@@ -1,6 +1,4 @@
-
 import Client from 'jsonrpc-websocket-client';
-
 
 async function RPCProxy(path) {
   const client = new Client(path)
