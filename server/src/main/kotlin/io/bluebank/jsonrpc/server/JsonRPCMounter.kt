@@ -1,15 +1,22 @@
-package io.bluebank.jsonrpc
+package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.JsonRPCErrorPayload.Companion.methodNotFound
-import io.bluebank.jsonrpc.JsonRPCErrorPayload.Companion.serverError
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.methodNotFound
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.serverError
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.Json
 import java.lang.reflect.Method
 
-class JsonRPCMounter<in T : Any>(private val service: T, private val socket: ServerWebSocket) {
+class JsonRPCMounter(private val service: Any, private val socket: ServerWebSocket) {
+  class FutureHandler(val callback: (AsyncResult<Any?>) -> Unit) : Handler<AsyncResult<Any?>> {
+    override fun handle(event: AsyncResult<Any?>) {
+      callback(event)
+    }
+  }
+
   init {
     socket.handler {
       handleRequest(it)
@@ -36,24 +43,18 @@ class JsonRPCMounter<in T : Any>(private val service: T, private val socket: Ser
     }
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun handleResult(result: Any?, request: JsonRPCRequest) {
     when (result) {
-      is Future<*> -> handleFuture(result, request)
+      is Future<*> -> handleFuture(result as Future<Any>, request)
       else -> respond(result, request)
     }
   }
 
-  private fun handleFuture(future: Future<*>, request: JsonRPCRequest) {
-    future.setHandler { result: Any ->
-      when (result) {
-        is AsyncResult<*> -> {
-          handleAsyncResult(result, request)
-        }
-        else -> {
-          respond(result, request)
-        }
-      }
-    }
+  private fun handleFuture(future: Future<Any>, request: JsonRPCRequest) {
+    future.setHandler(FutureHandler {
+      handleAsyncResult(it, request)
+    })
   }
 
   private fun handleAsyncResult(result2: AsyncResult<*>, request: JsonRPCRequest) {
@@ -92,7 +93,7 @@ class JsonRPCMounter<in T : Any>(private val service: T, private val socket: Ser
     } catch (err: IllegalArgumentException) {
       methodNotFound("method ${request.method} has multiple implementations with the same number of parameters")
     } catch (err: NoSuchElementException) {
-      methodNotFound("could not find method ${request.method}")
+      methodNotFound("could not find method ${request.method}", id = request.id)
     }
   }
 }

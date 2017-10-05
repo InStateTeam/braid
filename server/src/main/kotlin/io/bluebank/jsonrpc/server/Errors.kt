@@ -1,11 +1,5 @@
-package io.bluebank.jsonrpc
+package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.JsonRPCError.Companion.INTERNAL_ERROR
-import io.bluebank.jsonrpc.JsonRPCError.Companion.BASE_SERVER_ERROR
-import io.bluebank.jsonrpc.JsonRPCError.Companion.INVALID_PARAMS
-import io.bluebank.jsonrpc.JsonRPCError.Companion.INVALID_REQUEST
-import io.bluebank.jsonrpc.JsonRPCError.Companion.METHOD_NOT_FOUND
-import io.bluebank.jsonrpc.JsonRPCError.Companion.PARSE_ERROR
 
 class JsonRPCException(val payload: JsonRPCErrorPayload) : Exception()
 
@@ -25,27 +19,27 @@ data class JsonRPCErrorPayload(val error: JsonRPCError, val id: Any? = null, val
 
   companion object {
     fun internalError(message: String, id: Any? = null): Nothing {
-      JsonRPCErrorPayload(id = id, message = message, code = INTERNAL_ERROR).raise()
+      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INTERNAL_ERROR).raise()
     }
 
     fun parseError(message: String, id: Any? = null): Nothing {
-      JsonRPCErrorPayload(id = id, message = message, code = PARSE_ERROR).raise()
+      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.PARSE_ERROR).raise()
     }
 
     fun invalidRequest(message: String, id: Any? = null): Nothing {
-      JsonRPCErrorPayload(id = id, message = message, code = INVALID_REQUEST).raise()
+      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INVALID_REQUEST).raise()
     }
 
     fun methodNotFound(message: String, id: Any? = null): Nothing {
-      JsonRPCErrorPayload(id = id, message = message, code = METHOD_NOT_FOUND).raise()
+      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.METHOD_NOT_FOUND).raise()
     }
 
     fun invalidParams(message: String, id: Any? = null): Nothing {
-      JsonRPCErrorPayload(id = id, message = message, code = INVALID_PARAMS).raise()
+      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INVALID_PARAMS).raise()
     }
 
     fun serverError(message: String?, offset: Int = 0, id: Any? = null) : Nothing {
-      JsonRPCErrorPayload(id = id, message = message ?: "unknown error", code = BASE_SERVER_ERROR - offset).raise()
+      JsonRPCErrorPayload(id = id, message = message ?: "unknown error", code = JsonRPCError.BASE_SERVER_ERROR - offset).raise()
     }
   }
 

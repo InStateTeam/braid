@@ -10,7 +10,8 @@
     "build": "brunch build --production"
   },
   "dependencies": {
-    "JSONRpc": "^0.3.20"
+    "jsonrpc-websocket-client": "^0.2.0",
+    "rpc-websockets": "^3.4.7"
   },
   "devDependencies": {
     "auto-reload-brunch": "^2",
@@ -18,6 +19,7 @@
     "babel-preset-latest": "^6",
     "brunch": "^2",
     "clean-css-brunch": "^2",
-    "uglify-js-brunch": "^2"
+    "uglify-js-brunch": "^2",
+    "babel-polyfill": "^6.26.0"
   }
 }
