@@ -14,4 +14,8 @@ class CalculatorService {
   fun subtract(lhs: Int, rhs: Int): Future<Int> {
     return succeededFuture(lhs - rhs)
   }
+
+  fun multiply(lhs: Int, rhs: Int) : Int {
+    return lhs * rhs
+  }
 }

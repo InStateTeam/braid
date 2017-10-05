@@ -7,6 +7,7 @@ import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.StaticHandler
 
 class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: List<Any>) {
   private var vertx : Vertx? = null
@@ -46,6 +47,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     override fun start(startFuture: Future<Void>) {
       val router = Router.router(vertx)
       router.route().handler(BodyHandler.create())
+      router.get().handler(StaticHandler.create("editor-web").setCachingEnabled(false).setMaxCacheSize(1).setCacheEntryTimeout(1))
       vertx.createHttpServer(HttpServerOptions().setWebsocketSubProtocols("undefined"))
         .websocketHandler(this::onSocket)
         .requestHandler(router::accept)

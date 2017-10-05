@@ -8,7 +8,7 @@ async function RPCProxy(path) {
   const uri = function() {
     const uri = document.createElement('a');
     uri.href = path
-    return "http://" + uri.hostname + ":" + uri.port + "/editor"
+    return "http://" + uri.hostname + ":" + uri.port
   }
 
   return new Proxy(result, {
@@ -19,7 +19,7 @@ async function RPCProxy(path) {
       return function (...args) {
         return client.call(propKey, args).then(result => result, err => {
           if (err.code === -32601) {
-            throw Error(err.message + " editor: " + uri())
+            throw Error(err.message + "\nCreate a stub here: " + uri())
           } else {
             throw err
           }
@@ -34,6 +34,7 @@ async function App () {
   console.log(await proxy.add(1, 2))
   console.log(await proxy.subtract(1, 2))
   console.log(await proxy.multiply(1, 2))
+  console.log(await proxy.divide(10, 2))
 }
 
 export default App;
