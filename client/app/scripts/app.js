@@ -1,11 +1,21 @@
 import Client from 'jsonrpc-websocket-client';
 
-export default class App {
-  constructor(){
-    const client = new Client('https://gurujsonrpc.appspot.com/guru')
-  }
+async function App () {
+  const client = new Client('ws://localhost:8080');
 
-  main(){
-    
-  }
+  console.log(client.status)
+  // → closed
+
+  await client.open()
+
+  console.log(client.status)
+  // → open
+
+  console.log(
+    await client.call('dave', [1, 2])
+  )
+
+  await client.close()
 }
+
+export default App;
