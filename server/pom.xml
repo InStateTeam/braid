@@ -4,7 +4,7 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.bluebank.jsonrpc</groupId>
+  <groupId>io.bluebank.hermes</groupId>
   <artifactId>hermes-server</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -56,12 +56,17 @@
       <artifactId>jackson-module-kotlin</artifactId>
       <version>2.9.0</version>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+    </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
@@ -107,6 +112,7 @@
               <descriptorRefs>
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
+              <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </execution>
         </executions>
@@ -126,7 +132,6 @@
           </arguments>
         </configuration>
       </plugin>
-
     </plugins>
   </build>
 
