@@ -4,8 +4,13 @@
   "description": "Testing javasript rpc libraries",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "author": "Chris Jones",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "rpc-websockets": "^3.4.7"
+  },
+  "devDependencies": {}
 }
