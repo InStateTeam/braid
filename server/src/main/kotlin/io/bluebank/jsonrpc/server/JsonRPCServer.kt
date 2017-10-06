@@ -8,6 +8,7 @@ import io.vertx.core.http.ServerWebSocket
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
+import org.slf4j.LoggerFactory
 
 class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: List<Any>) {
   private var vertx: Vertx? = null
@@ -44,6 +45,9 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
   }
 
   class App(val serviceMap: Map<String, Any>, val port: Int) : AbstractVerticle() {
+    companion object {
+      val logger = loggerFor<App>()
+    }
     override fun start(startFuture: Future<Void>) {
       val router = setupRouter()
       setupWebserver(router, startFuture)
@@ -55,8 +59,10 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
         .requestHandler(router::accept)
         .listen(port) {
           if (it.succeeded()) {
+            logger.info("started on port $port")
             startFuture.complete()
           } else {
+            logger.error("failed to start because", it.cause())
             startFuture.fail(it.cause())
           }
         }

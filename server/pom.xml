@@ -4,7 +4,7 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.bluebank.jsonrpc</groupId>
+  <groupId>io.bluebank.hermes</groupId>
   <artifactId>hermes-server</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -55,6 +55,11 @@
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-kotlin</artifactId>
       <version>2.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
     </dependency>
   </dependencies>
 
@@ -126,7 +131,6 @@
           </arguments>
         </configuration>
       </plugin>
-
     </plugins>
   </build>
 
