@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
 
     """
   engine.eval(script)
+  
   val r = engine.eval("(typeof blah) === 'function'")
   val invocable = engine as Invocable
   val result = invocable.invokeFunction("foo", 1, 2, { result : Double ->

@@ -27,10 +27,20 @@
   }
 </style>
 <body>
+<select name="browser">
+  <option value="Internet Explorer">
+  <option value="Firefox">
+  <option value="Chrome">
+  <option value="Opera">
+  <option value="Safari">
+</select>
+<button>delete</button>
+<input type="text">
+<button>create</button>
 <div id="container"></div>
-<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+<script src="monaco-editor/min/vs/loader.js"></script>
 <script>
-  require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' }});
+  require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
   require(['vs/editor/editor.main'], function() {
     var editor = monaco.editor.create(document.getElementById('container'), {
       value: [

@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "monaco-editor": "^0.10.0"
+//    "monaco-editor": "^0.10.0"
   }
 }

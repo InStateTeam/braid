@@ -10,8 +10,8 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 
 class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: List<Any>) {
-  private var vertx : Vertx? = null
-  private val serviceMap : Map<String, Any> by lazy {
+  private var vertx: Vertx? = null
+  private val serviceMap: Map<String, Any> by lazy {
     services.map {
       getServicePath(it) to it
     }.toMap()
@@ -45,10 +45,12 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
 
   class App(val serviceMap: Map<String, Any>, val port: Int) : AbstractVerticle() {
     override fun start(startFuture: Future<Void>) {
-      val router = Router.router(vertx)
-      router.route().handler(BodyHandler.create())
-      router.get().handler(StaticHandler.create("editor-web").setCachingEnabled(false).setMaxCacheSize(1).setCacheEntryTimeout(1))
-      vertx.createHttpServer(HttpServerOptions().setWebsocketSubProtocols("undefined"))
+      val router = setupRouter()
+      setupWebserver(router, startFuture)
+    }
+
+    private fun setupWebserver(router: Router, startFuture: Future<Void>) {
+      vertx.createHttpServer(HttpServerOptions().withCompatibleWebsockets())
         .websocketHandler(this::onSocket)
         .requestHandler(router::accept)
         .listen(port) {
@@ -58,6 +60,23 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
             startFuture.fail(it.cause())
           }
         }
+    }
+
+    private fun HttpServerOptions.withCompatibleWebsockets(): HttpServerOptions {
+      this.websocketSubProtocols = "undefined"
+      return this
+    }
+
+    private fun setupRouter(): Router {
+      val router = Router.router(vertx)
+      router.route().handler(BodyHandler.create())
+      router.get().handler(
+        StaticHandler.create("editor-web")
+          .setCachingEnabled(false)
+          .setMaxCacheSize(1)
+          .setCacheEntryTimeout(1)
+      )
+      return router
     }
 
     private fun onSocket(socket: ServerWebSocket) {
@@ -70,8 +89,8 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     }
   }
 
-  private fun getServicePath(service: Any) : String {
-    val name = service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name?:service.javaClass.name.toLowerCase()
+  private fun getServicePath(service: Any): String {
+    val name = service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name ?: service.javaClass.name.toLowerCase()
     return rootPath + name
   }
 }

@@ -18,4 +18,8 @@ class CalculatorService {
   fun multiply(lhs: Int, rhs: Int) : Int {
     return lhs * rhs
   }
+
+  fun divide(lhs: Double, rhs: Double) : Double {
+    return lhs / rhs
+  }
 }
