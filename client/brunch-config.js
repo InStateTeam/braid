@@ -10,5 +10,5 @@ exports.files = {
 };
 
 exports.plugins = {
-  babel: {presets: ['latest']}
+  babel: {presets: ['latest', 'react']}
 };
