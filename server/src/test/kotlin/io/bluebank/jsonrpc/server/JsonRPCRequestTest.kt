@@ -1,7 +1,5 @@
-package io.bluebank.jsonrpc
+package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.server.JacksonKotlinInit
-import io.bluebank.jsonrpc.server.JsonRPCRequest
 import io.vertx.core.json.Json
 import org.junit.Assert.*
 import org.junit.Before

@@ -4,8 +4,7 @@ import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.serverError
 import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwMethodNotFound
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
-import io.vertx.core.Future.failedFuture
-import io.vertx.core.Future.succeededFuture
+import io.vertx.core.Future.*
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.Method
@@ -111,6 +110,14 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     private val SCRIPTS_PATH = ".service-scripts"
     private val sem = ScriptEngineManager()
     private val SCRIPT_ENGINE_NAME = "nashorn"
+    fun clearScriptsFolder(vertx: Vertx) : Future<Unit> {
+      val future = future<Void>()
+
+      vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future.completer())
+      return future
+        .map { Unit }
+        .otherwise { Unit }
+    }
   }
 
   private val scriptPath = "$SCRIPTS_PATH/$name.js"

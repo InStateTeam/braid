@@ -131,7 +131,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       response()
         .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
         .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
-        .end()
+        .end(script)
     }
 
     private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
