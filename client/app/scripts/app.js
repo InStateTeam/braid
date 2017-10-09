@@ -1,7 +1,7 @@
 import Client from 'jsonrpc-websocket-client';
 
 async function App () {
-  const client = new Client('ws://localhost:8080');
+  const client = new Client('ws://127.0.0.1:8080');
 
   console.log(client.status)
   // → closed
