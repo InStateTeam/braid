@@ -35,6 +35,7 @@ async function App () {
   console.log(await calculator.subtract(1, 2))
   console.log(await calculator.multiply(1, 2))
   console.log(await calculator.divide(10, 2))
+  console.log(await calculator.exp(2, 3))
 
   const accounts = await RPCProxy('ws://localhost:8080/api/accounts')
   console.log(await accounts.createAccount("fred"))

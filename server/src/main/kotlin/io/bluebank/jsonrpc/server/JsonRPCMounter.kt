@@ -1,7 +1,9 @@
 package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.methodNotFound
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.serverError
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwInvalidRequest
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwMethodNotFound
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwParseError
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwServerError
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
@@ -36,7 +38,7 @@ class JsonRPCMounter(private val service: Any, private val socket: ServerWebSock
         val result = method.invoke(service, *castedParameters)
         handleResult(result, request)
       } catch (err: Throwable) {
-        serverError(err.message, 0, request.id)
+        throwServerError(request.id, err.message)
       }
     } catch (err: JsonRPCException) {
       err.payload.send()
@@ -60,7 +62,7 @@ class JsonRPCMounter(private val service: Any, private val socket: ServerWebSock
   private fun handleAsyncResult(result2: AsyncResult<*>, request: JsonRPCRequest) {
     when (result2.succeeded()) {
       true -> respond(result2.result(), request)
-      else -> serverError(result2.cause().message, 0, request.id)
+      else -> throwServerError(request.id, result2.cause().message)
     }
   }
 
@@ -71,7 +73,7 @@ class JsonRPCMounter(private val service: Any, private val socket: ServerWebSock
 
   private fun checkVersion(request: JsonRPCRequest) {
     if (request.jsonrpc != "2.0") {
-      JsonRPCErrorPayload.invalidRequest("jsonrpc must 2.0")
+      throwInvalidRequest(request.id, "jsonrpc must 2.0")
     }
   }
 
@@ -79,7 +81,7 @@ class JsonRPCMounter(private val service: Any, private val socket: ServerWebSock
     try {
       return Json.decodeValue(it, JsonRPCRequest::class.java)
     } catch (err: Throwable) {
-      JsonRPCErrorPayload.parseError(err.message ?: "failed to parse")
+      throwParseError(err.message ?: "failed to parse")
     }
   }
 
@@ -91,9 +93,9 @@ class JsonRPCMounter(private val service: Any, private val socket: ServerWebSock
     try {
       return service.javaClass.methods.single { request.matchesMethod(it) }
     } catch (err: IllegalArgumentException) {
-      methodNotFound("method ${request.method} has multiple implementations with the same number of parameters")
+      throwMethodNotFound(request.id,"method ${request.method} has multiple implementations with the same number of parameters")
     } catch (err: NoSuchElementException) {
-      methodNotFound("could not find method ${request.method}", id = request.id)
+      throwMethodNotFound(request.id, "could not find method ${request.method}")
     }
   }
 }

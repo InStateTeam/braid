@@ -8,15 +8,9 @@ import io.vertx.core.http.ServerWebSocket
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
-import org.slf4j.LoggerFactory
 
 class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: List<Any>) {
   private var vertx: Vertx? = null
-  private val serviceMap: Map<String, Any> by lazy {
-    services.map {
-      getServicePath(it) to it
-    }.toMap()
-  }
 
   init {
     JacksonKotlinInit.init()
@@ -28,7 +22,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
   fun start() {
     if (vertx == null) {
       val vertx = Vertx.vertx()
-      vertx.deployVerticle(App(serviceMap, port)) {
+      vertx.deployVerticle(App(rootPath, services, port)) {
         if (it.failed()) {
           println("failed to deploy: ${it.cause().message}")
         }
@@ -44,10 +38,15 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     }
   }
 
-  class App(val serviceMap: Map<String, Any>, val port: Int) : AbstractVerticle() {
+  class App(val rootPath: String, val services: List<Any>, val port: Int) : AbstractVerticle() {
     companion object {
       val logger = loggerFor<App>()
     }
+
+    val serviceMap: MutableMap<String, Any> by lazy {
+      services.map { getServiceName(it) to it }.toMap().toMutableMap()
+    }
+
     override fun start(startFuture: Future<Void>) {
       val router = setupRouter()
       setupWebserver(router, startFuture)
@@ -76,6 +75,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     private fun setupRouter(): Router {
       val router = Router.router(vertx)
       router.route().handler(BodyHandler.create())
+      router.get("/api/services").handler { it.write(serviceMap.keys) }
       router.get().handler(
         StaticHandler.create("editor-web")
           .setCachingEnabled(false)
@@ -86,17 +86,21 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     }
 
     private fun onSocket(socket: ServerWebSocket) {
-      val service = serviceMap[socket.path()]
-      if (service != null) {
-        JsonRPCMounter(service, socket)
-      } else {
-        socket.reject()
+      with(socket.path()) {
+        if (!startsWith(rootPath)) {
+          socket.reject()
+        } else {
+          val serviceName = drop(rootPath.length)
+          val service = serviceMap[serviceName]
+          if (service != null)
+            JsonRPCMounter(service, socket)
+        }
       }
+    }
+
+    private fun getServiceName(service: Any): String {
+      return service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name ?: service.javaClass.name.toLowerCase()
     }
   }
 
-  private fun getServicePath(service: Any): String {
-    val name = service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name ?: service.javaClass.name.toLowerCase()
-    return rootPath + name
-  }
 }
