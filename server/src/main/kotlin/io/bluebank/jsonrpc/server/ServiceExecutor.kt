@@ -5,6 +5,9 @@ import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwMethodNotFo
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Future.failedFuture
+import io.vertx.core.Future.succeededFuture
+import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
 import java.lang.reflect.Method
 import javax.script.Invocable
 import javax.script.ScriptEngine
@@ -14,21 +17,21 @@ class MethodDoesNotExist : Exception()
 
 interface ServiceExecutor {
   @Throws(MethodDoesNotExist::class)
-  fun invoke(rpcRequest: JsonRPCRequest, resultCallback: (AsyncResult<Any>) -> Unit)
+  fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit)
 }
 
 class CompositeExecutor(vararg predefinedExecutors: ServiceExecutor) : ServiceExecutor {
-  private val executors = mutableListOf(*predefinedExecutors)
+  val executors = mutableListOf(*predefinedExecutors)
 
   fun add(executor: ServiceExecutor) {
     executors += executor
   }
 
-  override fun invoke(rpcRequest: JsonRPCRequest, resultCallback: (AsyncResult<Any>) -> Unit) {
+  override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
     if (executors.isEmpty()) {
-      resultCallback(serverError(rpcRequest.id, "no services available to call via executor interface").toFailedFuture())
+      callback(failedFuture("no services available to call via executor interface"))
     } else {
-      invoke(0, rpcRequest, resultCallback)
+      invoke(0, request, callback)
     }
   }
 
@@ -57,7 +60,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       val result = method.invoke(service, *castedParameters)
       handleResult(result, request, callback)
     } catch (err: Throwable) {
-      callback(failedFuture(serverError(request.id, err.message, 0)))
+      callback(failedFuture(err))
     }
   }
 
@@ -83,11 +86,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   private fun respond(result: Any?, callback: (AsyncResult<Any>) -> Unit) {
-    callback(Future.succeededFuture(result))
+    callback(succeededFuture(result))
   }
 
   private fun respond(err: Throwable, callback: (AsyncResult<Any>) -> Unit) {
-    callback(err.toFailedFuture())
+    callback(failedFuture(err))
   }
 
   private fun findMethod(request: JsonRPCRequest): Method {
@@ -102,17 +105,95 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 }
 
 
-class JavascriptService : ServiceExecutor {
-  override fun invoke(rpcRequest: JsonRPCRequest, resultCallback: (AsyncResult<Any>) -> Unit) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+class JavascriptExecutor(private val vertx: Vertx, private val name: String) : ServiceExecutor {
+  companion object {
+    private val logger = loggerFor<JavascriptExecutor>()
+    private val SCRIPTS_PATH = ".service-scripts"
+    private val sem = ScriptEngineManager()
+    private val SCRIPT_ENGINE_NAME = "nashorn"
   }
 
-  private val engine: ScriptEngine by lazy {
-    val sem = ScriptEngineManager()
-    sem.getEngineByName("nashorn")
+  private val scriptPath = "$SCRIPTS_PATH/$name.js"
+  private var engine: ScriptEngine = createEngine()
+  private val invocable: Invocable
+    get() {
+      return engine as Invocable
+    }
+
+  init {
+    if (!vertx.fileSystem().existsBlocking(SCRIPTS_PATH)) {
+      vertx.fileSystem().mkdirBlocking(SCRIPTS_PATH)
+    }
+    loadScript()
   }
 
-  private val invocable: Invocable by lazy {
-    engine as Invocable
+
+  fun getScript(): Buffer {
+    with(vertx.fileSystem()) {
+      return if (existsBlocking(scriptPath)) {
+        readFileBlocking(scriptPath)
+      } else {
+        Buffer.buffer()
+      }
+    }
+  }
+
+  fun updateScript(script: String) {
+    engine = createEngine()
+    try {
+      engine.eval(script)
+      saveScript(script)
+    } catch (err: Throwable) {
+      logger.error("failed to load script", err)
+      throw err
+    }
+  }
+
+  override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
+    checkMethodExists(request.method)
+
+    val params = if (request.params != null && request.params is List<*>) {
+      request.params.toTypedArray()
+    } else {
+      listOf(request.params).toTypedArray()
+    }
+
+    try {
+      val result = invocable.invokeFunction(request.method, *params)
+      callback(succeededFuture(result))
+    } catch (err: Throwable) {
+      callback(failedFuture("failed to invoke rpc"))
+    }
+  }
+
+  private fun loadScript() {
+    try {
+      val buffer = getScript()
+      engine.eval(buffer.toString())
+    } catch (err: Throwable) {
+      logger.error("failed to source script $scriptPath", err)
+    }
+  }
+
+  private fun createEngine(): ScriptEngine {
+    return sem.getEngineByName(SCRIPT_ENGINE_NAME)
+  }
+
+  private fun saveScript(script: String) {
+    with(vertx.fileSystem()) {
+      try {
+        this.writeFileBlocking(scriptPath, Buffer.buffer(script))
+      } catch (err: Throwable) {
+        logger.error("failed to write script to $scriptPath", err)
+      }
+    }
+  }
+
+  @Throws(MethodDoesNotExist::class)
+  private fun checkMethodExists(methodName: String) {
+    val exists = engine.eval("(typeof $methodName) === 'function'") as Boolean
+    if (!exists) {
+      throw MethodDoesNotExist()
+    }
   }
 }
