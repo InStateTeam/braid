@@ -221,4 +221,12 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
       throw MethodDoesNotExist()
     }
   }
+
+  fun deleteScript() {
+    with(vertx.fileSystem()) {
+      if (existsBlocking(scriptPath)) {
+        deleteBlocking(scriptPath)
+      }
+    }
+  }
 }

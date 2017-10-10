@@ -1,5 +1,6 @@
 package io.bluebank.jsonrpc.server
 
+import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.*
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerOptions
@@ -121,6 +122,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       router.get("/api/services").handler { it.getServiceList() }
       router.get("/api/services/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
       router.post("/api/services/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString)}
+      router.delete("/api/services/:serviceId").handler { it.deleteService(it.pathParam("serviceId"))}
       router.get().handler(
         StaticHandler.create("editor-web")
           .setCachingEnabled(false)
@@ -141,6 +143,23 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
         .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
         .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
         .end(script)
+    }
+
+    private fun RoutingContext.deleteService(serviceName: String) {
+      val service = serviceMap[serviceName]
+      if (service == null) {
+        response().setStatusMessage("no service called $serviceName").end()
+        return
+      }
+      getJavascriptExecutorForService(serviceName).deleteScript()
+      if (service is CompositeExecutor) {
+        response()
+          .setStatusMessage("cannot delete java service $serviceName, but have deleted JS extension script")
+          .end()
+        return
+      }
+      serviceMap.remove(serviceName)
+      // TODO: consider disengaging the websockets for any mounts
     }
 
     private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
