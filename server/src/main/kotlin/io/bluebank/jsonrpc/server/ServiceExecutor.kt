@@ -8,6 +8,8 @@ import io.vertx.core.Future.*
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.Method
+import java.nio.file.Path
+import java.nio.file.Paths
 import javax.script.Invocable
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
@@ -125,7 +127,16 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     }
     fun queryServiceNames(vertx: Vertx) : List<String> {
       makeScriptsFolder(vertx)
-      return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH).filter { it.endsWith(".js") }.map { it.dropLast(3) }
+      return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH)
+        .map {
+          Paths.get(it).fileName.toString()
+        }
+        .filter {
+          it.endsWith(".js")
+        }
+        .map {
+          it.dropLast(3)
+        }
     }
   }
 

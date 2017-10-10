@@ -58,7 +58,16 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     }
 
     val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
-      services.map { getServiceName(it) to wrapConcreteService(it) }.toMap().toMutableMap()
+      val serviceNames = services.map {getServiceName(it)}
+      val jsOnlyServices = JavascriptExecutor.queryServiceNames(vertx).filter { !serviceNames.contains(it) }
+      val mutableServiceMap = mutableMapOf<String, ServiceExecutor>()
+      services.map { getServiceName(it) to wrapConcreteService(it) }.forEach {
+        mutableServiceMap[it.first] = it.second
+      }
+      jsOnlyServices.map { it to JavascriptExecutor(vertx, it) }.forEach {
+        mutableServiceMap[it.first] = it.second
+      }
+      mutableServiceMap
     }
 
     override fun start(startFuture: Future<Void>) {

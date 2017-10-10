@@ -35,6 +35,7 @@ class JsonRPCServerTest {
 
   @After
   fun after(testContext: TestContext) {
+    JavascriptExecutor.clearScriptsFolder(vertx).setHandler(testContext.asyncAssertSuccess())
     server.stop(testContext.asyncAssertSuccess<Void>()::handle)
     client.close()
   }
