@@ -118,6 +118,15 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
         .map { Unit }
         .otherwise { Unit }
     }
+    fun makeScriptsFolder(vertx: Vertx) {
+      if (!vertx.fileSystem().existsBlocking(SCRIPTS_PATH)) {
+        vertx.fileSystem().mkdirBlocking(SCRIPTS_PATH)
+      }
+    }
+    fun queryServiceNames(vertx: Vertx) : List<String> {
+      makeScriptsFolder(vertx)
+      return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH).filter { it.endsWith(".js") }.map { it.dropLast(3) }
+    }
   }
 
   private val scriptPath = "$SCRIPTS_PATH/$name.js"
@@ -128,9 +137,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     }
 
   init {
-    if (!vertx.fileSystem().existsBlocking(SCRIPTS_PATH)) {
-      vertx.fileSystem().mkdirBlocking(SCRIPTS_PATH)
-    }
+    makeScriptsFolder(vertx)
     loadScript()
   }
 
