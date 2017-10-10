@@ -75,9 +75,9 @@
     <finalName>${project.artifactId}</finalName>
     <resources>
       <resource>
-        <directory>${project.build.sourceDirectory}/main/resources</directory>
+        <directory>${project.build.sourceDirectory}/../resources</directory>
         <excludes>
-          <exclude>**/.service-scripts</exclude>
+          <exclude>**/.service-scripts/**</exclude>
           <exclude>**/.vertx</exclude>
         </excludes>
       </resource>
