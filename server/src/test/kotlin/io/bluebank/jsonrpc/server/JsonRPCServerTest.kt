@@ -82,7 +82,7 @@ class JsonRPCServerTest {
         }
         .setHandler(testContext.asyncAssertSuccess())
   }
-
+  
   private fun jsonRPC(url: String, method: String, vararg params: Any?) : Future<Buffer> {
     val result = future<Buffer>()
     try {

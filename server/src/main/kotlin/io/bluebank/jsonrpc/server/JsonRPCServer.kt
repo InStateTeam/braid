@@ -59,7 +59,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     }
 
     val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
-      val serviceNames = services.map {getServiceName(it)}
+      val serviceNames = services.map { getServiceName(it) }
       val jsOnlyServices = JavascriptExecutor.queryServiceNames(vertx).filter { !serviceNames.contains(it) }
       val mutableServiceMap = mutableMapOf<String, ServiceExecutor>()
       services.map { getServiceName(it) to wrapConcreteService(it) }.forEach {
@@ -76,12 +76,12 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       setupWebserver(router, startFuture)
     }
 
-    private fun wrapConcreteService(service: Any) : ServiceExecutor {
+    private fun wrapConcreteService(service: Any): ServiceExecutor {
       return CompositeExecutor(ConcreteServiceExecutor(service), JavascriptExecutor(vertx, getServiceName(service)))
     }
 
 
-    private fun ServiceExecutor.getJavascriptExecutor() : JavascriptExecutor {
+    private fun ServiceExecutor.getJavascriptExecutor(): JavascriptExecutor {
       return when (this) {
         is CompositeExecutor -> {
           executors
@@ -90,10 +90,31 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
             .firstOrNull() ?: throw RuntimeException("cannot find javascript executor")
         }
         is JavascriptExecutor -> this
-        else -> {
-          throw RuntimeException("found executor is not a ${JavascriptExecutor::class.simpleName} or doesn't contain one")
-        }
+        else -> throw RuntimeException("found executor is not a ${JavascriptExecutor::class.simpleName} or doesn't contain one")
       }
+    }
+
+    private fun ServiceExecutor.getConcreteExecutor(): ConcreteServiceExecutor? {
+      return when (this) {
+        is CompositeExecutor -> {
+          executors.filter { it is ConcreteServiceExecutor }
+            .map { it as ConcreteServiceExecutor }
+            .firstOrNull()
+        }
+        is ConcreteServiceExecutor -> this
+        else -> null
+      }
+    }
+
+    private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
+      return serviceMap.computeIfAbsent(serviceName) {
+        JavascriptExecutor(vertx, serviceName)
+      }.getJavascriptExecutor()
+    }
+
+    private fun getJavaExecutorForService(serviceName: String): ConcreteServiceExecutor? {
+      val service = serviceMap[serviceName] ?: return null
+      return service.getConcreteExecutor()
     }
 
     private fun setupWebserver(router: Router, startFuture: Future<Void>) {
@@ -121,8 +142,9 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       router.route().handler(BodyHandler.create())
       router.get("/api/services").handler { it.getServiceList() }
       router.get("/api/services/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
-      router.post("/api/services/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString)}
-      router.delete("/api/services/:serviceId").handler { it.deleteService(it.pathParam("serviceId"))}
+      router.post("/api/services/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
+      router.delete("/api/services/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
+      router.get("/api/services/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
       router.get().handler(
         StaticHandler.create("editor-web")
           .setCachingEnabled(false)
@@ -162,10 +184,15 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       // TODO: consider disengaging the websockets for any mounts
     }
 
-    private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
-      return serviceMap.computeIfAbsent(serviceName) {
-        JavascriptExecutor(vertx, serviceName)
-      }.getJavascriptExecutor()
+    private fun RoutingContext.getJavaImplementationHeaders(serviceName: String) {
+      val service = getJavaExecutorForService(serviceName)
+
+      if (service == null) {
+        write("")
+        return
+      } else {
+        write(service.getJavaStubs())
+      }
     }
 
     private fun RoutingContext.saveServiceScript(serviceName: String, script: String) {
@@ -173,7 +200,7 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       try {
         service.updateScript(script)
         response().end()
-      } catch(err: Throwable) {
+      } catch (err: Throwable) {
         write(err)
       }
     }
@@ -195,6 +222,5 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
       return service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name ?: service.javaClass.name.toLowerCase()
     }
   }
-
 }
 
