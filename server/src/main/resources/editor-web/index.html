@@ -9,35 +9,35 @@
   <script>require('initialize');</script>
 </head>
 <body>
-  <header>
-    <span>Hermes</span>
-  </header>      
-  <main>
-    <section class="endpoint">
-      <div>
-        <label for="url">End Point</label>
-        <span id="url">ws://localhost:8080/api</span>
-      </div>
-    </section>
-    <aside class="services-list">
-      <ul id="services">
-      </ul>
-    </aside>
-    <section class="functions">
-      <button>delete</button>
-      <input type="text" id="newService">
-      <button id="createServiceBtn">Create</button>
-      <button id="saveBtn">Save</button>
-      <button id="formatBtn">Format</button>
-    </section>
-    <section id="container"></section>
-  </main>
-  <footer>
+<header>
+  <span>Hermes</span>
+</header>
+<main>
+  <section class="endpoint">
+    <div>
+      <label for="url">End Point</label>
+      <span id="url">ws://localhost:8080/api/services</span>
+    </div>
+  </section>
+  <aside class="services-list">
+    <ul id="services">
+    </ul>
+  </aside>
+  <section class="functions">
+    <button>delete</button>
+    <input type="text" id="newService">
+    <button id="createServiceBtn">Create</button>
+    <button id="saveBtn">Save</button>
+    <button id="formatBtn">Format</button>
+  </section>
+  <section id="container"></section>
+</main>
+<footer>
 
-  </footer>
-  
-  <script src="monaco-editor/min/vs/loader.js"></script>
-  <script>
+</footer>
+
+<script src="monaco-editor/min/vs/loader.js"></script>
+<script>
     var editor;
     var selectedService;
 
@@ -88,7 +88,7 @@
         // TODO: put this stuff somewhere in the UI
         console.log(script);
       });
-    
+
     }
 
     function getSelectedService() {
@@ -196,5 +196,5 @@
       };
     }
 </script>
-  </script>
+</script>
 </body>

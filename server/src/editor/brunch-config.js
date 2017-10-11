@@ -22,5 +22,5 @@ exports.npm = {
 };
 
 exports.paths = {
-  public: "../server/src/main/resources/editor-web"
+  public: "../main/resources/editor-web"
 }

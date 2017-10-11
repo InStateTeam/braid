@@ -32,10 +32,16 @@ section
     margin 0 auto
     width 70%
 
-    #services 
-      background-color #af8b46
-      color white
-      border none
-      cursor pointer
+    button 
+      background #1973E2
+      border none 
+      color rgba(255, 255, 255, 0.9)
+      font-family Courier New, Courier, monospace
       font-size 16px
-      padding 16px
+
+      &:disabled
+        background rgba(0, 0, 0, 0.4)
+
+    input[type=text]
+      font-size 16px
+      

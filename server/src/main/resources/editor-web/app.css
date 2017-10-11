@@ -57,13 +57,18 @@ section.functions {
   margin: 0 auto;
   width: 70%;
 }
-section.functions #services {
-  background-color: #af8b46;
-  color: #fff;
+section.functions button {
+  background: #1973e2;
   border: none;
-  cursor: pointer;
+  color: rgba(255,255,255,0.9);
+  font-family: Courier New, Courier, monospace;
   font-size: 16px;
-  padding: 16px;
+}
+section.functions button:disabled {
+  background: rgba(0,0,0,0.4);
+}
+section.functions input[type=text] {
+  font-size: 16px;
 }
 
 .services-list {
