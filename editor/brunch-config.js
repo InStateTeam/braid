@@ -20,3 +20,7 @@ exports.npm = {
     $: 'jquery'
   }
 };
+
+exports.paths = {
+  public: "../server/src/main/resources/editor-web"
+}

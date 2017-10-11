@@ -20,10 +20,7 @@
       </div>
     </section>
     <aside class="services-list">
-      <ul>
-        <li>Calculator</li>
-        <li>Accounts</li>
-        <li>Petstore</li>
+      <ul id="services">
       </ul>
     </aside>
     <section class="functions">
@@ -53,7 +50,7 @@
     }
 
     function bindEvents() {
-      $('#services').change(onServiceSelect);
+      $('#services').click(onServiceSelect);
       $('#saveBtn').click(onSave);
       $('#formatBtn').click(onFormat)
       $('#createServiceBtn').click(onCreateService)
@@ -64,7 +61,7 @@
 
       for (var idx in services) {
         const service = services[idx];
-        const option = $('<option>', {value: service, text: service})
+        const option = $('<li>', {value: service, text: service})
         selection.append(option);
       }
     }
@@ -86,6 +83,11 @@
         setEditorContents(script)
         $('#saveBtn').prop('disabled', true)
       });
+      getJavaHeaders(serviceName, function(script) {
+        // TODO: put this stuff somewhere in the UI
+        console.log(script);
+      });
+    
     }
 
     function getSelectedService() {
@@ -116,7 +118,7 @@
         retrieveAndUpdateServices(serviceName)
         $('#newService').val("")
       })
-    }
+   }
 
     function setEditorContents(script) {
       editor.setValue(script)
@@ -126,6 +128,12 @@
       $.get("/api/services/" + serviceName + "/script", function(script) {
         callback(script)
       })
+    }
+
+    function getJavaHeaders(serviceName, callback) {
+      $.get("/api/service/" + serviceName + "/java", function(script) {
+        callback(script);
+      });
     }
 
     function ensureServiceIsCreated(callback) {
