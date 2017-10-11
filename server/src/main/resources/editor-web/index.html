@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Brunch</title>
+  <title>Hermes</title>
   <link rel="stylesheet" href="/app.css">
   <script src="/vendor.js"></script>
   <script src="/app.js"></script>
@@ -39,6 +39,7 @@
   <script src="monaco-editor/min/vs/loader.js"></script>
   <script>
     var editor;
+    var selectedService;
 
     $(document).ready(function() {
       init();
@@ -50,7 +51,6 @@
     }
 
     function bindEvents() {
-      $('#services').click(onServiceSelect);
       $('#saveBtn').click(onSave);
       $('#formatBtn').click(onFormat)
       $('#createServiceBtn').click(onCreateService)
@@ -62,6 +62,7 @@
       for (var idx in services) {
         const service = services[idx];
         const option = $('<li>', {value: service, text: service})
+        option.click(onServiceSelect);
         selection.append(option);
       }
     }
@@ -78,12 +79,12 @@
     }
 
     function onServiceSelect(e) {
-      const selectedService = this.value
+      selectedService = this.textContent
       getServiceScript(selectedService, function(script) {
         setEditorContents(script)
         $('#saveBtn').prop('disabled', true)
       });
-      getJavaHeaders(serviceName, function(script) {
+      getJavaHeaders(selectedService, function(script) {
         // TODO: put this stuff somewhere in the UI
         console.log(script);
       });
@@ -91,7 +92,7 @@
     }
 
     function getSelectedService() {
-      return $('#services').val()
+      return selectedService;
     }
 
     function onSave(e) {
@@ -131,7 +132,7 @@
     }
 
     function getJavaHeaders(serviceName, callback) {
-      $.get("/api/service/" + serviceName + "/java", function(script) {
+      $.get("/api/services/" + serviceName + "/java", function(script) {
         callback(script);
       });
     }
@@ -162,7 +163,7 @@
       require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('container'), {
           value: "",
-          language: 'html'
+          language: 'javascript'
         });
         editor.onDidChangeModelContent(onScriptChanged);
         ensureServiceIsCreated(function(selectedService) {
