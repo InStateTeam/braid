@@ -23,6 +23,16 @@ fun RoutingContext.write(err: Throwable) {
     .end()
 }
 
+
+fun RoutingContext.write(str: String) {
+  response()
+    .setStatusCode(HttpResponseStatus.OK.code())
+    .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
+    .putHeader(HttpHeaders.CONTENT_LENGTH, str.length.toString())
+    .write(str)
+    .end()
+}
+
 val HttpClientResponse.failed: Boolean
   get() {
     return (this.statusCode() / 100) != 2

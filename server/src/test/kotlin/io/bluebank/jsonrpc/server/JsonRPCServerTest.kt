@@ -35,6 +35,7 @@ class JsonRPCServerTest {
 
   @After
   fun after(testContext: TestContext) {
+    JavascriptExecutor.clearScriptsFolder(vertx).setHandler(testContext.asyncAssertSuccess())
     server.stop(testContext.asyncAssertSuccess<Void>()::handle)
     client.close()
   }
@@ -81,7 +82,7 @@ class JsonRPCServerTest {
         }
         .setHandler(testContext.asyncAssertSuccess())
   }
-
+  
   private fun jsonRPC(url: String, method: String, vararg params: Any?) : Future<Buffer> {
     val result = future<Buffer>()
     try {

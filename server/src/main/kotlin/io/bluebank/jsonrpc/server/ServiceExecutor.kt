@@ -8,6 +8,8 @@ import io.vertx.core.Future.*
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import java.nio.file.Paths
 import javax.script.Invocable
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
@@ -101,6 +103,34 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       throwMethodNotFound(request.id, "could not find method ${request.method}")
     }
   }
+
+  fun getJavaStubs(): String {
+    val list = service.javaClass.declaredMethods
+      .filter { Modifier.isPublic(it.modifiers) }
+      .map { "function ${it.name} (${paramListAsJS(it)}) { // returns ${returnType(it)} }" }
+    return list.joinToString("\n\n")
+  }
+
+  private fun returnType(it: Method) : String {
+    return it.getAnnotation<JsonRPCReturns>(JsonRPCReturns::class.java)?.returnType ?: it.returnType.toJavascriptType()
+  }
+
+  private fun Class<*>.toJavascriptType() : String {
+    return when (this) {
+      Int::class.java -> "int"
+      Double::class.java-> "double"
+      Boolean::class.java -> "bool"
+      String::class.java-> "string"
+      Array<Any>::class.java-> "array"
+      List::class.java-> "array"
+      Map::class.java-> "map"
+      Collection::class.java-> "array"
+      else -> "object"
+    }
+  }
+
+
+  private fun paramListAsJS(it: Method) = it.parameters.joinToString(", ") { it.type.toJavascriptType() + "Param" }
 }
 
 
@@ -110,7 +140,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     private val SCRIPTS_PATH = ".service-scripts"
     private val sem = ScriptEngineManager()
     private val SCRIPT_ENGINE_NAME = "nashorn"
-    fun clearScriptsFolder(vertx: Vertx) : Future<Unit> {
+    fun clearScriptsFolder(vertx: Vertx): Future<Unit> {
       val future = future<Void>()
 
       vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future.completer())
@@ -118,14 +148,25 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
         .map { Unit }
         .otherwise { Unit }
     }
+
     fun makeScriptsFolder(vertx: Vertx) {
       if (!vertx.fileSystem().existsBlocking(SCRIPTS_PATH)) {
         vertx.fileSystem().mkdirBlocking(SCRIPTS_PATH)
       }
     }
-    fun queryServiceNames(vertx: Vertx) : List<String> {
+
+    fun queryServiceNames(vertx: Vertx): List<String> {
       makeScriptsFolder(vertx)
-      return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH).filter { it.endsWith(".js") }.map { it.dropLast(3) }
+      return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH)
+        .map {
+          Paths.get(it).fileName.toString()
+        }
+        .filter {
+          it.endsWith(".js")
+        }
+        .map {
+          it.dropLast(3)
+        }
     }
   }
 
@@ -208,6 +249,14 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     val exists = engine.eval("(typeof $methodName) === 'function'") as Boolean
     if (!exists) {
       throw MethodDoesNotExist()
+    }
+  }
+
+  fun deleteScript() {
+    with(vertx.fileSystem()) {
+      if (existsBlocking(scriptPath)) {
+        deleteBlocking(scriptPath)
+      }
     }
   }
 }
