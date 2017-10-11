@@ -10,16 +10,35 @@
 </head>
 <body>
   <header>
-    <select name="services" id="services">
-    </select>
-    <button>delete</button>
-    <input type="text" id="newService">
-    <button id="createServiceBtn">Create</button>
-    <button id="saveBtn">Save</button>
-    <button id="formatBtn">Format</button>
+    <span>Hermes</span>
   </header>      
-  <
-  <div id="container"></div>
+  <main>
+    <section class="endpoint">
+      <div>
+        <label for="url">End Point</label>
+        <span id="url">ws://localhost:8080/api</span>
+      </div>
+    </section>
+    <aside class="services-list">
+      <ul>
+        <li>Calculator</li>
+        <li>Accounts</li>
+        <li>Petstore</li>
+      </ul>
+    </aside>
+    <section class="functions">
+      <button>delete</button>
+      <input type="text" id="newService">
+      <button id="createServiceBtn">Create</button>
+      <button id="saveBtn">Save</button>
+      <button id="formatBtn">Format</button>
+    </section>
+    <section id="container"></section>
+  </main>
+  <footer>
+
+  </footer>
+  
   <script src="monaco-editor/min/vs/loader.js"></script>
   <script>
     var editor;
