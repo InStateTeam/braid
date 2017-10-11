@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Brunch</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/vendor.js"></script>
+  <script src="/app.js"></script>
+  <script>require('initialize');</script>
+</head>
+<body>
+  <header>
+    <select name="services" id="services">
+    </select>
+    <button>delete</button>
+    <input type="text" id="newService">
+    <button id="createServiceBtn">Create</button>
+    <button id="saveBtn">Save</button>
+    <button id="formatBtn">Format</button>
+  </header>      
+  <
+  <div id="container"></div>
+  <script src="monaco-editor/min/vs/loader.js"></script>
+  <script>
+    var editor;
+
+    $(document).ready(function() {
+      init();
+    })
+
+    function init() {
+      bindEvents()
+      loadEditor()
+    }
+
+    function bindEvents() {
+      $('#services').change(onServiceSelect);
+      $('#saveBtn').click(onSave);
+      $('#formatBtn').click(onFormat)
+      $('#createServiceBtn').click(onCreateService)
+    }
+
+    function populateServiceOptions(selection, services) {
+      selection.empty();
+
+      for (var idx in services) {
+        const service = services[idx];
+        const option = $('<option>', {value: service, text: service})
+        selection.append(option);
+      }
+    }
+
+    function updateServices(services, selectedService) {
+      const selection = $('#services');
+      populateServiceOptions(selection, services);
+      if (selectedService === null && services.length > 0) {
+        selectedService = services[0]
+      }
+      if (selectedService !== null) {
+        selection.val(selectedService).trigger('change');
+      }
+    }
+
+    function onServiceSelect(e) {
+      const selectedService = this.value
+      getServiceScript(selectedService, function(script) {
+        setEditorContents(script)
+        $('#saveBtn').prop('disabled', true)
+      });
+    }
+
+    function getSelectedService() {
+      return $('#services').val()
+    }
+
+    function onSave(e) {
+      const script = editor.getValue()
+      const service = getSelectedService()
+
+      $.post("/api/services/" + service + "/script", script)
+        .done(function() {
+          console.log("saved")
+          $('#saveBtn').prop('disabled', true)
+        })
+        .fail(function(e) {
+          console.log("failed to save", e);
+        })
+    }
+
+    function onFormat(e) {
+      editor.trigger('', 'editor.action.formatDocument');
+    }
+
+    function onCreateService() {
+      const serviceName = $('#newService').val()
+      getServiceScript(serviceName, function() {
+        retrieveAndUpdateServices(serviceName)
+        $('#newService').val("")
+      })
+    }
+
+    function setEditorContents(script) {
+      editor.setValue(script)
+    }
+
+    function getServiceScript(serviceName, callback) {
+      $.get("/api/services/" + serviceName + "/script", function(script) {
+        callback(script)
+      })
+    }
+
+    function ensureServiceIsCreated(callback) {
+      const params = parseURL(document.URL).searchObject
+      if (typeof(params['service']) !== 'undefined' && params.service !== null) {
+        getServiceScript(params.service, function() {
+          callback(params.service)
+        })
+      } else {
+        callback(null)
+      }
+    }
+
+    function retrieveAndUpdateServices(selectedService) {
+      $.get("/api/services", function (data) {
+        updateServices(data, selectedService)
+      });
+    }
+
+    function onScriptChanged() {
+      $('#saveBtn').prop('disabled', false);
+    }
+
+    function loadEditor() {
+      require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('container'), {
+          value: "",
+          language: 'html'
+        });
+        editor.onDidChangeModelContent(onScriptChanged);
+        ensureServiceIsCreated(function(selectedService) {
+          retrieveAndUpdateServices(selectedService);
+        })
+      });
+    }
+
+    function parseURL(url) {
+      var parser = document.createElement('a'),
+        searchObject = {},
+        queries, split, i;
+      // Let the browser do the work
+      parser.href = url;
+      // Convert query string to object
+      queries = parser.search.replace(/^\?/, '').split('&');
+      for( i = 0; i < queries.length; i++ ) {
+        split = queries[i].split('=');
+        searchObject[split[0]] = split[1];
+      }
+      return {
+        protocol: parser.protocol,
+        host: parser.host,
+        hostname: parser.hostname,
+        port: parser.port,
+        pathname: parser.pathname,
+        search: parser.search,
+        searchObject: searchObject,
+        hash: parser.hash
+      };
+    }
+</script>
+  </script>
+</body>
