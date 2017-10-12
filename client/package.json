@@ -1,6 +1,6 @@
 {
   "name": "hermes-client",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Simple JsonRPC proxy",
   "main": "index.js",
   "scripts": {
