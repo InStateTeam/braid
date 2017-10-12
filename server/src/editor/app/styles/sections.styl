@@ -38,9 +38,20 @@ section
       color rgba(255, 255, 255, 0.9)
       font-family Courier New, Courier, monospace
       font-size 16px
+      outline none
+
+
 
       &:disabled
         background rgba(0, 0, 0, 0.4)
+
+      &:active 
+        box-shadow 0 0 5px 2px #333
+        -webkit-transform scale(0.8, 0.95)
+        -moz-transform scale(0.95, 0.95)
+        -ms-transform scale(0.95, 0.95)
+        transform scale(0.95, 0.95)  
+
 
     input[type=text]
       font-size 16px
