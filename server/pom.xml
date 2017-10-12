@@ -7,11 +7,12 @@
   <parent>
     <groupId>io.bluebank.hermes</groupId>
     <artifactId>hermes</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>hermes-server</artifactId>
+
   <packaging>jar</packaging>
 
   <name>hermes server</name>

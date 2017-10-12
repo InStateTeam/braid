@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.bluebank.hermes</groupId>
   <artifactId>hermes</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
   <name>Hermes</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
@@ -30,4 +30,6 @@
     </repository>
   </distributionManagement>
 
+  <build>
+  </build>
 </project>
