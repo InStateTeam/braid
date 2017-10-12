@@ -20,3 +20,8 @@ function highlightNewService(selectedService){
     lists[newServiceIndex].style.background = "#0E3A70";
   }
 }
+
+function initHighlight(selectedService){
+  const item = document.querySelector('#services').querySelector('li');
+  item.style.background = '#1973E2';
+}
