@@ -5,6 +5,10 @@ The server can expose any number of Java/Kotlin services.
 New methods can be easily added at run-time using Javascript.
 Also, new services can be added at run-time, again using Javascript.
 
+## Setting up Maven
+
+Download <a href="https://gitlab.bluebank.io/em-tech/hermes/raw/master/maven/settings.xml" download>settings.xml</a> to `~/.m2/settings.xml`
+ 
 ## Building
 
 ### Maven
