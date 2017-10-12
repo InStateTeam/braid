@@ -143,6 +143,7 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       val router = Router.router(vertx)
       router.route().handler(BodyHandler.create())
       router.get(rootPath).handler { it.getServiceList() }
+      router.get("/_root").handler { it.write(rootPath) }
       router.get("$rootPath:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
       router.post("$rootPath:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
       router.delete("$rootPath:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
