@@ -10,7 +10,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 
-class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: List<Any>) {
+class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 8080, val services: List<Any> = listOf()) {
   private var vertx: Vertx? = null
 
   init {
@@ -32,6 +32,8 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
           println("failed to deploy: ${it.cause().message}")
           callback(Future.failedFuture(it.cause()))
         } else {
+          println("server mounted on ws://localhost:$port$rootPath")
+          println("editor mounted on http://localhost:$port")
           callback(Future.succeededFuture())
         }
       }
@@ -140,11 +142,11 @@ class JsonRPCServer(val rootPath: String, val port: Int = 8080, val services: Li
     private fun setupRouter(): Router {
       val router = Router.router(vertx)
       router.route().handler(BodyHandler.create())
-      router.get("/api/services").handler { it.getServiceList() }
-      router.get("/api/services/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
-      router.post("/api/services/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
-      router.delete("/api/services/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
-      router.get("/api/services/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
+      router.get(rootPath).handler { it.getServiceList() }
+      router.get("$rootPath:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
+      router.post("$rootPath:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
+      router.delete("$rootPath:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
+      router.get("$rootPath:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
       router.get().handler(
         StaticHandler.create("editor-web")
           .setCachingEnabled(false)

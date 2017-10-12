@@ -2,12 +2,13 @@
   "name": "hermes-client",
   "version": "1.0.0",
   "description": "Simple JsonRPC proxy",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
     "build-test": "rimraf test/dist/ && browerify test/app.js test/ --out-dir test/dist/ --copy-files",
-    "start": "npm run build && node dist/index.js"
+    "start": "npm run build && node dist/index.js",
+    "deploy": "npm login --registry=http://nexus-emtech.bluebank.io/repository/npm-local/ && npm publish ./ && npm logout"
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +20,11 @@
     "browserify": "^14.4.0",
     "rimraf": "^2.6.2",
     "rpc-websockets": "^3.4.7"
+  },
+  "publishConfig": {
+    "registry": "http://nexus-emtech.bluebank.io/repository/npm-local/"
+  },
+  "dependencies": {
+    "jsonrpc-websocket-client": "^0.2.0"
   }
 }
