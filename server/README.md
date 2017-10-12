@@ -4,7 +4,7 @@ This server implements a dynamic JsonRPC server to demonstrate the Hermes proof 
 The server can expose any number of Java/Kotlin services. 
 New methods can be easily added at run-time using Javascript.
 Also, new services can be added at run-time, again using Javascript.
-
+ 
 ## Building
 
 ### Maven

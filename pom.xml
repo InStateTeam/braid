@@ -2,10 +2,34 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.bluebank.hermes</groupId>
   <artifactId>hermes</artifactId>
-  <version>1</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
- 
+  <name>Hermes</name>
+  <url>https://gitlab.bluebank.io/em-tech/hermes</url>
+  <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
+
+  <scm>
+    <url>https://gitlab.bluebank.io/em-tech/hermes</url>
+    <developerConnection>scm:git:gitlab.bluebank.io:em-tech/hermes.git</developerConnection>
+  </scm>
+
   <modules>
     <module>server</module>
   </modules>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>http://nexus-emtech.bluebank.io/repository/maven-snapshots/</url>
+      <layout>default</layout>
+    </snapshotRepository>
+    <repository>
+      <id>nexus-releases</id>
+      <url>http://nexus-emtech.bluebank.io/repository/maven-releases/</url>
+      <layout>default</layout>
+    </repository>
+  </distributionManagement>
+
+  <build>
+  </build>
 </project>
