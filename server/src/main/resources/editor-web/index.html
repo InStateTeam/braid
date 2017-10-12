@@ -56,45 +56,6 @@
       $('#createServiceBtn').click(onCreateService)
     }
 
-    function populateServiceOptions(selection, services) {
-      selection.empty();
-
-      for (var idx in services) {
-        const service = services[idx];
-        const option = $('<li>', {value: service, text: service})
-        option.click(onServiceSelect);
-        selection.append(option);
-      }
-    }
-
-    function updateServices(services, selectedService) {
-      const selection = $('#services');
-      populateServiceOptions(selection, services);
-      if (selectedService === null && services.length > 0) {
-        selectedService = services[0]
-      }
-      if (selectedService !== null) {
-        selection.val(selectedService).trigger('change');
-      }
-    }
-
-    function onServiceSelect(e) {
-      selectedService = this.textContent
-      getServiceScript(selectedService, function(script) {
-        setEditorContents(script)
-        $('#saveBtn').prop('disabled', true)
-      });
-      getJavaHeaders(selectedService, function(script) {
-        // TODO: put this stuff somewhere in the UI
-        console.log(script);
-      });
-
-    }
-
-    function getSelectedService() {
-      return selectedService;
-    }
-
     function onSave(e) {
       const script = editor.getValue()
       const service = getSelectedService()
@@ -120,6 +81,53 @@
         $('#newService').val("")
       })
    }
+
+    function populateServiceOptions(selection, services) {
+      selection.empty();
+
+      for (var idx in services) {
+        const service = services[idx];
+        const option = $('<li>', {value: service, text: service})
+        option.click(onServiceSelect);
+        selection.append(option);
+      }
+    }
+
+    function updateServices(services, selectedService) {
+      const selection = $('#services');
+      populateServiceOptions(selection, services);
+      if (selectedService === null && services.length > 0) {
+        selectedService = services[0]
+      }
+      if (selectedService !== null) {
+        selection.val(selectedService).trigger('change');
+        window.selectedService = selectedService;
+        getServiceScript(selectedService, function(script) {
+          setEditorContents(script)
+          $('#saveBtn').prop('disabled', true)
+        });
+        getJavaHeaders(selectedService, function(script) {
+          // TODO: put this stuff somewhere in the UI
+        });
+        highlightNewService(selectedService)
+       }
+    }
+
+    function onServiceSelect(e) {
+      selectedService = this.textContent
+      getServiceScript(selectedService, function(script) {
+        setEditorContents(script)
+        $('#saveBtn').prop('disabled', true)
+      });
+      getJavaHeaders(selectedService, function(script) {
+        // TODO: put this stuff somewhere in the UI
+      });
+      selectHighlight(e);
+    }
+
+    function getSelectedService() {
+      return selectedService;
+    }    
 
     function setEditorContents(script) {
       editor.setValue(script)
@@ -195,6 +203,5 @@
         hash: parser.hash
       };
     }
-</script>
 </script>
 </body>

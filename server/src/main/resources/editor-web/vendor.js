@@ -10702,5 +10702,27 @@ window["$"] = require("jquery");
 })();
 /* jshint ignore:end */
 
+;function selectHighlight(e){
+  const lists = document.querySelector('#services').querySelectorAll('li');
+  for(let item = 0; item < lists.length; item++){
+    lists[item].style.background = '#1973E2';
+  }
+  e.target.style.background = "#0E3A70"
+}
+
+function highlightNewService(selectedService){
+  const lists = document.querySelector('#services').querySelectorAll('li');
+  let newServiceIndex = "";
+  for(let item = 0; item < lists.length; item++){
+    lists[item].style.background = '#1973E2';
+    if(lists[item].innerText == selectedService){
+      newServiceIndex = item;
+    }
+  }
+
+  if(newServiceIndex){
+    lists[newServiceIndex].style.background = "#0E3A70";
+  }
+}
 ;
 //# sourceMappingURL=vendor.js.map

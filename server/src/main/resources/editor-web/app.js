@@ -151,44 +151,14 @@ var __makeRelativeRequire = function(require, mappings, pref) {
 require.register("initialize.js", function(exports, require, module) {
 'use strict';
 
-var _selection = require('scripts/selection');
-
-var _selection2 = _interopRequireDefault(_selection);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 document.addEventListener('DOMContentLoaded', function () {
-  (0, _selection2.default)();
 
   console.log('Initialized app');
 });
 
 });
 
-require.register("scripts/selection.js", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = myListeners;
-function myListeners() {
-
-  document.querySelector('#services').addEventListener('click', function (e) {
-    if (e.target.tagName === 'LI') {
-      var lists = document.querySelector('#services').querySelectorAll('li');
-      for (var item = 0; item < lists.length; item++) {
-        lists[item].style.background = '#1973E2';
-        //item.style.background = "#"
-      }
-      e.target.style.background = "#0E3A70";
-    }
-  });
-}
-
-});
-
-;require.alias("process/browser.js", "process");process = require('process');require.register("___globals___", function(exports, require, module) {
+require.alias("process/browser.js", "process");process = require('process');require.register("___globals___", function(exports, require, module) {
   
 
 // Auto-loaded modules from config.npm.globals.
