@@ -30,14 +30,14 @@ async function RPCProxy(path) {
 }
 
 async function App () {
-  const calculator = await RPCProxy('ws://localhost:8080/api/calculator')
+  const calculator = await RPCProxy('ws://localhost:8080/api/services/calculator')
   console.log(await calculator.add(1, 2))
   console.log(await calculator.subtract(1, 2))
   console.log(await calculator.multiply(1, 2))
   console.log(await calculator.divide(10, 2))
   console.log(await calculator.exp(2, 3))
 
-  const accounts = await RPCProxy('ws://localhost:8080/api/accounts')
+  const accounts = await RPCProxy('ws://localhost:8080/api/services/accounts')
   console.log(await accounts.createAccount("fred"))
   console.log(await accounts.createAccount("jim"))
   console.log(await accounts.getAccounts())

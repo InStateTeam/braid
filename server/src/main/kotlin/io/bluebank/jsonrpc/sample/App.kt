@@ -4,5 +4,5 @@ import io.bluebank.jsonrpc.server.JsonRPCServer
 
 
 fun main(args: Array<String>) {
-  JsonRPCServer(rootPath = "/api/", port = 8080, services = listOf(CalculatorService(), AccountService())).start()
+  JsonRPCServer(rootPath = "/api/services/", port = 8080, services = listOf(CalculatorService(), AccountService())).start()
 }
