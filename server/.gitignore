@@ -4,3 +4,4 @@ target
 *.iml
 **/.service-scripts
 **/file-uploads
+src/main/resource/editor-web
