@@ -184,7 +184,7 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
         return
       }
       serviceMap.remove(serviceName)
-      // TODO: consider disengaging the websockets for any mounts
+      write("done")
     }
 
     private fun RoutingContext.getJavaImplementationHeaders(serviceName: String) {

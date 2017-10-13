@@ -41,7 +41,7 @@
    $.delete = function(url, callback){
     return $.ajax({
       url: url,
-      type: 'DELETE',
+      method: 'DELETE',
       success: callback
     });
   }
