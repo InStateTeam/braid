@@ -19,7 +19,7 @@ import java.net.ServerSocket
 @RunWith(VertxUnitRunner::class)
 class JsonRPCServerTest {
   val port = getFreePort()
-  val server = JsonRPCServer("/api/", port, listOf()) // we're just going to use
+  val server = JsonRPCServer("/api/services/", port, listOf()) // we're just going to use
   val vertx = Vertx.vertx()
   val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))
 
@@ -71,7 +71,7 @@ class JsonRPCServerTest {
 
       httpPost("/api/services/myservice/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port/api/myservice", "add", 1, 2)
+          jsonRPC("ws://localhost:$port/api/services/myservice", "add", 1, 2)
         }
         .map {
           Json.decodeValue(it, JsonRPCResponsePayload::class.java)
