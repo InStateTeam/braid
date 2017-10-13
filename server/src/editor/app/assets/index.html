@@ -41,7 +41,7 @@
    $.delete = function(url, callback){
     return $.ajax({
       url: url,
-      type: 'DELETE',
+      method: 'DELETE',
       success: callback
     });
   }
@@ -93,7 +93,10 @@
 
     function onDelete(e){
       const serviceName = selectedService;
-      console.log(serviceName);
+      const callValue = "/api/services/" + serviceName;
+      $.delete(callValue, function(){
+        retrieveAndUpdateServices();
+      });
     }
 
     function populateServiceOptions(selection, services) {
@@ -171,7 +174,7 @@
       }
     }
 
-    function retrieveAndUpdateServices(selectedService) {
+    function retrieveAndUpdateServices(selectdService) {
       $.get("/api/services", function (data) {
         updateServices(data, selectedService);
         
