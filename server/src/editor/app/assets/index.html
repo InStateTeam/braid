@@ -58,6 +58,7 @@
     })
 
     function init() {
+      getEndPoint();
       bindEvents();
       loadEditor();
     }
@@ -145,6 +146,7 @@
         // TODO: put this stuff somewhere in the UI
       });
       selectHighlight(e);
+      getEndPoint();
     }
 
     function getSelectedService() {
@@ -258,6 +260,13 @@
    function initHighlight(selectedService){
      const item = document.querySelector('#services').querySelector('li');
      item.style.background = '#1973E2';
+   }
+
+   function getEndPoint(){
+     const host = window.location.host;
+     const service = (selectedService) ? selectedService : "";
+     document.querySelector('#url').innerHTML = "ws://" + host + "/api/services/" + service;
+
    }
 </script>
 </body>
