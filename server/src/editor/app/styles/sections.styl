@@ -19,40 +19,74 @@ section
         border 1px solid rgba(0, 0, 0, 0.8)
         border-radius 3px
         padding 5px 10px
-  
-  &#container 
-    border 1px solid grey
-    height 100%
-    margin 10px auto
-    padding 5px
-    width 70%
-  
-
-  &.functions
-    margin 0 auto
-    width 70%
-
-    button 
-      background #1973E2
-      border none 
-      color rgba(255, 255, 255, 0.9)
-      font-family Courier New, Courier, monospace
-      font-size 16px
-      outline none
-
-
-
-      &:disabled
-        background rgba(0, 0, 0, 0.4)
-
-      &:active 
-        box-shadow 0 0 5px 2px #333
-        -webkit-transform scale(0.8, 0.95)
-        -moz-transform scale(0.95, 0.95)
-        -ms-transform scale(0.95, 0.95)
-        transform scale(0.95, 0.95)  
-
-
-    input[type=text]
-      font-size 16px
       
+  &#container 
+    display flex
+    margin 10px auto
+    height 100%    
+    
+    .services-list
+      background #1973E2
+      color rgba(255, 255, 255, 0.9)
+      flex-grow 1
+      font-family Courier New, Courier, monospace
+      font-size 20px
+      height 100%
+      margin 0 5px 5px 0
+
+      ul
+        margin 0
+        padding 0
+        text-align center
+        
+        li
+          border-bottom 2px solid rgba(255, 255, 255, 0.9)
+          list-style none
+          padding 7px 10px
+          cursor pointer
+
+    #editor
+      border 1px solid grey
+      flex-grow 1
+      height 100%
+      margin auto 10px      
+      padding 5px
+
+      .functions
+        margin 5px 0
+        width 70%
+
+        button 
+          background #1973E2
+          border none 
+          color rgba(255, 255, 255, 0.9)
+          font-family Courier New, Courier, monospace
+          font-size 16px
+          outline none
+          vertical-align top
+
+          &:disabled
+            background rgba(0, 0, 0, 0.4)
+
+          &:active 
+            box-shadow 0 0 5px 2px #333
+            -webkit-transform scale(0.8, 0.95)
+            -moz-transform scale(0.95, 0.95)
+            -ms-transform scale(0.95, 0.95)
+            transform scale(0.95, 0.95)  
+
+
+        input[type=text]
+          border 1px solid #1973E2
+          font-size 16px
+          padding-bottom 2px
+
+      #monaco
+        border-top 1px solid #1973E2 
+        height 100%
+        margin-top 10px
+        padding-top 10px
+
+        .monaco-editor
+          width 1200px !important
+

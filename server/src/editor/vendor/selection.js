@@ -1,5 +1,6 @@
 function selectHighlight(e){
   const lists = document.querySelector('#services').querySelectorAll('li');
+  console.log(lists);
   for(let item = 0; item < lists.length; item++){
     lists[item].style.background = '#1973E2';
   }
