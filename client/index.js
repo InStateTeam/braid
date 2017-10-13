@@ -1,6 +1,13 @@
 import Client from 'jsonrpc-websocket-client';
 
-exports.RPCProxy = async function (path, servicename) {
+
+/**
+ * Create a proxy to a jsonrpc hermes server endpoint
+ * Currently the only implemented protocol is ws://
+ * @param path
+ * @returns {Promise.<Proxy>}
+ */
+export default async function (path) {
   const client = new Client(path)
   await client.open()
   const result = {}
@@ -9,8 +16,9 @@ exports.RPCProxy = async function (path, servicename) {
     const uri = document.createElement('a');
     uri.href = path
     const base = "http://" + uri.hostname + ":" + uri.port
-    if (servicename !== undefined && servicename !== null) {
-      return base + "/?service=" + servicename
+    const serviceName = uri.pathname.split("/").filter(i => i.length > 0).pop()
+    if (serviceName !== undefined && serviceName !== null) {
+      return base + "/?service=" + serviceName
     } else {
       return base;
     }
