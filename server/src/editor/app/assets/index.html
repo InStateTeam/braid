@@ -16,7 +16,7 @@
   <section class="endpoint">
     <div>
       <label for="url">End Point</label>
-      <span id="url">ws://localhost:8080/api/services</span>
+      <span id="url"></span>
     </div>
   </section>
   <aside class="services-list">
@@ -24,7 +24,7 @@
     </ul>
   </aside>
   <section class="functions">
-    <button>delete</button>
+    <button id="deleteBtn">Delete</button>
     <input type="text" id="newService">
     <button id="createServiceBtn">Create</button>
     <button id="saveBtn">Save</button>
@@ -38,6 +38,14 @@
 
 <script src="monaco-editor/min/vs/loader.js"></script>
 <script>
+   $.delete = function(url, callback){
+    return $.ajax({
+      url: url,
+      type: 'DELETE',
+      success: callback
+    });
+  }
+
     var editor;
     var selectedService;
 
@@ -46,14 +54,15 @@
     })
 
     function init() {
-      bindEvents()
-      loadEditor()
+      bindEvents();
+      loadEditor();
     }
 
     function bindEvents() {
       $('#saveBtn').click(onSave);
-      $('#formatBtn').click(onFormat)
-      $('#createServiceBtn').click(onCreateService)
+      $('#formatBtn').click(onFormat);
+      $('#createServiceBtn').click(onCreateService);
+      $('#deleteBtn').click(onDelete);
     }
 
     function onSave(e) {
@@ -82,6 +91,11 @@
       })
    }
 
+    function onDelete(e){
+      const serviceName = selectedService;
+      console.log(serviceName);
+    }
+
     function populateServiceOptions(selection, services) {
       selection.empty();
 
@@ -97,7 +111,8 @@
       const selection = $('#services');
       populateServiceOptions(selection, services);
       if (selectedService === null && services.length > 0) {
-        selectedService = services[0]
+        selectedService = services[0];
+        initHighlight(selectedService);
       }
       if (selectedService !== null) {
         selection.val(selectedService).trigger('change');
@@ -158,7 +173,8 @@
 
     function retrieveAndUpdateServices(selectedService) {
       $.get("/api/services", function (data) {
-        updateServices(data, selectedService)
+        updateServices(data, selectedService);
+        
       });
     }
 
@@ -178,6 +194,7 @@
           retrieveAndUpdateServices(selectedService);
         })
       });
+      
     }
 
     function parseURL(url) {
