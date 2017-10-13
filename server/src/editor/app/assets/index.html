@@ -19,18 +19,22 @@
       <span id="url"></span>
     </div>
   </section>
-  <aside class="services-list">
-    <ul id="services">
-    </ul>
-  </aside>
-  <section class="functions">
-    <button id="deleteBtn">Delete</button>
-    <input type="text" id="newService">
-    <button id="createServiceBtn">Create</button>
-    <button id="saveBtn">Save</button>
-    <button id="formatBtn">Format</button>
+  <section id="container">
+    <aside class="services-list">
+      <ul id="services">
+      </ul>
+    </aside>                           
+    <div id="editor">
+      <section class="functions">
+        <button id="deleteBtn">Delete</button>
+        <input type="text" id="newService">
+        <button id="createServiceBtn">Create</button>
+        <button id="saveBtn">Save</button>
+        <button id="formatBtn">Format</button>
+      </section>
+      <section id="monaco"></section>     
+    </div>
   </section>
-  <section id="container"></section>
 </main>
 <footer>
 
@@ -54,6 +58,7 @@
     })
 
     function init() {
+      getEndPoint();
       bindEvents();
       loadEditor();
     }
@@ -86,8 +91,8 @@
     function onCreateService() {
       const serviceName = $('#newService').val()
       getServiceScript(serviceName, function() {
-        retrieveAndUpdateServices(serviceName)
-        $('#newService').val("")
+        retrieveAndUpdateServices(serviceName);
+        $('#newService').val("");
       })
    }
 
@@ -117,7 +122,7 @@
         selectedService = services[0];
         initHighlight(selectedService);
       }
-      if (selectedService !== null) {
+      if (selectedService) {
         selection.val(selectedService).trigger('change');
         window.selectedService = selectedService;
         getServiceScript(selectedService, function(script) {
@@ -127,7 +132,7 @@
         getJavaHeaders(selectedService, function(script) {
           // TODO: put this stuff somewhere in the UI
         });
-        highlightNewService(selectedService)
+        highlightNewService(selectedService);
        }
     }
 
@@ -141,6 +146,7 @@
         // TODO: put this stuff somewhere in the UI
       });
       selectHighlight(e);
+      getEndPoint();
     }
 
     function getSelectedService() {
@@ -177,7 +183,7 @@
     function retrieveAndUpdateServices(selectdService) {
       $.get("/api/services", function (data) {
         updateServices(data, selectedService);
-        
+        loadMonaco();
       });
     }
 
@@ -186,19 +192,23 @@
     }
 
     function loadEditor() {
+      ensureServiceIsCreated(function(selectedService) {
+          retrieveAndUpdateServices(selectedService);
+      })
+     }
+
+     function loadMonaco(){
       require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
       require(['vs/editor/editor.main'], function() {
-        editor = monaco.editor.create(document.getElementById('container'), {
+        editor = monaco.editor.create(document.getElementById('monaco'), {
           value: "",
-          language: 'javascript'
+          language: 'javascript',
+          automaticLayout: true
+
         });
-        editor.onDidChangeModelContent(onScriptChanged);
-        ensureServiceIsCreated(function(selectedService) {
-          retrieveAndUpdateServices(selectedService);
-        })
+        editor.onDidChangeModelContent(onScriptChanged);        
       });
-      
-    }
+     }
 
     function parseURL(url) {
       var parser = document.createElement('a'),
@@ -226,7 +236,7 @@
 
    function selectHighlight(e){
      const lists = document.querySelector('#services').querySelectorAll('li');
-     for (const item in lists) {
+     for (let item = 0; item < lists.length; item++) {
        lists[item].style.background = '#1973E2';
      }
      e.target.style.background = "#0E3A70"
@@ -235,7 +245,7 @@
    function highlightNewService(selectedService){
      const lists = document.querySelector('#services').querySelectorAll('li');
      let newServiceIndex = "";
-     for (const item in lists) {
+     for (let item = 0; item < lists.length;  item++) {
        lists[item].style.background = '#1973E2';
        if(lists[item].innerText === selectedService){
          newServiceIndex = item;
@@ -250,6 +260,13 @@
    function initHighlight(selectedService){
      const item = document.querySelector('#services').querySelector('li');
      item.style.background = '#1973E2';
+   }
+
+   function getEndPoint(){
+     const host = window.location.host;
+     const service = (selectedService) ? selectedService : "";
+     document.querySelector('#url').innerHTML = "ws://" + host + "/api/services/" + service;
+
    }
 </script>
 </body>
