@@ -53,8 +53,7 @@ section
       padding 5px
 
       .functions
-        margin 5px 0
-        width 70%
+        margin 5px 3px
 
         button 
           background #1973E2
@@ -75,11 +74,36 @@ section
             -ms-transform scale(0.95, 0.95)
             transform scale(0.95, 0.95)  
 
+          &#deleteBtn
+            float right
 
         input[type=text]
           border 1px solid #1973E2
           font-size 16px
           padding-bottom 2px
+          padding-left 2px
+          width 250px
+
+          &::-webkit-input-placeholder  /* Chrome/Opera/Safari */
+            color #CCC     
+            font-style italic
+            font-weight 100
+
+          ::-moz-placeholder  /* Firefox 19+ */
+            color #CCC 
+            font-style italic
+            font-weight 100
+          
+          :-ms-input-placeholder  /* IE 10+ */
+            color #CCC
+            font-style italic
+            font-weight 100
+
+          &::-moz-placeholder  /* Firefox 18- */
+            color #CCC 
+            font-style italic
+            font-weight 100
+          
 
       #monaco
         border-top 1px solid #1973E2 
