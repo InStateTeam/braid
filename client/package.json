@@ -4,10 +4,10 @@
   "description": "Simple JsonRPC proxy",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "build-test": "rimraf test/dist/ && browerify test/app.js test/ --out-dir test/dist/ --copy-files",
-    "start": "npm run build && node dist/index.js",
+    "clean": "rimraf dist/ && rimraf test-dist",
+    "build:source": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log,test,test-dir --copy-files",
+    "build": "npm run build:source",
+    "start": "node test/app.js",
     "deploy": "npm login --registry=http://nexus-emtech.bluebank.io/repository/npm-local/ && npm publish ./ && npm logout"
   },
   "author": "",
@@ -15,7 +15,9 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-regenerator": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
     "babelify": "^7.3.0",
     "browserify": "^14.4.0",
     "rimraf": "^2.6.2",

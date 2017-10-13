@@ -1,24 +1,28 @@
 const WebSocketServer = require('rpc-websockets').Server;
 
-// instantiate Server and start listening for requests
-const server = new WebSocketServer({
-  port: 8080,
-  host: 'localhost'
-});
+export default function () {
+  // instantiate Server and start listening for requests
+  const server = new WebSocketServer({
+    port: 8088,
+    host: 'localhost'
+  });
 
-// register an RPC method
-server.register('sum', function(params) {
-  return params[0] + params[1]
-})
+  const service = server.of("/api/calculator");
 
-// create an event
-server.event('feedUpdated')
+  // register an RPC method
+  service.register('add', function (params) {
+    return params[0] + params[1]
+  })
 
-// get events
-console.log(server.eventList())
+  // create an event
+  // server.event('feedUpdated')
 
-// emit an event to subscribers
-server.emit('feedUpdated')
+  // get events
+  // console.log(server.eventList())
 
-// close the server
-//server.close()
+  // emit an event to subscribers
+  // server.emit('feedUpdated')
+
+  // close the server
+  //server.close()
+}

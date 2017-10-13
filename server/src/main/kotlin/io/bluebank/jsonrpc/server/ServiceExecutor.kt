@@ -55,9 +55,9 @@ class CompositeExecutor(vararg predefinedExecutors: ServiceExecutor) : ServiceEx
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
-    val method = findMethod(request)
-    val castedParameters = request.mapParams(method)
     try {
+      val method = findMethod(request)
+      val castedParameters = request.mapParams(method)
       val result = method.invoke(service, *castedParameters)
       handleResult(result, request, callback)
     } catch (err: Throwable) {
@@ -205,19 +205,19 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
   }
 
   override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
-    checkMethodExists(request.method)
-
-    val params = if (request.params != null && request.params is List<*>) {
-      request.params.toTypedArray()
-    } else {
-      listOf(request.params).toTypedArray()
-    }
-
     try {
+      checkMethodExists(request.method)
+
+      val params = if (request.params != null && request.params is List<*>) {
+        request.params.toTypedArray()
+      } else {
+        listOf(request.params).toTypedArray()
+      }
+
       val result = invocable.invokeFunction(request.method, *params)
       callback(succeededFuture(result))
     } catch (err: Throwable) {
-      callback(failedFuture("failed to invoke rpc"))
+      callback(failedFuture(err))
     }
   }
 
