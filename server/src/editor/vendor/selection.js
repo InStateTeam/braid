@@ -8,6 +8,7 @@ function selectHighlight(e){
 
 function highlightNewService(selectedService){
   const lists = document.querySelector('#services').querySelectorAll('li');
+  console.log('this ran');
   let newServiceIndex = "";
   for(let item = 0; item < lists.length; item++){
     lists[item].style.background = '#1973E2';
@@ -23,5 +24,5 @@ function highlightNewService(selectedService){
 
 function initHighlight(selectedService){
   const item = document.querySelector('#services').querySelector('li');
-  item.style.background = '#1973E2';
+  console.log(item);
 }
