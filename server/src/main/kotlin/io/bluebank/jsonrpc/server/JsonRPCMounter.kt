@@ -1,8 +1,8 @@
 package io.bluebank.jsonrpc.server
 
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.serverError
 import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwInvalidRequest
 import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwParseError
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwServerError
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
@@ -37,10 +37,16 @@ class JsonRPCMounter(private val executor: ServiceExecutor, private val socket: 
     }
   }
 
-  private fun handleAsyncResult(result2: AsyncResult<*>, request: JsonRPCRequest) {
-    when (result2.succeeded()) {
-      true -> respond(result2.result(), request)
-      else -> throwServerError(request.id, result2.cause().message)
+  private fun handleAsyncResult(result: AsyncResult<*>, request: JsonRPCRequest) {
+    when (result.succeeded()) {
+      true -> respond(result.result(), request)
+      else -> {
+        if (result.cause() is MethodDoesNotExist) {
+          JsonRPCErrorPayload.methodNotFound(request.id, "method ${request.method} not implemented").payload.send()
+        } else {
+          serverError(request.id, result.cause().message).payload.send()
+        }
+      }
     }
   }
 
