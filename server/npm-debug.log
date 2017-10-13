@@ -1,0 +1,101 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/christopherjones/.nvm/versions/node/v6.11.3/bin/node',
+1 verbose cli   '/Users/christopherjones/.nvm/versions/node/v6.11.3/bin/npm',
+1 verbose cli   'install' ]
+2 info using npm@3.10.10
+3 info using node@v6.11.3
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly install normalizeTree
+8 silly loadCurrentTree Finishing
+9 silly loadIdealTree Starting
+10 silly install loadIdealTree
+11 silly cloneCurrentTree Starting
+12 silly install cloneCurrentTreeToIdealTree
+13 silly cloneCurrentTree Finishing
+14 silly loadShrinkwrap Starting
+15 silly install loadShrinkwrap
+16 silly loadShrinkwrap Finishing
+17 silly loadAllDepsIntoIdealTree Starting
+18 silly install loadAllDepsIntoIdealTree
+19 silly loadAllDepsIntoIdealTree Finishing
+20 silly loadIdealTree Finishing
+21 silly currentTree hermes-server@1.0.0
+22 silly idealTree hermes-server@1.0.0
+23 silly generateActionsToTake Starting
+24 silly install generateActionsToTake
+25 silly generateActionsToTake Finishing
+26 silly diffTrees action count 0
+27 silly decomposeActions action count 0
+28 silly runTopLevelLifecycles Starting
+29 silly install runPreinstallTopLevelLifecycles
+30 silly preinstall hermes-server@1.0.0 /Users/christopherjones/Developer/RBS_Inovation/hermes/server/hermes-server-27a2354a
+31 info lifecycle hermes-server@1.0.0~preinstall: hermes-server@1.0.0
+32 silly lifecycle hermes-server@1.0.0~preinstall: no script for preinstall, continuing
+33 silly executeActions Starting
+34 silly install executeActions
+35 silly doSerial global-install 0
+36 silly doParallel fetch 0
+37 verbose correctMkdir /Users/christopherjones/.npm/_locks correctMkdir not in flight; initializing
+38 verbose lock using /Users/christopherjones/.npm/_locks/staging-d3dd10ae29a72887.lock for /Users/christopherjones/Developer/RBS_Inovation/hermes/server/node_modules/.staging
+39 silly doParallel extract 0
+40 silly doParallel preinstall 0
+41 silly doReverseSerial remove 0
+42 silly doSerial move 0
+43 silly doSerial finalize 0
+44 silly doSerial build 0
+45 silly doSerial global-link 0
+46 silly doParallel update-linked 0
+47 silly doSerial install 0
+48 silly doSerial postinstall 0
+49 verbose unlock done using /Users/christopherjones/.npm/_locks/staging-d3dd10ae29a72887.lock for /Users/christopherjones/Developer/RBS_Inovation/hermes/server/node_modules/.staging
+50 silly executeActions Finishing
+51 silly rollbackFailedOptional Starting
+52 silly rollbackFailedOptional Finishing
+53 silly install runPostinstallTopLevelLifecycles
+54 silly build hermes-server@1.0.0
+55 info linkStuff hermes-server@1.0.0
+56 silly linkStuff hermes-server@1.0.0 has /Users/christopherjones/Developer/RBS_Inovation/hermes as its parent node_modules
+57 verbose linkBins hermes-server@1.0.0
+58 verbose linkMans hermes-server@1.0.0
+59 silly install hermes-server@1.0.0 /Users/christopherjones/Developer/RBS_Inovation/hermes/server/hermes-server-27a2354a
+60 info lifecycle hermes-server@1.0.0~install: hermes-server@1.0.0
+61 verbose lifecycle hermes-server@1.0.0~install: unsafe-perm in lifecycle true
+62 verbose lifecycle hermes-server@1.0.0~install: PATH: /Users/christopherjones/.nvm/versions/node/v6.11.3/lib/node_modules/npm/bin/node-gyp-bin:/Users/christopherjones/Developer/RBS_Inovation/hermes/server/node_modules/.bin:/Users/christopherjones/.nvm/versions/node/v6.11.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
+63 verbose lifecycle hermes-server@1.0.0~install: CWD: /Users/christopherjones/Developer/RBS_Inovation/hermes/server
+64 silly lifecycle hermes-server@1.0.0~install: Args: [ '-c',
+64 silly lifecycle   'mkdir -p ~/.m2 && docker run --rm -v $HOME/.m2:/home/user/.m2 -v $PWD:/build -w /build mfriedenhagen/docker-maven mvn clean install' ]
+65 silly lifecycle hermes-server@1.0.0~install: Returned: code: 1  signal: null
+66 info lifecycle hermes-server@1.0.0~install: Failed to exec install script
+67 verbose stack Error: hermes-server@1.0.0 install: `mkdir -p ~/.m2 && docker run --rm -v $HOME/.m2:/home/user/.m2 -v $PWD:/build -w /build mfriedenhagen/docker-maven mvn clean install`
+67 verbose stack Exit status 1
+67 verbose stack     at EventEmitter.<anonymous> (/Users/christopherjones/.nvm/versions/node/v6.11.3/lib/node_modules/npm/lib/utils/lifecycle.js:255:16)
+67 verbose stack     at emitTwo (events.js:106:13)
+67 verbose stack     at EventEmitter.emit (events.js:191:7)
+67 verbose stack     at ChildProcess.<anonymous> (/Users/christopherjones/.nvm/versions/node/v6.11.3/lib/node_modules/npm/lib/utils/spawn.js:40:14)
+67 verbose stack     at emitTwo (events.js:106:13)
+67 verbose stack     at ChildProcess.emit (events.js:191:7)
+67 verbose stack     at maybeClose (internal/child_process.js:920:16)
+67 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:230:5)
+68 verbose pkgid hermes-server@1.0.0
+69 verbose cwd /Users/christopherjones/Developer/RBS_Inovation/hermes/server
+70 error Darwin 16.7.0
+71 error argv "/Users/christopherjones/.nvm/versions/node/v6.11.3/bin/node" "/Users/christopherjones/.nvm/versions/node/v6.11.3/bin/npm" "install"
+72 error node v6.11.3
+73 error npm  v3.10.10
+74 error code ELIFECYCLE
+75 error hermes-server@1.0.0 install: `mkdir -p ~/.m2 && docker run --rm -v $HOME/.m2:/home/user/.m2 -v $PWD:/build -w /build mfriedenhagen/docker-maven mvn clean install`
+75 error Exit status 1
+76 error Failed at the hermes-server@1.0.0 install script 'mkdir -p ~/.m2 && docker run --rm -v $HOME/.m2:/home/user/.m2 -v $PWD:/build -w /build mfriedenhagen/docker-maven mvn clean install'.
+76 error Make sure you have the latest version of node.js and npm installed.
+76 error If you do, this is most likely a problem with the hermes-server package,
+76 error not with npm itself.
+76 error Tell the author that this fails on your system:
+76 error     mkdir -p ~/.m2 && docker run --rm -v $HOME/.m2:/home/user/.m2 -v $PWD:/build -w /build mfriedenhagen/docker-maven mvn clean install
+76 error You can get information on how to open an issue for this project with:
+76 error     npm bugs hermes-server
+76 error Or if that isn't available, you can get their info via:
+76 error     npm owner ls hermes-server
+76 error There is likely additional logging output above.
+77 verbose exit [ 1, true ]

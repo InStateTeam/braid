@@ -95,7 +95,7 @@
       const serviceName = selectedService;
       const callValue = "/api/services/" + serviceName;
       $.delete(callValue, function(){
-        console.log('in here');
+        retrieveAndUpdateServices();
       });
     }
 

@@ -7,7 +7,7 @@
   "repository": "",
   "scripts": {
     "start": "brunch watch --server",
-    "build": "rm -rf ../main/resources/editor-web && brunch build --production"
+    "build": "rm -rf ../main/resources/editor-web && set LOGGY_STACKS=1 && brunch build"
   },
   "dependencies": {
     "jquery": "^3.2.1"
