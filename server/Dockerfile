@@ -1,4 +1,7 @@
 FROM java:8-jdk-alpine
-ENTRYPOINT ["/usr/bin/java", "-jar", "/usr/share/hermes/hermes-server.jar"]
-ADD target/hermes-server.jar /usr/share/hermes/hermes-server.jar
+USER 999
+ENTRYPOINT ["/usr/bin/java", "-jar", "hermes/hermes-server.jar"]
+RUN mkdir ~/hermes && cd ~/hermes
+ADD ./target/hermes-server.jar hermes-server.jar
 EXPOSE 8080
+
