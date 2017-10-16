@@ -10,13 +10,15 @@
 </head>
 <body>
 <header>
+  <img src="png/Logo-03.png" alt="corda logo" />
   <span>Hermes</span>
 </header>
 <main>
   <section class="endpoint">
     <div>
-      <label for="url">End Point</label>
-      <span id="url"></span>
+      <label for="host">End Point</label>
+      <span id="host"></span>
+      <span id="calls"></span>
     </div>
   </section>
   <section id="container">
@@ -238,35 +240,36 @@
    function selectHighlight(e){
      const lists = document.querySelector('#services').querySelectorAll('li');
      for (let item = 0; item < lists.length; item++) {
-       lists[item].style.background = '#1973E2';
+       lists[item].style.background = '#000';
      }
-     e.target.style.background = "#0E3A70"
+     e.target.style.background = "#EF0017"
    }
 
    function highlightNewService(selectedService){
      const lists = document.querySelector('#services').querySelectorAll('li');
      let newServiceIndex = "";
      for (let item = 0; item < lists.length;  item++) {
-       lists[item].style.background = '#1973E2';
+       lists[item].style.background = '#000';
        if(lists[item].innerText === selectedService){
          newServiceIndex = item;
        }
      }
 
      if(newServiceIndex){
-       lists[newServiceIndex].style.background = "#0E3A70";
+       lists[newServiceIndex].style.background = "#EF0017";
      }
    }
 
    function initHighlight(selectedService){
      const item = document.querySelector('#services').querySelector('li');
-     item.style.background = '#1973E2';
+     item.style.background = '#000';
    }
 
    function getEndPoint(serviceName){
      const host = window.location.host;
      const service = serviceName;
-     document.querySelector('#url').innerHTML = "ws://" + host + "/api/services/" + service;
+     document.querySelector('#host').innerHTML = "ws://" + host;
+     document.querySelector('#calls').innerHTML = "/api/services/" + service;
 
    }
 </script>
