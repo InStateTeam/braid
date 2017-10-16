@@ -58,7 +58,7 @@
     })
 
     function init() {
-      getEndPoint();
+      getEndPoint('');
       bindEvents();
       loadEditor();
     }
@@ -262,9 +262,9 @@
      item.style.background = '#1973E2';
    }
 
-   function getEndPoint(){
+   function getEndPoint(serviceName){
      const host = window.location.host;
-     const service = (selectedService) ? selectedService : "";
+     const service = serviceName;
      document.querySelector('#url').innerHTML = "ws://" + host + "/api/services/" + service;
 
    }
