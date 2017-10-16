@@ -1,7 +1,9 @@
 FROM java:8-jdk-alpine
-USER 999
-ENTRYPOINT ["/usr/bin/java", "-jar", "hermes/hermes-server.jar"]
-RUN mkdir ~/hermes && cd ~/hermes
-ADD ./target/hermes-server.jar hermes-server.jar
+RUN mkdir hermes
+RUN chgrp -R 0 hermes && chmod -R g+rwX hermes
+ADD ./target/hermes-server.jar hermes/hermes-server.jar
 EXPOSE 8080
-
+USER 999
+#ENTRYPOINT ["ls"]
+WORKDIR hermes
+ENTRYPOINT ["/usr/bin/java", "-jar", "hermes-server.jar"]

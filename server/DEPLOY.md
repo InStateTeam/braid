@@ -3,9 +3,9 @@ Bluebank OCP Bring Your Own Container
 
 ## Hermes Specific Notes
 
-Deployment command line
+For `hermes-sample-server` you can deploy easily with this command 
 ```bash
-./deploy.sh hermes-sample hermes-sample latest docker-registry-default.bluebank.io:443
+deploy/runme.sh
 ```
 
 ## Quick start

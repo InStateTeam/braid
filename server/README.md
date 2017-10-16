@@ -45,3 +45,9 @@ The editor uses the REST API:
 * `GET /api/services` - retrieve list of declared services
 * `GET /api/services/<service-name>` - retrieve the javascript script for the given servive
 * `POST /api/services/<services-name` - POST an updated javascript body for the service.
+
+## Deployment to OpenShift
+
+```bash
+deploy/runme.sh
+```
