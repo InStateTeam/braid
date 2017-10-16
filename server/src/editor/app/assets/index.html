@@ -58,7 +58,7 @@
     })
 
     function init() {
-      getEndPoint();
+      getEndPoint('');
       bindEvents();
       loadEditor();
     }
@@ -102,6 +102,7 @@
       $.delete(callValue, function(){
         retrieveAndUpdateServices();
       });
+      getEndPoint('');
     }
 
     function populateServiceOptions(selection, services) {
@@ -146,7 +147,7 @@
         // TODO: put this stuff somewhere in the UI
       });
       selectHighlight(e);
-      getEndPoint();
+      getEndPoint(selectedService);
     }
 
     function getSelectedService() {
@@ -262,9 +263,9 @@
      item.style.background = '#1973E2';
    }
 
-   function getEndPoint(){
+   function getEndPoint(serviceName){
      const host = window.location.host;
-     const service = (selectedService) ? selectedService : "";
+     const service = serviceName;
      document.querySelector('#url').innerHTML = "ws://" + host + "/api/services/" + service;
 
    }
