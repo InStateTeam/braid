@@ -24,6 +24,8 @@ IMAGE="$2"
 TAG="$3"
 DOMAIN="bluebank.io"
 REGISTRY="docker-registry-default.${DOMAIN}:443"
+VOLUME_NAME="service-scripts"
+MOUNT="/home/hermes/service-scripts"
 
 # Usage options and user arguments
 read -d '' USAGE << EOF
@@ -34,31 +36,88 @@ Working example: ./deploy.sh xxx-nonroot-nginx-dev nonroot-nginx latest docker-r
 EOF
 
 
+ensureVolumeExists() {
+  echo
+  echo "*** Ensuring volume exists ${VOLUME_NAME} exists and is mounted on ${MOUNT}***"
+  echo
+
+  oc volume dc --all --name=${VOLUME_NAME} > /dev/null 2>/dev/null
+  if [ $? -eq 0 ]; then
+    echo "volume ${VOLUME_NAME} already exists"
+  else
+    oc volume dc/${IMAGE} --add --name=${VOLUME_NAME} --claim-name=${VOLUME_NAME} --claim-size=1M --mount-path=${MOUNT} --type=persistentVolumeClaim > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+    echo "volume ${VOLUME_NAME} created and set to be mounted on ${MOUNT}"
+    else
+    echo "failed to create ${VOLUME_NAME}"
+    fi
+  fi
+}
+
+ensureProjectExists() {
+  echo
+  echo "*** Ensuring project $PROJECT exists ***"
+  echo
+
+  oc new-project ${PROJECT} > /dev/null 2>/dev/null
+  if [ $? -eq 0 ]; then
+    echo "project ${PROJECT} created"
+  else
+    echo "project ${PROJECT} already exists"
+  fi
+  # switch to project
+  oc project ${PROJECT}
+}
+
+
+ensureAppExists() {
+  echo
+  echo "*** Ensuring app ${IMAGE}:${TAG} exists***"
+  echo
+  oc describe dc/${IMAGE} > /dev/null 2>/dev/null
+  if [ $? -eq 0 ]; then
+    echo "deployment config for app ${IMAGE} already exists"
+  else
+    echo "creating app ${IMAGE}:${TAG}"
+    oc new-app ${PROJECT}/${IMAGE}:${TAG}
+    if [ $? -eq 0 ]; then
+      echo "app ${IMAGE}:${TAG} created"
+    else
+      echo "app ${IMAGE}:${TAG} already exists"
+    fi
+  fi
+}
+
+createAndPushDockerImage() {
+  echo
+  echo "*** Creating Docker image ***"
+  echo
+  docker login --username=$(oc whoami) --password=$(oc whoami -t) ${REGISTRY}
+  docker pull ${IMAGE}
+  #docker tag ${IMAGE} ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG}
+  docker build -t ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG} .
+  echo
+  echo "*** Pushing Docker image ***"
+  echo
+  docker push ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG}
+}
+
+recreateService() {
+  echo
+  echo "*** Recreating Service ${IMAGE} ***"
+  echo
+  oc delete service ${IMAGE} > /dev/null 2>/dev/null
+  oc create service nodeport ${IMAGE} --tcp=443:8080
+  oc create route edge --hostname=${PROJECT}.${DOMAIN} --service=${IMAGE} --port=8080 --insecure-policy=Redirect
+}
+
 # The deploy function checks for the existing project before deploying a clean build from scratch
 deploy() {
-PROJECTS="$(oc get projects)"
-for project in $PROJECTS; do
-	if [ "$project" == "${PROJECT}" ]; then
-		oc delete project ${PROJECT} > /dev/null 2>&1
-		until oc new-project ${PROJECT} > /dev/null 2>&1; do
-			echo -e "Trying to re-provison project...Please be patient!"
-			sleep 10
-		done
-
-	fi
-done
-
-oc new-project ${PROJECT} > /dev/null 2>&1
-docker login --username=$(oc whoami) --password=$(oc whoami -t) ${REGISTRY}
-docker pull ${IMAGE}
-docker tag ${IMAGE} ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG}
-docker build -t ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG} .
-docker push ${REGISTRY}/${PROJECT}/${IMAGE}:${TAG}
-oc new-app ${IMAGE}:${TAG}
-oc delete service ${IMAGE}
-oc create service nodeport ${IMAGE} --tcp=443:8080
-oc create route edge --hostname=${PROJECT}.${DOMAIN} --service=${IMAGE} --port=8080 --insecure-policy=Redirect
-
+  ensureProjectExists
+  createAndPushDockerImage
+  ensureAppExists
+  ensureVolumeExists
+  recreateService
 }
 
 if [[ $# < 1 ]]; then echo "${USAGE}" && exit; fi

@@ -2,6 +2,6 @@
 **/.vertx
 target
 *.iml
-**/.service-scripts
+**/service-scripts
 **/file-uploads
 src/main/resources/editor-web
