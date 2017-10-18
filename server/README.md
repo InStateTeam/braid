@@ -19,6 +19,9 @@ The editor allows the UI developer to dynamically create stubbed services and se
 Thereby, s/he can develop without being held up by the server-side.
 Also the editor acts as a documentation to the server side for functions that need to be implemented.
 
+## Screenshot of the Editor
+![screenshot][docs/screenshot.png]
+
 ## Building
 
 ### Maven
