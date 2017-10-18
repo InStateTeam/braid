@@ -1,4 +1,4 @@
-import { getExistingServices } from 'scripts/workers';
+import { getExistingServices, getStubbedServices } from 'scripts/workers';
 import Helpers from 'scripts/helpers';
 import getEndPoint from 'scripts/endPoint'
 
@@ -15,7 +15,8 @@ export function onServiceSelect(e) {
   });
   helpers.selectHighlight(e);
   getEndPoint(selectedService);
-  getExistingServices(selectedService);
+  getExistingServices(selectedService, '.implemented-functions');
+  getStubbedServices(selectedService, '.stubbed-functions')
 }
 
 

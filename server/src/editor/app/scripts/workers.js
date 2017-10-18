@@ -65,3 +65,9 @@ export function getExistingServices(serviceName){
   });
 }
 
+export function getStubbedServices(serviceName){
+  $.get("/api/services/" + serviceName + "/script", function(data) {
+    // TODO: parse return type here
+ });
+}
+
