@@ -30,7 +30,7 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
   fun start(callback: (AsyncResult<Void>) -> Unit) {
     if (vertx == null) {
       val vertx = Vertx.vertx()
-      vertx.deployVerticle(App(rootPath, services, port)) {
+      vertx.deployVerticle(JsonRPCVerticle(rootPath, services, port)) {
         if (it.failed()) {
           println("failed to deploy: ${it.cause().message}")
           callback(Future.failedFuture(it.cause()))
@@ -58,9 +58,9 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
   }
 
 
-  class App(val rootPath: String, val services: List<Any>, val port: Int) : AbstractVerticle() {
+  class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: Int) : AbstractVerticle() {
     companion object {
-      val logger = loggerFor<App>()
+      val logger = loggerFor<JsonRPCVerticle>()
     }
 
     val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
@@ -218,8 +218,12 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
         } else {
           val serviceName = drop(rootPath.length)
           val service = serviceMap[serviceName]
-          if (service != null)
+          if (service != null) {
             JsonRPCMounter(service, socket)
+          } else {
+            socket.writeFinalTextFrame("cannot find service $service")
+            socket.reject()
+          }
         }
       }
     }
