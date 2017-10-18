@@ -7,6 +7,12 @@
 * Also as a separate task, we want to make it super easy to access Corda flows.
 
 
+## Structure
+
+1. A NPM javascript module, [hermes-client](hermes-client) to make it super easy to consume services in the UI and to alter them at runtime.
+2. A [server](server) to host a wide selection of services.
+3. A `hermes-corda` module that makes it very easy to expose Corda flows as services, securely.
+
 ## Nexus
 This project deploys artifacts to the Nexus3 repository. To consume these modules 
 
