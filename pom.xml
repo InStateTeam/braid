@@ -15,7 +15,6 @@
 
   <modules>
     <module>server</module>
-    <module>hermes-corda</module>
   </modules>
 
   <distributionManagement>
