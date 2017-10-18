@@ -15,7 +15,7 @@ import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
 
 class AuthenticatedSockJSTest : AbstractVerticle() {
-  override override fun start(startFuture: Future<Void>?) {
+  override fun start(startFuture: Future<Void>?) {
     val config = json {
       obj("properties_path" to "classpath:login/shiro.properties")
     }
