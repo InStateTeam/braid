@@ -1,9 +1,5 @@
 import getEndPoint from 'scripts/endPoint';
-import { 
-        getServiceScript, 
-        retrieveAndUpdateServices,
-        updateServices,
-        populateServiceOptions } from 'scripts/workers';
+import { getServiceScript, retrieveAndUpdateServices } from 'scripts/workers';
 
 import Helpers from 'scripts/helpers'
 
