@@ -5,12 +5,20 @@ The server can expose any number of Java/Kotlin services.
 New methods can be easily added at run-time using Javascript.
 Also, new services can be added at run-time, again using Javascript.
 
+## Sample Service
+
 Simple one line example:
 
 ```kotlin
   JsonRPCServer(rootPath = "/api/services/", port = 8080, services = listOf(CalculatorService(), AccountService())).start()
 ```
- 
+
+See this running here: [https://hermes-sample-server.bluebank.io](https://hermes-sample-server.bluebank.io)
+
+The editor allows the UI developer to dynamically create stubbed services and service methods, overlaying existing functionality in Java services. 
+Thereby, s/he can develop without being held up by the server-side.
+Also the editor acts as a documentation to the server side for functions that need to be implemented.
+
 ## Building
 
 ### Maven
