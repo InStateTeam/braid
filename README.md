@@ -9,9 +9,9 @@
 
 ## Structure
 
-1. A NPM javascript module, [hermes-client](hermes-client) to make it super easy to consume services in the UI and to alter them at runtime.
-2. A [server](server) to host a wide selection of services.
-3. A `hermes-corda` module that makes it very easy to expose Corda flows as services, securely.
+1. A NPM javascript module, [hermes-client](client) to make it super easy to consume services in the UI and to alter them at runtime.
+2. A Java module [hermes-server](server) to host a wide selection of services.
+3. A `hermes-corda` module that makes it very easy to expose Corda flows as services, securely. (This is currently being worked on)
 
 ## Nexus
 This project deploys artifacts to the Nexus3 repository. To consume these modules 
