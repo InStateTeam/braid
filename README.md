@@ -2,9 +2,9 @@
 
 ## Context
 
-We are attempting to create a Spike skeleton where the application tiers are connected before we even begin and not 10 minutes before the presentation.
-We also want to make it embarassignly easy to expose services using a wellknown protocol: JsonRPC.
-Also as a separate task, we want to make it super easy to access Corda flows.
+* Our aim is to create a Spike skeleton where the application tiers are connected before we even begin and not 10 minutes before the presentation.
+* We also want to make it embarassignly easy to expose services using a wellknown protocol: JsonRPC.
+* Also as a separate task, we want to make it super easy to access Corda flows.
 
 
 ## Nexus
