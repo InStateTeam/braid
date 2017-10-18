@@ -44,7 +44,7 @@ npm start
 
 The server starts on port `8080`.
 
-JsonRPC Websocket end-points are `ws://localhost:8080/api/<service-name>`
+JsonRPC Websocket end-points are `ws://localhost:8080/api/services/<service-name>`
 
 The editor uses the REST API:
 
