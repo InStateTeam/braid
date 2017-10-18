@@ -1,3 +1,4 @@
+import { getExistingServices } from 'scripts/workers';
 import Helpers from 'scripts/helpers';
 import getEndPoint from 'scripts/endPoint'
 
@@ -14,6 +15,7 @@ export function onServiceSelect(e) {
   });
   helpers.selectHighlight(e);
   getEndPoint(selectedService);
+  getExistingServices(selectedService);
 }
 
 

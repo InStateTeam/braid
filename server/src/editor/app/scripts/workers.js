@@ -58,3 +58,10 @@ export function populateServiceOptions(selection, services) {
   }
 }
 
+export function getExistingServices(serviceName){
+  $.get("/api/services/" + serviceName + "/java", function(data) {
+     const strArray = data.split("\n\n");
+     helpers.populateFunctions(strArray);
+  });
+}
+

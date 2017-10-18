@@ -69,6 +69,19 @@ export default class Helpers {
       lists[newServiceIndex].style.background = "#EF0017";
     }
   }
+
+  populateFunctions(serviceArray){
+    const functionList = document.querySelector('.implemented-functions');
+    while(functionList.firstChild){
+      functionList.removeChild(functionList.firstChild);
+    }
+    serviceArray.map((service) => {
+      const node = document.createElement("LI");
+      const textNode = document.createTextNode(service);
+      node.appendChild(textNode);
+      functionList.appendChild(node);
+    });
+  }
 }
 
   
