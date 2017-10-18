@@ -1,12 +1,9 @@
-package io.bluebank.jsonrpc.server.executors.impl
+package io.bluebank.jsonrpc.server.services
 
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload
-import io.bluebank.jsonrpc.server.JsonRPCMounter
-import io.bluebank.jsonrpc.server.JsonRPCRequest
-import io.bluebank.jsonrpc.server.JsonRPCReturns
-import io.bluebank.jsonrpc.server.executors.ServiceExecutor
+import io.bluebank.jsonrpc.server.*
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
+import java.beans.MethodDescriptor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
@@ -61,31 +58,36 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     }
   }
 
-  fun getJavaStubs(): String {
-    val list = service.javaClass.declaredMethods
+  fun getJavaStubs(): List<MethodDescriptor> {
+    return service.javaClass.declaredMethods
       .filter { Modifier.isPublic(it.modifiers) }
-      .map { "function ${it.name} (${paramListAsJS(it)}) { // returns ${returnType(it)} }" }
-    return list.joinToString("\n\n")
+      .map { it.toDescriptor() }
   }
 
-  private fun returnType(it: Method) : String {
-    return it.getAnnotation<JsonRPCReturns>(JsonRPCReturns::class.java)?.returnType ?: it.returnType.toJavascriptType()
+  private fun Method.toDescriptor(): MethodDescriptor {
+    val serviceAnnotation = getAnnotation<JsonRPCService>(JsonRPCService::class.java)
+    val name = serviceAnnotation?.name ?: this.name
+    val params = parameters.map { it.type.toJavascriptType() + "Param" }
+    val returnType = returnType.toJavascriptType()
+    val description = serviceAnnotation?.description ?: ""
+    return MethodDescriptor(name, description, params, returnType)
   }
 
-  private fun Class<*>.toJavascriptType() : String {
+
+  private fun Class<*>.toJavascriptType(): String {
     return when (this) {
       Int::class.java -> "int"
-      Double::class.java-> "double"
+      Double::class.java -> "double"
       Boolean::class.java -> "bool"
-      String::class.java-> "string"
-      Array<Any>::class.java-> "array"
-      List::class.java-> "array"
-      Map::class.java-> "map"
-      Collection::class.java-> "array"
+      String::class.java -> "string"
+      Array<Any>::class.java -> "array"
+      List::class.java -> "array"
+      Map::class.java -> "map"
+      Collection::class.java -> "array"
       else -> "object"
     }
   }
 
 
-  private fun paramListAsJS(it: Method) = it.parameters.joinToString(", ") { it.type.toJavascriptType() + "Param" }
+  data class MethodDescriptor(val name: String, val description: String, val parameters: List<String>, val returnType: String)
 }

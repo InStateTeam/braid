@@ -1,6 +1,6 @@
 package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.server.executors.impl.JavascriptExecutor
+import io.bluebank.jsonrpc.server.services.JavascriptExecutor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx

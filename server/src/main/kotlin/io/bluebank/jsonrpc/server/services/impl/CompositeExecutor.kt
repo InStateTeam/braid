@@ -1,7 +1,6 @@
-package io.bluebank.jsonrpc.server.executors.impl
+package io.bluebank.jsonrpc.server.services
 
 import io.bluebank.jsonrpc.server.JsonRPCRequest
-import io.bluebank.jsonrpc.server.executors.ServiceExecutor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 
