@@ -9,268 +9,58 @@
   <script>require('initialize');</script>
 </head>
 <body>
-<header>
-  <img src="png/Logo-03.png" alt="corda logo" />
-  <span>Hermes</span>
-</header>
-<main>
-  <section class="endpoint">
-    <div>
-      <label for="host">End Point</label>
-      <span id="host"></span>
-      <span id="calls"></span>
-    </div>
-  </section>
-  <section id="container">
-    <aside class="services-list">
-      <ul id="services">
-      </ul>
-    </aside>                           
-    <div id="editor">
-      <section class="functions">
-        <input type="text" id="newService" placeholder="new service name">
-        <button id="createServiceBtn">Create</button>
-        <button id="saveBtn">Save</button>
-        <button id="formatBtn">Format</button>
-        <button id="deleteBtn">Delete</button>
-      </section>
-      <section id="monaco"></section>     
-    </div>
-  </section>
-</main>
-<footer>
+  <header>
+    <img src="png/Logo-03.png" alt="corda logo" />
+    <span>Hermes</span>
+  </header>
+  <main>
+    <section class="endpoint">
+      <div>
+        <label for="host">End Point</label>
+        <span id="host"></span>
+        <span id="calls"></span>
+      </div>
+    </section>
+    <section id="container">
+      <aside class="services-list">
+        <ul id="services">
+        </ul>
+      </aside>                           
+      <div id="editor">
+        <section class="functions">
+          <input type="text" id="newService" placeholder="new service name">
+          <button id="createServiceBtn">Create</button>
+          <button id="saveBtn">Save</button>
+          <button id="formatBtn">Format</button>
+          <button id="deleteBtn">Delete</button>
+        </section>
+        <section id="monaco"></section>     
+      </div>
+    </section>
+  </main>
+  <footer>
 
-</footer>
+  </footer>
 
-<script src="monaco-editor/min/vs/loader.js"></script>
-<script>
-   $.delete = function(url, callback){
-    return $.ajax({
-      url: url,
-      method: 'DELETE',
-      success: callback
-    });
-  }
-
+  <script src="monaco-editor/min/vs/loader.js"></script>
+  <script>
     var editor;
     var selectedService;
-
-    $(document).ready(function() {
-      init();
-    })
-
-    function init() {
-      getEndPoint('');
-      bindEvents();
-      loadEditor();
-    }
-
-    function bindEvents() {
-      $('#saveBtn').click(onSave);
-      $('#formatBtn').click(onFormat);
-      $('#createServiceBtn').click(onCreateService);
-      $('#deleteBtn').click(onDelete);
-    }
-
-    function onSave(e) {
-      const script = editor.getValue()
-      const service = getSelectedService()
-
-      $.post("/api/services/" + service + "/script", script)
-        .done(function() {
-          console.log("saved")
-          $('#saveBtn').prop('disabled', true)
-        })
-        .fail(function(e) {
-          console.log("failed to save", e);
-        })
-    }
-
-    function onFormat(e) {
-      editor.trigger('', 'editor.action.formatDocument');
-    }
-
-    function onCreateService() {
-      const serviceName = $('#newService').val()
-      getServiceScript(serviceName, function() {
-        retrieveAndUpdateServices(serviceName);
-        $('#newService').val("");
-      })
-   }
-
-    function onDelete(e){
-      const serviceName = selectedService;
-      const callValue = "/api/services/" + serviceName;
-      $.delete(callValue, function(){
-        retrieveAndUpdateServices();
-      });
-      getEndPoint('');
-    }
-
-    function populateServiceOptions(selection, services) {
-      selection.empty();
-
-      for (var idx in services) {
-        const service = services[idx];
-        const option = $('<li>', {value: service, text: service})
-        option.click(onServiceSelect);
-        selection.append(option);
-      }
-    }
-
-    function updateServices(services, selectedService) {
-      const selection = $('#services');
-      populateServiceOptions(selection, services);
-      if (selectedService === null && services.length > 0) {
-        selectedService = services[0];
-        initHighlight(selectedService);
-      }
-      if (selectedService) {
-        selection.val(selectedService).trigger('change');
-        window.selectedService = selectedService;
-        getServiceScript(selectedService, function(script) {
-          setEditorContents(script)
-          $('#saveBtn').prop('disabled', true)
-        });
-        getJavaHeaders(selectedService, function(script) {
-          // TODO: put this stuff somewhere in the UI
-        });
-        highlightNewService(selectedService);
-       }
-    }
-
-    function onServiceSelect(e) {
-      selectedService = this.textContent
-      getServiceScript(selectedService, function(script) {
-        setEditorContents(script)
-        $('#saveBtn').prop('disabled', true)
-      });
-      getJavaHeaders(selectedService, function(script) {
-        // TODO: put this stuff somewhere in the UI
-      });
-      selectHighlight(e);
-      getEndPoint(selectedService);
-    }
-
-    function getSelectedService() {
-      return selectedService;
-    }    
-
-    function setEditorContents(script) {
-      editor.setValue(script)
-    }
-
-    function getServiceScript(serviceName, callback) {
-      $.get("/api/services/" + serviceName + "/script", function(script) {
-        callback(script)
-      })
-    }
-
-    function getJavaHeaders(serviceName, callback) {
-      $.get("/api/services/" + serviceName + "/java", function(script) {
-        callback(script);
-      });
-    }
-
-    function ensureServiceIsCreated(callback) {
-      const params = parseURL(document.URL).searchObject
-      if (typeof(params['service']) !== 'undefined' && params.service !== null) {
-        getServiceScript(params.service, function() {
-          callback(params.service)
-        })
-      } else {
-        callback(null)
-      }
-    }
-
-    function retrieveAndUpdateServices(selectdService) {
-      $.get("/api/services", function (data) {
-        updateServices(data, selectedService);
-        loadMonaco();
-      });
-    }
-
-    function onScriptChanged() {
-      $('#saveBtn').prop('disabled', false);
-    }
-
-    function loadEditor() {
-      ensureServiceIsCreated(function(selectedService) {
-          retrieveAndUpdateServices(selectedService);
-      })
-     }
-
-     function loadMonaco(){
+    
+    function monaco(){
       require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
       require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('monaco'), {
           value: "",
           language: 'javascript',
           automaticLayout: true
-
         });
         editor.onDidChangeModelContent(onScriptChanged);        
       });
-     }
-
-    function parseURL(url) {
-      var parser = document.createElement('a'),
-        searchObject = {},
-        queries, split, i;
-      // Let the browser do the work
-      parser.href = url;
-      // Convert query string to object
-      queries = parser.search.replace(/^\?/, '').split('&');
-      for( i = 0; i < queries.length; i++ ) {
-        split = queries[i].split('=');
-        searchObject[split[0]] = split[1];
+      
+      function onScriptChanged() {
+        $('#saveBtn').prop('disabled', false);
       }
-      return {
-        protocol: parser.protocol,
-        host: parser.host,
-        hostname: parser.hostname,
-        port: parser.port,
-        pathname: parser.pathname,
-        search: parser.search,
-        searchObject: searchObject,
-        hash: parser.hash
-      };
     }
-
-   function selectHighlight(e){
-     const lists = document.querySelector('#services').querySelectorAll('li');
-     for (let item = 0; item < lists.length; item++) {
-       lists[item].style.background = '#000';
-     }
-     e.target.style.background = "#EF0017"
-   }
-
-   function highlightNewService(selectedService){
-     const lists = document.querySelector('#services').querySelectorAll('li');
-     let newServiceIndex = "";
-     for (let item = 0; item < lists.length;  item++) {
-       lists[item].style.background = '#000';
-       if(lists[item].innerText === selectedService){
-         newServiceIndex = item;
-       }
-     }
-
-     if(newServiceIndex){
-       lists[newServiceIndex].style.background = "#EF0017";
-     }
-   }
-
-   function initHighlight(selectedService){
-     const item = document.querySelector('#services').querySelector('li');
-     item.style.background = '#000';
-   }
-
-   function getEndPoint(serviceName){
-     const host = window.location.host;
-     const service = serviceName;
-     document.querySelector('#host').innerHTML = "ws://" + host;
-     document.querySelector('#calls').innerHTML = "/api/services/" + service;
-
-   }
-</script>
+  </script>
 </body>

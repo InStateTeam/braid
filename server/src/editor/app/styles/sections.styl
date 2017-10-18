@@ -8,9 +8,9 @@ section
 
     div
       position absolute
-      left 50%
-      top 50%
-      transform translate(-50%, -50%)
+      left 40%
+      top 60%
+      transform translate(0%, -50%)
 
       label 
         color rgba(0, 0, 0, 0.8)
@@ -67,7 +67,10 @@ section
           margin auto 3px
           outline none
           padding 5px 20px
-          vertical-align top          
+          vertical-align top        
+
+          &:disabled
+            background rgba(0, 0, 0, 0.4)  
 
           &:active 
             box-shadow 0 0 5px 2px #333
@@ -89,6 +92,7 @@ section
           font-size 16px
           height 27px
           margin-right -8px
+          outline none
           padding-bottom 2px
           padding-left 10px
           width 250px
