@@ -53,6 +53,7 @@ The editor uses the REST API:
 * `POST /api/services/<services-name` - POST an updated javascript body for the service.
 * `GET /api/services/<service-name>/script` - retrieve Javascript stubs for the service.
 * `GET /api/services/<service-name>/java` - retrieve the descriptions of the Java functions per service - for documentation
+
 ## Deployment to OpenShift
 
 ```bash
