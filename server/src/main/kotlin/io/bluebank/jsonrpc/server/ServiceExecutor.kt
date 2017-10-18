@@ -137,7 +137,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 class JavascriptExecutor(private val vertx: Vertx, private val name: String) : ServiceExecutor {
   companion object {
     private val logger = loggerFor<JavascriptExecutor>()
-    private val SCRIPTS_PATH = ".service-scripts"
+    private val SCRIPTS_PATH = "service-scripts"
     private val sem = ScriptEngineManager()
     private val SCRIPT_ENGINE_NAME = "nashorn"
     fun clearScriptsFolder(vertx: Vertx): Future<Unit> {
