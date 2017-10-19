@@ -185,24 +185,25 @@
                 <exec executable="npm" dir="${project.basedir}/src/editor">
                   <arg value="install"/>
                 </exec>
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/eventbus-test">
+                  <arg value="install"/>
+                </exec>
               </target>
             </configuration>
           </execution>
           <execution>
-            <id>clean npm output</id>
-            <phase>clean</phase>
-            <goals><goal>run</goal></goals>
-            <configuration></configuration>
-          </execution>
-          <execution>
             <id>npm run build</id>
-            <phase>clean</phase>
+            <phase>compile</phase>
             <goals>
               <goal>run</goal>
             </goals>
             <configuration>
               <target>
                 <exec executable="npm" dir="${project.basedir}/src/editor">
+                  <arg value="run"/>
+                  <arg value="build"/>
+                </exec>
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/eventbus-test">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
