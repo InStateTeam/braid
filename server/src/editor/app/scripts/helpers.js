@@ -76,7 +76,9 @@ export default class Helpers {
     }
     serviceArray.map((service) => {
       const node = document.createElement("LI");
-      const textNode = document.createTextNode(service);
+      // TODO: Chris you may wish to style this properly :-)
+      const text = JSON.stringify(service);
+      const textNode = document.createTextNode(text);
       node.appendChild(textNode);
       list.appendChild(node);
     });
