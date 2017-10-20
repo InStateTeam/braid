@@ -70,17 +70,38 @@ export default class Helpers {
     }
   }
 
-  populateFunctions(serviceArray){
-    const functionList = document.querySelector('.implemented-functions');
-    while(functionList.firstChild){
-      functionList.removeChild(functionList.firstChild);
+  populateList(list, serviceArray){
+    while(list.firstChild){
+      list.removeChild(list.firstChild);
     }
     serviceArray.map((service) => {
       const node = document.createElement("LI");
       const textNode = document.createTextNode(service);
       node.appendChild(textNode);
-      functionList.appendChild(node);
+      list.appendChild(node);
     });
+  }
+
+  populateFunctions(serviceArray){
+    const functionList = document.querySelector('.implemented-functions');
+    this.populateList(functionList, serviceArray);
+  }
+
+  populateStubs(serviceArray){
+    const stubList = document.querySelector('.stubbed-functions');
+    this.populateList(stubList, serviceArray);
+  }
+
+  expandFunctionsSection(){
+    const funSection = document.querySelector('.calls');
+    const container = document.querySelector('#container');
+    funSection.style.width = "800px";
+  }
+
+  collapseFunctionsSection(){
+    const funSection = document.querySelector('.calls');
+    funSection.style.width = '0';
+    funSection.style.flex = '0';
   }
 }
 
