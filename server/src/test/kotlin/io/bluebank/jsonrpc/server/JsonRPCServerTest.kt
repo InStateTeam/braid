@@ -75,7 +75,7 @@ class JsonRPCServerTest {
           jsonRPC("ws://localhost:$port/api/services/myservice", "add", 1, 2)
         }
         .map {
-          Json.decodeValue(it, JsonRPCResponsePayload::class.java)
+          Json.decodeValue(it, JsonRPCResponse::class.java)
         }
         .map { it.result.toString().toDouble().toInt() }
         .map {

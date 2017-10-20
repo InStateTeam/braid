@@ -53,7 +53,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, private val socket: 
   }
 
   private fun respond(result: Any?, request: JsonRPCRequest) {
-    val payload = JsonRPCResponsePayload(result = result, id = request.id)
+    val payload = JsonRPCResponse(result = result, id = request.id)
     socket.writeFinalTextFrame(Json.encode(payload))
   }
 
