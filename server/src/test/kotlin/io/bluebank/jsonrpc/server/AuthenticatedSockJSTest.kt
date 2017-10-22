@@ -3,7 +3,6 @@ package io.bluebank.jsonrpc.server
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
 import io.bluebank.jsonrpc.server.socket.TypedSocket
-import io.bluebank.jsonrpc.server.socket.onData
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
