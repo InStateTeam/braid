@@ -1,0 +1,1 @@
+console.error("Error: Parsing file /home/fuzz/dev/hermes/server/src/test/resources/eventbus-test/app.js: Assigning to rvalue (45:2)");

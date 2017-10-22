@@ -1,6 +1,9 @@
 package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.server.socket.*
+import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
+import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
+import io.bluebank.jsonrpc.server.socket.TypedSocket
+import io.bluebank.jsonrpc.server.socket.onData
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -76,9 +79,9 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   }
 
   private fun socketHandler(socket: SockJSSocket) {
-    val wrapper = SockJSWrapper(socket)
-    val auth = AuthenticatedSocket(getAuthProvider())
-    val transformer = TypedSocket(EchoRequest::class.java)
+    val wrapper = SockJSSocketWrapper.create(socket)
+    val auth = AuthenticatedSocket.create(getAuthProvider())
+    val transformer = TypedSocket.create(EchoRequest::class.java)
     wrapper.addListener(auth)
     auth.addListener(transformer)
     transformer.onData { this.write(it.str) }
