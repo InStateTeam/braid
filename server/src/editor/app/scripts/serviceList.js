@@ -5,6 +5,7 @@ import getEndPoint from 'scripts/endPoint'
 const helpers = new Helpers();
 
 export function onServiceSelect(e) {
+  console.log(editor);
   helpers.setSelectedService(this.textContent);
   helpers.getServiceScript(selectedService, function(script) {
     helpers.setEditorContents(script)
@@ -16,7 +17,6 @@ export function onServiceSelect(e) {
   helpers.selectHighlight(e);
   getEndPoint(selectedService);
   getExistingServices(selectedService, '.implemented-functions');
-  getStubbedServices(selectedService, '.stubbed-functions');
   helpers.expandFunctionsSection();
 }
 

@@ -66,8 +66,6 @@ export function getExistingServices(serviceName){
 
 export function getStubbedServices(serviceName){
   $.get("/api/services/" + serviceName + "/script", function(data) {
-    let stubList = data.split('\n');
-    console.log(stubList);
     helpers.populateStubs(stubList);
  });
 }
