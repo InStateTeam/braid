@@ -20,8 +20,9 @@ class JsonRPC {
     this.socket.onclose = function() {
       thisObj.closeHandler();
     }
-    this.socket.onmessage = function (data) {
-      thisObj.messageHandler(data);
+    this.socket.onmessage = function (e) {
+      console.log("received", e.data);
+      thisObj.messageHandler(JSON.parse(e.data));
     }
   }
 
@@ -97,13 +98,14 @@ class JsonRPC {
   }
 
   invoke(method, params) {
+    const thisObj = this;
     return new Promise(function (resolve, reject) {
-      this.invokeForStream(method, params, resolve, reject);
+      thisObj.invokeForStream(method, params, resolve, reject);
     });
   }
 
   invokeForStream(method, params, onNext, onError, onCompleted) {
-    const id = this.id++
+    const id = this.nextId++
 
     const payload = {
       id: id,

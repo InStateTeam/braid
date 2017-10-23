@@ -1,6 +1,10 @@
 package io.bluebank.jsonrpc.server.socket.impl
 
 import io.bluebank.jsonrpc.server.AbstractSocket
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload
+import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.invalidParams
+import io.bluebank.jsonrpc.server.JsonRPCRequest
+import io.bluebank.jsonrpc.server.JsonRPCResponse
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.Socket
 import io.vertx.core.buffer.Buffer
@@ -26,13 +30,14 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
 
   override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
     try {
-      val op = Json.decodeValue(item, AuthOp::class.java)
-      when (op.operation) {
-        Operation.LOGIN -> {
+      val op = Json.decodeValue(item, JsonRPCRequest::class.java)
+      when (op.method) {
+        "login" -> {
           handleAuthRequest(op)
         }
-        Operation.LOGOUT -> {
+        "logout" -> {
           user = null
+          sendOk(op)
         }
       }
     } catch (err: Throwable) {
@@ -54,22 +59,36 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
     return this
   }
 
-  private fun handleAuthRequest(op: AuthOp) {
-    authProvider.authenticate(JsonObject(op.credentials)) {
-      if (it.succeeded()) {
-        user = it.result()
-        socket.write(Json.encodeToBuffer("OK"))
-      } else {
-        user = null
-        socket.write(Json.encodeToBuffer("ERROR - ${it.cause().message ?: "unspecified error"}"))
+  @Suppress("UNCHECKED_CAST")
+  private fun handleAuthRequest(op: JsonRPCRequest) {
+    if (op.params ==  null || op.params !is Map<*, *>) {
+      sendParameterError(op)
+    } else {
+      val m = op.params as Map<String, Any>
+      authProvider.authenticate(JsonObject(m)) {
+        if (it.succeeded()) {
+          user = it.result()
+          sendOk(op)
+        } else {
+          user = null
+          sendFailed(op, it.cause())
+        }
       }
     }
   }
 
-  private enum class Operation {
-    LOGIN,
-    LOGOUT
+  private fun sendParameterError(op: JsonRPCRequest) {
+    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object").payload
+    write(Json.encodeToBuffer(msg))
   }
 
-  private data class AuthOp(val operation: Operation, val credentials: Map<String, Any>)
+  private fun sendOk(op: JsonRPCRequest) {
+    val msg = JsonRPCResponse(id = op.id, result = "OK")
+    write(Json.encodeToBuffer(msg))
+  }
+
+  private fun sendFailed(op: JsonRPCRequest, cause: Throwable) {
+    val msg = JsonRPCErrorPayload.serverError(id =op.id, message = cause.message ?: "unspecified error").payload
+    write(Json.encodeToBuffer(msg))
+  }
 }

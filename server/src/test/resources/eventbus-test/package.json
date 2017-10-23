@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist/*",
     "build": "browserify app.js -o dist/bundle.js",
     "watch": "watchify app.js -o dist/bundle.js"
   },
@@ -18,6 +19,7 @@
     "vertx3-eventbus-client": "^3.4.2"
   },
   "devDependencies": {
+    "rimraf": "^2.6.2",
     "watchify": "^3.9.0"
   }
 }
