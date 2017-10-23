@@ -4,7 +4,7 @@
   height 50px
   padding-bottom 5px
   position relative
-
+  
   div
     position absolute
     left 40%
@@ -33,6 +33,14 @@
     font-size 20px
     margin 0
     width 250px 
+    z-index 100
+
+    &:after
+      background #000
+      content ''
+      padding 1000px 125px
+      position absolute
+      z-index 10 
 
     ul
       margin 0
@@ -49,43 +57,45 @@
     background #ECECEC
     bottom 0
     display inline-block
-    left 250px
+    left 0px
+    padding-left 5px
     position absolute
     top 0
+    transition all 0.3s
+    width 225p
+    z-index -1
 
     ul
       background #ECECEC
       list-style none
-      margin 0 5px 20px
-      overflowy scroll
+      margin 0 5px 20px 0
       padding 0
+      width 220px
 
       li          
+        box-sizing border-box
         border-radius 3px
         color #FFF
         margin-bottom 2px
         padding 5px 10px 6px
-        width 200px
-        transition 0.5s
+        width 220px
 
         &:hover
           cursor pointer
 
-        h3
+        .title
           margin 0
-          width 200px
         
         .content
           &.hide
-            display none
-
-        
+            display none        
         
       &.implemented-functions
       
         li
           background #49CC90
           border 2px solid #49CC90
+          
 
         
       &.stubbed-functions
@@ -102,8 +112,10 @@
     display inline-block
     height 100vh
     padding 5px
-    transition width 0.5s
+    position relative
+    right 0
     width calc(100% - 250px)
+    transition all 0.5s
 
     .functions
       margin 5px 3px
