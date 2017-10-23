@@ -1,173 +1,177 @@
-section
+.endpoint
+  background #ECECEC
+  color rgba(0, 0, 0, 0.8)
+  height 50px
+  padding-bottom 5px
+  position relative
 
-  &.endpoint
-    background #ECECEC
-    color rgba(0, 0, 0, 0.8)
-    height 50px
-    position relative
+  div
+    position absolute
+    left 40%
+    top 50%
+    transform translate(0%, -50%)
 
-    div
-      position absolute
-      left 40%
-      top 60%
-      transform translate(0%, -50%)
+    label 
+      color rgba(0, 0, 0, 0.8)
 
-      label 
-        color rgba(0, 0, 0, 0.8)
-
-      span
-        background #FFF
-        border 1px solid rgba(0, 0, 0, 0.8)
-        border-radius 3px
-        padding 5px 10px
+    span
+      background #FFF
+      border 1px solid rgba(0, 0, 0, 0.8)
+      border-radius 3px
+      padding 5px 10px
       
-  &#container 
-    background #ECECEC
-    display flex
-    height calc(100% - 120px)    
-    margin 0 auto
-    overflow scroll
-    padding-top 10px
+#container  
+  overflow-x hidden
+  overflow-y scroll
+  position relative
 
-    .services-list
-      background #000
-      color rgba(255, 255, 255, 0.9)
-      flex-basis 40%
-      flex-grow 1
-      font-size 20px
-      margin 0 5px 5px 0
-      transition width 0.5s
+  .services-list
+    background #000
+    color rgba(255, 255, 255, 0.9)
+    display inline-block
+    float left
+    font-size 20px
+    margin 0
+    width 250px 
 
-      ul
-        margin 0
-        padding 0
-        text-align center
-        
-        li
-          border-bottom 2px solid rgba(255, 255, 255, 0.9)
-          list-style none
-          padding 7px 10px
-          cursor pointer
-   
-    .calls
-      flex-grow 0
-      transition 0.5s
-      width 0
-
-      ul
-        background #ECECEC
+    ul
+      margin 0
+      padding 0
+      text-align center
+      
+      li
+        border-bottom 2px solid rgba(255, 255, 255, 0.9)
         list-style none
-        margin 0 5px 20px
-        overflowy scroll
-        padding 0
+        padding 7px 10px
+        cursor pointer
+  
+  .calls
+    background #ECECEC
+    bottom 0
+    display inline-block
+    left 250px
+    position absolute
+    top 0
 
-        li          
-          color #FFF
-          margin-bottom 2px
-          padding 5px 10px 6px
-          border-radius 3px
+    ul
+      background #ECECEC
+      list-style none
+      margin 0 5px 20px
+      overflowy scroll
+      padding 0
 
-          &:hover
-            cursor pointer
+      li          
+        border-radius 3px
+        color #FFF
+        margin-bottom 2px
+        padding 5px 10px 6px
+        width 200px
+        transition 0.5s
 
-          h3
-            margin 0
-          
-          .content
-            &.hide
-              display none
+        &:hover
+          cursor pointer
 
-          
-          
-        &.implemented-functions
+        h3
+          margin 0
+          width 200px
         
-          li
-            background #49CC90
-            border 2px solid #49CC90
+        .content
+          &.hide
+            display none
 
-         
-        &.stubbed-functions
         
-          li
-            background #FCA130;
-            border 2px solid #FCA130;
-
-
-    #editor
-      border 1px solid #000
-      box-sizing border-box
-      flex-grow 2
-      height 100%
-      margin auto 10px      
-      padding 5px
-
-      .functions
-        margin 5px 3px
-
-        button 
-          background linear-gradient(#DDD, #BBB)
-          border 1px solid #888
-          border-radius 2px
-          color rgba(0, 0, 0, 1.0)
-          font-family 'SSP-Bold' 
-          font-size 16px
-          margin auto 3px
-          outline none
-          padding 5px 20px
-          vertical-align top        
-
-          &:disabled
-            background rgba(0, 0, 0, 0.4)  
-
-          &:active 
-            box-shadow 0 0 5px 2px #333
-            -webkit-transform scale(0.8, 0.95)
-            -moz-transform scale(0.95, 0.95)
-            -ms-transform scale(0.95, 0.95)
-            transform scale(0.95, 0.95)
         
-          &#createServiceBtn
-            border-left none
-            border-radius 0 2px 2px 0
+      &.implemented-functions
+      
+        li
+          background #49CC90
+          border 2px solid #49CC90
 
-          &#deleteBtn
-            float right
+        
+      &.stubbed-functions
+      
+        li
+          background #FCA130;
+          border 2px solid #FCA130;
 
-        input[type=text]
-          border 1px solid #000
-          border-right none
-          font-size 16px
-          height 27px
-          margin-right -8px
-          outline none
-          padding-bottom 2px
-          padding-left 10px
-          width 250px
 
-          &::-webkit-input-placeholder  /* Chrome/Opera/Safari */
-            color #CCC     
-            font-style italic
-            font-weight 100
+  #editor
+    background: #ECECEC
+    border 1px solid #000
+    box-sizing border-box
+    display inline-block
+    height 100vh
+    padding 5px
+    transition width 0.5s
+    width calc(100% - 250px)
 
-          ::-moz-placeholder  /* Firefox 19+ */
-            color #CCC 
-            font-style italic
-            font-weight 100
-          
-          :-ms-input-placeholder  /* IE 10+ */
-            color #CCC
-            font-style italic
-            font-weight 100
+    .functions
+      margin 5px 3px
 
-          &::-moz-placeholder  /* Firefox 18- */
-            color #CCC 
-            font-style italic
-            font-weight 100
-          
+      button 
+        background linear-gradient(#DDD, #BBB)
+        border 1px solid #888
+        border-radius 2px
+        color rgba(0, 0, 0, 1.0)
+        font-family 'SSP-Bold' 
+        font-size 16px
+        margin auto 3px
+        outline none
+        padding 5px 20px
+        vertical-align top        
 
-      #monaco
-        border-top 1px solid #000 
-        height calc(100% - 70px)
-        margin-top 10px
-        padding-top 10px
+        &:disabled
+          background rgba(0, 0, 0, 0.4)  
+
+        &:active 
+          box-shadow 0 0 5px 2px #333
+          -webkit-transform scale(0.8, 0.95)
+          -moz-transform scale(0.95, 0.95)
+          -ms-transform scale(0.95, 0.95)
+          transform scale(0.95, 0.95)
+      
+        &#createServiceBtn
+          border-left none
+          border-radius 0 2px 2px 0
+
+        &#deleteBtn
+          float right
+
+      input[type=text]
+        border 1px solid #000
+        border-right none
+        font-size 16px
+        height 27px
+        margin-right -8px
+        outline none
+        padding-bottom 2px
+        padding-left 10px
+        width 250px
+
+        &::-webkit-input-placeholder  /* Chrome/Opera/Safari */
+          color #CCC     
+          font-style italic
+          font-weight 100
+
+        ::-moz-placeholder  /* Firefox 19+ */
+          color #CCC 
+          font-style italic
+          font-weight 100
+        
+        :-ms-input-placeholder  /* IE 10+ */
+          color #CCC
+          font-style italic
+          font-weight 100
+
+        &::-moz-placeholder  /* Firefox 18- */
+          color #CCC 
+          font-style italic
+          font-weight 100
+        
+
+    #monaco
+      border-top 1px solid #000
+      height calc(100% - 75px)
+      margin-top 10px
+      padding-top 10px
 

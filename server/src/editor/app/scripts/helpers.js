@@ -162,8 +162,11 @@ export default class Helpers {
   }
 
   expandFunctionsSection(){
-    const funSection = document.querySelector('.calls');
-    funSection.style.width = "800px";
+    const funSection = document.querySelector('.calls.ul.li');
+    const editor = document.querySelector('#editor');
+    fucSection.style.width = '200px'
+    editor.style.width =  'calc(100% - 480px)'
+    editor.style.marginLeft = '230px'
   }
 
   collapseFunctionsSection(){
