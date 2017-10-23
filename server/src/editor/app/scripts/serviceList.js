@@ -16,7 +16,8 @@ export function onServiceSelect(e) {
   helpers.selectHighlight(e);
   getEndPoint(selectedService);
   getExistingServices(selectedService, '.implemented-functions');
-  getStubbedServices(selectedService, '.stubbed-functions')
+  getStubbedServices(selectedService, '.stubbed-functions');
+  helpers.expandFunctionsSection();
 }
 
 
