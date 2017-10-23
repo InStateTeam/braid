@@ -24,17 +24,19 @@ section
   &#container 
     background #ECECEC
     display flex
-    height 100%    
+    height calc(100% - 120px)    
     margin 0 auto
+    overflow scroll
     padding-top 10px
 
     .services-list
       background #000
       color rgba(255, 255, 255, 0.9)
+      flex-basis 40%
       flex-grow 1
       font-size 20px
-      height 100%
       margin 0 5px 5px 0
+      transition width 0.5s
 
       ul
         margin 0
@@ -46,27 +48,56 @@ section
           list-style none
           padding 7px 10px
           cursor pointer
+    
+    .calls
+      flex-grow 0
+      transition 0.5s
+      width 0
+
+      ul
+        background #ECECEC
+        list-style none
+        margin 0 5px 20px
+        overflowy scroll
+        padding 0
+
+        li          
+          color #FFF
+          margin-bottom 2px
+          padding 5px 10px 6px
+          border-radius 1px
+
+          &:hover
+            cursor pointer
+
+          h3
+            margin 0
+          
+          .content
+            &.hide
+              display none
+          
+        &.implemented-functions
+        
+          li
+            background #49CC90
+            border 2px solid #49cc90
+
+         
+        &.stubbed-functions
+        
+          li
+            background #FCA130;
+            border 2px solid #FCA130;
+
 
     #editor
       border 1px solid #000
+      box-sizing border-box
       flex-grow 1
       height 100%
       margin auto 10px      
       padding 5px
-
-      .calls
-
-        .implemented-functions
-          list-style none
-          padding-left 10px
-
-          li 
-            background #49cc90
-            border 1px solid #000
-            border-radius 3px
-            color #FFF
-            margin-bottom 2px
-            padding 7px 10px
 
       .functions
         margin 5px 3px
@@ -134,10 +165,7 @@ section
 
       #monaco
         border-top 1px solid #000 
-        height 100%
+        height calc(100% - 70px)
         margin-top 10px
         padding-top 10px
-
-        .monaco-editor
-          width 1200px !important
 

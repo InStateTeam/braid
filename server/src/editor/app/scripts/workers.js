@@ -60,13 +60,15 @@ export function populateServiceOptions(selection, services) {
 
 export function getExistingServices(serviceName){
   $.get("/api/services/" + serviceName + "/java", function(data) {
-     helpers.populateFunctions(data);
+    helpers.populateFunctions(data);
   });
 }
 
 export function getStubbedServices(serviceName){
   $.get("/api/services/" + serviceName + "/script", function(data) {
-    // TODO: parse return type here
+    let stubList = data.split('\n');
+    console.log(stubList);
+    helpers.populateStubs(stubList);
  });
 }
 
