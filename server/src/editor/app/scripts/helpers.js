@@ -74,6 +74,7 @@ export default class Helpers {
     while(list.firstChild){
       list.removeChild(list.firstChild);
     }
+
     serviceArray.map((service) => {
       let text, textNode;
       let node = document.createElement("LI");
@@ -157,7 +158,6 @@ export default class Helpers {
 
   populateStubs(serviceArray){
     const stubList = document.querySelector('.stubbed-functions');
-    console.log(serviceArray);
     this.populateList(stubList, serviceArray);
   }
 
