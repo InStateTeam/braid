@@ -1,19 +1,25 @@
 package io.bluebank.jsonrpc.server
 
+import io.bluebank.jsonrpc.server.services.ServiceExecutor
 import io.bluebank.jsonrpc.server.services.impl.CompositeExecutor
 import io.bluebank.jsonrpc.server.services.impl.ConcreteServiceExecutor
 import io.bluebank.jsonrpc.server.services.impl.JavascriptExecutor
-import io.bluebank.jsonrpc.server.services.ServiceExecutor
-import io.vertx.core.*
+import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
+import io.bluebank.jsonrpc.server.socket.TypedSocket
+import io.vertx.core.AbstractVerticle
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
+import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerOptions
-import io.vertx.core.http.ServerWebSocket
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.handler.sockjs.SockJSSocket
 
-class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 8080, val services: List<Any> = listOf()) {
+class JsonRPCServer(val rootPath: String = "/api/", val port: Int = 8080, val services: List<Any> = listOf()) {
   private var vertx: Vertx? = null
 
   init {
@@ -76,8 +82,12 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       mutableServiceMap
     }
 
+    private lateinit var router: Router
+    private lateinit var sockJSHandler : SockJSHandler
+
+
     override fun start(startFuture: Future<Void>) {
-      val router = setupRouter()
+      router = setupRouter()
       setupWebserver(router, startFuture)
     }
 
@@ -90,9 +100,9 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       return when (this) {
         is CompositeExecutor -> {
           executors
-            .filter { it is JavascriptExecutor }
-            .map { it as JavascriptExecutor }
-            .firstOrNull() ?: throw RuntimeException("cannot find javascript executor")
+              .filter { it is JavascriptExecutor }
+              .map { it as JavascriptExecutor }
+              .firstOrNull() ?: throw RuntimeException("cannot find javascript executor")
         }
         is JavascriptExecutor -> this
         else -> throw RuntimeException("found executor is not a ${JavascriptExecutor::class.simpleName} or doesn't contain one")
@@ -103,8 +113,8 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       return when (this) {
         is CompositeExecutor -> {
           executors.filter { it is ConcreteServiceExecutor }
-            .map { it as ConcreteServiceExecutor }
-            .firstOrNull()
+              .map { it as ConcreteServiceExecutor }
+              .firstOrNull()
         }
         is ConcreteServiceExecutor -> this
         else -> null
@@ -113,6 +123,7 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
 
     private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
       return serviceMap.computeIfAbsent(serviceName) {
+        router.route(sockPath(serviceName)).handler(sockJSHandler)
         JavascriptExecutor(vertx, serviceName)
       }.getJavascriptExecutor()
     }
@@ -124,17 +135,16 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
 
     private fun setupWebserver(router: Router, startFuture: Future<Void>) {
       vertx.createHttpServer(HttpServerOptions().withCompatibleWebsockets())
-        .websocketHandler(this::onSocket)
-        .requestHandler(router::accept)
-        .listen(port) {
-          if (it.succeeded()) {
-            logger.info("started on port $port")
-            startFuture.complete()
-          } else {
-            logger.error("failed to start because", it.cause())
-            startFuture.fail(it.cause())
+          .requestHandler(router::accept)
+          .listen(port) {
+            if (it.succeeded()) {
+              logger.info("started on port $port")
+              startFuture.complete()
+            } else {
+              logger.error("failed to start because", it.cause())
+              startFuture.fail(it.cause())
+            }
           }
-        }
     }
 
     private fun HttpServerOptions.withCompatibleWebsockets(): HttpServerOptions {
@@ -145,20 +155,26 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
     private fun setupRouter(): Router {
       val router = Router.router(vertx)
       router.route().handler(BodyHandler.create())
-      router.get(rootPath).handler { it.getServiceList() }
-      router.get("/_root").handler { it.write(rootPath) }
-      router.get("$rootPath:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
-      router.post("$rootPath:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
-      router.delete("$rootPath:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
-      router.get("$rootPath:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
-      router.get().handler(
-        StaticHandler.create("editor-web")
-          .setCachingEnabled(false)
-          .setMaxCacheSize(1)
-          .setCacheEntryTimeout(1)
+      router.get("/_root").handler { it.write("${rootPath}sockjs") }
+      val servicesRouter = Router.router(vertx)
+      router.mountSubRouter("${rootPath}services", servicesRouter)
+      servicesRouter.get("/").handler { it.getServiceList() }
+      servicesRouter.get("/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
+      servicesRouter.post("/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
+      servicesRouter.delete("/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
+      servicesRouter.get("/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
+      setupSockJS(router)
+      router.get()
+          .last()
+          .handler(
+          StaticHandler.create("editor-web")
+              .setCachingEnabled(false)
+              .setMaxCacheSize(1)
+              .setCacheEntryTimeout(1)
       )
       return router
     }
+
 
     private fun RoutingContext.getServiceList() {
       write(serviceMap.keys)
@@ -168,9 +184,9 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       val script = getJavascriptExecutorForService(serviceName).getScript()
 
       response()
-        .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
-        .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
-        .end(script)
+          .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
+          .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
+          .end(script)
     }
 
     private fun RoutingContext.deleteService(serviceName: String) {
@@ -182,13 +198,22 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       getJavascriptExecutorForService(serviceName).deleteScript()
       if (service is CompositeExecutor) {
         response()
-          .setStatusMessage("cannot delete java service $serviceName, but have deleted JS extension script")
-          .end()
+            .setStatusMessage("cannot delete java service $serviceName, but have deleted JS extension script")
+            .end()
         return
       }
       serviceMap.remove(serviceName)
+      val searchPath = sockPath(serviceName).dropLast(1) // remove the *
+      router.routes.filter { it.path == searchPath}.forEach {
+        logger.info("remove route $it")
+        it.remove()
+      }
       write("done")
     }
+
+    private fun sockPath(serviceName: String) = "$sockRootPath$serviceName/*"
+
+    private val sockRootPath = "${rootPath}sockjs/"
 
     private fun RoutingContext.getJavaImplementationHeaders(serviceName: String) {
       val service = getJavaExecutorForService(serviceName)
@@ -211,26 +236,36 @@ class JsonRPCServer(val rootPath : String = "/api/services/", val port: Int = 80
       }
     }
 
-    private fun onSocket(socket: ServerWebSocket) {
-      with(socket.path()) {
-        if (!startsWith(rootPath)) {
-          socket.reject()
-        } else {
-          val serviceName = drop(rootPath.length)
-          val service = serviceMap[serviceName]
-          if (service != null) {
-            JsonRPCMounter(service, socket)
-          } else {
-            socket.writeFinalTextFrame("cannot find service $service")
-            socket.reject()
-          }
-        }
+    private fun socketHandler(socket: SockJSSocket) {
+      val re = Regex("${sockRootPath.replace("/", "\\/")}([^\\/]+).*")
+      val serviceName = re.matchEntire(socket.uri())?.groupValues?.get(1) ?: ""
+
+      val service = serviceMap[serviceName]
+      if (service != null) {
+        val wrapper = SockJSSocketWrapper.create(socket)
+        val rpcConverter = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
+        wrapper.addListener(rpcConverter)
+        val mount = JsonRPCMounter(service)
+        rpcConverter.addListener(mount)
+      } else {
+        socket.write("cannot find service $service")
+        socket.close()
       }
     }
 
     private fun getServiceName(service: Any): String {
       return service.javaClass.getDeclaredAnnotation(JsonRPCService::class.java)?.name ?: service.javaClass.name.toLowerCase()
     }
+
+    private fun setupSockJS(router: Router) {
+      sockJSHandler = SockJSHandler.create(vertx)
+      sockJSHandler.socketHandler(this::socketHandler)
+      // mount each service
+      serviceMap.keys.forEach {
+        router.route(sockPath(it)).handler(sockJSHandler)
+      }
+    }
+
   }
 }
 

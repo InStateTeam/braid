@@ -7,6 +7,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.HttpHeaders
+import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.unit.TestContext
@@ -20,7 +21,7 @@ import java.net.ServerSocket
 @RunWith(VertxUnitRunner::class)
 class JsonRPCServerTest {
   val port = getFreePort()
-  val server = JsonRPCServer("/api/services/", port, listOf()) // we're just going to use
+  val server = JsonRPCServer(port = port, services = listOf()) // we're just going to use
   val vertx = Vertx.vertx()
   val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))
 
@@ -72,10 +73,10 @@ class JsonRPCServerTest {
 
       httpPost("/api/services/myservice/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port/api/services/myservice", "add", 1, 2)
+          jsonRPC("ws://localhost:$port/api/sockjs/myservice/websocket", "add", 1, 2)
         }
         .map {
-          Json.decodeValue(it, JsonRPCResponse::class.java)
+          Json.decodeValue(it, JsonRPCResultResponse::class.java)
         }
         .map { it.result.toString().toDouble().toInt() }
         .map {
@@ -96,8 +97,9 @@ class JsonRPCServerTest {
           result.fail(err)
           socket.close()
         }
+
         val request = JsonRPCRequest(id = 1, method = method, params = params.toList())
-        socket.writeFinalTextFrame(Json.encode(request))
+        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
       }
     } catch (err: Throwable) {
       result.fail(err)

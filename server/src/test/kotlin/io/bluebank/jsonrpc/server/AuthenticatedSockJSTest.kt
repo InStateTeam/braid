@@ -80,7 +80,7 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   private fun socketHandler(socket: SockJSSocket) {
     val wrapper = SockJSSocketWrapper.create(socket)
     val auth = AuthenticatedSocket.create(getAuthProvider())
-    val transformer = TypedSocket.create(EchoRequest::class.java)
+    val transformer = TypedSocket.create<EchoRequest, String>()
     wrapper.addListener(auth)
     auth.addListener(transformer)
     transformer.onData { this.write(it.str) }

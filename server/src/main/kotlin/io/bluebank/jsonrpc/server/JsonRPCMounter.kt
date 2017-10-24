@@ -1,41 +1,46 @@
 package io.bluebank.jsonrpc.server
 
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.serverError
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwInvalidRequest
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.throwParseError
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.serverError
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.throwInvalidRequest
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.throwParseError
 import io.bluebank.jsonrpc.server.services.MethodDoesNotExist
 import io.bluebank.jsonrpc.server.services.ServiceExecutor
+import io.bluebank.jsonrpc.server.socket.Socket
+import io.bluebank.jsonrpc.server.socket.SocketListener
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
-import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.json.Json
 
-class JsonRPCMounter(private val executor: ServiceExecutor, private val socket: ServerWebSocket) {
+class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
+  private lateinit var socket: Socket<JsonRPCRequest, JsonRPCResponse>
+
+  override fun onRegister(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
+    this.socket = socket
+  }
+
+  override fun dataHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>, item: JsonRPCRequest) {
+    handleRequest(item)
+  }
+
+  override fun endHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
+    // TODO: deactivate all long running streams
+  }
+
   class FutureHandler(val callback: (AsyncResult<Any?>) -> Unit) : Handler<AsyncResult<Any?>> {
     override fun handle(event: AsyncResult<Any?>) {
       callback(event)
     }
   }
 
-  init {
-    socket.handler {
-      handleRequest(it)
-    }
-    .closeHandler {
-      // TODO: maybe release the service?
-    }
-  }
-
-  private fun handleRequest(it: Buffer) {
+  private fun handleRequest(request: JsonRPCRequest) {
     try {
-      val request = parse(it)
       checkVersion(request)
       executor.invoke(request) {
         handleAsyncResult(it, request)
       }
     } catch (err: JsonRPCException) {
-      err.payload.send()
+      err.response.send()
     }
   }
 
@@ -44,17 +49,17 @@ class JsonRPCMounter(private val executor: ServiceExecutor, private val socket: 
       true -> respond(result.result(), request)
       else -> {
         if (result.cause() is MethodDoesNotExist) {
-          JsonRPCErrorPayload.methodNotFound(request.id, "method ${request.method} not implemented").payload.send()
+          JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
         } else {
-          serverError(request.id, result.cause().message).payload.send()
+          serverError(request.id, result.cause().message).response.send()
         }
       }
     }
   }
 
   private fun respond(result: Any?, request: JsonRPCRequest) {
-    val payload = JsonRPCResponse(result = result, id = request.id)
-    socket.writeFinalTextFrame(Json.encode(payload))
+    val payload = JsonRPCResultResponse(result = result, id = request.id)
+    socket.write(payload)
   }
 
   private fun checkVersion(request: JsonRPCRequest) {
@@ -71,7 +76,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, private val socket: 
     }
   }
 
-  private fun JsonRPCErrorPayload.send() {
-    socket.writeFinalTextFrame(Json.encode(this))
+  private fun JsonRPCErrorResponse.send() {
+    socket.write(this)
   }
 }

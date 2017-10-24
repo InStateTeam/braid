@@ -1,10 +1,10 @@
 package io.bluebank.jsonrpc.server.socket.impl
 
 import io.bluebank.jsonrpc.server.AbstractSocket
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload
-import io.bluebank.jsonrpc.server.JsonRPCErrorPayload.Companion.invalidParams
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.invalidParams
 import io.bluebank.jsonrpc.server.JsonRPCRequest
-import io.bluebank.jsonrpc.server.JsonRPCResponse
+import io.bluebank.jsonrpc.server.JsonRPCResultResponse
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.Socket
 import io.vertx.core.buffer.Buffer
@@ -78,17 +78,17 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   }
 
   private fun sendParameterError(op: JsonRPCRequest) {
-    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object").payload
+    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object").response
     write(Json.encodeToBuffer(msg))
   }
 
   private fun sendOk(op: JsonRPCRequest) {
-    val msg = JsonRPCResponse(id = op.id, result = "OK")
+    val msg = JsonRPCResultResponse(id = op.id, result = "OK")
     write(Json.encodeToBuffer(msg))
   }
 
   private fun sendFailed(op: JsonRPCRequest, cause: Throwable) {
-    val msg = JsonRPCErrorPayload.serverError(id =op.id, message = cause.message ?: "unspecified error").payload
+    val msg = JsonRPCErrorResponse.serverError(id =op.id, message = cause.message ?: "unspecified error").response
     write(Json.encodeToBuffer(msg))
   }
 }

@@ -1,6 +1,9 @@
 package io.bluebank.jsonrpc.server.services.impl
 
-import io.bluebank.jsonrpc.server.*
+import io.bluebank.jsonrpc.server.JsonRPCErrorResponse
+import io.bluebank.jsonrpc.server.JsonRPCMounter
+import io.bluebank.jsonrpc.server.JsonRPCRequest
+import io.bluebank.jsonrpc.server.JsonRPCService
 import io.bluebank.jsonrpc.server.services.ServiceExecutor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -36,7 +39,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
     when (response.succeeded()) {
       true -> respond(response.result(), callback)
-      else -> respond(JsonRPCErrorPayload.serverError(request.id, response.cause().message), callback)
+      else -> respond(JsonRPCErrorResponse.serverError(request.id, response.cause().message), callback)
     }
   }
 
@@ -52,9 +55,9 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     try {
       return service.javaClass.methods.single { request.matchesMethod(it) }
     } catch (err: IllegalArgumentException) {
-      JsonRPCErrorPayload.throwMethodNotFound(request.id, "method ${request.method} has multiple implementations with the same number of parameters")
+      JsonRPCErrorResponse.throwMethodNotFound(request.id, "method ${request.method} has multiple implementations with the same number of parameters")
     } catch (err: NoSuchElementException) {
-      JsonRPCErrorPayload.throwMethodNotFound(request.id, "could not find method ${request.method}")
+      JsonRPCErrorResponse.throwMethodNotFound(request.id, "could not find method ${request.method}")
     }
   }
 

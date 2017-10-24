@@ -7,7 +7,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
-class TypedSocketImpl<R>(private val receiveClass: Class<R>) : AbstractSocket<R, Any>(), SocketListener<Buffer, Buffer> {
+class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketListener<Buffer, Buffer> {
 
   private lateinit var socket: Socket<Buffer, Buffer>
 
@@ -26,7 +26,7 @@ class TypedSocketImpl<R>(private val receiveClass: Class<R>) : AbstractSocket<R,
     onEnd()
   }
 
-  override fun write(obj: Any): Socket<R, Any> {
+  override fun write(obj: K): Socket<R, K> {
     val s = Json.encodeToBuffer(obj)
     socket.write(s)
     return this

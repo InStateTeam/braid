@@ -7,9 +7,6 @@ import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.MessageCodec
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.core.streams.WriteStream
-import rx.Observer
-import rx.Subscriber
 
 class EventBusRpcStreaming : AbstractVerticle() {
   companion object {
@@ -23,12 +20,12 @@ class EventBusRpcStreaming : AbstractVerticle() {
 
   override fun start() {
     vertx.eventBus().registerDefaultCodec(JsonRPCRequest::class.java, JsonCodec(JsonRPCRequest::class.java))
-    vertx.eventBus().registerDefaultCodec(JsonRPCResponse::class.java, JsonCodec(JsonRPCResponse::class.java))
+    vertx.eventBus().registerDefaultCodec(JsonRPCResultResponse::class.java, JsonCodec(JsonRPCResultResponse::class.java))
     vertx.eventBus().consumer<JsonRPCRequest>("topic") {
-      val response = JsonRPCResponse(result = 5, id = it.body().id)
+      val response = JsonRPCResultResponse(result = 5, id = it.body().id)
       it.reply(response)
     }
-    vertx.eventBus().publisher<JsonRPCRequest>("topic").send<JsonRPCResponse>(JsonRPCRequest(id = 1, method = "hello", params = null)) {
+    vertx.eventBus().publisher<JsonRPCRequest>("topic").send<JsonRPCResultResponse>(JsonRPCRequest(id = 1, method = "hello", params = null)) {
       logger.info(Json.encode(it.result().body()))
     }
   }
@@ -39,7 +36,7 @@ data class JsonRPCRequestWithResponseAddress(val request: JsonRPCRequest, val ad
 
 class ResponseObserver(val eventbus: EventBus, val request: JsonRPCRequestWithResponseAddress) {
   fun onNext(t: Any?) {
-    publish(JsonRPCResponse(result = t, id = request.request.id))
+    publish(JsonRPCResultResponse(result = t, id = request.request.id))
   }
 
   fun onCompleted() {
@@ -47,7 +44,7 @@ class ResponseObserver(val eventbus: EventBus, val request: JsonRPCRequestWithRe
   }
 
   fun onError(error: JsonRPCError) {
-    publish(JsonRPCErrorPayload(error, id = request.request.id))
+    publish(JsonRPCErrorResponse(error, id = request.request.id))
   }
 
   private fun publish(value: Any) {
