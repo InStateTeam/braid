@@ -9,6 +9,7 @@ export default class Helpers {
   }
 
   setEditorContents(script) {
+    editor.updateOptions({readOnly: false});
     editor.setValue(script)
   }
 
@@ -48,12 +49,16 @@ export default class Helpers {
     };
   }
   
-  selectHighlight(e){
+  selectHighlight(selectedService){
     const lists = document.querySelector('#services').querySelectorAll('li');
+    let selectedLi;
     for (let item = 0; item < lists.length; item++) {
       lists[item].style.background = '#000';
+      if(lists[item].textContent == selectedService){
+        selectedLi = lists[item];
+      }
     }
-    e.target.style.background = "#EF0017"
+    selectedLi.style.background = "#EF0017"
   }
 
   highlightNewService(selectedService){
@@ -172,8 +177,11 @@ export default class Helpers {
 
   collapseFunctionsSection(){
     const funSection = document.querySelector('.calls');
-    funSection.style.width = '0';
-    funSection.style.flex = '0';
+    const editor = document.querySelector('#editor');
+    funSection.style.zIndex = -1;
+    funSection.style.marginLeft = '0px'
+    editor.style.width =  'calc(100% - 250px)'
+    editor.style.marginLeft = '0px'
   }
 }
 

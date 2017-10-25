@@ -1,4 +1,4 @@
-import { getServiceScript, 
+import {  
          retrieveAndUpdateServices,
          ensureServiceIsCreated
         } from 'scripts/workers';
@@ -9,6 +9,6 @@ export default class Monaco {
     ensureServiceIsCreated(function(selectedService) {
       retrieveAndUpdateServices(selectedService);
       monaco();
-  });
+    });
   }
 } 

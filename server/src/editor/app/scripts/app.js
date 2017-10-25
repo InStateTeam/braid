@@ -1,7 +1,7 @@
 import getEndPoint from 'scripts/endPoint';
 import Buttons from 'scripts/buttons';
 import Monaco from 'scripts/Monaco';
-import Helpers from 'scripts/helpers';
+import EventListeners from 'scripts/eventListeners';
 
 export default class App {
   constructor(){
@@ -12,7 +12,6 @@ export default class App {
         success: callback
       });
     }
-    const helpers = new Helpers(); 
     this.Buttons = new Buttons();
     this.Monaco = new Monaco();
   }
@@ -21,6 +20,8 @@ export default class App {
     getEndPoint('');
     this.bindEvents();
     this.Monaco.loadEditor();
+    this.EventListeners = new EventListeners(); 
+    $('#newService').focus();
   }
 
   bindEvents() {

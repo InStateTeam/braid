@@ -44,6 +44,7 @@ export function updateServices(services, selectedService) {
       // TODO: put this stuff somewhere in the UI
     });
     helpers.highlightNewService(selectedService);
+    editor.focus();
    }
 }
 
@@ -60,7 +61,12 @@ export function populateServiceOptions(selection, services) {
 
 export function getExistingServices(serviceName){
   $.get("/api/services/" + serviceName + "/java", function(data) {
-    helpers.populateFunctions(data);
+    if(data){
+      helpers.populateFunctions(data);
+      helpers.expandFunctionsSection();
+    } else { 
+      helpers.collapseFunctionsSection();
+    }
   });
 }
 

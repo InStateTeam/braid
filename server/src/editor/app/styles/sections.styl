@@ -62,7 +62,7 @@
     position absolute
     top 0
     transition all 0.3s
-    width 225p
+    width 225px
     z-index -1
 
     ul
@@ -84,26 +84,31 @@
           cursor pointer
 
         .title
+          font-size 20px
+          font-weight normal 
           margin 0
-        
+                  
         .content
           &.hide
-            display none        
+            display none
+          
+          div
+            border-top 1px solid #0A0
+
+            &.description
+              margin-top 10px
         
       &.implemented-functions
       
         li
           background #49CC90
-          border 2px solid #49CC90
-          
-
+          border 2px solid #49CC90     
         
       &.stubbed-functions
       
         li
           background #FCA130;
           border 2px solid #FCA130;
-
 
   #editor
     background: #ECECEC
@@ -127,7 +132,7 @@
         color rgba(0, 0, 0, 1.0)
         font-family 'SSP-Bold' 
         font-size 16px
-        margin auto 3px
+        margin auto 6px auto 0
         outline none
         padding 5px 20px
         vertical-align top        
@@ -187,3 +192,24 @@
       margin-top 10px
       padding-top 10px
 
+@media screen and (max-width: 1159px)
+  #container 
+    #editor 
+      .functions
+        button 
+          font-size 12px
+          padding 5px 10px
+
+          &#deleteBtn
+            float none
+        
+        input[type=text]
+          font-size 12px
+          height 22px
+          margin-bottom 3px
+          width 200px
+
+
+
+
+  

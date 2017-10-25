@@ -34,7 +34,7 @@
         <section class="functions">
           <input type="text" id="newService" placeholder="new service name">
           <button id="createServiceBtn">Create</button>
-          <button id="saveBtn">Save</button>
+          <button id="saveBtn" disabled>Save</button>
           <button id="formatBtn">Format</button>
           <button id="deleteBtn">Delete</button>
         </section>
@@ -42,10 +42,13 @@
       </div>
     </section>
   </main>
-  <footer>
-
-  </footer>
-
+  <div class="modal">
+    <div class="modal-content">
+      <p>Did you wish to save the changes you made to <i class="unsaved"></i>?</p>
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+  </div>
   <script src="monaco-editor/min/vs/loader.js"></script>
   <script>
     var editor;
@@ -55,9 +58,10 @@
       require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
       require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('monaco'), {
-          value: "",
+          value: "/* Please create or select a service before trying to edit */",
           language: 'javascript',
-          automaticLayout: true
+          automaticLayout: true,
+          readOnly: true
         });
         editor.onDidChangeModelContent(onScriptChanged);        
       });
