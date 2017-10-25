@@ -2,12 +2,12 @@ package io.bluebank.jsonrpc.server.socket.impl
 
 import io.bluebank.jsonrpc.server.AbstractSocket
 import io.bluebank.jsonrpc.server.socket.Socket
-import io.bluebank.jsonrpc.server.socket.SocketListener
+import io.bluebank.jsonrpc.server.socket.SocketAndListener
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
-class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketListener<Buffer, Buffer> {
+class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketAndListener<R, K, Buffer, Buffer> {
 
   private lateinit var socket: Socket<Buffer, Buffer>
 
