@@ -102,7 +102,6 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     }
   }
 
-
   private fun loadScript() {
     try {
       val buffer = getScript()
