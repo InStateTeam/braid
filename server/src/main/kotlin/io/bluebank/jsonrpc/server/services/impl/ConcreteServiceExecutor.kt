@@ -1,54 +1,65 @@
 package io.bluebank.jsonrpc.server.services.impl
 
-import io.bluebank.jsonrpc.server.JsonRPCErrorResponse
-import io.bluebank.jsonrpc.server.JsonRPCMounter
-import io.bluebank.jsonrpc.server.JsonRPCRequest
-import io.bluebank.jsonrpc.server.JsonRPCService
+import io.bluebank.jsonrpc.server.*
 import io.bluebank.jsonrpc.server.services.ServiceExecutor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
+import rx.Observable
+import rx.Subscriber
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
-  override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
-    try {
-      val method = findMethod(request)
-      val castedParameters = request.mapParams(method)
-      val result = method.invoke(service, *castedParameters)
-      handleResult(result, request, callback)
-    } catch (err: Throwable) {
-      callback(Future.failedFuture(err))
+
+  override fun invoke(request: JsonRPCRequest): Observable<Any> {
+    // use unsafe constructor until we switch to rxjava2 and vertx 3.5.0 - currently too new to be confident of stability
+    return Observable.create<Any> { subscriber ->
+      try {
+        val method = findMethod(request)
+        val castedParameters = request.mapParams(method)
+        val result = method.invoke(service, *castedParameters)
+        handleResult(result, request, subscriber)
+      } catch (err: Throwable) {
+        subscriber.onError(err)
+      }
     }
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun handleResult(result: Any?, request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
+  private fun handleResult(result: Any?, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
     when (result) {
-      is Future<*> -> handleFuture(result as Future<Any>, request, callback)
-      else -> respond(result, callback)
+      is Future<*> -> handleFuture(result as Future<Any>, request, subscriber)
+      is Observable<*> -> handleObservable(result as Observable<Any>, request, subscriber)
+      else -> respond(result, subscriber)
     }
   }
 
-  private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
+  private fun handleObservable(result: Observable<Any>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+    result
+        .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
+        .subscribe(subscriber)
+  }
+
+  private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
     future.setHandler(JsonRPCMounter.FutureHandler {
       handleAsyncResult(it, request, callback)
     })
   }
 
-  private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
+  private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
     when (response.succeeded()) {
-      true -> respond(response.result(), callback)
-      else -> respond(JsonRPCErrorResponse.serverError(request.id, response.cause().message), callback)
+      true -> respond(response.result(), subscriber)
+      else -> respond(response.cause().createJsonException(request), subscriber)
     }
   }
 
-  private fun respond(result: Any?, callback: (AsyncResult<Any>) -> Unit) {
-    callback(Future.succeededFuture(result))
+  private fun respond(result: Any?, subscriber: Subscriber<Any>) {
+    subscriber.onNext(result)
+    subscriber.onCompleted()
   }
 
-  private fun respond(err: Throwable, callback: (AsyncResult<Any>) -> Unit) {
-    callback(Future.failedFuture(err))
+  private fun respond(err: Throwable, subscriber: Subscriber<Any>) {
+    subscriber.onError(err)
   }
 
   private fun findMethod(request: JsonRPCRequest): Method {
@@ -63,8 +74,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   fun getJavaStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
-      .filter { Modifier.isPublic(it.modifiers) }
-      .map { it.toDescriptor() }
+        .filter { Modifier.isPublic(it.modifiers) }
+        .map { it.toDescriptor() }
   }
 
   private fun Method.toDescriptor(): MethodDescriptor {

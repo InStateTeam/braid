@@ -44,5 +44,3 @@ class App {
     console.log("closed");
   }
 }
-
-

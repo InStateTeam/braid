@@ -2,6 +2,7 @@
 
 const SockJS = require('sockjs-client');
 const Promise = require('promise');
+import Rx from 'rxjs/Rx';
 
 class JsonRPC {
   constructor(url, options) {
@@ -14,10 +15,10 @@ class JsonRPC {
     this.onClose = null;
     this.socket = new SockJS(this.url, null, this.options);
     const thisObj = this;
-    this.socket.onopen = function() {
+    this.socket.onopen = function () {
       thisObj.openHandler();
     }
-    this.socket.onclose = function() {
+    this.socket.onclose = function () {
       thisObj.closeHandler();
     }
     this.socket.onmessage = function (e) {

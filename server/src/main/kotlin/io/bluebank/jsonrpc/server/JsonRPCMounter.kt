@@ -36,28 +36,26 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   private fun handleRequest(request: JsonRPCRequest) {
     try {
       checkVersion(request)
-      executor.invoke(request) {
-        handleAsyncResult(it, request)
-      }
+      executor.invoke(request).subscribe({ handleDataItem(it, request)}, { err -> handlerError(err, request) }, { handleCompleted(request) })
     } catch (err: JsonRPCException) {
       err.response.send()
     }
   }
 
-  private fun handleAsyncResult(result: AsyncResult<*>, request: JsonRPCRequest) {
-    when (result.succeeded()) {
-      true -> respond(result.result(), request)
-      else -> {
-        if (result.cause() is MethodDoesNotExist) {
-          JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
-        } else {
-          serverError(request.id, result.cause().message).response.send()
-        }
-      }
+  private fun handleCompleted(request: JsonRPCRequest) {
+    val payload = JsonRPCCompletedResponse(id = request.id)
+    socket.write(payload)
+  }
+
+  private fun handlerError(err: Throwable, request: JsonRPCRequest) {
+    if (err is MethodDoesNotExist) {
+      JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
+    } else {
+      serverError(request.id, err.message).response.send()
     }
   }
 
-  private fun respond(result: Any?, request: JsonRPCRequest) {
+  private fun handleDataItem(result: Any?, request: JsonRPCRequest) {
     val payload = JsonRPCResultResponse(result = result, id = request.id)
     socket.write(payload)
   }

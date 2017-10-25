@@ -74,3 +74,6 @@ data class JsonRPCErrorResponse(val error: JsonRPCError, val id: Any? = null, va
 }
 
 fun <T: Any> Throwable.toFailedFuture() : Future<T> = Future.failedFuture<T>(this)
+
+fun Throwable.createJsonException(request: JsonRPCRequest) = JsonRPCErrorResponse.serverError(request.id, message)
+
