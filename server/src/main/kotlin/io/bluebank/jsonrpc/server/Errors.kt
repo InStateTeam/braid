@@ -3,7 +3,7 @@ package io.bluebank.jsonrpc.server
 import io.vertx.core.Future
 
 
-class JsonRPCException(val payload: JsonRPCErrorPayload) : Exception() {
+class JsonRPCException(val response: JsonRPCErrorResponse) : Exception() {
   @Throws(JsonRPCException::class)
   fun raise() : Nothing {
     throw this
@@ -21,7 +21,7 @@ class JsonRPCError(val code: Int, val message: String) {
   }
 }
 
-data class JsonRPCErrorPayload(val error: JsonRPCError, val id: Any? = null, val jsonrpc: String = "2.0") {
+data class JsonRPCErrorResponse(val error: JsonRPCError, val id: Any? = null, val jsonrpc: String = "2.0") : JsonRPCResponse() {
   constructor(id: Any?, message: String, code: Int) : this(JsonRPCError(code, message), id = id)
 
   companion object {
@@ -30,7 +30,7 @@ data class JsonRPCErrorPayload(val error: JsonRPCError, val id: Any? = null, val
     }
 
     fun internalError(id: Any?, message: String) =
-      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INTERNAL_ERROR).asException()
+      JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.INTERNAL_ERROR).asException()
 
     @Throws(JsonRPCException::class)
     fun throwParseError(message: String) : Nothing {
@@ -38,35 +38,35 @@ data class JsonRPCErrorPayload(val error: JsonRPCError, val id: Any? = null, val
     }
 
     fun parseError(message: String) =
-      JsonRPCErrorPayload(id = null, message = message, code = JsonRPCError.PARSE_ERROR).asException()
+      JsonRPCErrorResponse(id = null, message = message, code = JsonRPCError.PARSE_ERROR).asException()
 
     fun throwInvalidRequest(id: Any?, message: String) {
       invalidRequest(id, message).raise()
     }
 
     fun invalidRequest(id: Any?, message: String) =
-      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INVALID_REQUEST).asException()
+      JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.INVALID_REQUEST).asException()
 
     fun throwMethodNotFound(id: Any?, message: String) : Nothing {
       methodNotFound(id, message).raise()
     }
 
     fun methodNotFound(id: Any?, message: String) =
-      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.METHOD_NOT_FOUND).asException()
+      JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.METHOD_NOT_FOUND).asException()
 
     fun throwInvalidParams(message: String, id: Any? = null) {
       invalidParams(id, message).raise()
     }
 
     fun invalidParams(id: Any?, message: String) =
-      JsonRPCErrorPayload(id = id, message = message, code = JsonRPCError.INVALID_PARAMS).asException()
+      JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.INVALID_PARAMS).asException()
 
     fun throwServerError(id: Any?, message: String?, offset: Int = 0) {
       serverError(id, message, offset).raise()
     }
 
     fun serverError(id: Any?, message: String?, offset: Int = 0) =
-      JsonRPCErrorPayload(id = id, message = message ?: "unknown error", code = JsonRPCError.BASE_SERVER_ERROR - offset).asException()
+      JsonRPCErrorResponse(id = id, message = message ?: "unknown error", code = JsonRPCError.BASE_SERVER_ERROR - offset).asException()
 
   }
 
@@ -74,3 +74,6 @@ data class JsonRPCErrorPayload(val error: JsonRPCError, val id: Any? = null, val
 }
 
 fun <T: Any> Throwable.toFailedFuture() : Future<T> = Future.failedFuture<T>(this)
+
+fun Throwable.createJsonException(request: JsonRPCRequest) = JsonRPCErrorResponse.serverError(request.id, message)
+

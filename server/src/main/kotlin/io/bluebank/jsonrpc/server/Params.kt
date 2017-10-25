@@ -28,7 +28,7 @@ interface Params {
   fun mapParams(method: Method): List<Any?>
 }
 
-class SingleValueParam(val params: Any) : Params {
+class SingleValueParam(val param: Any) : Params {
   override val count: Int = 1
 
   override fun match(method: Method): Boolean {
@@ -36,7 +36,7 @@ class SingleValueParam(val params: Any) : Params {
   }
 
   override fun mapParams(method: Method): List<Any?> {
-    return listOf(params)
+    return listOf(convert(param, method.parameters[0]))
   }
 }
 

@@ -1,11 +1,14 @@
-package io.bluebank.jsonrpc.server.services
+package io.bluebank.jsonrpc.server.services.impl
 
 import io.bluebank.jsonrpc.server.JsonRPCRequest
+import io.bluebank.jsonrpc.server.createJsonException
 import io.bluebank.jsonrpc.server.loggerFor
-import io.vertx.core.AsyncResult
+import io.bluebank.jsonrpc.server.services.MethodDoesNotExist
+import io.bluebank.jsonrpc.server.services.ServiceExecutor
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
+import rx.Observable
 import java.nio.file.Paths
 import javax.script.Invocable
 import javax.script.ScriptEngine
@@ -22,8 +25,8 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
 
       vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future.completer())
       return future
-        .map { Unit }
-        .otherwise { Unit }
+          .map { Unit }
+          .otherwise { Unit }
     }
 
     fun makeScriptsFolder(vertx: Vertx) {
@@ -35,15 +38,15 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     fun queryServiceNames(vertx: Vertx): List<String> {
       makeScriptsFolder(vertx)
       return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH)
-        .map {
-          Paths.get(it).fileName.toString()
-        }
-        .filter {
-          it.endsWith(".js")
-        }
-        .map {
-          it.dropLast(3)
-        }
+          .map {
+            Paths.get(it).fileName.toString()
+          }
+          .filter {
+            it.endsWith(".js")
+          }
+          .map {
+            it.dropLast(3)
+          }
     }
   }
 
@@ -81,20 +84,21 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     }
   }
 
-  override fun invoke(request: JsonRPCRequest, callback: (AsyncResult<Any>) -> Unit) {
-    try {
-      checkMethodExists(request.method)
-
-      val params = if (request.params != null && request.params is List<*>) {
-        request.params.toTypedArray()
-      } else {
-        listOf(request.params).toTypedArray()
+  override fun invoke(request: JsonRPCRequest): Observable<Any> {
+    return Observable.create { subscriber ->
+      try {
+        checkMethodExists(request.method)
+        val params = if (request.params != null && request.params is List<*>) {
+          request.params.toTypedArray()
+        } else {
+          listOf(request.params).toTypedArray()
+        }
+        val result = invocable.invokeFunction(request.method, *params)
+        subscriber.onNext(result)
+        subscriber.onCompleted()
+      } catch (err: Throwable) {
+        subscriber.onError(err.createJsonException(request))
       }
-
-      val result = invocable.invokeFunction(request.method, *params)
-      callback(Future.succeededFuture(result))
-    } catch (err: Throwable) {
-      callback(Future.failedFuture(err))
     }
   }
 
