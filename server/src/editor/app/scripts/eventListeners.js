@@ -1,9 +1,11 @@
 import Buttons from 'scripts/buttons';
 import { saveContent, switchService } from 'scripts/serviceList';
+import Helpers from 'scripts/helpers';
 
 export default class EventListeners {
   constructor(){
     this.Buttons = new Buttons();
+    this.Helpers = new Helpers();
     this.init();
   }
 
@@ -21,6 +23,10 @@ export default class EventListeners {
         self.Buttons.onCreateService();
       }
     }); 
+
+    textBoxCreate.addEventListener('input', (e) => {      
+      textBoxCreate.value = self.Helpers.parseCreateService(e.target.value);
+    });
   }
 
   modalClickEvents(){

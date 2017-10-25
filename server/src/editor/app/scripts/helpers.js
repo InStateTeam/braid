@@ -48,6 +48,18 @@ export default class Helpers {
       hash: parser.hash
     };
   }
+
+  parseCreateService(string){
+    // TODO: delete offending char
+    const pattern = /^[A-Za-z]\w*$/;
+    if(string.length > 0){
+      let result = pattern.test(string);
+      if(!result){
+        return string.slice(0, (string.length - 1));
+      }
+    }
+    return string
+  }
   
   selectHighlight(selectedService){
     const lists = document.querySelector('#services').querySelectorAll('li');
