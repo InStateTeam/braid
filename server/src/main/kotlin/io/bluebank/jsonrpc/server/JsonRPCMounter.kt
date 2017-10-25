@@ -2,18 +2,17 @@ package io.bluebank.jsonrpc.server
 
 import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.serverError
 import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.throwInvalidRequest
-import io.bluebank.jsonrpc.server.JsonRPCErrorResponse.Companion.throwParseError
 import io.bluebank.jsonrpc.server.services.MethodDoesNotExist
 import io.bluebank.jsonrpc.server.services.ServiceExecutor
 import io.bluebank.jsonrpc.server.socket.Socket
 import io.bluebank.jsonrpc.server.socket.SocketListener
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
-import io.vertx.core.buffer.Buffer
-import io.vertx.core.json.Json
+import rx.Subscription
 
 class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
   private lateinit var socket: Socket<JsonRPCRequest, JsonRPCResponse>
+  private val activeSubscriptions = mutableMapOf<JsonRPCRequest, Subscription>()
 
   override fun onRegister(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
     this.socket = socket
@@ -24,7 +23,8 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   }
 
   override fun endHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
-    // TODO: deactivate all long running streams
+    activeSubscriptions.forEach { _, subscription -> subscription.unsubscribe() }
+    activeSubscriptions.clear()
   }
 
   class FutureHandler(val callback: (AsyncResult<Any?>) -> Unit) : Handler<AsyncResult<Any?>> {
@@ -36,22 +36,31 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   private fun handleRequest(request: JsonRPCRequest) {
     try {
       checkVersion(request)
-      executor.invoke(request).subscribe({ handleDataItem(it, request)}, { err -> handlerError(err, request) }, { handleCompleted(request) })
+      val subscription = executor.invoke(request).subscribe({ handleDataItem(it, request)}, { err -> handlerError(err, request) }, { handleCompleted(request) })
+      activeSubscriptions[request] = subscription
     } catch (err: JsonRPCException) {
       err.response.send()
     }
   }
 
   private fun handleCompleted(request: JsonRPCRequest) {
-    val payload = JsonRPCCompletedResponse(id = request.id)
-    socket.write(payload)
+    try {
+      val payload = JsonRPCCompletedResponse(id = request.id)
+      socket.write(payload)
+    } finally {
+      activeSubscriptions.remove(request)
+    }
   }
 
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
-    if (err is MethodDoesNotExist) {
-      JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
-    } else {
-      serverError(request.id, err.message).response.send()
+    try {
+      if (err is MethodDoesNotExist) {
+        JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
+      } else {
+        serverError(request.id, err.message).response.send()
+      }
+    } finally {
+      activeSubscriptions.remove(request)
     }
   }
 
@@ -63,14 +72,6 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   private fun checkVersion(request: JsonRPCRequest) {
     if (request.jsonrpc != "2.0") {
       throwInvalidRequest(request.id, "jsonrpc must 2.0")
-    }
-  }
-
-  private fun parse(it: Buffer): JsonRPCRequest {
-    try {
-      return Json.decodeValue(it, JsonRPCRequest::class.java)
-    } catch (err: Throwable) {
-      throwParseError(err.message ?: "failed to parse")
     }
   }
 

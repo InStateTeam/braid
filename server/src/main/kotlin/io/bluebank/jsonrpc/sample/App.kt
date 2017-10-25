@@ -13,8 +13,6 @@ fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
   JsonRPCServer(
       vertx = vertx,
-      rootPath = "/api/services/",
-      port = 8080,
       services = listOf(CalculatorService(), AccountService()),
       authProvider = getAuthProvider(vertx)
   ).start()
