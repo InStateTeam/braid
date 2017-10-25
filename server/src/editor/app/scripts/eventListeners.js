@@ -8,11 +8,11 @@ export default class EventListeners {
   }
 
   init(){
-    this.textBoxMapEnterToCreate(); 
-    this.modalEvents();    
+    this.textBoxKeyEvents(); 
+    this.modalClickEvents();    
   }
 
-  textBoxMapEnterToCreate(){
+  textBoxKeyEvents(){
     let textBoxCreate = document.querySelector('#newService');
     let self = this;
     textBoxCreate.addEventListener('keyup', (e) => {
@@ -23,7 +23,7 @@ export default class EventListeners {
     }); 
   }
 
-  modalEvents(){
+  modalClickEvents(){
     let modal = document.querySelector('.modal');    
     modal.addEventListener('click', (e) => {
       if(e.target.classList.contains('modal')){
