@@ -67,7 +67,11 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   }
 
   private fun setupStatic(router: Router) {
-    router.get().handler(StaticHandler.create("eventbus-test").setCachingEnabled(false).setCacheEntryTimeout(1).setMaxCacheSize(1))
+    router.get().handler(StaticHandler.create("streamingtest")
+//        .setCachingEnabled(false)
+//        .setCacheEntryTimeout(1).setMaxCacheSize(1)
+    // enable the above lines to turn off caching - suitable for rapid coding of the UI
+    )
   }
 
   private fun setupSockJS(router: Router, timeService: TimeService) {
