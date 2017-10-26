@@ -4,12 +4,14 @@ import io.bluebank.jsonrpc.server.services.impl.JavascriptExecutor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
@@ -21,7 +23,7 @@ import java.net.ServerSocket
 @RunWith(VertxUnitRunner::class)
 class JsonRPCServerTest {
   val port = getFreePort()
-  private val vertx: Vertx = Vertx.vertx()
+  private val vertx: Vertx = Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
   private val server = JsonRPCServer(port = port, services = listOf(), vertx = vertx) // we're just going to use
   val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))!!
 
@@ -86,19 +88,26 @@ class JsonRPCServerTest {
   }
 
   private fun jsonRPC(url: String, method: String, vararg params: Any?): Future<Buffer> {
+    val id = 1L
     val result = future<Buffer>()
     try {
       client.websocket(url) { socket ->
         socket.handler { response ->
-          // TODO: check response has correct id
-          result.complete(response)
-          socket.close()
+          val jo = JsonObject(response)
+          val responseId = jo.getLong("id")
+          if (responseId != id) {
+            result.fail("expected id $id but $responseId")
+          } else if (jo.containsKey("result")) {
+            result.complete(response)
+          } else if (jo.containsKey("error")) {
+            result.fail(jo.getJsonObject("error").encode())
+          } else if (jo.containsKey("completed")) {
+            // we ignore the 'completed' message
+          }
         }.exceptionHandler { err ->
           result.fail(err)
-          socket.close()
         }
-
-        val request = JsonRPCRequest(id = 1, method = method, params = params.toList())
+        val request = JsonRPCRequest(id = id, method = method, params = params.toList())
         socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
       }
     } catch (err: Throwable) {
