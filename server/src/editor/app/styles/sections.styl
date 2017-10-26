@@ -42,6 +42,8 @@
       position absolute
       z-index 10 
 
+    
+
     ul
       margin 0
       padding 0
@@ -184,6 +186,54 @@
           color #CCC 
           font-style italic
           font-weight 100
+      
+      .tooltip
+        background #000
+        border 2px solid #DE0000
+        border-radius 3px
+        box-sizing border-box
+        color #FFF
+        padding auto
+        position absolute
+        opacity 0
+        pointer-events none
+        text-align center
+        top 50px
+        width 300px
+        z-index 100
+        
+        &.shown
+          opacity 1
+
+        &:before
+          content " "
+          border 6px solid 
+          border-color transparent transparent #DE0000 transparent
+          left 30%
+          position absolute
+          top -14px
+          transform translateX(-50%)
+
+        &:after
+          content " "
+          border 6px solid 
+          border-color transparent transparent #000 transparent
+          right 70%
+          position absolute
+          top -11px
+          transform translateX(50%)
+
+        ul
+          padding-left 0
+
+          li
+            display none
+            margin-bottom 10px
+
+            &.shown
+              display block
+              
+
         
 
     #monaco

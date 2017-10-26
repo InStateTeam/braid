@@ -9,10 +9,29 @@ export default class Buttons {
 
   onCreateService() {
     const serviceName = $('#newService').val();
-    getServiceScript(serviceName, function() {
-      retrieveAndUpdateServices(serviceName);
-      $('#newService').val("");
-    });
+    const tooltip = document.querySelector('.tooltip');
+    const isValidServiceName = helpers.checkCreatedService(serviceName);
+    if(isValidServiceName){
+      getServiceScript(serviceName, function() {
+        retrieveAndUpdateServices(serviceName);
+        $('#newService').val("");
+        tooltip.classList.remove('shown');
+      });
+    } else {
+      let invalidServiceName = helpers.parseCreateService(serviceName);
+      document.querySelector('.badService').innerHTML = invalidServiceName.highlightedString;
+  
+      (invalidServiceName.empty) ? 
+      document.querySelector('.empty').classList.add('shown') : document.querySelector('.empty').classList.remove('shown');
+  
+      (invalidServiceName.first) ? 
+      document.querySelector('.first').classList.add('shown') : document.querySelector('.first').classList.remove('shown');
+  
+      (invalidServiceName.remain) ? 
+      document.querySelector('.remain').classList.add('shown') : document.querySelector('.remain').classList.remove('shown');    
+  
+      tooltip.classList.add('shown');
+    }
  }
 
  onSave(e) {

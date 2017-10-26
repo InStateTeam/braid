@@ -24,9 +24,9 @@ export default class EventListeners {
       }
     }); 
 
-    textBoxCreate.addEventListener('input', (e) => {      
-      textBoxCreate.value = self.Helpers.parseCreateService(e.target.value);
-    });
+    //textBoxCreate.addEventListener('input', (e) => {      
+    //  textBoxCreate.value = self.Helpers.checkCreateService(e.target.value);
+    //});
   }
 
   modalClickEvents(){
