@@ -3,7 +3,7 @@ package io.bluebank.jsonrpc.server
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method: String, val params: Any?) {
+data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
   private val parameters = Params.build(params)
 
   fun matchesMethod(method: Method): Boolean {
