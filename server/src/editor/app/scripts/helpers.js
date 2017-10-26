@@ -48,6 +48,57 @@ export default class Helpers {
       hash: parser.hash
     };
   }
+
+  parseCreateService(string){
+    const patternSubZero = /[A-Za-z]/;
+    const patternRemainingChars = /\w/;
+
+    const validation = {
+      empty: false,
+      first: false,
+      highlightedString: '',
+      remain: false
+    }
+    
+    let strArray = string.split('');
+
+    if(string.length == 0){
+      validation.empty = true;
+    }
+
+    strArray.forEach((char, index, array) => {
+      let check = false;
+      if(index === 0){
+        check = patternSubZero.test(char);
+        if(!check){
+          validation.first = true;
+        }
+      } else { 
+        check = patternRemainingChars.test(char);
+        if(!check){
+          validation.remain = true;
+        }
+      }
+
+      if(!check){
+        validation.highlightedString  += '<span style="background:#DE0000">' + char + '</span>';
+      } else {
+        validation.highlightedString += char;
+      }
+    });
+
+    return validation;
+  }
+
+  checkCreatedService(string){
+    const pattern = /^[A-Za-z]\w*$/;
+    
+    if(!string){
+     return false
+    }
+
+    return pattern.test(string);
+  }
   
   selectHighlight(selectedService){
     const lists = document.querySelector('#services').querySelectorAll('li');

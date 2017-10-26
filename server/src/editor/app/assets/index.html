@@ -34,6 +34,15 @@
       <div id="editor">        
         <section class="functions">
           <input type="text" id="newService" placeholder="new service name">
+          <div class="tooltip">
+            <h4>Invalid service name</h4>
+            <p class="badService"></p>
+            <ul>
+              <li class="empty">It must not be an empty string</li>
+              <li class="first">The first character must be a letter or underscore</li>
+              <li class="remain">The remaining characters must be alpha-numeric or underscore</li>
+            </ul>
+          </div>
           <button id="createServiceBtn">Create</button>
           <button id="saveBtn" disabled>Save</button>
           <button id="formatBtn">Format</button>
@@ -54,8 +63,7 @@
   <script>
     var editor;
     var selectedService;
-    
-    
+        
     function monaco(){
       require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
       require(['vs/editor/editor.main'], function() {
