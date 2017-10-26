@@ -113,7 +113,9 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
     router.route().handler {
       // allow all origins
       val origin = it.request().getHeader("Origin")
-      it.response().putHeader("Access-Control-Allow-Credentials", origin);
+      if (origin != null) {
+        it.response().putHeader("Access-Control-Allow-Credentials", origin);
+      }
       it.next()
     }
     router.get("/_root").handler { it.write("${rootPath}jsonrpc") }

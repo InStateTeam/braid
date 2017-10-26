@@ -24,7 +24,7 @@ import java.net.ServerSocket
 class JsonRPCServerTest {
   val port = getFreePort()
   private val vertx: Vertx = Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
-  private val server = JsonRPCServer(port = port, services = listOf(), vertx = vertx) // we're just going to use
+  private val server = JsonRPCServer(port = port, services = listOf(), vertx = vertx)
   val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))!!
 
   @Before
@@ -75,7 +75,7 @@ class JsonRPCServerTest {
 
     httpPost("/api/services/myservice/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port/api/sockjs/myservice/websocket", "add", 1, 2)
+          jsonRPC("ws://localhost:$port/api/jsonrpc/myservice/websocket", "add", 1, 2)
         }
         .map {
           Json.decodeValue(it, JsonRPCResultResponse::class.java)
