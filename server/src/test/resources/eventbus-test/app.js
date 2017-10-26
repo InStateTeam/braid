@@ -18,14 +18,20 @@ class App {
 
   onOpen() {
     console.log("opened")
-    this.login();
+    this.login()
+      .then(() => {
+        this.rpc.invokeForStream("time", null, this.onTime)
+      })
+  }
+
+  onTime(time) {
+    $('#time').text(time)
   }
 
   login() {
-    this.rpc.invoke("login", {username: "admin", password: "admin"})
+    return this.rpc.invoke("login", {username: "admin", password: "admin"})
       .then((result) => {
         console.log("login succeeded", result);
-        this.logout();
       }, (error) => {
         console.log("login failed", error);
       })

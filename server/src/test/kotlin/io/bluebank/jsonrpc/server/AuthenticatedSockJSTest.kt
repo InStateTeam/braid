@@ -1,5 +1,6 @@
 package io.bluebank.jsonrpc.server
 
+import io.bluebank.jsonrpc.server.services.impl.ConcreteServiceExecutor
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
 import io.bluebank.jsonrpc.server.socket.TypedSocket
@@ -18,6 +19,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
+import rx.Observable
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,12 +31,12 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
+      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
       JacksonKotlinInit.init()
       Vertx.vertx().deployVerticle(AuthenticatedSockJSTest())
     }
 
     private val logger = loggerFor<AuthenticatedSockJSTest>()
-    private val timeFormat = SimpleDateFormat("HH:mm:ss")
   }
 
   override fun start(startFuture: Future<Void>) {
@@ -42,48 +44,46 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
 
     router.route().handler(CookieHandler.create())
     router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)))
-//    setupAuth(router)
-    setupSockJS(router)
-    setupTimeService()
+    val timeService = setupTimeService()
+    setupSockJS(router, timeService)
     setupStatic(router)
 
     val PORT = 8080
     vertx.createHttpServer()
-      .requestHandler(router::accept)
-      .listen(PORT) {
-        if (it.succeeded()) {
-          logger.info("started on http://localhost:$PORT")
-        } else {
-          logger.error("failed to startup", it.cause())
+        .requestHandler(router::accept)
+        .listen(PORT) {
+          if (it.succeeded()) {
+            logger.info("started on http://localhost:$PORT")
+          } else {
+            logger.error("failed to startup", it.cause())
+          }
+          startFuture.completer().handle(it.mapEmpty<Void>())
         }
-        startFuture.completer().handle(it.mapEmpty<Void>())
-      }
 
   }
 
-  private fun setupTimeService() {
-    vertx.setPeriodic(1000) {
-      vertx.eventBus().publish("time", timeFormat.format(Date()))
-    }
+  private fun setupTimeService(): TimeService {
+    return TimeService(vertx)
   }
 
   private fun setupStatic(router: Router) {
     router.get().handler(StaticHandler.create("eventbus-test").setCachingEnabled(false).setCacheEntryTimeout(1).setMaxCacheSize(1))
   }
 
-  private fun setupSockJS(router: Router) {
+  private fun setupSockJS(router: Router, timeService: TimeService) {
     val sockJSHandler = SockJSHandler.create(vertx)
-    sockJSHandler.socketHandler(this::socketHandler)
+    sockJSHandler.socketHandler { socketHandler(it, timeService) }
     router.route("/api/*").handler(sockJSHandler)
   }
 
-  private fun socketHandler(socket: SockJSSocket) {
+  private fun socketHandler(socket: SockJSSocket, timeService: TimeService) {
     val wrapper = SockJSSocketWrapper.create(socket)
     val auth = AuthenticatedSocket.create(getAuthProvider())
-    val transformer = TypedSocket.create<EchoRequest, String>()
+    val mount = JsonRPCMounter(ConcreteServiceExecutor(timeService))
+    val transformer = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
     wrapper.addListener(auth)
     auth.addListener(transformer)
-    transformer.onData { this.write(it.str) }
+    transformer.addListener(mount)
   }
 
   private fun getAuthProvider(): ShiroAuth {
@@ -94,5 +94,33 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   }
 }
 
-data class EchoRequest(val str: String)
+/**
+ * a simple time service
+ */
+class TimeService(private val vertx: Vertx) {
+  companion object {
+    private val timeFormat = SimpleDateFormat("HH:mm:ss")
+  }
+
+  init {
+    vertx.setPeriodic(1000) {
+      vertx.eventBus().publish("time", timeFormat.format(Date()))
+    }
+  }
+
+  fun time(): Observable<String> {
+    return Observable.create { subscriber ->
+      val consumer = vertx.eventBus().consumer<String>("time")
+
+      consumer.handler {
+        if (subscriber.isUnsubscribed) {
+          consumer.unregister()
+        } else {
+          subscriber.onNext(it.body())
+        }
+      }
+    }
+  }
+}
+
 

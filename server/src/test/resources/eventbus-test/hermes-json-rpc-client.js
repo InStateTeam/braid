@@ -22,7 +22,6 @@ class JsonRPC {
       thisObj.closeHandler();
     }
     this.socket.onmessage = function (e) {
-      console.log("received", e.data);
       thisObj.messageHandler(JSON.parse(e.data));
     }
   }
@@ -81,6 +80,10 @@ class JsonRPC {
 
   handleResultMessage(message) {
     const state = this.state[message.id];
+    if (!state) {
+      console.error("could not find state for method " + message.id);
+      return
+    }
     if (state.onNext) {
       state.onNext(message.result);
     }
@@ -112,7 +115,8 @@ class JsonRPC {
       id: id,
       jsonrpc: "2.0",
       method: method,
-      params: params
+      params: params,
+      streamed: true
     };
 
     this.state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
