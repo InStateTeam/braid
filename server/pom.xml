@@ -192,7 +192,7 @@
                 <exec executable="npm" dir="${project.basedir}/src/editor">
                   <arg value="install"/>
                 </exec>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/eventbus-test">
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest">
                   <arg value="install"/>
                 </exec>
               </target>
@@ -210,7 +210,7 @@
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/eventbus-test">
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
