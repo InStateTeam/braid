@@ -75,6 +75,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   fun getJavaStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
         .filter { Modifier.isPublic(it.modifiers) }
+        .filter { !it.name.contains("$")}
         .map { it.toDescriptor() }
   }
 

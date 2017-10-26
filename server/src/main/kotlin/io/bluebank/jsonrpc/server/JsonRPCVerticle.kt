@@ -7,7 +7,6 @@ import io.bluebank.jsonrpc.server.services.impl.JavascriptExecutor
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
 import io.bluebank.jsonrpc.server.socket.TypedSocket
-import io.bluebank.jsonrpc.server.socket.listenTo
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.http.HttpHeaders
@@ -111,7 +110,13 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
   private fun setupRouter(): Router {
     val router = Router.router(vertx)
     router.route().handler(BodyHandler.create())
-    router.get("/_root").handler { it.write("${rootPath}sockjs") }
+    router.route().handler {
+      // allow all origins
+      val origin = it.request().getHeader("Origin")
+      it.response().putHeader("Access-Control-Allow-Credentials", origin);
+      it.next()
+    }
+    router.get("/_root").handler { it.write("${rootPath}jsonrpc") }
     val servicesRouter = Router.router(vertx)
     router.mountSubRouter("${rootPath}services", servicesRouter)
     servicesRouter.get("/").handler { it.getServiceList() }
@@ -169,7 +174,7 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
 
   private fun sockPath(serviceName: String) = "$sockRootPath$serviceName/*"
 
-  private val sockRootPath = "${rootPath}sockjs/"
+  private val sockRootPath = "${rootPath}jsonrpc/"
 
   private fun RoutingContext.getJavaImplementationHeaders(serviceName: String) {
     val service = getJavaExecutorForService(serviceName)
@@ -201,13 +206,18 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
       // TODO: the pipeline setup is complex. rework this to ease comprehension
       // the slight gotcha is that the service may or may not be authenticated
       // perhaps all services should be authenticated?
-      val rpcSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
-      val pipeline1 = if (authProvider != null) {
-        rpcSocket.listenTo(AuthenticatedSocket.create(authProvider))
-      } else {
-        rpcSocket
+      val sockWrapper = with(SockJSSocketWrapper.create(socket)) {
+        if (authProvider != null) {
+          val authenticatedSocket = AuthenticatedSocket.create(authProvider)
+          this.addListener(authenticatedSocket)
+          authenticatedSocket
+        } else {
+          this
+        }
       }
-      pipeline1.listenTo(SockJSSocketWrapper.create(socket))
+
+      val rpcSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
+      sockWrapper.addListener(rpcSocket)
       val mount = JsonRPCMounter(service)
       rpcSocket.addListener(mount)
     } else {

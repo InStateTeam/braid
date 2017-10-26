@@ -37,7 +37,8 @@ class JsonRPCServer(val vertx: Vertx,
           callback(failedFuture(it.cause()))
         } else {
           deploymentId = it.result()
-          println("server mounted on ws://localhost:$port$rootPath")
+          println("server mounted on http://localhost:$port$rootPath")
+          println("sockjs JsonRPC server mounted on http://localhost:$port${rootPath}jsonrpc/")
           println("editor mounted on http://localhost:$port")
           callback(succeededFuture())
         }

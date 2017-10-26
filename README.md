@@ -23,5 +23,20 @@ Download <a href="https://gitlab.bluebank.io/em-tech/hermes/raw/master/maven/set
 
 ### Setting up NPM with Nexus3
 
-`npm config set registry http://nexus-emtech.bluebank.io/repository/npm-bluebank-group/`
+Nexus exposes a unified repository for both a npm central proxy and a locally deployed repo (private to bluebank.)
+The unified repo can be used to install all artifacts. Set is as follows:
+
+```bash
+npm config set registry http://nexus-emtech.bluebank.io/repository/npm-bluebank-group/
+```
+
+To be able to publish modules (such as, say, `hermes-client`) add your credential to npm using:
+
+```bash
+npm add-user --registry=http://nexus-emtech.bluebank.io/repository/npm-local/
+```
+
+This will prompt you for your credentials and email. Once successfully authorised, you should be able to publish the 
+`hermes-client` module in the [client](client) directory.
+
 

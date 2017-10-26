@@ -1,5 +1,6 @@
 package io.bluebank.jsonrpc.server
 
+import io.bluebank.jsonrpc.sample.TimeService
 import io.bluebank.jsonrpc.server.services.impl.ConcreteServiceExecutor
 import io.bluebank.jsonrpc.server.socket.AuthenticatedSocket
 import io.bluebank.jsonrpc.server.socket.SockJSSocketWrapper
@@ -19,9 +20,6 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import rx.Observable
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Not an automated test.
@@ -95,35 +93,6 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
       obj("properties_path" to "classpath:auth/shiro.properties")
     }
     return ShiroAuth.create(vertx, ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES))
-  }
-}
-
-/**
- * a simple time service
- */
-class TimeService(private val vertx: Vertx) {
-  companion object {
-    private val timeFormat = SimpleDateFormat("HH:mm:ss")
-  }
-
-  init {
-    vertx.setPeriodic(1000) {
-      vertx.eventBus().publish("time", timeFormat.format(Date()))
-    }
-  }
-
-  fun time(): Observable<String> {
-    return Observable.create { subscriber ->
-      val consumer = vertx.eventBus().consumer<String>("time")
-
-      consumer.handler {
-        if (subscriber.isUnsubscribed) {
-          consumer.unregister()
-        } else {
-          subscriber.onNext(it.body())
-        }
-      }
-    }
   }
 }
 
