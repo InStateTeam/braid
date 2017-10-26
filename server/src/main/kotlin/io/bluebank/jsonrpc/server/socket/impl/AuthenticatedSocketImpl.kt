@@ -29,26 +29,26 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   }
 
   override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
-    try {
-      val op = Json.decodeValue(item, JsonRPCRequest::class.java)
-      when (op.method) {
-        "login" -> {
-          handleAuthRequest(op)
-        }
-        "logout" -> {
-          user = null
-          sendOk(op)
-        }
+    val op = Json.decodeValue(item, JsonRPCRequest::class.java)
+    when (op.method) {
+      "login" -> {
+        handleAuthRequest(op)
       }
-    } catch (err: Throwable) {
-      // this isn't an auth op, so if we're logged in, then pass it on
-      if (user != null) {
-        onData(item)
-      } else {
-        socket.write(Json.encodeToBuffer("failed because not logged in"))
+      "logout" -> {
+        user = null
+        sendOk(op)
+      }
+      else -> {
+        // this isn't an auth op, so if we're logged in, then pass it on
+        if (user != null) {
+          onData(item)
+        } else {
+          socket.write(Json.encodeToBuffer("failed because not logged in"))
+        }
       }
     }
   }
+
 
   override fun endHandler(socket: Socket<Buffer, Buffer>) {
     onEnd()
@@ -61,7 +61,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
 
   @Suppress("UNCHECKED_CAST")
   private fun handleAuthRequest(op: JsonRPCRequest) {
-    if (op.params ==  null || op.params !is Map<*, *>) {
+    if (op.params == null || op.params !is Map<*, *>) {
       sendParameterError(op)
     } else {
       val m = op.params as Map<String, Any>
@@ -88,7 +88,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   }
 
   private fun sendFailed(op: JsonRPCRequest, cause: Throwable) {
-    val msg = JsonRPCErrorResponse.serverError(id =op.id, message = cause.message ?: "unspecified error").response
+    val msg = JsonRPCErrorResponse.serverError(id = op.id, message = cause.message ?: "unspecified error").response
     write(Json.encodeToBuffer(msg))
   }
 }

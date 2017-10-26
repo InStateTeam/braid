@@ -45,8 +45,10 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
 
   private fun handleCompleted(request: JsonRPCRequest) {
     try {
-      val payload = JsonRPCCompletedResponse(id = request.id)
-      socket.write(payload)
+      if (request.streamed) {
+        val payload = JsonRPCCompletedResponse(id = request.id)
+        socket.write(payload)
+      }
     } finally {
       activeSubscriptions.remove(request)
     }
@@ -67,11 +69,21 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   private fun handleDataItem(result: Any?, request: JsonRPCRequest) {
     val payload = JsonRPCResultResponse(result = result, id = request.id)
     socket.write(payload)
+    if (!request.streamed) {
+      activeSubscriptions[request]?.unsubscribe()
+      activeSubscriptions.remove(request)
+    }
   }
 
   private fun checkVersion(request: JsonRPCRequest) {
-    if (request.jsonrpc != "2.0") {
-      throwInvalidRequest(request.id, "jsonrpc must 2.0")
+    val message = "jsonrpc version must be at least 2.0"
+    try {
+      val version = request.jsonrpc.toDouble()
+      if (version < 2.0) {
+        throwInvalidRequest(request.id, message)
+      }
+    } catch (err: NumberFormatException) {
+      throwInvalidRequest(request.id, message)
     }
   }
 

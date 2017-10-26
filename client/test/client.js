@@ -1,8 +1,15 @@
 import 'babel-register'
 import 'babel-polyfill'
-import RPCProxy from '../dist/index.js'
 
+const ServiceProxy = require('../');
+
+var calculator = null
 export default async function App () {
-  const calculator = await RPCProxy('ws://localhost:8088/api/calculator')
-  console.log(await calculator.add(1, 2))
+  console.log("starting client");
+  calculator = ServiceProxy('http://localhost:8088/api', onOpen);
+}
+
+function onOpen() {
+  console.log("onOpen");
+  calculator.add(1, 2).then( result => { console.log(result) });
 }

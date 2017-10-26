@@ -1,8 +1,7 @@
-"use strict";
+'use strict';
 
 const SockJS = require('sockjs-client');
 const Promise = require('promise');
-import Rx from 'rxjs/Rx';
 
 class JsonRPC {
   constructor(url, options) {
@@ -22,7 +21,6 @@ class JsonRPC {
       thisObj.closeHandler();
     }
     this.socket.onmessage = function (e) {
-      console.log("received", e.data);
       thisObj.messageHandler(JSON.parse(e.data));
     }
   }
@@ -81,6 +79,11 @@ class JsonRPC {
 
   handleResultMessage(message) {
     const state = this.state[message.id];
+    if (!state) {
+      console.error("could not find state for method " + message.id);
+      return
+    }
+    // console.log("received", message);
     if (state.onNext) {
       state.onNext(message.result);
     }
@@ -101,20 +104,24 @@ class JsonRPC {
   invoke(method, params) {
     const thisObj = this;
     return new Promise(function (resolve, reject) {
-      thisObj.invokeForStream(method, params, resolve, reject);
+      thisObj.invokeForStream(method, params, resolve, reject, undefined, false);
     });
   }
 
-  invokeForStream(method, params, onNext, onError, onCompleted) {
+  invokeForStream(method, params, onNext, onError, onCompleted, streamed) {
     const id = this.nextId++
+    if (streamed === undefined) {
+      streamed = true;
+    }
 
     const payload = {
       id: id,
       jsonrpc: "2.0",
       method: method,
-      params: params
+      params: params,
+      streamed: streamed
     };
-
+    // console.log("payload", payload);
     this.state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
     this.socket.send(JSON.stringify(payload));
     return new CancellableInvocation(this, id);

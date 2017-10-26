@@ -9,8 +9,12 @@ npm install --save hermes-client
 followed by:
 
 ```javascript
-const calculator = await RPCProxy('ws://localhost:8088/api/calculator')
-  console.log(await calculator.add(1, 2))
+
+const calculator = new ServiceProxy("http://localhost:8080/api/jsonrpc/calculator", onOpen);
+function onOpen() {
+  calculator.add(1, 2)
+  .then((result) => { console.log(result); })
+}
 ```
 
 ## Features
@@ -23,14 +27,14 @@ Clicking on the URL takes the UI developer to the Hermes Editor to add the new m
 
 ```npm run build```
 
-## Deploy / Publish to Nexus
+## Publish to Nexus
 
-```npm run deploy```
+```npm publish```
 
 You will be ask for the username, password and email. I used:
 
 ```bash
 user: admin
 password: 8a5500n!
-email: fuzz@bluebank.io # it can be anything
+email: fuzz@bluebank.io
 ```

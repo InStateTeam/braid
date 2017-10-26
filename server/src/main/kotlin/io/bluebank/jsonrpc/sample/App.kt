@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
   JsonRPCServer(
       vertx = vertx,
-      services = listOf(CalculatorService(), AccountService()),
+      services = listOf(CalculatorService(), AccountService(), TimeService(vertx)),
       authProvider = getAuthProvider(vertx)
   ).start()
 }
