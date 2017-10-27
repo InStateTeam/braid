@@ -1,6 +1,6 @@
 package io.bluebank.jsonrpc.sample
 
-import io.bluebank.jsonrpc.server.JsonRPCServer
+import io.bluebank.jsonrpc.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.vertx.core.Vertx
 import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
@@ -11,13 +11,20 @@ import io.vertx.kotlin.core.json.obj
 
 fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
-  JsonRPCServer(
-      vertx = vertx,
-      services = listOf(CalculatorService(), AccountService(), TimeService(vertx)),
-      authProvider = getAuthProvider(vertx)
-  ).start()
+  val server = createServerBuilder()
+      .withVertx(vertx)
+      .withService(CalculatorService())
+      .withService(AccountService())
+      .withService(TimeService(vertx))
+      .withAuthProvider(getAuthProvider(vertx))
+      .build()
+
+  server.start()
 }
 
+/**
+ * We could use any auth provider
+ */
 private fun getAuthProvider(vertx: Vertx): ShiroAuth {
   val config = json {
     obj("properties_path" to "classpath:auth/shiro.properties")

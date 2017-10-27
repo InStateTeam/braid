@@ -1,5 +1,6 @@
 package io.bluebank.jsonrpc.server
 
+import io.bluebank.jsonrpc.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.jsonrpc.server.services.impl.JavascriptExecutor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
@@ -22,10 +23,13 @@ import java.net.ServerSocket
 
 @RunWith(VertxUnitRunner::class)
 class JsonRPCServerTest {
-  val port = getFreePort()
+  private val port = getFreePort()
   private val vertx: Vertx = Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
-  private val server = JsonRPCServer(port = port, services = listOf(), vertx = vertx)
-  val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))!!
+  private val server = createServerBuilder()
+      .withVertx(vertx)
+      .withPort(port)
+      .build()
+  private val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))!!
 
   @Before
   fun before(testContext: TestContext) {
