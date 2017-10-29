@@ -7,10 +7,23 @@ Also, new services can be added at run-time, again using Javascript.
 
 ## Sample Service
 
-Simple one line example:
+Simple example:
 
 ```kotlin
-  JsonRPCServer(rootPath = "/api/services/", port = 8080, services = listOf(CalculatorService(), AccountService())).start()
+import io.bluebank.hermes.server.JsonRPCServerBuilder.Companion.createServerBuilder
+
+fun main(args: Array<String>) {
+  val server = createServerBuilder()
+      .withService(CalculatorService())
+      .build()
+  server.start()
+}
+
+class CalculatorService {
+  fun add(lhs: Int, rhs: Int): Int {
+    return lhs + rhs
+  }
+}
 ```
 
 See this running here: [https://hermes-sample-server.bluebank.io](https://hermes-sample-server.bluebank.io)
