@@ -89,8 +89,13 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     } else {
       returnType.toJavascriptType()
     }
+    val returnPrefix = if (returnType == Observable::class.java) {
+      "stream-of "
+    } else {
+      ""
+    }
     val description = serviceAnnotation?.description ?: ""
-    return MethodDescriptor(name, description, params, returnDescription)
+    return MethodDescriptor(name, description, params, returnPrefix + returnDescription)
   }
 
   private fun Class<*>.toJavascriptType(): String {

@@ -1,5 +1,6 @@
 package io.bluebank.hermes.sample
 
+import io.bluebank.hermes.server.MethodDescription
 import io.bluebank.hermes.server.ServiceDescription
 import io.vertx.core.Vertx
 import rx.Observable
@@ -21,6 +22,7 @@ class TimeService(private val vertx: Vertx) {
     }
   }
 
+  @MethodDescription(returnType = String::class, description = "return a stream of time updates")
   fun time(): Observable<String> {
     return Observable.create { subscriber ->
       val consumer = vertx.eventBus().consumer<String>("time")
