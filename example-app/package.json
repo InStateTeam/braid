@@ -8,7 +8,7 @@
     "clean": "rimraf dist/*",
     "build": "webpack --progress -p",
     "watch": "webpack --progress --watch",
-    "watch-server": "webpack-dev-server --progress"
+    "watch-server": "webpack-dev-server --progress --port 3333"
   },
   "repository": "https://gitlab.bluebank.io/em-tech/hermes",
   "keywords": [],

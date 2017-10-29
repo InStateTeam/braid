@@ -30,6 +30,12 @@ The unified repo can be used to install all artifacts. Set is as follows:
 ```bash
 npm config set registry http://nexus-emtech.bluebank.io/repository/npm-bluebank-group/
 ```
+Followed by
+
+```bash
+npm add-user
+```
+... to add your credentials for the nexus npm repository.
 
 To be able to publish modules (such as, say, `hermes-client`) add your credential to npm using:
 

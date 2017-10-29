@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
       .withService(CalculatorService())
       .withService(AccountService())
       .withService(TimeService(vertx))
-      .withAuthProvider(getAuthProvider(vertx))
+       .withAuthProvider(getAuthProvider(vertx))
       .build()
 
   server.start()

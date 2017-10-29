@@ -21,22 +21,18 @@ class JsonRPC {
     oReq.addEventListener('load', () => thisObj.onInitialCheck(oReq));
     oReq.addEventListener('error', (e) => thisObj.initialCheckFailed(e));
     oReq.open('GET', url + '/info');
-    try {
-      oReq.send();
-    } catch (e) {
-      // swallow and report later
-    }
+    oReq.send();
   }
 
   onInitialCheck(oReq) {
     if ((oReq.status / 100) !== 2) {
       if (oReq.statusText.startsWith('Hermes: ')) {
-        this.logHermes(oReq.statusText.substring(8));
+        JsonRPC.logHermes(oReq.statusText.substring(8));
       } else {
         console.error(oReq.statusText)
       }
       if (this.onError) {
-        this.onError(new ErrorEvent(oReq.status !== 404, oReq.statusText ))
+        this.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText))
       }
       return
     }
@@ -56,16 +52,25 @@ class JsonRPC {
     }
   }
 
-  logHermes(msg) {
-    msg = msg.split('.').map((it) => { return it.trim(); }).join('.\n');
-    console.log("%cHermes%c\n\n" + msg, "font-size: 24pt; font-weight: bold; color: #880017; background-color: #999;", "font-size: 14px;")
+  initialCheckFailed(e) {
+    if (this.onError) {
+      var error;
+      if (e.currentTarget.status === 0) {
+        error = new ErrorEvent(false, false, "connection refused")
+      } else  {
+        error = new ErrorEvent(false, false, "unknown error")
+      }
+      this.onError(error);
+    } else {
+      console.log('initialCheckFailed', e);
+    }
   }
 
-  initialCheckFailed(e) {
-    console.log('initialCheckFailed', e);
-    if (this.onError) {
-      this.onError(e);
-    }
+  static logHermes(msg) {
+    msg = msg.split('.').map((it) => {
+      return it.trim();
+    }).join('.\n');
+    console.log("%cHermes%c\n\n" + msg, "font-size: 24pt; font-weight: bold; color: #880017; background-color: #999;", "font-size: 14px;")
   }
 
   openHandler(e) {
@@ -88,6 +93,7 @@ class JsonRPC {
       this.onError(err);
     }
   }
+
   messageHandler(message) {
     if (message.hasOwnProperty('id')) {
       if (this.state.hasOwnProperty(message.id)) {
@@ -195,10 +201,12 @@ class CancellableInvocation {
 }
 
 class ErrorEvent {
-  constructor(serviceFound, message, data) {
+  constructor(serverFound, serviceFound, message, data) {
+    this.serverFound = serverFound;
     this.serviceFound = serviceFound;
     this.message = message;
     this.data = data;
   }
 }
+
 module.exports = JsonRPC;
