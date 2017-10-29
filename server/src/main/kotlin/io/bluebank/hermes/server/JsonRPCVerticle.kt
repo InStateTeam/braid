@@ -237,6 +237,17 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
     sockJSHandler = SockJSHandler.create(vertx)
     sockJSHandler.socketHandler(this::socketHandler)
     // mount each service
+
+    router.get(sockRootPath + ":serviceId/info").handler {
+      val serviceId = it.pathParam("serviceId")
+      if (serviceMap.contains(serviceId)) {
+        it.next()
+      } else {
+        it.response().setStatusMessage("""Hermes: Service '$serviceId' does not exist. Click here to create it http://localhost:8080""".trimMargin())
+          .setStatusCode(404)
+          .end()
+      }
+    }
     serviceMap.keys.forEach {
       router.route(sockPath(it)).handler(sockJSHandler)
     }
