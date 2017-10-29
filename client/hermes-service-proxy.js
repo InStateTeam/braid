@@ -3,7 +3,7 @@
 const JsonRPC = require('./hermes-json-rpc-client');
 
 class HermesServiceProxy {
-  constructor(url, onOpen, onClose, options) {
+  constructor(url, onOpen, onClose, onError, options) {
     if (!options) {
       options = {}
     }
@@ -11,6 +11,7 @@ class HermesServiceProxy {
     this.client = new JsonRPC(url, options);
     this.client.onOpen = onOpen;
     this.client.onClose = onClose;
+    this.client.onError = onError;
   }
 
   uri() {

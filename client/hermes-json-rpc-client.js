@@ -12,33 +12,82 @@ class JsonRPC {
     this.status = "CLOSED";
     this.onOpen = null;
     this.onClose = null;
-    this.socket = new SockJS(this.url, null, this.options);
+    this.onError = null;
     const thisObj = this;
-    this.socket.onopen = function () {
-      thisObj.openHandler();
+    // first we do a quick check if the service exists and response to a sockjs info request
+    // we do this because sockjs-client doesn't distinguish between, the lack of a sockjs service and the webserver being up
+    const oReq = new XMLHttpRequest();
+
+    oReq.addEventListener('load', () => thisObj.onInitialCheck(oReq));
+    oReq.addEventListener('error', (e) => thisObj.initialCheckFailed(e));
+    oReq.open('GET', url + '/info');
+    try {
+      oReq.send();
+    } catch (e) {
+      // swallow and report later
     }
-    this.socket.onclose = function () {
-      thisObj.closeHandler();
+  }
+
+  onInitialCheck(oReq) {
+    if ((oReq.status / 100) !== 2) {
+      if (oReq.statusText.startsWith('Hermes: ')) {
+        this.logHermes(oReq.statusText.substring(8));
+      } else {
+        console.error(oReq.statusText)
+      }
+      if (this.onError) {
+        this.onError(new ErrorEvent(oReq.status !== 404, oReq.statusText ))
+      }
+      return
+    }
+    const thisObj = this;
+    this.socket = new SockJS(this.url, null, this.options);
+    this.socket.onopen = function (e) {
+      thisObj.openHandler(e);
+    }
+    this.socket.onclose = function (e) {
+      thisObj.closeHandler(e);
+    }
+    this.socket.onerror = function (err) {
+      thisObj.errorHandler(err)
     }
     this.socket.onmessage = function (e) {
       thisObj.messageHandler(JSON.parse(e.data));
     }
   }
 
-  openHandler() {
+  logHermes(msg) {
+    msg = msg.split('.').map((it) => { return it.trim(); }).join('.\n');
+    console.log("%cHermes%c\n\n" + msg, "font-size: 24pt; font-weight: bold; color: #880017; background-color: #999;", "font-size: 14px;")
+  }
+
+  initialCheckFailed(e) {
+    console.log('initialCheckFailed', e);
+    if (this.onError) {
+      this.onError(e);
+    }
+  }
+
+  openHandler(e) {
     this.status = "OPEN";
     if (this.onOpen) {
-      this.onOpen();
+      this.onOpen(e);
     }
   }
 
-  closeHandler() {
+  closeHandler(e) {
     this.status = "CLOSED";
     if (this.onClose) {
-      this.onClose();
+      this.onClose(e);
     }
   }
 
+  errorHandler(err) {
+    this.status = "FAILED";
+    if (this.onError) {
+      this.onError(err);
+    }
+  }
   messageHandler(message) {
     if (message.hasOwnProperty('id')) {
       if (this.state.hasOwnProperty(message.id)) {
@@ -145,4 +194,11 @@ class CancellableInvocation {
   }
 }
 
+class ErrorEvent {
+  constructor(serviceFound, message, data) {
+    this.serviceFound = serviceFound;
+    this.message = message;
+    this.data = data;
+  }
+}
 module.exports = JsonRPC;
