@@ -16,6 +16,7 @@
   <modules>
     <module>server</module>
     <module>example-server</module>
+    <module>hermes-quickstart</module>
   </modules>
 
   <distributionManagement>
