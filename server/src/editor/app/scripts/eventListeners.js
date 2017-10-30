@@ -13,6 +13,7 @@ export default class EventListeners {
     this.textBoxKeyEvents(); 
     this.modalClickEvents();    
     this.popupEvents();
+    this.copyService();
   }
 
   textBoxKeyEvents(){
@@ -56,6 +57,29 @@ export default class EventListeners {
     let popup = document.querySelector('.tooltip .close');
     popup.addEventListener('click', (e) => {
       document.querySelector('.tooltip').classList.remove('shown');
+    });
+  }
+
+  copyService(){
+    let copyServiceBtn = document.querySelector('#copy-to-clipboard');
+    let copyToolTip = document.querySelector('.tooltip-clip');
+    
+    copyServiceBtn.addEventListener('click', (e) => {
+      let serviceText = document.querySelector('#calls');
+      serviceText.select();
+    
+      try {
+        let successful = document.execCommand('copy');
+        let msg = successful ? 'copied' : 'not copied';
+        copyToolTip.textContent = msg;
+        copyToolTip.style.display = 'block';
+      } catch (err) {
+        console.log('Oops, unable to copy');
+      }
+    });
+
+    copyServiceBtn.addEventListener('mouseout', (e) => {
+      copyToolTip.style.display = 'none';
     });
   }
 }

@@ -19,7 +19,11 @@
       <div>
         <label for="host">End Point</label>
         <span id="host"></span>
-        <span id="calls"></span>
+        <input type="text" readonly="readonly" value="" id="calls" />
+        <button id="copy-to-clipboard">
+          <img src="png/clip.png" alt="clipboard" />
+          <div class="tooltip-clip">copied</div>
+        </button>        
       </div>
     </section>
     <section id="container">
@@ -27,7 +31,7 @@
         <ul id="services">
         </ul>
       </div>
-      <div class='calls'>
+      <div class="calls">
         <ul class="implemented-functions"></ul>
         <ul class="stubbed-functions"></ul>
       </div>                           
