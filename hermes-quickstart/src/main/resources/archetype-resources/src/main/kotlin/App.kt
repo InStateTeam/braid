@@ -1,4 +1,4 @@
-package io.bluebank.hermes.sample
+package ${package}
 
 import io.bluebank.hermes.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.vertx.core.Vertx
@@ -14,7 +14,6 @@ fun main(args: Array<String>) {
   val server = createServerBuilder()
       .withVertx(vertx)
       .withService(CalculatorService())
-      .withService(AccountService())
       .withService(TimeService(vertx))
       .withAuthProvider(getAuthProvider(vertx))
       .build()

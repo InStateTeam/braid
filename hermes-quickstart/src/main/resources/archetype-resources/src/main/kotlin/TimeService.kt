@@ -1,4 +1,4 @@
-package io.bluebank.hermes.sample
+package ${package}
 
 import io.bluebank.hermes.server.MethodDescription
 import io.bluebank.hermes.server.ServiceDescription
@@ -32,7 +32,7 @@ class TimeService(private val vertx: Vertx) {
     return Observable.create { subscriber -> serveTime(subscriber) }
   }
 
-  private fun serveTime(subscriber: Subscriber<in String>) {
+  private fun serveTime(subscriber: Subscriber<String>) {
     val consumer = vertx.eventBus().consumer<String>("time")
     consumer.handler {
       if (subscriber.isUnsubscribed) {
