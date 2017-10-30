@@ -12,6 +12,7 @@ export default class EventListeners {
   init(){
     this.textBoxKeyEvents(); 
     this.modalClickEvents();    
+    this.popupEvents();
   }
 
   textBoxKeyEvents(){
@@ -48,6 +49,13 @@ export default class EventListeners {
         switchService(selectedService);
         modal.classList.toggle('shown');
       }
+    });
+  }
+
+  popupEvents(){
+    let popup = document.querySelector('.tooltip .close');
+    popup.addEventListener('click', (e) => {
+      document.querySelector('.tooltip').classList.remove('shown');
     });
   }
 }

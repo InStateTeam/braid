@@ -18,8 +18,9 @@
     "babel-preset-latest": "^6",
     "brunch": "^2",
     "clean-css-brunch": "^2",
+    "js-beautify": "^1.7.4",
+    "rimraf": "^2.6.2",
     "stylus-brunch": "^2.10.0",
-    "uglify-js-brunch": "^2",
-    "rimraf": "^2.6.2"
+    "uglify-js-brunch": "^2"
   }
 }
