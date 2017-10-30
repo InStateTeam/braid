@@ -18,6 +18,7 @@
       </includes>
     </fileSet>
     <fileSet filtered="true" packaged="false" encoding="UTF-8">
+      <directory/>
       <includes>
         <include>*.md</include>
         <include>Dockerfile</include>

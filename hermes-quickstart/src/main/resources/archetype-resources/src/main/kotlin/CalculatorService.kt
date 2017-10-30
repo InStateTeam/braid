@@ -9,29 +9,14 @@ import io.vertx.core.Future.succeededFuture
 @ServiceDescription("calculator", "a simple calculator")
 class CalculatorService {
 
-  @MethodDescription(description = "add two ints", returnType = Int::class)
-  fun add(lhs: Int, rhs: Int): Future<Int> {
+  @MethodDescription(description = "add two ints")
+  fun add(lhs: Int, rhs: Int): Int> {
     return succeededFuture(lhs + rhs)
   }
 
+  // N.B. how to document the return type on an async function
   @MethodDescription(description = "subtract the second int from the first", returnType = Int::class)
   fun subtract(lhs: Int, rhs: Int): Future<Int> {
     return succeededFuture(lhs - rhs)
   }
-
-  @MethodDescription(description = "multiply two ints", returnType = Int::class)
-  fun multiply(lhs: Int, rhs: Int) : Int {
-    return lhs * rhs
-  }
-
-  fun divide(lhs: Double, rhs: Double) : Double {
-    return lhs / rhs
-  }
-
-  @MethodDescription(description = "multiply two complex numbers")
-  fun multiplyComplex(lhs: ComplexNumber, rhs: ComplexNumber) : ComplexNumber {
-    return ComplexNumber(lhs.x * rhs.x - lhs.y * rhs.y, lhs.x * rhs.y + lhs.y * rhs.x)
-  }
 }
-
-class ComplexNumber(val x: Double, val y: Double)
