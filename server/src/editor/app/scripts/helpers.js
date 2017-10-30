@@ -1,3 +1,5 @@
+import beautify from 'js-beautify';
+
 export default class Helpers {
   
   getSelectedService() {
@@ -191,9 +193,10 @@ export default class Helpers {
       returnTypeTitle.appendChild(textNode);
       returnType.appendChild(returnTypeTitle);
 
-      let returnTypeContent = document.createElement("P");
+      let returnTypeContent = document.createElement("PRE");
       returnTypeContent.classList.add('return-type-content');
-      text = service.returnType;
+      text = beautify(service.returnType, { indent_size: 2 });
+      
       textNode = document.createTextNode(text);
       returnTypeContent.appendChild(textNode);
       returnType.appendChild(returnTypeContent);
@@ -221,7 +224,7 @@ export default class Helpers {
     const funSection = document.querySelector('.calls');
     const editor = document.querySelector('#editor');
     funSection.style.marginLeft = '250px'
-    editor.style.width =  'calc(100% - 480px)'
+    editor.style.width =  'calc(100% - 485px)'
     editor.style.marginLeft = '230px'
     setTimeout(() => {funSection.style.zIndex = 1;}, 500);
   }
@@ -231,8 +234,8 @@ export default class Helpers {
     const editor = document.querySelector('#editor');
     funSection.style.zIndex = -1;
     funSection.style.marginLeft = '0px'
-    editor.style.width =  'calc(100% - 250px)'
-    editor.style.marginLeft = '0px'
+    editor.style.width =  'calc(100% - 260px)'
+    editor.style.marginLeft = '5px'
   }
 }
 
