@@ -9,6 +9,7 @@ import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import rx.Observable
+import rx.Observable.create
 import java.nio.file.Paths
 import javax.script.Invocable
 import javax.script.ScriptEngine
@@ -85,7 +86,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
   }
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
-    return Observable.create { subscriber ->
+    return create { subscriber ->
       try {
         checkMethodExists(request.method)
         val params = if (request.params != null && request.params is List<*>) {
@@ -96,6 +97,8 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
         val result = invocable.invokeFunction(request.method, *params)
         subscriber.onNext(result)
         subscriber.onCompleted()
+      } catch (err: MethodDoesNotExist) {
+        subscriber.onError(err)
       } catch (err: Throwable) {
         subscriber.onError(err.createJsonException(request))
       }

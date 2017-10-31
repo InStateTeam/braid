@@ -32,7 +32,7 @@ class JsonRPC {
         console.error(oReq.statusText)
       }
       if (this.onError) {
-        this.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText))
+        this.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText));
       }
       return
     }
@@ -40,13 +40,13 @@ class JsonRPC {
     this.socket = new SockJS(this.url, null, this.options);
     this.socket.onopen = function (e) {
       thisObj.openHandler(e);
-    }
+    };
     this.socket.onclose = function (e) {
       thisObj.closeHandler(e);
-    }
+    };
     this.socket.onerror = function (err) {
       thisObj.errorHandler(err)
-    }
+    };
     this.socket.onmessage = function (e) {
       thisObj.messageHandler(JSON.parse(e.data));
     }
@@ -113,7 +113,9 @@ class JsonRPC {
   handleError(message) {
     const state = this.state[message.id];
     if (state.onError) {
-      state.onError(new Error(`json rpc error ${message.error.code} with message ${message.error.message}`));
+      const err = new Error(`json rpc error ${message.error.code} with message ${message.error.message}`);
+      err.jsonRPCError = message.error;
+      state.onError(err);
     }
     delete this.state[message.id];
   }
@@ -164,7 +166,7 @@ class JsonRPC {
   }
 
   invokeForStream(method, params, onNext, onError, onCompleted, streamed) {
-    const id = this.nextId++
+    const id = this.nextId++;
     if (streamed === undefined) {
       streamed = true;
     }
@@ -193,7 +195,7 @@ class CancellableInvocation {
     if (this.jsonRPC.state[id]) {
       const payload = {
         cancel: this.id
-      }
+      };
       this.jsonRPC.socket.send(payload);
       delete this.jsonRPC.state[id];
     }

@@ -4,7 +4,6 @@ import io.bluebank.hermes.server.MethodDescription
 import io.bluebank.hermes.server.ServiceDescription
 import io.vertx.core.Vertx
 import rx.Observable
-import rx.Subscriber
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,6 +19,7 @@ class TimeService(private val vertx: Vertx) {
   }
 
   init {
+    // create a timer publisher to the eventbus
     vertx.setPeriodic(1000) {
       vertx.eventBus().publish("time", timeFormat.format(Date()))
     }
@@ -28,17 +28,14 @@ class TimeService(private val vertx: Vertx) {
   // N.B. how we can document the return type of a stream
   @MethodDescription(returnType = String::class, description = "return a stream of time updates")
   fun time(): Observable<String> {
-
-    return Observable.create { subscriber -> serveTime(subscriber) }
-  }
-
-  private fun serveTime(subscriber: Subscriber<in String>) {
-    val consumer = vertx.eventBus().consumer<String>("time")
-    consumer.handler {
-      if (subscriber.isUnsubscribed) {
-        consumer.unregister()
-      } else {
-        subscriber.onNext(it.body())
+    return Observable.create { subscriber ->
+      val consumer = vertx.eventBus().consumer<String>("time")
+      consumer.handler {
+        if (subscriber.isUnsubscribed) {
+          consumer.unregister()
+        } else {
+          subscriber.onNext(it.body())
+        }
       }
     }
   }
