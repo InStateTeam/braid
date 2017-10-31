@@ -18,8 +18,8 @@ class HermesServiceProxy {
   uri() {
     const uri = document.createElement('a');
     uri.href = this.url;
-    const base = "http://" + uri.hostname + ":" + uri.port
-    const serviceName = uri.pathname.split("/").filter(i => i.length > 0).pop()
+    const base = "http://" + uri.hostname + ":" + uri.port;
+    const serviceName = uri.pathname.split("/").filter(i => i.length > 0).pop();
     if (serviceName !== undefined && serviceName !== null) {
       return base + "/?service=" + serviceName
     } else {
@@ -82,7 +82,7 @@ class HermesServiceProxy {
   }
 
   static massageArgs(args) {
-    if (args != null) {
+    if (args) {
       if (args.length === 0) {
         args = null;
       } else if (args.length === 1) {
@@ -108,7 +108,7 @@ class HermesServiceProxy {
 
 function createProxy(url, onOpen, onClose, options) {
   return new Proxy(new HermesServiceProxy(url, onOpen, onClose, options), {
-    get: (target, propKey, receiver) => {
+    get: (target, propKey) => {
       return function (...args) {
         return target.invoke(propKey, args)
       }
@@ -116,4 +116,4 @@ function createProxy(url, onOpen, onClose, options) {
   });
 }
 
-module.exports = createProxy
+module.exports = createProxy;
