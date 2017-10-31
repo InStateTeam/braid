@@ -14,9 +14,8 @@ fun main(args: Array<String>) {
   val server = createServerBuilder()
       .withVertx(vertx)
       .withService(CalculatorService())
-      .withService(AccountService())
       .withService(TimeService(vertx))
-       .withAuthProvider(getAuthProvider(vertx))
+      .withAuthProvider(getAuthProvider(vertx))
       .build()
 
   server.start()

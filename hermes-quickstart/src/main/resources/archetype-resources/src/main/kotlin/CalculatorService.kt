@@ -10,8 +10,8 @@ import io.vertx.core.Future.succeededFuture
 class CalculatorService {
 
   @MethodDescription(description = "add two ints")
-  fun add(lhs: Int, rhs: Int): Int> {
-    return succeededFuture(lhs + rhs)
+  fun add(lhs: Int, rhs: Int): Int {
+    return lhs + rhs
   }
 
   // N.B. how to document the return type on an async function

@@ -113,7 +113,9 @@ class JsonRPC {
   handleError(message) {
     const state = this.state[message.id];
     if (state.onError) {
-      state.onError(new Error(`json rpc error ${message.error.code} with message ${message.error.message}`));
+      const err = new Error(`json rpc error ${message.error.code} with message ${message.error.message}`);
+      err.jsonRPCError = message.error;
+      state.onError(err);
     }
     delete this.state[message.id];
   }

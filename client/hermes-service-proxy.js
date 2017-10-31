@@ -8,6 +8,7 @@ class HermesServiceProxy {
       options = {}
     }
     options.noCredentials = true;
+    this.url = url;
     this.client = new JsonRPC(url, options);
     this.client.onOpen = onOpen;
     this.client.onClose = onClose;
@@ -16,7 +17,7 @@ class HermesServiceProxy {
 
   uri() {
     const uri = document.createElement('a');
-    uri.href = path
+    uri.href = this.url;
     const base = "http://" + uri.hostname + ":" + uri.port
     const serviceName = uri.pathname.split("/").filter(i => i.length > 0).pop()
     if (serviceName !== undefined && serviceName !== null) {
@@ -69,8 +70,12 @@ class HermesServiceProxy {
   }
 
   onErrorTrap(err) {
-    if (err.code === -32601) {
-      throw Error(err.message + "\nCreate a stub here: " + this.uri())
+    if (err.jsonRPCError && err.jsonRPCError.code === -32601) {
+      console.log("%cHermes: %c" + err.message + "\n%cCreate a stub here: " + this.uri(),
+        "font-family: sans-serif; font-size: 14px; font-weight: bold;",
+        "",
+        "font-weight: bold;");
+      throw Error(err.message)
     } else {
       throw err;
     }

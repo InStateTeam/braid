@@ -111,6 +111,11 @@ recreateService() {
   oc create route edge --hostname=${PROJECT}.${DOMAIN} --service=${IMAGE} --port=8080 --insecure-policy=Redirect
 }
 
+printCompletionMessage() {
+  echo "Done"
+  echo "Deployed to https://openshift.ocp-bluebank.io/console/project/${artifactId}-server"
+}
+
 # The deploy function checks for the existing project before deploying a clean build from scratch
 deploy() {
   ensureProjectExists
@@ -118,6 +123,7 @@ deploy() {
   ensureAppExists
   ensureVolumeExists
   recreateService
+  printCompletionMessage
 }
 
 if [[ $# < 1 ]]; then echo "${USAGE}" && exit; fi
