@@ -1,10 +1,13 @@
 package io.bluebank.hermes.sample
 
-import io.bluebank.hermes.server.*
-import io.bluebank.hermes.server.services.impl.ConcreteServiceExecutor
-import io.bluebank.hermes.server.socket.AuthenticatedSocket
-import io.bluebank.hermes.server.socket.SockJSSocketWrapper
-import io.bluebank.hermes.server.socket.TypedSocket
+import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
+import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
+import io.bluebank.hermes.core.jsonrpc.JsonRPCResponse
+import io.bluebank.hermes.core.logging.loggerFor
+import io.bluebank.hermes.core.socket.AuthenticatedSocket
+import io.bluebank.hermes.core.socket.SockJSSocketWrapper
+import io.bluebank.hermes.core.socket.TypedSocket
+import io.bluebank.hermes.server.services.ConcreteServiceExecutor
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -30,7 +33,7 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
     @JvmStatic
     fun main(args: Array<String>) {
       System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-      JacksonKotlinInit.init()
+      io.bluebank.hermes.core.json.JacksonKotlinInit.init()
       Vertx.vertx().deployVerticle(AuthenticatedSockJSTest())
     }
 
