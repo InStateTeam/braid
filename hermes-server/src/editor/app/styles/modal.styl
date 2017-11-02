@@ -1,0 +1,54 @@
+.modal
+  background rgba(0, 0, 0, 0.4)
+  bottom 0
+  left 0
+  opacity 0
+  pointer-events none
+  position fixed
+  right 0
+  top 0
+  z-index 100
+
+  &.shown
+    opacity 1
+    pointer-events all
+
+  .modal-content
+    background #000
+    border 3px solid #DE0000
+    border-radius 6px
+    position relative
+    left 50%
+    padding 10px
+    text-align center
+    top 50%
+    transform translate(-50%, -50%)
+    width 320px
+
+    p
+      color #FFF
+      margin-top 0
+
+      i 
+        font-weight bolder
+
+    button
+      border none
+      border-radius 20px
+      color #FFF
+      cursor pointer
+      font-size 16px
+      width 50px
+
+      &#yesBtn
+        background #0B0
+
+        &:hover
+          background #0E0
+      
+      &#noBtn
+        background #DE0000
+
+        &:hover
+          background #F00
+

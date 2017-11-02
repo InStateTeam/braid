@@ -1,0 +1,26 @@
+{
+  "name": "brunch-app",
+  "description": "Brunch.io application",
+  "private": true,
+  "author": "Brunch",
+  "version": "0.0.1",
+  "repository": "",
+  "scripts": {
+    "start": "brunch watch --server",
+    "build": "rimraf ../main/resources/editor-web && brunch build --production"
+  },
+  "dependencies": {
+    "jquery": "^3.2.1"
+  },
+  "devDependencies": {
+    "auto-reload-brunch": "^2",
+    "babel-brunch": "~6.0",
+    "babel-preset-latest": "^6",
+    "brunch": "^2",
+    "clean-css-brunch": "^2",
+    "js-beautify": "^1.7.4",
+    "rimraf": "^2.6.2",
+    "stylus-brunch": "^2.10.0",
+    "uglify-js-brunch": "^2"
+  }
+}

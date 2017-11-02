@@ -4,7 +4,7 @@
   <artifactId>hermes</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>Hermes</name>
+  <name>hermes parent</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
   <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
 
@@ -13,8 +13,24 @@
     <developerConnection>scm:git:gitlab.bluebank.io:em-tech/hermes.git</developerConnection>
   </scm>
 
+  <properties>
+    <kotlin.version>1.1.50</kotlin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>4.12</junit.version>
+    <vertx.version>3.4.2</vertx.version>
+    <rxjava.version>1.3.2</rxjava.version>
+    <deploy.plugin.version>2.8.2</deploy.plugin.version>
+    <ant.plugin.version>1.8</ant.plugin.version>
+    <assembly.plugin.version>2.6</assembly.plugin.version>
+    <source.plugin.version>3.0.1</source.plugin.version>
+    <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>
+  </properties>
+
   <modules>
-    <module>server</module>
+    <module>hermes-client-js</module>
+    <module>hermes-server</module>
+    <module>example-server</module>
+    <module>hermes-quickstart</module>
   </modules>
 
   <distributionManagement>
@@ -31,5 +47,39 @@
   </distributionManagement>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${ant.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${deploy.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${assembly.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-maven-plugin</artifactId>
+          <version>${kotlin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${source.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${javadoc.plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>

@@ -2,3 +2,4 @@
 **/.vertx
 **/*.iml
 **/service-scripts
+**/file-uploads

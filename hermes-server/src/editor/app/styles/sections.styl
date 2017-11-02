@@ -1,0 +1,94 @@
+.endpoint
+  background #ECECEC
+  color rgba(0, 0, 0, 0.8)
+  height 50px
+  padding-bottom 5px
+  position relative
+  
+  div
+    position absolute
+    left 30%
+    top 50%
+    transform translate(0%, -50%)
+
+    label 
+      color rgba(0, 0, 0, 0.8)
+
+    span
+      background #FFF
+      border 1px solid rgba(0, 0, 0, 0.8)
+      border-radius 3px
+      padding 4px 10px
+
+    input[type=text]
+      border 1px solid rgba(0, 0, 0, 0.8)
+      border-radius 3px
+      color rgba(0,0,0, 0.8)
+      height 16px
+      font-family "Roboto Light", sans-serif
+      font-size 16px
+      padding 5px 10px
+      vertical-align bottom
+      width 18em
+    
+    button
+      background linear-gradient(#DDD, #BBB)
+      border 1px solid #888
+      border-radius 2px
+      color rgba(0, 0, 0, 1.0)
+      font-family 'SSP-Bold' 
+      font-size 16px
+      margin -3px 6px auto 0
+      outline none
+      padding 2px 7px 1px
+      position relative
+      vertical-align middle    
+
+      img 
+        height 20px
+      
+      .tooltip-clip
+        background #000
+        border-radius 3px
+        color #FFF
+        display none
+        font-size 9px
+        padding 4px 5px 5px
+        postition absolute
+        transform translate(80%, -50%);
+
+        &:before
+          border 4px solid transparent
+          border-left none
+          border-right-color:  #000
+          content ""
+          height 0
+          left -4px
+          position absolute
+          top 6px
+          width 0
+      
+#container  
+  overflow-x hidden
+  overflow-y scroll
+  position relative
+
+@media screen and (max-width: 1159px)
+  #container 
+    #editor 
+      .functions
+        button 
+          font-size 12px
+          padding 5px 10px
+
+          &#deleteBtn
+            float none
+        
+        input[type=text]
+          font-size 12px
+          height 22px
+          margin-bottom 3px
+          width 200px
+
+
+
