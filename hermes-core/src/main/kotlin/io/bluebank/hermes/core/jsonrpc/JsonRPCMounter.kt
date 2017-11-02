@@ -2,8 +2,8 @@ package io.bluebank.hermes.core.jsonrpc
 
 import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse.Companion.serverError
 import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse.Companion.throwInvalidRequest
-import io.bluebank.hermes.core.services.MethodDoesNotExist
-import io.bluebank.hermes.core.services.ServiceExecutor
+import io.bluebank.hermes.core.service.MethodDoesNotExist
+import io.bluebank.hermes.core.service.ServiceExecutor
 import io.bluebank.hermes.core.socket.Socket
 import io.bluebank.hermes.core.socket.SocketListener
 import io.vertx.core.AsyncResult

@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.annotation
 
 import kotlin.reflect.KClass
 

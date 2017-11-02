@@ -1,4 +1,4 @@
-package io.bluebank.hermes
+package io.bluebank.hermes.core.jsonrpc
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.vertx.core.json.Json
@@ -32,5 +32,4 @@ class ParameterTests {
     val decoded = Json.decodeValue(encoded, Receiver::class.java)
     assertTrue(decoded.params is Map<*, *>)
   }
-
 }

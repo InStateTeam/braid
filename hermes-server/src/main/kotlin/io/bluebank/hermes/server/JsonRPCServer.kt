@@ -1,6 +1,5 @@
 package io.bluebank.hermes.server
 
-import io.bluebank.hermes.core.json.JacksonKotlinInit
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
 import io.vertx.core.Future.succeededFuture
@@ -100,7 +99,7 @@ class JsonRPCServerBuilder {
 class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilder) {
   companion object {
     init {
-      JacksonKotlinInit.init()
+      io.bluebank.hermes.core.json.JacksonKotlinInit.init()
     }
 
     internal fun createJsonRpcServer(builder: JsonRPCServerBuilder): JsonRPCServer {

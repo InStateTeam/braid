@@ -1,10 +1,10 @@
-package io.bluebank.hermes.core.services.impl
+package io.bluebank.hermes.server.services
 
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.createJsonException
 import io.bluebank.hermes.core.logging.loggerFor
-import io.bluebank.hermes.core.services.MethodDoesNotExist
-import io.bluebank.hermes.core.services.ServiceExecutor
+import io.bluebank.hermes.core.service.MethodDoesNotExist
+import io.bluebank.hermes.core.service.ServiceExecutor
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -90,7 +90,8 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
       try {
         checkMethodExists(request.method)
         val params = if (request.params != null && request.params is List<*>) {
-          request.params.toTypedArray()
+          val paramsList = request.params as List<*>
+          paramsList.toTypedArray()
         } else {
           listOf(request.params).toTypedArray()
         }

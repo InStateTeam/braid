@@ -2,8 +2,8 @@ package io.bluebank.hermes.server
 
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.JsonRPCResultResponse
-import io.bluebank.hermes.core.services.impl.JavascriptExecutor
 import io.bluebank.hermes.server.JsonRPCServerBuilder.Companion.createServerBuilder
+import io.bluebank.hermes.server.services.JavascriptExecutor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx

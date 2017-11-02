@@ -1,7 +1,5 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.jsonrpc
 
-import io.bluebank.hermes.core.json.JacksonKotlinInit
-import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.vertx.core.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -10,7 +8,7 @@ import org.junit.Test
 class JsonRPCRequestTest {
   @Before
   fun before() {
-    JacksonKotlinInit.init()
+    io.bluebank.hermes.core.json.JacksonKotlinInit.init()
   }
 
   @Test

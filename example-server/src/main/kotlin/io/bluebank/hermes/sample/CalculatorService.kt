@@ -1,7 +1,7 @@
 package io.bluebank.hermes.sample
 
-import io.bluebank.hermes.server.MethodDescription
-import io.bluebank.hermes.server.ServiceDescription
+import io.bluebank.hermes.core.annotation.MethodDescription
+import io.bluebank.hermes.core.annotation.ServiceDescription
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
 
