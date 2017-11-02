@@ -1,5 +1,5 @@
 import Buttons from 'scripts/buttons';
-import { saveContent, switchService } from 'scripts/serviceList';
+import {saveContent, switchService} from 'scripts/serviceList';
 import Helpers from 'scripts/helpers';
 
 export default class EventListeners {
