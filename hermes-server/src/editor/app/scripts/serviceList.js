@@ -1,4 +1,4 @@
-import { getExistingServices, getStubbedServices } from 'scripts/workers';
+import {getExistingServices, getStubbedServices} from 'scripts/workers';
 import Helpers from 'scripts/helpers';
 import getEndPoint from 'scripts/endPoint';
 

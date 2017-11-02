@@ -1,7 +1,4 @@
-import {  
-         retrieveAndUpdateServices,
-         ensureServiceIsCreated
-        } from 'scripts/workers';
+import {ensureServiceIsCreated, retrieveAndUpdateServices} from 'scripts/workers';
 
 export default class Monaco {
 

@@ -1,6 +1,5 @@
-import { onServiceSelect } from 'scripts/serviceList';
+import {onServiceSelect} from 'scripts/serviceList';
 import Helpers from 'scripts/helpers';
-import Monaco from 'scripts/Monaco';
 
 const helpers = new Helpers();
 

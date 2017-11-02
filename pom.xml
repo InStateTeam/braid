@@ -27,8 +27,8 @@
   </properties>
 
   <modules>
-    <module>client</module>
-    <module>server</module>
+    <module>hermes-client-js</module>
+    <module>hermes-server</module>
     <module>example-server</module>
     <module>hermes-quickstart</module>
   </modules>

@@ -8,8 +8,8 @@
     <artifactId>hermes</artifactId>
     <version>1.0</version>
   </parent>
-  <artifactId>hermes-client</artifactId>
-  <name>hermes-client</name>
+  <artifactId>hermes-client-js</artifactId>
+  <name>hermes-client-js</name>
   <build>
     <plugins>
       <plugin>
