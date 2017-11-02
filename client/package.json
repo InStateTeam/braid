@@ -10,7 +10,16 @@
     "watch": "webpack --progress --watch"
   },
   "keywords": [],
-  "author": "",
+  "contributors": [
+    {
+      "name": "fuzz",
+      "email": "fuzz@bluebank.io"
+    },
+    {
+      "name": "chris",
+      "email": "chris.jones@bluebank.io"
+    }
+  ],
   "license": "ISC",
   "dependencies": {
     "jquery": "^3.2.1",
