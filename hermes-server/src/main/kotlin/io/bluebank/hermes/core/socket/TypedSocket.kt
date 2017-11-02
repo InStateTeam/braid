@@ -1,6 +1,6 @@
-package io.bluebank.hermes.server.socket
+package io.bluebank.hermes.core.socket
 
-import io.bluebank.hermes.server.socket.impl.TypedSocketImpl
+import io.bluebank.hermes.core.socket.impl.TypedSocketImpl
 import io.vertx.core.buffer.Buffer
 
 interface TypedSocket<R, K : Any> : SocketAndListener<R, K, Buffer, Buffer> {

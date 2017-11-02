@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.jsonrpc
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier

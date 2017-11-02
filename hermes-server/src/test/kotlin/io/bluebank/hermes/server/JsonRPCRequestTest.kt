@@ -1,5 +1,7 @@
 package io.bluebank.hermes.server
 
+import io.bluebank.hermes.core.json.JacksonKotlinInit
+import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.vertx.core.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Before

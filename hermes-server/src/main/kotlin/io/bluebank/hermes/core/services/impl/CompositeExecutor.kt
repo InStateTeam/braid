@@ -1,7 +1,7 @@
-package io.bluebank.hermes.server.services.impl
+package io.bluebank.hermes.core.services.impl
 
-import io.bluebank.hermes.server.JsonRPCRequest
-import io.bluebank.hermes.server.services.ServiceExecutor
+import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
+import io.bluebank.hermes.core.services.ServiceExecutor
 import rx.Observable
 
 class CompositeExecutor(vararg predefinedExecutors: ServiceExecutor) : ServiceExecutor {

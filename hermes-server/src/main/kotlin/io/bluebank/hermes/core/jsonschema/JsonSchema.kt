@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.jsonschema
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema

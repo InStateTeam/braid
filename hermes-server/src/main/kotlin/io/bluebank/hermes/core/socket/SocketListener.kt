@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server.socket
+package io.bluebank.hermes.core.socket
 
 interface SocketListener<R, S> {
   fun onRegister(socket: Socket<R, S>)

@@ -1,6 +1,6 @@
-package io.bluebank.hermes.server.services
+package io.bluebank.hermes.core.services
 
-import io.bluebank.hermes.server.JsonRPCRequest
+import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import rx.Observable
 
 class MethodDoesNotExist : Exception()

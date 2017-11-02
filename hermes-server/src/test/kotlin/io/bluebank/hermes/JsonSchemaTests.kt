@@ -1,6 +1,6 @@
 package io.bluebank.hermes
 
-import io.bluebank.hermes.server.describeClass
+import io.bluebank.hermes.core.jsonschema.describeClass
 import org.junit.Test
 import kotlin.test.assertEquals
 

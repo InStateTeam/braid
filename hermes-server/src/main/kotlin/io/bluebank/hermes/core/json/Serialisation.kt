@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.json
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.vertx.core.json.Json

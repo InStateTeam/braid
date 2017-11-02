@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.jsonrpc
 
 import io.vertx.core.Future
 

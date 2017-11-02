@@ -1,7 +1,6 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.socket
 
-import io.bluebank.hermes.server.socket.Socket
-import io.bluebank.hermes.server.socket.SocketListener
+import io.bluebank.hermes.core.logging.loggerFor
 
 abstract class AbstractSocket<R, S> : Socket<R, S> {
   companion object {

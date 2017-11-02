@@ -1,6 +1,6 @@
-package io.bluebank.hermes.server.socket
+package io.bluebank.hermes.core.socket
 
-import io.bluebank.hermes.server.socket.impl.SockJsSocketImpl
+import io.bluebank.hermes.core.socket.impl.SockJsSocketImpl
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 

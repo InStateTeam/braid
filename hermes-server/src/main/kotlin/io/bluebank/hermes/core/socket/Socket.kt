@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server.socket
+package io.bluebank.hermes.core.socket
 
 import io.vertx.ext.auth.User
 

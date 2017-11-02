@@ -1,5 +1,6 @@
 package io.bluebank.hermes.server
 
+import io.bluebank.hermes.core.json.JacksonKotlinInit
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
 import io.vertx.core.Future.succeededFuture

@@ -1,6 +1,6 @@
-package io.bluebank.hermes.server.socket
+package io.bluebank.hermes.core.socket
 
-import io.bluebank.hermes.server.socket.impl.AuthenticatedSocketImpl
+import io.bluebank.hermes.core.socket.impl.AuthenticatedSocketImpl
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.auth.AuthProvider
 

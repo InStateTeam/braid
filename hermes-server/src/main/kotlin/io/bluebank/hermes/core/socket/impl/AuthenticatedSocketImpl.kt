@@ -1,12 +1,12 @@
-package io.bluebank.hermes.server.socket.impl
+package io.bluebank.hermes.core.socket.impl
 
-import io.bluebank.hermes.server.AbstractSocket
-import io.bluebank.hermes.server.JsonRPCErrorResponse
-import io.bluebank.hermes.server.JsonRPCErrorResponse.Companion.invalidParams
-import io.bluebank.hermes.server.JsonRPCRequest
-import io.bluebank.hermes.server.JsonRPCResultResponse
-import io.bluebank.hermes.server.socket.AuthenticatedSocket
-import io.bluebank.hermes.server.socket.Socket
+import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse
+import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse.Companion.invalidParams
+import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
+import io.bluebank.hermes.core.jsonrpc.JsonRPCResultResponse
+import io.bluebank.hermes.core.socket.AbstractSocket
+import io.bluebank.hermes.core.socket.AuthenticatedSocket
+import io.bluebank.hermes.core.socket.Socket
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
