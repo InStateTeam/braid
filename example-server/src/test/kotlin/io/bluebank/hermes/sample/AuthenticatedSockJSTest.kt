@@ -4,10 +4,10 @@ import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.JsonRPCResponse
 import io.bluebank.hermes.core.logging.loggerFor
+import io.bluebank.hermes.core.service.ConcreteServiceExecutor
 import io.bluebank.hermes.core.socket.AuthenticatedSocket
 import io.bluebank.hermes.core.socket.SockJSSocketWrapper
 import io.bluebank.hermes.core.socket.TypedSocket
-import io.bluebank.hermes.server.services.ConcreteServiceExecutor
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx

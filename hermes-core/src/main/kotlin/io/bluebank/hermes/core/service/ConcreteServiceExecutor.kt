@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server.services
+package io.bluebank.hermes.core.service
 
 import io.bluebank.hermes.core.annotation.MethodDescription
 import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse
@@ -6,7 +6,6 @@ import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.createJsonException
 import io.bluebank.hermes.core.jsonschema.describeClass
-import io.bluebank.hermes.core.service.ServiceExecutor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import rx.Observable

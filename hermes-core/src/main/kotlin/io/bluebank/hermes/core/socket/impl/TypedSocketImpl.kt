@@ -2,12 +2,12 @@ package io.bluebank.hermes.core.socket.impl
 
 import io.bluebank.hermes.core.socket.AbstractSocket
 import io.bluebank.hermes.core.socket.Socket
-import io.bluebank.hermes.core.socket.SocketAndListener
+import io.bluebank.hermes.core.socket.SocketProcessor
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
-class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketAndListener<R, K, Buffer, Buffer> {
+class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketProcessor<R, K, Buffer, Buffer> {
 
   private lateinit var socket: Socket<Buffer, Buffer>
 
