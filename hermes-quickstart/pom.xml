@@ -10,6 +10,15 @@
   <name>hermes-quickstart</name>
   <packaging>jar</packaging>
 
+  <dependencies>
+    <dependency>
+      <groupId>io.bluebank.hermes</groupId>
+      <artifactId>hermes-server</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
