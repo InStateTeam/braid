@@ -3,3 +3,8 @@
 **/*.iml
 **/service-scripts
 **/file-uploads
+
+# NPM packages folder.
+node_modules/
+
+

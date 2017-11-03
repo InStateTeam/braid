@@ -233,9 +233,11 @@ export default class Helpers {
     const funSection = document.querySelector('.calls');
     const editor = document.querySelector('#editor');
     funSection.style.zIndex = -1;
-    funSection.style.marginLeft = '0px'
-    editor.style.width =  'calc(100% - 260px)'
-    editor.style.marginLeft = '5px'
+    setTimeout(() => {
+      funSection.style.marginLeft = '0px';
+      editor.style.width =  'calc(100% - 260px)';
+      editor.style.marginLeft = '5px'
+    }, 500);    
   }
 }
 

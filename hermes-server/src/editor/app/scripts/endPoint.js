@@ -5,5 +5,7 @@ export default function getEndPoint(serviceName) {
   } else {
     const host = window.location.host;
     control.value = window.location.protocol + "//" + host + "/api/jsonrpc/" + serviceName;
+    let inputWidth = control.value.length * 7.5;
+    control.style.width = inputWidth + 'px';
   }
 }
