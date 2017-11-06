@@ -1,5 +1,4 @@
-import getEndPoint from 'scripts/endPoint';
-import {getServiceScript, retrieveAndUpdateServices} from 'scripts/workers';
+import {retrieveAndUpdateServices} from 'scripts/workers';
 
 import Helpers from 'scripts/helpers'
 
@@ -15,7 +14,7 @@ export default class Buttons {
     const tooltip = document.querySelector('.tooltip');
     const isValidServiceName = helpers.checkCreatedService(serviceName);
     if(isValidServiceName){
-      getServiceScript(serviceName, function() {
+      helpers.getServiceScript(serviceName, function() {
         retrieveAndUpdateServices(serviceName);
         $('#newService').val("");
         tooltip.classList.remove('shown');
@@ -46,11 +45,14 @@ export default class Buttons {
   onDelete(e) {
     const serviceName = helpers.getSelectedService();
     const callValue = "/api/services/" + serviceName;
-    $.delete(callValue, function(){
-      helpers.setSelectedService('');
-      retrieveAndUpdateServices('');
+    $.ajax({
+      url: callValue,
+      method: 'DELETE',
+      success:  () => {
+        helpers.setSelectedService('');
+        retrieveAndUpdateServices('');
+      }
     });
-    getEndPoint('');
   }
 
   formatTooltip(serviceName) {
