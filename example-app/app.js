@@ -3,7 +3,7 @@
 const $ = require('jquery');
 const ServiceProxy = require('hermes-client');
 // Use the following line instead of the above, to debug using the local source for hermes-client
-// const ServiceProxy = require('../client/hermes-service-proxy');
+// const ServiceProxy = require('../hermes-client-js/hermes-service-proxy');
 
 $(document).ready(() => {
   const url = "http://localhost:8080/api/jsonrpc/time";
@@ -25,7 +25,8 @@ class App {
     console.log("opened")
     this.service.login({username: 'admin', password: 'admin'})
       .then(() => { console.log('login succeeded') }, (err) => console.error('login failed', err))
-      .then(() => { this.service.time(this.onTime) });
+      .then(() => { this.service.time(this.onTime) })
+    ;
   }
 
   onTime(time) {

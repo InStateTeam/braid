@@ -15,7 +15,7 @@
   <name>hermes example-server</name>
 
   <properties>
-    <kotlin.version>1.1.51</kotlin.version>
+    <kotlin.version>1.1.4-3</kotlin.version>
   </properties>
 
   <dependencies>
@@ -57,6 +57,7 @@
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
         <executions>
           <execution>
             <id>compile</id>
