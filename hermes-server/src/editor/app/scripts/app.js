@@ -1,4 +1,3 @@
-import Buttons from 'scripts/buttons';
 import Monaco from 'scripts/Monaco';
 import EventListeners from 'scripts/eventListeners';
 

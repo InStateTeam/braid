@@ -13,7 +13,7 @@ export default class EventListeners {
     this.functionButtonsClickEvents();
     this.textBoxKeyEvents(); 
     this.modalClickEvents();    
-    this.popupEvents();
+    this.tooltipEvents();
     this.copyServiceClickEvent();
   }
 
@@ -71,9 +71,9 @@ export default class EventListeners {
     });
   }
 
-  popupEvents(){
-    let popup = document.querySelector('.tooltip .close');
-    popup.addEventListener('click', (e) => {
+  tooltipEvents(){
+    let tooltip = document.querySelector('.tooltip .close');
+    tooltip.addEventListener('click', (e) => {
       document.querySelector('.tooltip').classList.remove('shown');
     });
   }
