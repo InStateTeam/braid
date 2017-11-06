@@ -8,5 +8,3 @@ class MethodDoesNotExist : Exception()
 interface ServiceExecutor {
   fun invoke(request: JsonRPCRequest) : Observable<Any>
 }
-
-
