@@ -20,7 +20,7 @@ export default class Buttons {
         tooltip.classList.remove('shown');
       });
     } else {
-      this.formatTooltip(serviceName)
+      helpers.formatTooltip(serviceName)
     }
  }
 
@@ -53,21 +53,5 @@ export default class Buttons {
         retrieveAndUpdateServices('');
       }
     });
-  }
-
-  formatTooltip(serviceName) {
-    let invalidServiceName = helpers.parseCreateService(serviceName);
-    document.querySelector('.badService').innerHTML = invalidServiceName.highlightedString;
-
-    (invalidServiceName.empty) ? 
-    document.querySelector('.empty').classList.add('shown') : document.querySelector('.empty').classList.remove('shown');
-
-    (invalidServiceName.first) ? 
-    document.querySelector('.first').classList.add('shown') : document.querySelector('.first').classList.remove('shown');
-
-    (invalidServiceName.remain) ? 
-    document.querySelector('.remain').classList.add('shown') : document.querySelector('.remain').classList.remove('shown');    
-
-    document.querySelector('.tooltip').classList.add('shown');
-  }
+  }  
 }

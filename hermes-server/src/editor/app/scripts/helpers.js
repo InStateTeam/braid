@@ -5,6 +5,7 @@ let selectedService = '';
 export default class Helpers {
   constructor(){
     this.showExistingServices = this.showExistingServices.bind(this);
+    this.formatTooltip = this.formatTooltip.bind(this);
   }
   
   getSelectedService() {
@@ -245,6 +246,22 @@ export default class Helpers {
       let inputWidth = control.value.length * 8.5;
       control.style.width = inputWidth + 'px';
     }
+  }
+
+  formatTooltip(serviceName) {
+    let invalidServiceName = this.parseCreateService(serviceName);
+    document.querySelector('.badService').innerHTML = invalidServiceName.highlightedString;
+
+    (invalidServiceName.empty) ? 
+    document.querySelector('.empty').classList.add('shown') : document.querySelector('.empty').classList.remove('shown');
+
+    (invalidServiceName.first) ? 
+    document.querySelector('.first').classList.add('shown') : document.querySelector('.first').classList.remove('shown');
+
+    (invalidServiceName.remain) ? 
+    document.querySelector('.remain').classList.add('shown') : document.querySelector('.remain').classList.remove('shown');    
+
+    document.querySelector('.tooltip').classList.add('shown');
   }
 }
 
