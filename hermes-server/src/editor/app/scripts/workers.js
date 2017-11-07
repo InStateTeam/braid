@@ -1,6 +1,4 @@
-import {onServiceSelect} from 'scripts/serviceList';
 import Helpers from 'scripts/helpers';
-import getEndPoint from 'scripts/endPoint';
 
 const helpers = new Helpers();
 
@@ -9,11 +7,9 @@ export function ensureServiceIsCreated(callback) {
   if (typeof(params['service']) !== 'undefined' && params.service !== null) {
     helpers.getServiceScript(params.service, function() {
       callback(params.service);
-      console.log('called')
     })
   } else {
     callback(null);
-    console.log('not called');
   }
 }
 
@@ -40,7 +36,7 @@ export function switchService(selectedService){
   });
   helpers.getJavaHeaders(selectedService, helpers.showExistingServices);
   helpers.selectHighlight(helpers.getSelectedService());
-  getEndPoint(selectedService);
+  helpers.getEndPoint(selectedService);
   editor.focus();
 }
 
@@ -50,7 +46,7 @@ function populateServiceOptions(selection, services) {
   for (var idx in services) {
     const service = services[idx];
     const option = $('<li>', {value: service, text: service})
-    option.click(onServiceSelect);
+    //option.click(onServiceSelect);
     selection.append(option);
   }
 }

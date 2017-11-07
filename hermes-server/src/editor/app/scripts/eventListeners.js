@@ -15,6 +15,7 @@ export default class EventListeners {
     this.modalClickEvents();    
     this.tooltipEvents();
     this.copyServiceClickEvent();
+    this.serviceSelectEvent();
   }
 
   functionButtonsClickEvents(){
@@ -99,5 +100,26 @@ export default class EventListeners {
     copyServiceBtn.addEventListener('mouseout', (e) => {
       copyToolTip.style.display = 'none';
     });
+  }
+
+  serviceSelectEvent(){
+    let services = document.querySelector('#services');
+    let self = this;    
+    services.addEventListener('click', (e) => {
+      if(e.target.tagName === 'LI'){
+        onServiceSelect(e);
+      }
+    })
+
+    function onServiceSelect(e) {
+      if(self.Helpers.getSelectedService() && !document.querySelector('#saveBtn').disabled){
+        document.querySelector('.unsaved').textContent = self.Helpers.getSelectedService();
+        let modal = document.querySelector('.modal');
+        modal.setAttribute('data-service', e.target.textContent);
+        modal.classList.toggle('shown');
+      } else {
+        switchService(e.target.textContent);
+      }  
+    }    
   }
 }
