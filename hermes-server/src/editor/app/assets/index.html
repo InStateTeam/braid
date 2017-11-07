@@ -36,7 +36,7 @@
       </div>                           
       <div id="editor">        
         <section class="functions">
-          <input type="text" id="newService" placeholder="new service name">
+          <input type="text" id="newService" placeholder="new service name" autofocus>
           <div class="tooltip">
             <div class="close">&times;</div>
             <h4>Invalid service name</h4>
@@ -66,8 +66,7 @@
   <script src="monaco-editor/min/vs/loader.js"></script>
   <script>
     var editor;
-    var selectedService;
-        
+            
     function monaco(){
       require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
       require(['vs/editor/editor.main'], function() {
@@ -77,12 +76,10 @@
           automaticLayout: true,
           readOnly: true
         });
-        editor.onDidChangeModelContent(onScriptChanged);        
+        editor.onDidChangeModelContent(function(){
+          document.querySelector('#saveBtn').disabled = false;
+        });        
       });
-      
-      function onScriptChanged() {
-        $('#saveBtn').prop('disabled', false);
-      }
     }
   </script>
 </body>

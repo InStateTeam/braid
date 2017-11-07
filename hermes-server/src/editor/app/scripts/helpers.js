@@ -1,6 +1,11 @@
 import beautify from 'js-beautify';
 
+let selectedService = '';
+
 export default class Helpers {
+  constructor(){
+    this.showExistingServices = this.showExistingServices.bind(this);
+  }
   
   getSelectedService() {
     return selectedService;
@@ -26,9 +31,18 @@ export default class Helpers {
       callback(script);
     });
   }
+
+  showExistingServices(data){
+    if(data){
+      this.populateFunctions(data);
+      this.expandFunctionsSection();
+    } else { 
+      this.collapseFunctionsSection();
+    }
+  }
   
   parseURL(url) {
-    var parser = document.createElement('a'),
+    let parser = document.createElement('a'),
       searchObject = {},
       queries, split, i;
     // Let the browser do the work
@@ -112,20 +126,6 @@ export default class Helpers {
       }
     }
     selectedLi.style.background = "#EF0017"
-  }
-
-  highlightNewService(selectedService){
-    const lists = document.querySelector('#services').querySelectorAll('li');
-    let newServiceIndex = "";
-    for (let item = 0; item < lists.length;  item++) {
-      lists[item].style.background = '#000';
-      if(lists[item].innerText === selectedService){
-        newServiceIndex = item;
-      }
-    }
-    if(newServiceIndex){
-      lists[newServiceIndex].style.background = "#EF0017";
-    }
   }
 
   populateList(list, serviceArray){
@@ -215,11 +215,6 @@ export default class Helpers {
     this.populateList(functionList, serviceArray);
   }
 
-  populateStubs(serviceArray){
-    const stubList = document.querySelector('.stubbed-functions');
-    this.populateList(stubList, serviceArray);
-  }
-
   expandFunctionsSection(){
     const funSection = document.querySelector('.calls');
     const editor = document.querySelector('#editor');
@@ -238,6 +233,18 @@ export default class Helpers {
       editor.style.width =  'calc(100% - 260px)';
       editor.style.marginLeft = '5px'
     }, 500);    
+  }
+
+  getEndPoint(serviceName) {
+    const control = document.querySelector('#calls');
+    if (!serviceName || serviceName.trim() === "") {
+      control.value = ""
+    } else {
+      const host = window.location.host;
+      control.value = window.location.protocol + "//" + host + "/api/jsonrpc/" + serviceName;
+      let inputWidth = control.value.length * 8.5;
+      control.style.width = inputWidth + 'px';
+    }
   }
 }
 
