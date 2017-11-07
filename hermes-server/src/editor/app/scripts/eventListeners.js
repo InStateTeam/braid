@@ -1,5 +1,5 @@
 import Buttons from 'scripts/buttons';
-import {saveContent, switchService} from 'scripts/serviceList';
+import {switchService} from 'scripts/workers';
 import Helpers from 'scripts/helpers';
 
 export default class EventListeners {
@@ -10,10 +10,32 @@ export default class EventListeners {
   }
 
   init(){
+    this.functionButtonsClickEvents();
     this.textBoxKeyEvents(); 
     this.modalClickEvents();    
-    this.popupEvents();
-    this.copyService();
+    this.tooltipEvents();
+    this.copyServiceClickEvent();
+    this.serviceSelectEvent();
+  }
+
+  functionButtonsClickEvents(){
+    let functionButtons = document.querySelector('.functions');
+    let self = this;
+    functionButtons.addEventListener('click', (e) => {
+
+      if(e.target.id === 'createServiceBtn'){
+        self.Buttons.onCreateService();
+      }
+      if(e.target.id === 'saveBtn'){
+       self.Buttons.onSave(e); 
+      }
+      if(e.target.id === 'formatBtn'){
+       self.Buttons.onFormat(e); 
+      }
+      if(e.target.id === 'deleteBtn'){
+       self.Buttons.onDelete(e); 
+      }
+    })
   }
 
   textBoxKeyEvents(){
@@ -25,14 +47,11 @@ export default class EventListeners {
         self.Buttons.onCreateService();
       }
     }); 
-
-    //textBoxCreate.addEventListener('input', (e) => {      
-    //  textBoxCreate.value = self.Helpers.checkCreateService(e.target.value);
-    //});
   }
 
   modalClickEvents(){
-    let modal = document.querySelector('.modal');    
+    let modal = document.querySelector('.modal');
+    let self = this;    
     modal.addEventListener('click', (e) => {
       if(e.target.classList.contains('modal')){
         modal.classList.toggle('shown');
@@ -40,7 +59,7 @@ export default class EventListeners {
 
       if(e.target.id === 'yesBtn'){        
         let selectedService = modal.dataset.service;
-        saveContent(selectedService);
+        self.Buttons.onSave(e);
         switchService(selectedService);
         modal.classList.toggle('shown');
       }
@@ -53,14 +72,14 @@ export default class EventListeners {
     });
   }
 
-  popupEvents(){
-    let popup = document.querySelector('.tooltip .close');
-    popup.addEventListener('click', (e) => {
+  tooltipEvents(){
+    let tooltip = document.querySelector('.tooltip .close');
+    tooltip.addEventListener('click', (e) => {
       document.querySelector('.tooltip').classList.remove('shown');
     });
   }
 
-  copyService(){
+  copyServiceClickEvent(){
     let copyServiceBtn = document.querySelector('#copy-to-clipboard');
     let copyToolTip = document.querySelector('.tooltip-clip');
     
@@ -81,5 +100,26 @@ export default class EventListeners {
     copyServiceBtn.addEventListener('mouseout', (e) => {
       copyToolTip.style.display = 'none';
     });
+  }
+
+  serviceSelectEvent(){
+    let services = document.querySelector('#services');
+    let self = this;    
+    services.addEventListener('click', (e) => {
+      if(e.target.tagName === 'LI'){
+        onServiceSelect(e);
+      }
+    })
+
+    function onServiceSelect(e) {
+      if(self.Helpers.getSelectedService() && !document.querySelector('#saveBtn').disabled){
+        document.querySelector('.unsaved').textContent = self.Helpers.getSelectedService();
+        let modal = document.querySelector('.modal');
+        modal.setAttribute('data-service', e.target.textContent);
+        modal.classList.toggle('shown');
+      } else {
+        switchService(e.target.textContent);
+      }  
+    }    
   }
 }
