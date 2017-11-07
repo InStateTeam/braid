@@ -1,5 +1,6 @@
 package io.bluebank.hermes.core.jsonrpc
 
+import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
@@ -12,5 +13,9 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method:
 
   fun mapParams(method: Method): Array<Any?> {
     return parameters.mapParams(method).toTypedArray()
+  }
+
+  fun mapParams(constructor: Constructor<*>) : Array<Any?> {
+    return parameters.mapParams(constructor).toTypedArray()
   }
 }
