@@ -33,6 +33,7 @@
     <module>hermes-quickstart</module>
     <module>hermes-core</module>
     <module>hermes-corda</module>
+    <module>example-cordapp</module>
   </modules>
 
   <distributionManagement>
