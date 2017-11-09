@@ -32,6 +32,7 @@
     <module>example-server</module>
     <module>hermes-quickstart</module>
     <module>hermes-core</module>
+    <module>hermes-corda</module>
   </modules>
 
   <distributionManagement>
