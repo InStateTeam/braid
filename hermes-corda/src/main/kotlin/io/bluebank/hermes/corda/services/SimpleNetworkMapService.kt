@@ -1,7 +1,6 @@
 package io.bluebank.hermes.corda.services
 
 import io.bluebank.hermes.corda.HermesConfig
-import io.bluebank.hermes.corda.serialisation.registerHermesJacksonSerializers
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.NodeInfo
@@ -12,11 +11,6 @@ import rx.Observable
 import rx.Subscription
 
 class SimpleNetworkMapService private constructor(private val networkMapCache: NetworkMapCache, config: HermesConfig) {
-  companion object {
-    init {
-      registerHermesJacksonSerializers()
-    }
-  }
   constructor(services: ServiceHubInternal, config: HermesConfig) : this (services.networkMapCache, config)
 
   data class SimpleNodeInfo(

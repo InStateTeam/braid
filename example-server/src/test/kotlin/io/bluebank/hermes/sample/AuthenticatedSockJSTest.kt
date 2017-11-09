@@ -1,5 +1,6 @@
 package io.bluebank.hermes.sample
 
+import io.bluebank.hermes.core.json.HermesJacksonInit
 import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.JsonRPCResponse
@@ -33,7 +34,7 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
     @JvmStatic
     fun main(args: Array<String>) {
       System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-      io.bluebank.hermes.core.json.JacksonKotlinInit.init()
+      HermesJacksonInit.init()
       Vertx.vertx().deployVerticle(AuthenticatedSockJSTest())
     }
 

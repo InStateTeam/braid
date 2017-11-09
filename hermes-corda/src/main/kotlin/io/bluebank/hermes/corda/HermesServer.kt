@@ -1,17 +1,18 @@
 package io.bluebank.hermes.corda
 
-import io.bluebank.hermes.core.json.JacksonKotlinInit
+import io.bluebank.hermes.corda.serialisation.HermesCordaJacksonInit
 import io.vertx.core.Vertx
 import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 import net.corda.node.services.api.ServiceHubInternal
 
 class HermesServer(val serviceHub: ServiceHub, private val config: HermesConfig) {
-
   companion object {
     private val logger = loggerFor<HermesServer>()
+    init {
+      HermesCordaJacksonInit.init()
+    }
     fun bootstrapHermes(serviceHub: ServiceHub, config: HermesConfig = HermesConfig()) : HermesServer {
-      JacksonKotlinInit.init()
       return HermesServer(serviceHub, config).start()
     }
   }

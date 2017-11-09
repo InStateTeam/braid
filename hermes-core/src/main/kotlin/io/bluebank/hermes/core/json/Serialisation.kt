@@ -3,7 +3,7 @@ package io.bluebank.hermes.core.json
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.vertx.core.json.Json
 
-class JacksonKotlinInit {
+class HermesJacksonInit {
   companion object {
     init {
       with(KotlinModule()) {
