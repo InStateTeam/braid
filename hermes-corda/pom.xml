@@ -9,10 +9,15 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>hermes-core</artifactId>
+  <artifactId>hermes-corda</artifactId>
   <packaging>jar</packaging>
 
-  <name>hermes-core</name>
+  <name>hermes-corda</name>
+  <description>a library for easy access to corda from non-jvm environments</description>
+
+  <properties>
+    <corda.version>1.0.0</corda.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -33,56 +38,30 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <version>${vertx.version}</version>
+      <groupId>io.bluebank.hermes</groupId>
+      <artifactId>hermes-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
-      <version>${vertx.version}</version>
+      <groupId>net.corda</groupId>
+      <artifactId>corda-node</artifactId>
+      <version>${corda.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.corda.crash</groupId>
+          <artifactId>crash.shell</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.bft-smart</groupId>
+          <artifactId>library</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <version>${vertx.version}</version>
+      <groupId>net.corda</groupId>
+      <artifactId>corda-test-utils</artifactId>
+      <version>${corda.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-kotlin</artifactId>
-      <version>2.9.0</version>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-auth-shiro</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-auth-common</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-kotlin</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/io.reactivex/rxjava -->
-    <dependency>
-      <groupId>io.reactivex</groupId>
-      <artifactId>rxjava</artifactId>
-      <version>${rxjava.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jsonSchema</artifactId>
-      <version>2.7.4</version>
     </dependency>
   </dependencies>
 

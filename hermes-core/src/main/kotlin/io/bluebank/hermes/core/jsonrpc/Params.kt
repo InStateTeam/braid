@@ -1,6 +1,7 @@
 package io.bluebank.hermes.core.jsonrpc
 
 import io.vertx.core.json.Json
+import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
@@ -26,6 +27,7 @@ interface Params {
 
   fun match(method: Method): Boolean
   fun mapParams(method: Method): List<Any?>
+  fun mapParams(constructor: Constructor<*>) : List<Any?>
 }
 
 class SingleValueParam(val param: Any) : Params {
@@ -38,6 +40,10 @@ class SingleValueParam(val param: Any) : Params {
   override fun mapParams(method: Method): List<Any?> {
     return listOf(convert(param, method.parameters[0]))
   }
+
+  override fun mapParams(constructor: Constructor<*>): List<Any?> {
+    return listOf(convert(param, constructor.parameters[0]))
+  }
 }
 
 class NamedParams(val map: Map<String, Any?>) : Params {
@@ -45,10 +51,14 @@ class NamedParams(val map: Map<String, Any?>) : Params {
   override fun match(method: Method): Boolean {
     return method.parameters.all { map.containsKey(it.name) }
   }
-
-
   override fun mapParams(method: Method): List<Any?> {
     return method.parameters.map { parameter ->
+      val value = map[parameter.name]
+      convert(value, parameter)
+    }
+  }
+  override fun mapParams(constructor: Constructor<*>): List<Any?> {
+    return constructor.parameters.map { parameter ->
       val value = map[parameter.name]
       convert(value, parameter)
     }
@@ -68,6 +78,11 @@ class ListParams(val params: List<Any?>) : Params {
     }
   }
 
+  override fun mapParams(constructor: Constructor<*>): List<Any?> {
+    return constructor.parameters.zip(params).map { (parameter, value) ->
+      convert(value, parameter)
+    }
+  }
 }
 
 private fun convert(value: Any?, parameter: Parameter): Any? {
@@ -85,6 +100,10 @@ class NullParams : Params {
   }
 
   override fun mapParams(method: Method): List<Any?> {
+    // assuming client has already checked the method parameters
+    return emptyList()
+  }
+  override fun mapParams(constructor: Constructor<*>): List<Any?> {
     // assuming client has already checked the method parameters
     return emptyList()
   }
