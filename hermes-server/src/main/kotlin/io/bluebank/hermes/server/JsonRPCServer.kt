@@ -99,7 +99,7 @@ class JsonRPCServerBuilder {
 class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilder) {
   companion object {
     init {
-      io.bluebank.hermes.core.json.JacksonKotlinInit.init()
+      io.bluebank.hermes.core.json.HermesJacksonInit.init()
     }
 
     internal fun createJsonRpcServer(builder: JsonRPCServerBuilder): JsonRPCServer {
