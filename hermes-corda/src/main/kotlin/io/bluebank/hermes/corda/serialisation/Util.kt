@@ -16,3 +16,9 @@ internal fun checkHasField(fieldName: String, node: JsonNode, parser: JsonParser
     throw JsonMappingException.from(parser, "missing field: $fieldName")
   }
 }
+
+internal fun checkIsTextual(node: JsonNode, parser: JsonParser) {
+  if (!node.isTextual) {
+    throw JsonMappingException.from(parser, "node is not text");
+  }
+}

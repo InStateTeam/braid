@@ -28,6 +28,7 @@
 
   <modules>
     <module>hermes-client-js</module>
+    <module>hermes-corda-client-js</module>
     <module>hermes-server</module>
     <module>example-server</module>
     <module>hermes-quickstart</module>
@@ -107,6 +108,7 @@
         </executions>
         <configuration>
           <jvmTarget>1.8</jvmTarget>
+          <javaParameters>true</javaParameters>
         </configuration>
       </plugin>
     </plugins>

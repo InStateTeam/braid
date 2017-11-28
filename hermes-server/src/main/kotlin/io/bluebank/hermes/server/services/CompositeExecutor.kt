@@ -1,6 +1,7 @@
 package io.bluebank.hermes.server.services
 
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
+import io.bluebank.hermes.core.service.MethodDescriptor
 import io.bluebank.hermes.core.service.ServiceExecutor
 import rx.Observable
 
@@ -18,6 +19,8 @@ class CompositeExecutor(vararg predefinedExecutors: ServiceExecutor) : ServiceEx
       invoke (0, request)
     }
   }
+
+  override fun getStubs(): List<MethodDescriptor> = executors.flatMap { it.getStubs() }
 
   private fun invoke(executorIndex: Int, rpcRequest: JsonRPCRequest) : Observable<Any> {
     return executors[executorIndex].invoke(rpcRequest)

@@ -1,6 +1,7 @@
 package io.bluebank.hermes.server
 
 import io.bluebank.hermes.core.annotation.ServiceDescription
+import io.bluebank.hermes.core.http.write
 import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.JsonRPCResponse
@@ -24,7 +25,9 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 
-class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: Int, val authProvider: AuthProvider?) : AbstractVerticle() {
+class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val port: Int,
+                      private val authProvider: AuthProvider?,
+                      private val httpServerOptions: HttpServerOptions) : AbstractVerticle() {
   companion object {
     val logger = loggerFor<JsonRPCVerticle>()
   }
@@ -94,7 +97,7 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
   }
 
   private fun setupWebserver(router: Router, startFuture: Future<Void>) {
-    vertx.createHttpServer(HttpServerOptions().withCompatibleWebsockets())
+    vertx.createHttpServer(httpServerOptions.withCompatibleWebsockets())
         .requestHandler(router::accept)
         .listen(port) {
           if (it.succeeded()) {
@@ -191,7 +194,7 @@ class JsonRPCVerticle(val rootPath: String, val services: List<Any>, val port: I
       write("")
       return
     } else {
-      write(service.getJavaStubs())
+      write(service.getStubs())
     }
   }
 

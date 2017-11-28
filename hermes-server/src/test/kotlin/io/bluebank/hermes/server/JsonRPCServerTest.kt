@@ -1,5 +1,6 @@
 package io.bluebank.hermes.server
 
+import io.bluebank.hermes.core.http.failed
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.hermes.server.JsonRPCServerBuilder.Companion.createServerBuilder
@@ -31,7 +32,13 @@ class JsonRPCServerTest {
       .withVertx(vertx)
       .withPort(port)
       .build()
-  private val client = vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))!!
+  private val client = vertx.createHttpClient(HttpClientOptions()
+      .setDefaultPort(port)
+      .setDefaultHost("localhost")
+      .setSsl(true)
+      .setTrustAll(true)
+      .setVerifyHost(false)
+  )!!
 
   @Before
   fun before(testContext: TestContext) {
@@ -129,7 +136,7 @@ class JsonRPCServerTest {
   private fun httpGet(url: String): Future<Buffer> {
     val future = future<Buffer>()
     try {
-      client.getNow(url) { response ->
+      client.get(url) { response ->
         if (response.failed) {
           future.fail(response.statusMessage() ?: "failed")
         } else {
@@ -137,7 +144,9 @@ class JsonRPCServerTest {
             future.complete(it)
           }
         }
-      }
+      }.exceptionHandler {
+        future.fail(it)
+      }.end()
     } catch (err: Throwable) {
       future.fail(err)
     }
@@ -157,6 +166,9 @@ class JsonRPCServerTest {
                 future.complete(it)
               }
             }
+          }
+          .exceptionHandler {
+            future.fail(it)
           }
           .end(data)
     } catch (err: Throwable) {
