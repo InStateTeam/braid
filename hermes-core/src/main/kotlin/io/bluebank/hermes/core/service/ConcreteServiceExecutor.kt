@@ -1,15 +1,15 @@
 package io.bluebank.hermes.core.service
 
-import io.bluebank.hermes.core.annotation.MethodDescription
 import io.bluebank.hermes.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.hermes.core.jsonrpc.JsonRPCMounter
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
 import io.bluebank.hermes.core.jsonrpc.createJsonException
-import io.bluebank.hermes.core.jsonschema.describeClass
+import io.bluebank.hermes.core.jsonschema.toDescriptor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import rx.Observable
 import rx.Subscriber
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
@@ -23,6 +23,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
         val castedParameters = request.mapParams(method)
         val result = method.invoke(service, *castedParameters)
         handleResult(result, request, subscriber)
+      } catch (err: InvocationTargetException) {
+        subscriber.onError(err.targetException)
       } catch (err: Throwable) {
         subscriber.onError(err)
       }
@@ -76,35 +78,10 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     }
   }
 
-  fun getJavaStubs(): List<MethodDescriptor> {
+  override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
         .filter { Modifier.isPublic(it.modifiers) }
         .filter { !it.name.contains("$")}
         .map { it.toDescriptor() }
   }
-
-  private fun Method.toDescriptor(): MethodDescriptor {
-    val serviceAnnotation = getAnnotation<MethodDescription>(MethodDescription::class.java)
-    val name = this.name
-    val params = parameters.map { it.type.toJavascriptType() }
-
-    val returnDescription = if (serviceAnnotation != null && serviceAnnotation.returnType != Any::class) {
-      serviceAnnotation.returnType.javaObjectType.toJavascriptType()
-    } else {
-      returnType.toJavascriptType()
-    }
-    val returnPrefix = if (returnType == Observable::class.java) {
-      "stream-of "
-    } else {
-      ""
-    }
-    val description = serviceAnnotation?.description ?: ""
-    return MethodDescriptor(name, description, params, returnPrefix + returnDescription)
-  }
-
-  private fun Class<*>.toJavascriptType(): String {
-    return describeClass(this)
-  }
-
-  data class MethodDescriptor(val name: String, val description: String, val parameters: List<String>, val returnType: String)
 }

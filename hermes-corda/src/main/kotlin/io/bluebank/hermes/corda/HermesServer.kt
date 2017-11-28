@@ -6,15 +6,14 @@ import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 import net.corda.node.services.api.ServiceHubInternal
 
-class HermesServer(val serviceHub: ServiceHub, private val config: HermesConfig) {
+class HermesServer(serviceHub: ServiceHub, private val config: HermesConfig) {
   companion object {
     private val logger = loggerFor<HermesServer>()
     init {
       HermesCordaJacksonInit.init()
     }
-    fun bootstrapHermes(serviceHub: ServiceHub, config: HermesConfig = HermesConfig()) : HermesServer {
-      return HermesServer(serviceHub, config).start()
-    }
+    fun bootstrapHermes(serviceHub: ServiceHub, config: HermesConfig = HermesConfig()) =
+        HermesServer(serviceHub, config).start()
   }
 
   private val services : ServiceHubInternal = serviceHub as ServiceHubInternal

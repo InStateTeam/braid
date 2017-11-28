@@ -12,7 +12,7 @@ import net.corda.core.contracts.Amount
 import java.util.*
 
 private val _QUANTITY_FIELD = "quantity"
-private val _DISPLAY_TOKEN_SIZE_FIELD = "displayTokenSizeField"
+private val _DISPLAY_TOKEN_SIZE_FIELD = "displayTokenSize"
 private val _TOKEN_FIELD = "token"
 private val _TOKEN_TYPE_FIELD = "_tokenType"
 
@@ -43,18 +43,30 @@ class AmountDeserializer : StdDeserializer<Amount<Any>>(Amount::class.java) {
   override fun deserialize(parser: JsonParser, context: DeserializationContext): Amount<Any> {
     val node = parseNode(parser)
     checkNode(node, parser)
-    val quantity = node[_QUANTITY_FIELD].asLong()
-    val displayTokenSize = node[_DISPLAY_TOKEN_SIZE_FIELD].decimalValue()
-    val token = parseToken(node)
-    return Amount(quantity, displayTokenSize, token)
+    return when {
+      node.isObject -> {
+        val quantity = node[_QUANTITY_FIELD].asLong()
+        val displayTokenSize = node[_DISPLAY_TOKEN_SIZE_FIELD].decimalValue()
+        val token = parseToken(node)
+        Amount(quantity, displayTokenSize, token)
+      }
+      node.isTextual -> {
+        @Suppress("UNCHECKED_CAST")
+        Amount.parseCurrency(node.textValue()) as Amount<Any>
+      }
+      else -> {
+        throw RuntimeException("should never get here");
+      }
+    }
   }
 
-  private fun parseToken(node: JsonNode): Any {
-    return if (node.has(_TOKEN_TYPE_FIELD)) {
+  private fun parseToken(node: JsonNode): Any = when {
+    node.has(_TOKEN_TYPE_FIELD) -> {
       val tokenClassName = node[_TOKEN_TYPE_FIELD].textValue()
       val tokenClass = Class.forName(tokenClassName)
       Json.mapper.readerFor(tokenClass).readValue<Any>(node[_TOKEN_FIELD])
-    } else {
+    }
+    node.has(_TOKEN_FIELD) -> {
       val tokenString = node[_TOKEN_FIELD].asText()
       try {
         Currency.getInstance(tokenString)
@@ -62,16 +74,18 @@ class AmountDeserializer : StdDeserializer<Amount<Any>>(Amount::class.java) {
         tokenString
       }
     }
+    else -> throw RuntimeException("cannot parse amount")
   }
 
-  private fun parseNode(parser: JsonParser): JsonNode {
-    return parser.codec.readTree(parser)
-  }
+  private fun parseNode(parser: JsonParser): JsonNode = parser.codec.readTree(parser)
 
   private fun checkNode(node: JsonNode, parser: JsonParser) {
-    checkIsObject(node, parser)
-    checkHasField(_QUANTITY_FIELD, node, parser)
-    checkHasField(_DISPLAY_TOKEN_SIZE_FIELD, node, parser)
-    checkHasField(_TOKEN_FIELD, node, parser)
+    if (node.isObject) {
+      checkHasField(_QUANTITY_FIELD, node, parser)
+      checkHasField(_DISPLAY_TOKEN_SIZE_FIELD, node, parser)
+      checkHasField(_TOKEN_FIELD, node, parser)
+    } else {
+      checkIsTextual(node, parser)
+    }
   }
 }

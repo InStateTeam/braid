@@ -17,7 +17,6 @@ class JsonRPC {
     // first we do a quick check if the service exists and response to a sockjs info request
     // we do this because sockjs-client doesn't distinguish between, the lack of a sockjs service and the webserver being up
     const oReq = new XMLHttpRequest();
-
     oReq.addEventListener('load', () => thisObj.onInitialCheck(oReq));
     oReq.addEventListener('error', (e) => thisObj.initialCheckFailed(e));
     oReq.open('GET', url + '/info');

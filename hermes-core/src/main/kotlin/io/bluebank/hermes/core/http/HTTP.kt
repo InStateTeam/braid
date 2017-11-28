@@ -1,4 +1,4 @@
-package io.bluebank.hermes.server
+package io.bluebank.hermes.core.http
 
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.http.HttpClientResponse

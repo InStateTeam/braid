@@ -2,10 +2,14 @@ package io.bluebank.hermes.corda.services
 
 import io.bluebank.hermes.corda.HermesConfig
 import io.bluebank.hermes.core.jsonrpc.JsonRPCRequest
+import io.bluebank.hermes.core.jsonschema.toDescriptor
+import io.bluebank.hermes.core.jsonschema.toSimpleJavascriptType
+import io.bluebank.hermes.core.service.MethodDescriptor
 import io.bluebank.hermes.core.service.MethodDoesNotExist
 import io.bluebank.hermes.core.service.ServiceExecutor
 import net.corda.core.flows.FlowLogic
 import net.corda.core.toObservable
+import net.corda.core.utilities.ProgressTracker
 import net.corda.node.services.api.ServiceHubInternal
 import rx.Observable
 import java.lang.reflect.Constructor
@@ -17,6 +21,21 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
       invoke(request, flow)
     } else {
       Observable.error(MethodDoesNotExist())
+    }
+  }
+
+  override fun getStubs(): List<MethodDescriptor> {
+    return config.registeredFlows.flatMap { flow ->
+      // we filter constructors with progress trackers for now
+      // there may be a correct way of handling these but for now, these are not included
+      // constructor parameters are denoted as discrete methods appended with the number of parameters that the
+      // constructor takes,
+      flow.value.constructors.filter {
+        !it.parameterTypes.contains(ProgressTracker::class.java)
+      }.map {
+        val returnType = flow.value.getMethod("call").returnType
+        it.toDescriptor().copy(name = flow.key, returnType = returnType.toSimpleJavascriptType())
+      }
     }
   }
 
@@ -46,6 +65,4 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
   }
 }
 
-private fun Constructor<*>.matches(request: JsonRPCRequest) : Boolean {
-  return this.parameterCount == request.paramCount()
-}
+private fun Constructor<*>.matches(request: JsonRPCRequest)  = this.parameterCount == request.paramCount()

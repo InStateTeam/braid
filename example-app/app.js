@@ -6,7 +6,7 @@ const ServiceProxy = require('hermes-client');
 // const ServiceProxy = require('../hermes-client-js/hermes-service-proxy');
 
 $(document).ready(() => {
-  const url = "http://localhost:8080/api/jsonrpc/time";
+  const url = "https://localhost:8080/api/jsonrpc/time";
   const app = new App(url);
 });
 
@@ -18,7 +18,13 @@ class App {
 
   connect() {
     const thisObj = this;
-    this.service = new ServiceProxy(this.url, (e) => { thisObj.onOpen(e) }, (e) => { thisObj.onClose(e) }, (err) => { thisObj.onError(err); });
+    this.service = new ServiceProxy(this.url,
+      () => { thisObj.onOpen() },
+      () => { thisObj.onClose() },
+      (err) => { thisObj.onError(err); },
+      {
+        rejectUnauthorized: false
+      });
   }
 
   onOpen() {

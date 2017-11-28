@@ -70,6 +70,7 @@ class HermesServiceProxy {
   }
 
   onErrorTrap(err) {
+    console.log(err);
     if (err.jsonRPCError && err.jsonRPCError.code === -32601) {
       console.log("%cHermes: %c" + err.message + "\n%cCreate a stub here: " + this.uri(),
         "font-family: sans-serif; font-size: 14px; font-weight: bold;",

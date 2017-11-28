@@ -1,9 +1,11 @@
 package io.bluebank.hermes.server
 
+import io.bluebank.hermes.core.http.HttpServerConfig
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
 import io.vertx.core.Future.succeededFuture
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.auth.AuthProvider
 
 /**
@@ -15,7 +17,7 @@ class JsonRPCServerBuilder {
   internal var port: Int = 8080
   internal var services: MutableList<Any> = mutableListOf()
   internal var authProvider: AuthProvider? = null
-
+  internal var httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()
   companion object {
     /**
      * main entry point to setup a builder
@@ -23,9 +25,7 @@ class JsonRPCServerBuilder {
      * and finally call [build]
      */
     @JvmStatic
-    fun createServerBuilder(): JsonRPCServerBuilder {
-      return JsonRPCServerBuilder()
-    }
+    fun createServerBuilder() = JsonRPCServerBuilder()
   }
 
   /**
@@ -86,6 +86,11 @@ class JsonRPCServerBuilder {
     return this
   }
 
+  fun withHttpServerOptions(httpServerOptions: HttpServerOptions) : JsonRPCServerBuilder {
+    this.httpServerOptions = httpServerOptions
+    return this
+  }
+
   /**
    * build the server
    * don't forget to start the server using [JsonRPCServerBuilder.build]
@@ -130,7 +135,7 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
   fun start(callback: (AsyncResult<Void>) -> Unit) {
     if (deploymentId == null) {
       with(builder) {
-        vertx!!.deployVerticle(JsonRPCVerticle(rootPath, services, port, authProvider)) {
+        vertx!!.deployVerticle(JsonRPCVerticle(rootPath, services, port, authProvider, httpServerOptions)) {
           if (it.failed()) {
             println("failed to deploy: ${it.cause().message}")
             callback(failedFuture(it.cause()))
