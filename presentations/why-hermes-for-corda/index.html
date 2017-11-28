@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>Hermes</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section data-markdown>
+				<textarea data-template>
+					## Hermes Demo
+
+					* Problem
+					* Approach
+					* Demo
+					* Explore 
+					* Backlog
+
+					> seeking your feedback and support
+				</textarea>
+			</section>
+			<section id='naming'>
+				<q>"There are only two hard things in Computer Science: cache invalidation and naming things."</q>
+				<br><br><code>sed -i 's/hermes/a-better-name/g' *</code>
+			</section>
+			<section id="the_problem">
+				<blockquote>Our <i>purpose</i> is to deliver business value</blockquote>
+				<h4 class='fragment'>It's not about</h4>
+				<ol>
+					<li class="fragment">Wrapping the world with JAX-RS</li>
+					<li class="fragment">Mangling REST for streaming</li>					
+					<li class="fragment">Remembering to do webservice security right</li>
+					<ul>
+						<li class="fragment">TLS, CORS, CSRF, XSS ...</li>
+					</ul>
+					<li class='fragment'>...</li>
+				</ol>
+
+				<blockquote class="fragment">
+					REST and JAX-RS are the wrong abstractions
+				</blockquote>
+			</section>
+			<section id='but'>
+				<h2>But ...</h2>
+				We still want our client stacks:
+				<ol>
+					<li class="fragment">Browser</li>
+					<li class="fragment">Python</li>
+					<li class="fragment">C#</li>
+					<li class="fragment">F# (hello, TypeProviders! ;-)</li>
+					<li class="fragment">Golang, Dart, C++ etc</li>
+				</ol>
+			</section>
+			<section id="the_approach">
+				<h2>Approach</h2>
+				<ol>
+					<li class="fragment">A small toolkit, not a large framework</li>	
+					<li class="fragment">Good performance: <code>[5k, 10k)</code></li>					
+					<li class="fragment"><i>"Zero to Hero"</i> in < 15 minutes</li>
+					<li class="fragment">Expose flows and custom services with ease</li>
+					<li class="fragment">Pluggable Auth* provider</li>
+					<li class="fragment">Code your client with <i>real objects</i></li>
+					<li class="fragment"><code>Promise</code> and <code>Observable</code> semantics</li>
+				</ol>
+			</section>
+			<section id='demo'>
+				<h2><a href='http://localhost:3333' target='_blank'>Demo</a></h2>
+			</section>
+			<section id='work_remaining'>
+					<h2>Work Remaining</h2>
+					
+					<ul>
+						<li>Vault API - query criteria representation</li>
+						<li>More typeinfo to clients</li>
+						<li>Integration tests</li>
+						<li>Languages: Python, C#, F#, ... </li>
+						<li>Documentation</li>						
+						<li>... and more ...</li>
+					</ul>
+			</section>
+			<section id='qa'>
+				<h3>Thanks for listening!</h3>
+				<q>Your questions and recommendations most welcome</q>
+			</section>
+			</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			history: true,
+			centre: true,
+			transition: 'fade',
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js' },
+				{ src: 'plugin/markdown/markdown.js' },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+</html>

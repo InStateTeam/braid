@@ -15,6 +15,7 @@
       <groupId>io.bluebank.hermes</groupId>
       <artifactId>hermes-client-js</artifactId>
       <version>${project.version}</version>
+      <type>pom</type>
     </dependency>
   </dependencies>
   <build>
