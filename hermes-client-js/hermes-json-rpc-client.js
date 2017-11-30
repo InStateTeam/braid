@@ -5,182 +5,188 @@ const Promise = require('promise');
 
 class JsonRPC {
   constructor(url, options) {
-    this.url = url;
-    this.options = options;
-    this.nextId = 1;
-    this.state = {};
-    this.status = "CLOSED";
-    this.onOpen = null;
-    this.onClose = null;
-    this.onError = null;
-    const thisObj = this;
-    // first we do a quick check if the service exists and response to a sockjs info request
-    // we do this because sockjs-client doesn't distinguish between, the lack of a sockjs service and the webserver being up
-    const oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', () => thisObj.onInitialCheck(oReq));
-    oReq.addEventListener('error', (e) => thisObj.initialCheckFailed(e));
-    oReq.open('GET', url + '/info');
-    oReq.send();
-  }
+    const that = this;
+    let nextId = 1;
+    let state = {};
+    let status = "CLOSED";
+    that.onOpen = null;
+    that.onClose = null;
+    that.onError = null;
 
-  onInitialCheck(oReq) {
-    if ((oReq.status / 100) !== 2) {
-      if (oReq.statusText.startsWith('Hermes: ')) {
-        JsonRPC.logHermes(oReq.statusText.substring(8));
+    // -- PRIVATE FUNCTIONS -- oh Javascript
+
+    function checkServiceExistsAndBootstrap() {
+      // first we do a quick check if the service exists and response to a sockjs info request
+      // we do this because sockjs-client doesn't distinguish between, the lack of a sockjs service and the webserver being up
+      const oReq = new XMLHttpRequest();
+      oReq.addEventListener('load', () => onInitialCheck(oReq));
+      oReq.addEventListener('error', (e) => initialCheckFailed(e));
+      oReq.open('GET', url + '/info');
+      oReq.send();
+    }
+
+    function initialCheckFailed(e) {
+      if (that.onError) {
+        let error;
+        if (e.currentTarget.status === 0) {
+          error = new ErrorEvent(false, false, "connection refused")
+        } else  {
+          error = new ErrorEvent(false, false, "unknown error")
+        }
+        that.onError(error);
       } else {
-        console.error(oReq.statusText)
+        console.log('initialCheckFailed', e);
       }
-      if (this.onError) {
-        this.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText));
-      }
-      return
     }
-    const thisObj = this;
-    this.socket = new SockJS(this.url, null, this.options);
-    this.socket.onopen = function (e) {
-      thisObj.openHandler(e);
-    };
-    this.socket.onclose = function (e) {
-      thisObj.closeHandler(e);
-    };
-    this.socket.onerror = function (err) {
-      thisObj.errorHandler(err)
-    };
-    this.socket.onmessage = function (e) {
-      thisObj.messageHandler(JSON.parse(e.data));
-    }
-  }
 
-  initialCheckFailed(e) {
-    if (this.onError) {
-      var error;
-      if (e.currentTarget.status === 0) {
-        error = new ErrorEvent(false, false, "connection refused")
-      } else  {
-        error = new ErrorEvent(false, false, "unknown error")
-      }
-      this.onError(error);
-    } else {
-      console.log('initialCheckFailed', e);
-    }
-  }
-
-  static logHermes(msg) {
-    msg = msg.split('.').map((it) => {
-      return it.trim();
-    }).join('.\n');
-    console.log("%cHermes%c\n\n" + msg, "font-size: 24pt; font-weight: bold; color: #880017; background-color: #999;", "font-size: 14px;")
-  }
-
-  openHandler(e) {
-    this.status = "OPEN";
-    if (this.onOpen) {
-      this.onOpen(e);
-    }
-  }
-
-  closeHandler(e) {
-    this.status = "CLOSED";
-    if (this.onClose) {
-      this.onClose(e);
-    }
-  }
-
-  errorHandler(err) {
-    this.status = "FAILED";
-    if (this.onError) {
-      this.onError(err);
-    }
-  }
-
-  messageHandler(message) {
-    if (message.hasOwnProperty('id')) {
-      if (this.state.hasOwnProperty(message.id)) {
-        if (message.hasOwnProperty("error")) {
-          this.handleError(message);
+    function onInitialCheck(oReq) {
+      if ((oReq.status / 100) !== 2) {
+        if (oReq.statusText.startsWith('Hermes: ')) {
+          logHermes(oReq.statusText.substring(8));
         } else {
-          this.handleResponse(message);
+          console.error(oReq.statusText)
+        }
+        if (that.onError) {
+          that.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText));
+        }
+        return
+      }
+      that.socket = new SockJS(url, null, options);
+      that.socket.onopen = function (e) {
+        openHandler(e);
+      };
+      that.socket.onclose = function (e) {
+        closeHandler(e);
+      };
+      that.socket.onerror = function (err) {
+        errorHandler(err)
+      };
+      that.socket.onmessage = function (e) {
+        messageHandler(JSON.parse(e.data));
+      }
+    }
+
+    function logHermes(msg) {
+      msg = msg.split('.').map((it) => {
+        return it.trim();
+      }).join('.\n');
+      console.log("%cHermes%c\n\n" + msg, "font-size: 24pt; font-weight: bold; color: #880017; background-color: #999;", "font-size: 14px;")
+    }
+
+    function openHandler(e) {
+      status = "OPEN";
+      if (that.onOpen) {
+        that.onOpen(e);
+      }
+    }
+
+    function closeHandler(e) {
+      status = "CLOSED";
+      if (that.onClose) {
+        that.onClose(e);
+      }
+    }
+
+    function errorHandler(err) {
+      that.status = "FAILED";
+      if (that.onError) {
+        that.onError(err);
+      }
+    }
+
+    function messageHandler(message) {
+      if (message.hasOwnProperty('id')) {
+        if (state.hasOwnProperty(message.id)) {
+          if (message.hasOwnProperty("error")) {
+            handleError(message);
+          } else {
+            handleResponse(message);
+          }
+        } else {
+          console.error("couldn't find callback for message identifier " + message.id);
         }
       } else {
-        console.error("couldn't find callback for message identifier " + message.id);
+        console.warn("received message does not have an identifier", message)
       }
-    } else {
-      console.warn("received message does not have an identifier", message)
-    }
-  }
-
-  handleError(message) {
-    const state = this.state[message.id];
-    if (state.onError) {
-      const err = new Error(`json rpc error ${message.error.code} with message ${message.error.message}`);
-      err.jsonRPCError = message.error;
-      state.onError(err);
-    }
-    delete this.state[message.id];
-  }
-
-  handleResponse(message) {
-    const hasResult = message.hasOwnProperty('result');
-    const isCompleted = message.hasOwnProperty('completed');
-    if (hasResult) {
-      this.handleResultMessage(message);
-    }
-    if (isCompleted) {
-      this.handleCompletionMessage(message);
-    }
-    if (!hasResult && !isCompleted) {
-      this.handleUnrecognisedResponseMessage(message);
-    }
-  }
-
-  handleResultMessage(message) {
-    const state = this.state[message.id];
-    if (!state) {
-      console.error("could not find state for method " + message.id);
-      return
-    }
-    // console.log("received", message);
-    if (state.onNext) {
-      state.onNext(message.result);
-    }
-  }
-
-  handleCompletionMessage(message) {
-    const state = this.state[message.id];
-    if (state.onCompleted) {
-      state.onCompleted();
-    }
-    delete this.state[message.id];
-  }
-
-  handleUnrecognisedResponseMessage(message) {
-    console.error("unrecognised json rpc payload", message);
-  }
-
-  invoke(method, params) {
-    const thisObj = this;
-    return new Promise(function (resolve, reject) {
-      thisObj.invokeForStream(method, params, resolve, reject, undefined, false);
-    });
-  }
-
-  invokeForStream(method, params, onNext, onError, onCompleted, streamed) {
-    const id = this.nextId++;
-    if (streamed === undefined) {
-      streamed = true;
     }
 
-    const payload = {
-      id: id,
-      jsonrpc: "2.0",
-      method: method,
-      params: params,
-      streamed: streamed
-    };
-    // console.log("payload", payload);
-    this.state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
-    this.socket.send(JSON.stringify(payload));
-    return new CancellableInvocation(this, id);
+    function handleError(message) {
+      const msgState = state[message.id];
+      if (msgState.onError) {
+        const err = new Error(`json rpc error ${message.error.code} with message ${message.error.message}`);
+        err.jsonRPCError = message.error;
+        msgState.onError(err);
+      }
+      delete state[message.id];
+    }
+
+    function handleResponse(message) {
+      const hasResult = message.hasOwnProperty('result');
+      const isCompleted = message.hasOwnProperty('completed');
+      if (hasResult) {
+        handleResultMessage(message);
+      }
+      if (isCompleted) {
+        handleCompletionMessage(message);
+      }
+      if (!hasResult && !isCompleted) {
+        handleUnrecognisedResponseMessage(message);
+      }
+    }
+
+    function handleResultMessage(message) {
+      const msgState = state[message.id];
+      if (!msgState) {
+        console.error("could not find state for method " + message.id);
+        return
+      }
+      if (msgState.onNext) {
+        msgState.onNext(message.result);
+      }
+    }
+
+    function handleCompletionMessage(message) {
+      const msgState = state[message.id];
+      if (msgState.onCompleted) {
+        msgState.onCompleted();
+      }
+      delete state[message.id];
+    }
+
+    function handleUnrecognisedResponseMessage(message) {
+      console.error("unrecognised json rpc payload", message);
+    }
+
+    // -- PUBLIC FUNCTIONS --
+
+    that.invoke = function(method, params) {
+      return new Promise(function (resolve, reject) {
+        that.invokeForStream(method, params, resolve, reject, undefined, false);
+      });
+    }
+
+    that.invokeForStream = function(method, params, onNext, onError, onCompleted, streamed) {
+      const id = nextId++;
+      if (streamed === undefined) {
+        streamed = true;
+      }
+
+      const payload = {
+        id: id,
+        jsonrpc: "2.0",
+        method: method,
+        params: params,
+        streamed: streamed
+      };
+      // console.log("payload", payload);
+      state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
+      that.socket.send(JSON.stringify(payload));
+      return new CancellableInvocation(this, id);
+    }
+
+    // -- INITIALISATION --
+
+    checkServiceExistsAndBootstrap()
   }
 }
 

@@ -2,135 +2,158 @@
 
 import ServiceProxy from 'hermes-client';
 
+/**
+ * This class creates a first-class JS object with methods that proxy to a given service end-point
+ */
 class DynamicProxy {
+  /**
+   *
+   * @param config - an object with one required field 'url' and an optional field 'credentials' carrying the payload for the authentication service used by the server
+   *  example: {
+   *    url: 'https://localhost:8080/api',
+   *    credentials: {
+   *      username: 'foo',
+   *      password: 'bar'
+   *    }
+   *  }
+   * @param serviceName - the name of the service being bound to
+   * @param onOpen - callback when this proxy has connected to the service
+   * @param onClose - callback when this proxy has disconnected from the service
+   * @param onError - callback when this proxy has failed to connect
+   * @param options - transport level options. see SockJS options: https://github.com/sockjs/sockjs-client
+   */
   constructor(config, serviceName, onOpen, onClose, onError, options) {
-    const thisObj = this;
+    const that = this;
     if (!config.url) {
       throw "missing url property in config";
     }
-    this.__onOpen = onOpen;
-    this.__config = Object.assign({}, config); // clone so that we can then get rid of the credentials once logged in
-    this.__serviceName = serviceName;
-    this.__onError = onError;
-    this.__proxy = new ServiceProxy(this.__config.url + "jsonrpc/" + serviceName,
-      thisObj._onOpen.bind(thisObj),
-      onClose, onError, options);
-  }
+    config = Object.assign({}, config); // clone so that we can then get rid of the credentials once logged in
+    const proxy = new ServiceProxy(config.url + "jsonrpc/" + serviceName, internalOnOpen, onClose, err => failed(`to open service proxy for ${serviceName}`, err), options);
 
-  _onOpen() {
-    const thisObj = this;
-    Promise.resolve()
-      .then(() => {
-        if (this.__config.credentials) {
-          return thisObj.__proxy.login(thisObj.__config.credentials)
-        }
-        return null;
-      })
-      .then(() => {
-        this._clearCredentials()
-        thisObj._retrieveDocsAndBind()
-      }, err => {
-        thisObj._retrieveDocsAndBind()
-        if (thisObj.__onError) {
-          thisObj.__onError(err);
-        } else {
-          console.error("failed to open", err);
+    // --- PRIVATE FUNCTIONS ---
+
+    function internalOnOpen() {
+      Promise.resolve()
+        .then(() => {
+          if (config.credentials) {
+            return proxy.login(config.credentials)
+          }
+          return null;
+        })
+        .then(() => {
+          clearCredentials();
+          retrieveMetadataAndBind();
+        }, err => {
+          retrieveMetadataAndBind();
+          failed("failed to open", err)
+        });
+    }
+
+    function retrieveMetadataAndBind() {
+      const url = getMetadataEndpoint(config, serviceName);
+      const oReq = new XMLHttpRequest();
+      oReq.addEventListener('load', () => {
+        bindMetadata(oReq);
+        if (onOpen) {
+          onOpen();
         }
       });
-  }
+      oReq.addEventListener('error', failed);
+      oReq.open('GET', url);
+      oReq.send();
+    }
 
-  _retrieveDocsAndBind() {
-    const thisObj = this;
-    const url = this._getDocumentationEndpoint(this.__config, this.__serviceName);
-    const oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', () => {
-      thisObj._bindDocs(oReq);
-      if (thisObj.__onOpen) {
-        thisObj.__onOpen();
+    function bindMetadata(oReq) {
+      if (oReq.status !== 200) {
+        failed(oReq.status);
+        return;
       }
-    });
-    oReq.addEventListener('error', (e) => thisObj._failed(e));
-    oReq.open('GET', url);
-    oReq.send();
-  }
-
-  _bindDocs(oReq) {
-    if (oReq.status !== 200) {
-      this._failed(oReq.status)
-      return
+      const metadata = JSON.parse(oReq.response);
+      for (let idx = 0; idx < metadata.length; ++idx) {
+        bind(metadata[idx]);
+      }
     }
-    const docs = JSON.parse(oReq.response);
-    for (let idx = 0; idx < docs.length; ++idx) {
-      this._bind(docs[idx]);
+
+    function bind(item) {
+      const name = item.name;
+      if (!that.hasOwnProperty(name)) {
+        const fn = function (...args) {
+          return invoke(name, ...args)
+        };
+        fn.__metadata = []; // to populate with metadata on signature and documentation
+        fn.docs = function () { printDocs(fn); };
+        that[name] = fn;
+      }
+      // append the metadata for the method. N.B. methods can have overloads, hence the use of an array.
+      const fn = that[name];
+      fn.__metadata.push(item);
+      return that[name];
     }
-  }
 
-  _bind(item) {
-    const fn = this._createOrReturnFunction(item);
-    fn.__docs.push(item);
-  }
+    function invoke(methodName, ...args) {
+      return proxy[methodName](...args);
+    }
 
-  _createOrReturnFunction(item) {
-    const name = item.name;
-    if (!this.hasOwnProperty(name)) {
-      const fnp = [];
-      for (let paramName in item.parameters) {
-        if (item.parameters.hasOwnProperty(paramName)) {
-          fnp.push(paramName);
+    function failed(reason, e) {
+      if (onError) {
+        onError({ reason: reason, error: e });
+      } else {
+        console.error(reason, e);
+      }
+    }
+
+
+    function getMetadataEndpoint(config, name) {
+      const parsed = parseURL(config.url);
+      return parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + "/api/doc/" + name
+    }
+
+    function parseURL(url) {
+      const parser = document.createElement('a');
+      parser.href = url;
+      return parser;
+    }
+
+    function clearCredentials() {
+      config.credentials = null;
+    }
+
+    /**
+     * prints documentation of a function's metadata
+     *
+     * @param fn - the respective function
+     */
+    function printDocs(fn) {
+      let msg = "API documentation\n" +
+                "-----------------\n";
+      for (let idx in fn.__metadata) {
+        const methodDefinition = fn.__metadata[idx];
+        if (!methodDefinition.returnType) {
+          methodDefinition.returnType = 'unknown';
         }
+        let apifn = "* " + methodDefinition.name + '(' + generateParamList(methodDefinition) + ') => ' + methodDefinition.returnType + '\n';
+        apifn += methodDefinition.description + '\n';
+        apifn += generateParamDocs(methodDefinition);
+        msg += apifn + '\n\n';
       }
-      fnp.push('return this.__proxy.' + name + '(...arguments)');
-      const fn = new Function(...fnp);
-      fn.__docs = []; // to populate with docs on calling convention
-      fn.docs = _printDocs.bind(fn);
-      this[name] = fn;
+      console.log(msg);
     }
-    return this[name];
-  }
 
-  _failed(e) {
-    console.error("failed to get docs", e);
-  }
+    function generateParamList(methodDefinition) {
+      return Object.keys(methodDefinition.parameters).join(', ');
+    }
 
-  _getDocumentationEndpoint(config, name) {
-    const parsed = this._parseURL(config.url)
-    const url = parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + "/api/doc/" + name
-    return url
-  }
+    function generateParamDocs(methodDefinition) {
+      return Object.keys(methodDefinition.parameters)
+        .map(p => {
+          return `  @param ${p} - ${methodDefinition.parameters[p]}`
+        }).join('\n')
+    }
+    // --- PUBLIC FUNCTIONS ---
 
-  _parseURL(url) {
-    const parser = document.createElement('a');
-    parser.href = url;
-    return parser;
-  }
-
-  _clearCredentials() {
-    this.__config.credentials = null;
+    // --- INITIALISATION ---
   }
 }
 
-function _printDocs() {
-  let msg = "API documentation\n" +
-    "-----------------\n";
-  for (let idx in this.__docs) {
-    const defn = this.__docs[idx];
-    let apifn = "* " + defn.name + '(' + _generateParamList(defn) + ') => ' + defn.returnType + '\n';
-    apifn += defn.description + '\n';
-    apifn += _generateParamDocs(defn);
-    msg += apifn + '\n\n';
-  }
-  console.log(msg);
-}
-
-function _generateParamList(defn) {
-  return Object.keys(defn.parameters).join(', ');
-}
-
-function _generateParamDocs(defn) {
-  return Object.keys(defn.parameters)
-    .map(p => {
-      return `  @param ${p} - ${defn.parameters[p]}`
-    }).join('\n')
-}
 
 module.exports = DynamicProxy;
