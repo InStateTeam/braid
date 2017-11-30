@@ -2,9 +2,17 @@
 
 ## Context
 
-* Our aim is to create a Spike skeleton where the application tiers are connected before we even begin and not 10 minutes before the presentation.
-* We also want to make it embarassignly easy to expose services using a wellknown protocol: JsonRPC.
-* Also as a separate task, we want to make it super easy to access Corda flows.
+Writing web-services appears easy at first. However, the machinery of REST frameworks often slow development, and by-default introduce security concerns that a long time to fix.
+Further, traditional REST services do not cater for reactive services that enable clients to respond to changes.
+Finally, typically, the authentication and authorisation models are intricate and require careful work to integrate with incumbent security services.
+
+The `Hermes` project is an answer to the above.
+
+There are three modules:
+
+* `hermes-core` and `hermes-client-js` - these provide the core functionality of hermes. Transport, encodings, security. Server-side and javascript client side. 
+* `hermes-corda` - a library that makes it easy for developers to integrate into Corda providing a secure, object-oriented way of accessing Corda core and custom services using JS, F#, Python and Java. Hermes is reactive, which means that aside from classic request-response invocations (eg. REST), it can stream results, making it easy to write applications that respond to transactions (eg. SockJS).
+* `hermes-server` - a server for a unique way of creating spikes - this module is focussed on closer interaction between UI and server side developers. UI develoeprs can dynamically add and modify server functionality, whilst the server developers provide full implementations later.
 
 
 ## Structure
