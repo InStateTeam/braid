@@ -1,0 +1,71 @@
+#btnStartDemo {
+    font-size: 40px;
+}
+
+.reveal .demo-output {
+    width: 100%;
+    height: 450px;
+    background: white;
+    margin: 10px;
+    text-align: left;
+    overflow: scroll;
+}
+
+.reveal .demo-output-item {
+    font-size: 20px;
+    font-family: monospace;
+    color: black;
+    border: 3px solid white;
+    animation: fadein 1s;
+    padding: 3px;
+    display: flex;
+}
+
+.reveal .demo-output-item:hover {
+    border: 3px #1a6091 solid;
+}
+
+.reveal .demo-output-property:hover {
+    background: crimson;
+    color: white;
+    font-weight: bold;
+}
+
+.reveal pre.demo-output-property {
+    font-size: 20px;
+}
+.reveal .demo-output-index {
+    color: lightgray;
+    padding-right: 10px;
+    height: 100%;
+    display: inline-block;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Firefox < 16 */
+@-moz-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Safari, Chrome and Opera > 12.1 */
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Opera < 12.1 */
+@-o-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

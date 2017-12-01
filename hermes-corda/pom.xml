@@ -16,7 +16,7 @@
   <description>a library for easy access to corda from non-jvm environments</description>
 
   <properties>
-    <corda.version>1.0.0</corda.version>
+    <corda.version>2.0.0</corda.version>
   </properties>
 
   <dependencies>
@@ -47,6 +47,10 @@
       <artifactId>corda-node</artifactId>
       <version>${corda.version}</version>
       <exclusions>
+        <exclusion>
+          <groupId>net.corda.plugins</groupId>
+          <artifactId>cordform-common</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>com.github.corda.crash</groupId>
           <artifactId>crash.shell</artifactId>

@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "hermes-corda-client": "^1.0.0",
-    "hermes-client": "^1.0.0"
+    "hermes-client": "^1.0.0",
+    "hermes-corda-client": "^1.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

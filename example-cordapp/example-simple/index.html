@@ -1,31 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Simple Example App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Simple Example App</title>
 </head>
 <style>
-    html, body, .container {
-        height: 100%;
-        margin: 0;
+  html, body, .container {
+    height: 100%;
+    margin: 0;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center
+  }
+
+  .item {
+    font-family: sans-serif;
+    font-size: 24pt;
+    color: gray;
+  }
+
+  @media (max-width: 1500px) {
+    .item span {
+      display: none;
     }
-    .container {
-        display: flex;
-        align-items: center;
-        justify-content: center
-    }
-    .item {
-        font-family: sans-serif;
-        font-size: 24pt;
-        color: gray;
-    }
+  }
 </style>
 <body>
-    <div class="container">
-        <div class="item">demo</div>
-    </div>
-    <script src="dist/bundle.js"></script>
+<div class="container" id="container">
+  <div class="item">Demo<span> - open the console ...</span></div>
+</div>
+<script src="dist/bundle.js"></script>
 </body>
 </html>

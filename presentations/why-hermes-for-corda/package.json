@@ -1,14 +1,16 @@
 {
-  "name": "reveal.js",
-  "version": "3.5.0",
-  "description": "The HTML Presentation Framework",
-  "homepage": "http://lab.hakim.se/reveal-js",
-  "subdomain": "revealjs",
+  "name": "hermes-presentation",
+  "version": "1.0.0",
+  "description": "A brief presentation of hermes corda",
   "main": "js/reveal.js",
   "scripts": {
-    "test": "grunt test",
-    "start": "grunt serve",
-    "build": "grunt"
+    "_test": "grunt test",
+    "_start": "grunt serve",
+    "_build": "grunt",
+    "clean": "rimraf dist/* && rimraff node_modules/hermes-corda-client",
+    "build": "webpack --progress -p",
+    "watch": "webpack --progress --watch",
+    "watch-server": "webpack-dev-server --progress --port 3333"
   },
   "author": {
     "name": "Hakim El Hattab",
@@ -21,6 +23,10 @@
   },
   "engines": {
     "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "hermes-client": "^1.0.0",
+    "hermes-corda-client": "^1.0.0"
   },
   "devDependencies": {
     "express": "~4.14.0",
@@ -38,7 +44,14 @@
     "grunt-zip": "~0.17.1",
     "mustache": "~2.2.1",
     "node-sass": "~3.13.0",
-    "socket.io": "^1.4.8"
+    "socket.io": "^1.4.8",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "rimraf": "^2.6.2",
+    "watchify": "^3.9.0",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.3"
   },
   "license": "MIT"
 }
