@@ -9,8 +9,9 @@ function bindUI() {
 }
 
 function startDemo() {
-  log('demo started');
-  console.log('demo started');
+  const msg = 'demo started';
+  log(msg);
+  console.log(msg);
 
   corda = new CordaProxy({
     url: 'https://localhost:8080/api/',
@@ -20,8 +21,6 @@ function startDemo() {
     }
   }, onOpen, onClose, onError);
 }
-
-
 
 function onOpen() {
   const msg = 'opened';
@@ -35,20 +34,12 @@ function onOpen() {
     .then(() => console.log('finished'), err => console.error('failed', err));
 }
 
-
 function printMyInfo() {
   const msg = 'retrieving myNodeInfo'
   console.log(msg);
   log(msg);
   return corda.network.myNodeInfo()
-    .then(ni => printNetworkInfo(ni));
-}
-
-function printNetworkInfo(ni) {
-  console.log('network info for node: ', ni);
-  log('node info: ' +
-    `<span class="demo-output-property">${ni.addresses[0].host}:${ni.addresses[0].port}</span> ` +
-    `<span class="demo-output-property">${ni.legalIdentities[0].name}</span>`);
+    .then(ni => printNodeInfo(ni));
 }
 
 function getNotaries() {
@@ -60,11 +51,6 @@ function getNotaries() {
       notary = notaries[0];
       printNotary(notary)
     })
-}
-
-function printNotary(notary) {
-  console.log('notary', notary);
-  log(`notary: <span class="demo-output-property">${notary.name}</span>`);
 }
 
 function registerForCashNotifications() {
@@ -81,12 +67,7 @@ function onCashNotification(update) {
   amount.token = "...";
   const amountTxt = JSON.stringify(amount, null, 1);
   log(`notification:<br> txid: <span class="demo-output-property">${txid}</span>` +
-  `<br>amount:<span class="demo-output-property">${amountTxt}</span>`)
-}
-
-function printSignedTx(ref, result) {
-  console.log('tx for ref', ref, result);
-  log(`txid for reference <span class="demo-output-property">${ref}</span>: <span class="demo-output-property">${result.stx.transaction.id}</span> `)
+    `<br>amount:<span class="demo-output-property">${amountTxt}</span>`)
 }
 
 function issueCash(amount, ref) {
@@ -94,6 +75,23 @@ function issueCash(amount, ref) {
   log(`issuing: <span class="demo-output-property">${amount}</span> with reference <span class="demo-output-property">${ref}</span>`);
   return corda.flows.issueCash(amount, ref, notary)
     .then(result => printSignedTx(ref, result), console.error);
+}
+
+function printNodeInfo(ni) {
+  console.log('network info for node: ', ni);
+  log('node info: ' +
+    `<span class="demo-output-property">${ni.addresses[0].host}:${ni.addresses[0].port}</span> ` +
+    `<span class="demo-output-property">${ni.legalIdentities[0].name}</span>`);
+}
+
+function printNotary(notary) {
+  console.log('notary', notary);
+  log(`notary: <span class="demo-output-property">${notary.name}</span>`);
+}
+
+function printSignedTx(ref, result) {
+  console.log('tx for ref', ref, result);
+  log(`txid for reference <span class="demo-output-property">${ref}</span>: <span class="demo-output-property">${result.stx.transaction.id}</span> `)
 }
 
 function onClose() {
