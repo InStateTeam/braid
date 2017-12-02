@@ -8,7 +8,7 @@
   <title>Hermes</title>
 
   <link rel="stylesheet" href="css/reveal.css">
-  <link rel="stylesheet" href="css/theme/sky.css">
+  <link rel="stylesheet" href="css/theme/league.css">
   <link rel="stylesheet" href="css/app.css">
 
   <!-- Theme used for syntax highlighting of code -->
@@ -25,118 +25,117 @@
 </head>
 
 <body>
-<div class="reveal">
-  <div class="slides">
-    <section data-markdown class="center">
-				<textarea data-template>
-					## Hermes Demo
+  <div class="reveal">
+    <div class="slides">
+      <section data-markdown class="center">
+        <textarea data-template>
+          ## Hermes
+          > fast & secure access to Corda for all
+        </textarea>
+      </section>
 
-					* Problem
-					* Approach
-					* Demo
-					* Explore 
-					* Backlog
-
-					> seeking your feedback and support
-				</textarea>
-    </section>
-    <section id='naming' class="center">
-      <q>"There are only two hard things in Computer Science: cache invalidation and naming things."</q>
-      <br><br><code>sed -i 's/hermes/a-better-name/g' *</code>
-    </section>
-    <section id="the_problem" class="center">
-      <blockquote>Our <i>purpose</i> is to deliver business value</blockquote>
-      <h4 class='fragment'>It's not about</h4>
-      <ol>
-        <li class="fragment">Wrapping the world with JAX-RS</li>
-        <li class="fragment">Remembering to do webservice security right</li>
-        <ul>
-          <li class="fragment">TLS, CORS, CSRF, XSS ...</li>
+      <section id="what-we-want" class="center">
+        <h2>What we want</h2>
+        <img src="img/moon-on-a-stick.jpg" style="background:none; width: 40%; box-shadow:none; float: left; border: 0px none;">
+        <ul style="width: 50%; font-size: 32px; margin: 10px;">
+            <li class="fragment">Easily expose flows &amp; custom services</li>
+            <li class="fragment">Consume them in
+              <u>any</u> client</li>
+            <li class="fragment">First-class APIs. Everywhere</li>
+            <li class="fragment">Proprietary security services</li>
+            <li class="fragment">Reactive / event streams
+            <li class="fragment">Small footprint, high performance</li>
+            <li class="fragment">Secure. By default</li>
+            <li class="fragment"><i>"Zero to Hero"</i> in &lt; 15 minutes</li>          
         </ul>
-        <li class="fragment">Writing client-side REST bindings</li>
-        <li class="fragment">Mangling REST for streaming</li>
-        <li class='fragment'>...</li>
-      </ol>
+      </section>
 
-      <blockquote class="fragment">
-        REST and JAX-RS are the wrong abstractions
-      </blockquote>
-    </section>
-    <section id='but' class="center">
-      <h2>But ...</h2>
-      We still want our client stacks:
-      <ol>
-        <li class="fragment">Browser</li>
-        <li class="fragment">Python</li>
-        <li class="fragment">C#</li>
-        <li class="fragment">F# (hello, TypeProviders! ;-)</li>
-        <li class="fragment">Golang, Dart, C++ etc</li>
-      </ol>
-    </section>
-    <section id="the_approach" class="center">
-      <h2>Approach</h2>
-      <ol>
-        <li class="fragment">A small toolkit, not a large framework</li>
-        <li class="fragment">Good performance: <code>[5k, 10k)</code></li>
-        <li class="fragment"><i>"Zero to Hero"</i> in < 15 minutes</li>
-        <li class="fragment">Expose flows and custom services with ease</li>
-        <li class="fragment">Pluggable Auth* provider</li>
-        <li class="fragment">Code your client with <i>real objects</i></li>
-        <li class="fragment"><code>Promise</code> and <code>Observable</code> semantics</li>
-      </ol>
-    </section>
-    <section id='demo'>
-      <h2>Demo</h2>
-      <button id='btnStartDemo'>Start</button>
-      <br>
-      <div id='demoOutput' class='demo-output'>
+      <section id='but' class="center">
+        <h2>Change is Expensive</h2>
+        <ol>
+          <li class="fragment">Browser, NodeJS</li>
+          <li class="fragment">C#, F#</li>          
+          <li class="fragment">Python</li>
+          <li class="fragment">Golang, C++ ...</li>
+        </ol>
+        <p class="fragment"><q>... changing our runtimes is expensive => support all</q></p>
+      </section>
+      <section id="APIs" class="center">
+        <h2>First class APIs </h2>
 
-      </div>
-    </section>
-    <section id='work_remaining'>
-      <h2>Work Remaining</h2>
+        <pre><code class="hljs" data-trim contenteditable>
+const corda = new CordaProxy(..., onOpen, onClose, onError);
 
-      <ul>
-        <li>Vault API - query criteria representation</li>
-        <li>More typeinfo to clients</li>
-        <li>Integration tests</li>
-        <li>Languages: Python, C#, F#, ...</li>
-        <li>Documentation</li>
-        <li>... and more ...</li>
-      </ul>
-    </section>
-    <section id='qa'>
-      <h3>Thanks for listening!</h3>
-      <q>Your questions and recommendations most welcome</q>
-    </section>
+function onOpen() {
+  corda.myService.listenForMyChanges(onChange, onError);
+  corda.flows.issueCash("$200", ...)
+    .then(signedTx => console.log(signedTx));
+}
+        </code></pre>
+
+        <p>No POST requests!</p>
+      </section>
+      <section id="the_approach" class="center">
+        <h2>Approach</h2>
+        <ol>
+          <li class="fragment">The moon on a stick</li>
+          <li class="fragment">Good performance: 5K-10K tx/s on small single-core instance</li>
+          <li class="fragment">Non-blocking I/O using vert.x and netty</li>
+          <li class="fragment">Client API proxies built at runtime from server-side metadata</li>         
+        </ol>
+      </section>
+      <section id='demo'>
+        <h2>Demo</h2>
+        <button id='btnStartDemo'>Start</button>
+        <br>
+        <div id='demoOutput' class='demo-output'>
+
+        </div>
+      </section>
+      <section id='work_remaining' class="center">
+        <h2>Work Remaining</h2>
+
+        <ul>
+          <li class="fragment">Vault API - query criteria representation</li>
+          <li class="fragment">More typeinfo - nested types and generics</li>
+          <li class="fragment">Documentation</li>
+          <li class="fragment">More integration tests</li>
+          <li class="fragment">Languages: Python, C#, F#, ...</li>
+        </ul>
+      </section>
+      <section id='qa'>
+        <h3>Thanks for listening!</h3>
+        <q>Your questions and recommendations most welcome</q>
+      </section>
+    </div>
   </div>
-</div>
 
-<script src="lib/js/head.min.js"></script>
-<script src="js/reveal.js"></script>
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
 
-<script>
-  // More info about config & dependencies:
-  // - https://github.com/hakimel/reveal.js#configuration
-  // - https://github.com/hakimel/reveal.js#dependencies
-  Reveal.initialize({
-    controls: true,
-    progress: true,
-    history: true,
-    center: false,
-    transition: 'fade',
-    dependencies: [
-      {src: 'plugin/markdown/marked.js'},
-      {src: 'plugin/markdown/markdown.js'},
-      {src: 'plugin/notes/notes.js', async: true},
-      {
-        src: 'plugin/highlight/highlight.js', async: true, callback: function () {
-        hljs.initHighlightingOnLoad();
-      }
-      }
-    ]
-  });
-</script>
-<script src="dist/bundle.js"></script>
+  <script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: false,
+      transition: 'fade',
+      dependencies: [
+        { src: 'plugin/markdown/marked.js' },
+        { src: 'plugin/markdown/markdown.js' },
+        { src: 'plugin/notes/notes.js', async: true },
+        {
+          src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+            hljs.initHighlightingOnLoad();
+          }
+        }
+      ]
+    });
+  </script>
+  <script src="dist/bundle.js"></script>
 </body>
+
 </html>

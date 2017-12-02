@@ -1,6 +1,8 @@
 package io.bluebank.hermes.corda.example
 
 import io.bluebank.hermes.corda.HermesConfig
+import io.vertx.core.Vertx
+import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.kotlin.core.json.json
@@ -28,17 +30,21 @@ class Server(private val serviceHub: ServiceHub) : SingletonSerializeAsToken() {
   }
 
   private fun bootstrap(config: HermesConfig) {
+    config
+        .withFlow(EchoFlow::class)
+        .withFlow("issueCash", CashIssueFlow::class)
+        .withService("myService", MyService(serviceHub as ServiceHubInternal))
+        .withAuthConstructor(this::shiroFactory)
+        .bootstrapHermes(serviceHub)
+  }
+
+  private fun shiroFactory(it: Vertx): AuthProvider {
     val shiroConfig = json {
       obj {
         put("properties_path", "classpath:shiro.properties")
       }
     }
-    config
-        .withFlow(EchoFlow::class)
-        .withFlow("issueCash", CashIssueFlow::class)
-        .withService("myService", MyService(serviceHub as ServiceHubInternal))
-        .withAuthConstructor { ShiroAuth.create(it, ShiroAuthOptions().setConfig(shiroConfig)) }
-        .bootstrapHermes(serviceHub)
+    return ShiroAuth.create(it, ShiroAuthOptions().setConfig(shiroConfig))
   }
 
   private val configFileName: String
