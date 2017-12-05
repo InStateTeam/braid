@@ -1,9 +1,10 @@
 package io.bluebank.hermes.corda
 
+import io.bluebank.hermes.core.http.setupAllowAnyCORS
+import io.bluebank.hermes.core.http.withCompatibleWebsockets
 import io.bluebank.hermes.core.logging.loggerFor
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
-import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import net.corda.node.internal.Node
@@ -26,28 +27,11 @@ class HermesVerticle(private val services: ServiceHubInternal, private val confi
         .listen(config.port)
   }
 
-  private fun HttpServerOptions.withCompatibleWebsockets(): HttpServerOptions {
-    this.websocketSubProtocols = "undefined"
-    return this
-  }
-
   private fun setupRouter(): Router {
     val router = Router.router(vertx)
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
     router.setupSockJSHandler(vertx, services, config)
     return router
-  }
-
-  private fun Router.setupAllowAnyCORS() {
-    route().handler {
-      // allow all origins .. TODO: set this up with configuration
-      val origin = it.request().getHeader("Origin")
-      if (origin != null) {
-        it.response().putHeader("Access-Control-Allow-Origin", origin)
-        it.response().putHeader("Access-Control-Allow-Credentials", "true")
-      }
-      it.next()
-    }
   }
 }
