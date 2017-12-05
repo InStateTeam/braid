@@ -139,7 +139,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     router.get()
         .last()
         .handler(
-        StaticHandler.create("editor-web")
+        StaticHandler.create("editor-web", JsonRPCVerticle::class.java.classLoader)
             .setCachingEnabled(false)
             .setMaxCacheSize(1)
             .setCacheEntryTimeout(1)
