@@ -141,9 +141,10 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
             callback(failedFuture(it.cause()))
           } else {
             deploymentId = it.result()
-            println("server mounted on http://localhost:$port$rootPath")
-            println("sockjs JsonRPC server mounted on http://localhost:$port${rootPath}jsonrpc/")
-            println("editor mounted on http://localhost:$port")
+            val protocol = if (builder.httpServerOptions.isSsl) "https" else "http"
+            println("server mounted on ${protocol}://localhost:$port$rootPath")
+            println("sockjs JsonRPC server mounted on ${protocol}://localhost:$port${rootPath}jsonrpc/")
+            println("editor mounted on ${protocol}://localhost:$port")
             callback(succeededFuture())
           }
         }
