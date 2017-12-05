@@ -9,7 +9,7 @@ class HttpServerConfig {
   companion object {
     @JvmStatic
     fun defaultServerOptions() : HttpServerOptions {
-      val jksPath = "io/bluebank/hermes/dev-only/default.jks"
+      val jksPath = HttpServerConfig::class.java.`package`.name.replace(".", "/") + "/default.jks"
       val jksBuffer = getResourceAsBuffer(jksPath)
       return HttpServerOptions()
           .setSsl(true)
@@ -20,7 +20,7 @@ class HttpServerConfig {
     }
 
     private fun getResourceAsBuffer(path: String): Buffer? {
-      val jksStream = ClassLoader.getSystemClassLoader().getResourceAsStream(path)
+      val jksStream = HttpServerConfig::class.java.classLoader.getResourceAsStream(path)
       val baos = ByteArrayOutputStream(jksStream.available())
       while (jksStream.available() > 0) {
         baos.write(jksStream.read())

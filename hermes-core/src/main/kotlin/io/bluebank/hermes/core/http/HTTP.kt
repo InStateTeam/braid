@@ -34,6 +34,4 @@ fun RoutingContext.write(str: String) {
 }
 
 val HttpClientResponse.failed: Boolean
-  get() {
-    return (this.statusCode() / 100) != 2
-  }
+  get() = (this.statusCode() / 100) != 2
