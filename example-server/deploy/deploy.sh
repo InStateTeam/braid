@@ -25,7 +25,7 @@ TAG="$3"
 DOMAIN="bluebank.io"
 REGISTRY="docker-registry-default.${DOMAIN}:443"
 VOLUME_NAME="service-scripts"
-MOUNT="/home/hermes/service-scripts"
+MOUNT="/home/brain/service-scripts"
 
 # Usage options and user arguments
 read -d '' USAGE << EOF

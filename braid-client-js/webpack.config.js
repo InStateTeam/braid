@@ -5,7 +5,7 @@ module.exports = {
   },
   output: {
     path: __dirname + '/dist',
-    filename: 'hermes-client.js',
+    filename: 'braid-client.js',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },

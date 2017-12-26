@@ -21,13 +21,13 @@ A continuous build can be run with:
 npm run watch 
 ```
 
-To run a continous build and a webserver, on [http://localhost:8081](http://localhost:8081):
+To run a continuous build and a web server, on [http://localhost:8081](http://localhost:8081):
 
 ```bash
 npm run watch-server
 ```
 
-The build uses the **deployed** `hermes-client` library.
+The build uses the **deployed** `briad-client` library.
 
 To make it use the local source, edit the `app.js` file to point to the respective relative directories in [client](../client).
 

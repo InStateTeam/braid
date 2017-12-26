@@ -1,11 +1,11 @@
-# hermes-quickstart Maven Archetype
+# braid-quickstart Maven Archetype
 
 ## Build
 
 To build locally and install correctly, execute the following in the parent project directory:
 
 ```bash
-mvn install -pl hermes-quickstart archetype:update-local-catalog
+mvn install -pl braid-quickstart archetype:update-local-catalog
 ```
 
 
@@ -14,11 +14,11 @@ mvn install -pl hermes-quickstart archetype:update-local-catalog
 Interactive mode:
 
 ```bash
-mvn archetype:generate -DarchetypeGroupId=io.bluebank.hermes -DarchetypeArtifactId=hermes-quickstart 
+mvn archetype:generate -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart 
 ```
 
 Non-interactive mode:
 
 ```bash
-mvn archetype:generate -B -DarchetypeGroupId=io.bluebank.hermes -DarchetypeArtifactId=hermes-quickstart -DgroupId=io.bluebank.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
+mvn archetype:generate -B -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart -DgroupId=io.bluebank.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
 ```

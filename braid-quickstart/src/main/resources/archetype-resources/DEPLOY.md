@@ -1,9 +1,9 @@
 Bluebank OCP Bring Your Own Container
 ====================================
 
-## Hermes Specific Notes
+## Braid Specific Notes
 
-For `hermes-sample-server` you can deploy easily with this command 
+For `braid-sample-server` you can deploy easily with this command 
 ```bash
 deploy/runme.sh
 ```

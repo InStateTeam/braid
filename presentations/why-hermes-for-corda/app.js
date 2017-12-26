@@ -1,5 +1,5 @@
 'use strict';
-import CordaProxy from 'hermes-corda-client';
+import CordaProxy from 'braid-corda-client';
 
 export let corda = null;
 let notary;

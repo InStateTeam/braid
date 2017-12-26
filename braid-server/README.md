@@ -1,6 +1,6 @@
-# Hermes Server
+# Braid Server
 
-This server implements a dynamic JsonRPC server to demonstrate the Hermes proof of concept.
+This server implements a dynamic JsonRPC server to demonstrate the Braid proof of concept.
 The server can expose any number of Java/Kotlin services. 
 New methods can be easily added at run-time using Javascript.
 Also, new services can be added at run-time, again using Javascript.
@@ -26,7 +26,7 @@ class CalculatorService {
 }
 ```
 
-See this running here: [https://hermes-sample-server.bluebank.io](https://hermes-sample-server.bluebank.io)
+See this running here: [https://braid-sample-server.bluebank.io](https://braid-sample-server.bluebank.io)
 
 The editor allows the UI developer to dynamically create stubbed services and service methods, overlaying existing functionality in Java services. 
 Thereby, s/he can develop without being held up by the server-side.
