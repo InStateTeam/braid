@@ -1,7 +1,7 @@
 'use strict';
 
 const $ = require('jquery');
-const ServiceProxy = require('./hermes-service-proxy');
+const ServiceProxy = require('./braidervice-proxy');
 
 $(document).ready(() => {
   const url = "http://localhost:8080/api";

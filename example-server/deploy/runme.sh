@@ -7,5 +7,5 @@ popd > /dev/null
 echo ${SCRIPTPATH}
 
 pushd "${SCRIPTPATH}/.." # move one level  (this is so that the docker image can be built)
-./deploy/deploy.sh hermes-sample-server hermes-sample latest docker-registry-default.bluebank.io:443
+./deploy/deploy.sh braid-sample-server braid-sample latest docker-registry-default.bluebank.io:443
 popd # pop back to cwd prior to executing this script
