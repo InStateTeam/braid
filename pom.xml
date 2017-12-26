@@ -1,10 +1,10 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.bluebank.hermes</groupId>
-  <artifactId>hermes</artifactId>
+  <groupId>io.bluebank.braid</groupId>
+  <artifactId>braid</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
-  <name>hermes parent</name>
+  <name>braid parent</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
   <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
 
@@ -27,13 +27,13 @@
   </properties>
 
   <modules>
-    <module>hermes-client-js</module>
-    <module>hermes-corda-client-js</module>
-    <module>hermes-server</module>
+    <module>braid-client-js</module>
+    <module>braid-corda-client-js</module>
+    <module>braid-server</module>
     <module>example-server</module>
-    <module>hermes-quickstart</module>
-    <module>hermes-core</module>
-    <module>hermes-corda</module>
+    <module>braid-quickstart</module>
+    <module>braid-core</module>
+    <module>braid-corda</module>
     <module>example-cordapp</module>
   </modules>
 

@@ -1,9 +1,9 @@
 'use strict';
 
 const $ = require('jquery');
-const ServiceProxy = require('hermes-client');
-// Use the following line instead of the above, to debug using the local source for hermes-client
-// const ServiceProxy = require('../hermes-client-js/hermes-service-proxy');
+const ServiceProxy = require('braid-client');
+// Use the following line instead of the above, to debug using the local source for braid-client
+// const ServiceProxy = require('../braid-client-js/braid-service-proxy');
 
 $(document).ready(() => {
   const url = "https://localhost:8080/api/jsonrpc/time";

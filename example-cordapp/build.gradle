@@ -139,5 +139,5 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
 
 task runTemplateClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'io.bluebank.hermes.corda.example.ClientKt'
+    main = 'io.bluebank.braid.corda.example.ClientKt'
 }
