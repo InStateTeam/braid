@@ -22,7 +22,7 @@ class HermesServer(serviceHub: ServiceHub, private val config: HermesConfig) {
 
   private fun start() : HermesServer {
     vertx = Vertx.vertx()
-    vertx.deployVerticle(HermesVerticle(services, config)) {
+    vertx.deployVerticle(BraidVerticle(services, config)) {
       if (it.failed()) {
         logger.error("failed to startup hermes server", it.cause())
       } else {

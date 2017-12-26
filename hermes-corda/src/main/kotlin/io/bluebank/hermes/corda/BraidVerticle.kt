@@ -10,9 +10,9 @@ import io.vertx.ext.web.handler.BodyHandler
 import net.corda.node.internal.Node
 import net.corda.node.services.api.ServiceHubInternal
 
-class HermesVerticle(private val services: ServiceHubInternal, private val config: HermesConfig) : AbstractVerticle() {
+class BraidVerticle(private val services: ServiceHubInternal, private val config: HermesConfig) : AbstractVerticle() {
   companion object {
-    private val log = loggerFor<HermesVerticle>()
+    private val log = loggerFor<BraidVerticle>()
   }
   override fun start(startFuture: Future<Void>?) {
     log.info("starting with ", config)
