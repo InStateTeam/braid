@@ -27,7 +27,7 @@ To run a continuous build and a web server, on [http://localhost:8081](http://lo
 npm run watch-server
 ```
 
-The build uses the **deployed** `briad-client` library.
+The build uses the **deployed** `braid-client` library.
 
 To make it use the local source, edit the `app.js` file to point to the respective relative directories in [client](../client).
 
