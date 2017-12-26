@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <artifactId>hermes</artifactId>
-    <groupId>io.bluebank.hermes</groupId>
+    <artifactId>braid</artifactId>
+    <groupId>io.bluebank.braid</groupId>
     <version>1.0</version>
   </parent>
 
@@ -12,7 +12,7 @@
   <artifactId>example-server</artifactId>
   <packaging>jar</packaging>
 
-  <name>hermes example-server</name>
+  <name>braid example-server</name>
 
   <properties>
     <kotlin.version>1.1.4-3</kotlin.version>
@@ -37,8 +37,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.bluebank.hermes</groupId>
-      <artifactId>hermes-server</artifactId>
+      <groupId>io.bluebank.braid</groupId>
+      <artifactId>braid-server</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -92,7 +92,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>io.bluebank.hermes.sample.AppKt</mainClass>
+                  <mainClass>io.bluebank.braid.sample.AppKt</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
