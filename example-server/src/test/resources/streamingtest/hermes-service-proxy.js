@@ -1,8 +1,8 @@
 'use strict';
 
-const JsonRPC = require('./hermes-json-rpc-client');
+const JsonRPC = require('./braid-json-rpc-client');
 
-class HermesServiceProxy {
+class BraidServiceProxy {
   constructor(url, onOpen, onClose, options) {
     this.client = new JsonRPC(url, options);
     this.client.onOpen = onOpen;
@@ -10,7 +10,7 @@ class HermesServiceProxy {
   }
 
   invoke(method, args) {
-    const callbacks = HermesServiceProxy.bindCallbacks(args);
+    const callbacks = BraidServiceProxy.bindCallbacks(args);
     if (callbacks) {
       return this.invokeForStream(method, args, callbacks);
     } else {
@@ -19,12 +19,12 @@ class HermesServiceProxy {
   }
 
   invokeForPromise(method, args) {
-    args = HermesServiceProxy.massageArgs(args);
+    args = BraidServiceProxy.massageArgs(args);
     return this.client.invoke(method, args);
   }
 
   invokeForStream(method, args, callbacks) {
-    const noFunctionArgs = HermesServiceProxy.massageArgs(args.filter(item => {
+    const noFunctionArgs = BraidServiceProxy.massageArgs(args.filter(item => {
       return typeof item !== 'function'
     }));
     return this.client.invokeForStream(method, noFunctionArgs, callbacks.onNext, callbacks.onError, callbacks.onCompleted);
@@ -56,7 +56,7 @@ class HermesServiceProxy {
 }
 
 function createProxy(url, onOpen, onClose, options) {
-  return new Proxy(new HermesServiceProxy(url, onOpen, onClose, options), {
+  return new Proxy(new BraidServiceProxy(url, onOpen, onClose, options), {
     get: (target, propKey, receiver) => {
       return function (...args) {
         return target.invoke(propKey, args)

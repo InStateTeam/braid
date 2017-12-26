@@ -1,10 +1,10 @@
 package com.template
 
-import io.bluebank.hermes.corda.example.EchoFlow
+import io.bluebank.braid.corda.example.EchoFlow
 import net.corda.node.internal.StartedNode
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetwork.MockNode
-import net.corda.testing.setCordappPackages
+import net.corda.testing.setCordappPackagesF
 import net.corda.testing.unsetCordappPackages
 import org.junit.After
 import org.junit.Before
