@@ -24,15 +24,15 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="install"/>
                 </exec>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="version"/>
                   <arg value="${project.version}"/>
                   <arg value="--allow-same-version"/>
                 </exec>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="run"/>
                   <arg value="clean"/>
                 </exec>
@@ -47,7 +47,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
@@ -62,7 +62,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="publish"/>
                 </exec>
               </target>

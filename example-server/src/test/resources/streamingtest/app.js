@@ -1,7 +1,7 @@
 'use strict';
 
 const $ = require('jquery');
-const ServiceProxy = require('./braidervice-proxy');
+const ServiceProxy = require('./braid-service-proxy');
 
 $(document).ready(() => {
   const url = "http://localhost:8080/api";

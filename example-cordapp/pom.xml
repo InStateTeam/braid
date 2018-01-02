@@ -39,7 +39,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="./gradlew" dir="${project.basedir}">
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
                   <arg value="deployNodes"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
