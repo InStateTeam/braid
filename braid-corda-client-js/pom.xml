@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.bluebank.braid</groupId>
     <artifactId>braid</artifactId>
-    <version>1.0</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>braid-corda-client-js</artifactId>
   <name>braid-corda-client-js</name>
@@ -32,23 +32,17 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
+                  <arg value="install"/>
+                </exec>
+                <exec executable="npm" failonerror="true">
+                  <arg value="version"/>
+                  <arg value="${project.version}"/>
+                  <arg value="--allow-same-version"/>
+                </exec>
+                <exec executable="npm" failonerror="true">
                   <arg value="run"/>
                   <arg value="clean"/>
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm install (initialize)</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="npm">
-                  <arg value="install"/>
                 </exec>
               </target>
             </configuration>
@@ -61,7 +55,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
@@ -76,7 +70,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm">
+                <exec executable="npm" failonerror="true">
                   <arg value="publish"/>
                 </exec>
               </target>
@@ -90,6 +84,16 @@
         <configuration>
           <skip>false</skip>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <phase>none</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

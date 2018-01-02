@@ -3,6 +3,7 @@
 **/*.iml
 **/service-scripts
 **/file-uploads
+**/pom.xml.versionsBackup
 
 # NPM packages folder.
 node_modules/

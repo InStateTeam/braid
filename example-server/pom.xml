@@ -4,7 +4,7 @@
   <parent>
     <artifactId>braid</artifactId>
     <groupId>io.bluebank.braid</groupId>
-    <version>1.0</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -115,7 +115,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest">
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest" failonerror="true">
                   <arg value="install"/>
                 </exec>
               </target>
@@ -129,7 +129,7 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest">
+                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest" failonerror="true">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>
