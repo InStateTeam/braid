@@ -4,7 +4,7 @@
   <parent>
     <artifactId>braid</artifactId>
     <groupId>io.bluebank.braid</groupId>
-    <version>1.0</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -41,6 +41,7 @@
               <target>
                 <exec executable="./gradlew" dir="${project.basedir}">
                   <arg value="deployNodes"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
               </target>
             </configuration>
@@ -53,6 +54,36 @@
         <configuration>
           <skip>true</skip>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>update version of braid referenced in corda example</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <replaceregexp file="build.gradle"
+                               match="ext\.braid_version = '[^']*'"
+                               replace="ext.braid_version = '${project.version}'">
+
+                </replaceregexp>
+                <replaceregexp match="&quot;braid-client&quot;: &quot;[^&quot;]*&quot;"
+                               replace="&quot;braid-client&quot;: &quot;${project.version}&quot;">
+                  <fileset dir="." includes="**/package.json"/>
+                </replaceregexp>
+                <replaceregexp match="&quot;braid-corda-client&quot;: &quot;[^&quot;]*&quot;"
+                               replace="&quot;braid-corda-client&quot;: &quot;${project.version}&quot;">
+                  <fileset dir="." includes="**/package.json"/>
+                </replaceregexp>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

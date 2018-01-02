@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "^1.0.0",
-    "braid-corda-client": "^1.0.0"
+    "braid-client": "1.0.0-SNAPSHOT",
+    "braid-corda-client": "1.0.0-SNAPSHOT"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

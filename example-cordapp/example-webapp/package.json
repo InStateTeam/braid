@@ -13,11 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "^1.0.0",
+    "braid-client": "1.0.0-SNAPSHOT",
     "jquery": "^3.2.1",
     "promise": "^8.0.1",
     "sockjs-client": "^1.0.3",
-    "braid-corda-client": "^1.0.0"
+    "braid-corda-client": "1.0.0-SNAPSHOT"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

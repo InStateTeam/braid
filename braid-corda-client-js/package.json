@@ -1,6 +1,6 @@
 {
   "name": "braid-corda-client",
-  "version": "1.0.0",
+  "version": "1.0.0-SNAPSHOT",
   "description": "service proxies for braid corda services",
   "main": "dist/braid-corda-client.js",
   "repository": "https://gitlab.bluebank.io/em-tech/hermes",
@@ -19,7 +19,7 @@
   ],
   "license": "ISC",
   "dependencies": {
-    "braid-client": "^1.0.0"
+    "braid-client": "^1.0.0-SNAPSHOT"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

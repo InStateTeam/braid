@@ -1,6 +1,6 @@
 {
   "name": "braid-client",
-  "version": "1.0.0",
+  "version": "1.0.0-SNAPSHOT",
   "description": "service proxies for Braid JsonRPC services",
   "main": "dist/braid-client.js",
   "repository": "https://gitlab.bluebank.io/em-tech/hermes",
