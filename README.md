@@ -1,5 +1,7 @@
 # Braid
 
+[![pipeline status](https://gitlab.bluebank.io/em-tech/braid/badges/master/pipeline.svg)](https://gitlab.bluebank.io/em-tech/braid/commits/master)
+
 ## Context
 
 Writing web-services appears easy at first. However, the machinery of REST frameworks often slow development, and by-default introduce security concerns that a long time to fix.
