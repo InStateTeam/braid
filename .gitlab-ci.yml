@@ -11,16 +11,22 @@ cache:
 
 build:
   stage: build
+  tags:
+    - script-docker
   script:
     - mvn $MAVEN_CLI_OPTS compile
 
 test:
   stage: test
+  tags:
+    - script-docker
   script:
     - mvn $MAVEN_CLI_OPTS test
 
 deploy:
   stage: deploy
+  tags:
+    - script-docker
   script:
     - mvn $MAVEN_CLI_OPTS deploy
   only:
