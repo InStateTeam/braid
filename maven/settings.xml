@@ -15,7 +15,7 @@
     <mirror>
       <id>central</id>
       <name>central</name>
-      <url>${env.MAVEN_REPO_USER}/maven-public/</url>
+      <url>${env.MAVEN_REPO_URL}/maven-public/</url>
       <mirrorOf>*</mirrorOf>
     </mirror>
   </mirrors>
