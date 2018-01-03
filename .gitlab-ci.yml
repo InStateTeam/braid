@@ -20,6 +20,6 @@ deploy:
   stage: deploy
   environment: development
   only:
-    - master@em-tech/braid
+    - master
   except:
-    - branches@em-tech/braid
+    - branches
