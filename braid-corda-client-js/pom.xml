@@ -32,17 +32,24 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm" failonerror="true">
-                  <arg value="install"/>
-                </exec>
+                <delete dir="dist"/>
+                <delete dir="test-dist"/>
+                <delete dir="node_modules"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm setup</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
                 <exec executable="npm" failonerror="true">
                   <arg value="version"/>
                   <arg value="${project.version}"/>
                   <arg value="--allow-same-version"/>
-                </exec>
-                <exec executable="npm" failonerror="true">
-                  <arg value="run"/>
-                  <arg value="clean"/>
                 </exec>
               </target>
             </configuration>
