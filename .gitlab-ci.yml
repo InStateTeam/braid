@@ -1,11 +1,25 @@
 stages:
   - build
+  - deploy
 
 build:
   tags:
     - script-maven
+    - script-npm
   script:
     - mvn clean install -B
   stage: build
   environment: development
 
+deploy:
+  tags:
+    - script-maven
+    - script-npm
+  script:
+    - mvn deploy
+  stage: deploy
+  environment: development
+  only:
+    - master@em-tech/braid
+  except:
+    - branches@em-tech/braid
