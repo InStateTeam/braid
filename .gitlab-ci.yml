@@ -1,24 +1,37 @@
-stages:
-  - build
-  - deploy
+image: docker-java8-mvn-nodejs-npm:latest
+
+variables:
+  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=maven/repository"
+
+before_script:
+- npm set registry $NPM_REPO
+- npm set $NPM_CREDENTIALS
+
+cache:
+  paths:
+    - maven/repository/
+    - target/
 
 build:
-  tags:
-    - script-maven
-    - script-npm
-  script:
-    - mvn clean install -B
   stage: build
-  environment: development
+  tags:
+    - script-docker
+  script:
+    - mvn $MAVEN_CLI_OPTS compile
+
+test:
+  stage: test
+  tags:
+    - script-docker
+  script:
+    - mvn $MAVEN_CLI_OPTS test
 
 deploy:
-  tags:
-    - script-maven
-    - script-npm
-  script:
-    - mvn deploy
   stage: deploy
-  environment: development
+  tags:
+    - script-docker
+  script:
+    - mvn $MAVEN_CLI_OPTS deploy
   only:
     - master
-
