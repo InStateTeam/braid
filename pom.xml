@@ -45,8 +45,9 @@
     </snapshotRepository>
     <repository>
       <id>central</id>
-      <name>83d43b5afeb5-releases</name>
+      <name>central</name>
       <url>${env.MAVEN_REPO_URL}/maven-releases/</url>
+      <layout>default</layout>
     </repository>
   </distributionManagement>
 
