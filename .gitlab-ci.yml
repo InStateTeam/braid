@@ -1,24 +1,27 @@
-stages:
-  - build
-  - deploy
+image: maven:latest
+
+variables:
+  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=maven/repository"
+
+cache:
+  paths:
+    - maven/repository/
+    - target/
 
 build:
-  tags:
-    - script-maven
-    - script-npm
-  script:
-    - mvn clean install -B
   stage: build
-  environment: development
+  script:
+    - mvn $MAVEN_CLI_OPTS compile
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
 
 deploy:
-  tags:
-    - script-maven
-    - script-npm
-  script:
-    - mvn deploy
   stage: deploy
-  environment: development
+  script:
+    - mvn $MAVEN_CLI_OPTS deploy
   only:
     - master
-
