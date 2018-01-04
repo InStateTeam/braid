@@ -4,6 +4,7 @@
 **/service-scripts
 **/file-uploads
 **/pom.xml.versionsBackup
+**/package-lock.json
 
 # NPM packages folder.
 node_modules/

@@ -5,14 +5,9 @@
 
   <servers>
     <server>
-      <id>nexus-snapshots</id>
-      <username>admin</username>
-      <password>8a5500n!</password>
-    </server>
-    <server>
-      <id>nexus-releases</id>
-      <username>admin</username>
-      <password>8a5500n!</password>
+      <id>central</id>
+      <username>${env.MAVEN_REPO_USER}</username>
+      <password>${env.MAVEN_REPO_PASS}</password>
     </server>
   </servers>
 
@@ -20,7 +15,7 @@
     <mirror>
       <id>central</id>
       <name>central</name>
-      <url>http://nexus-emtech.bluebank.io/repository/maven-public/</url>
+      <url>${env.MAVEN_REPO_URL}/maven-public/</url>
       <mirrorOf>*</mirrorOf>
     </mirror>
   </mirrors>

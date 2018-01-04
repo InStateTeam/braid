@@ -39,13 +39,14 @@
 
   <distributionManagement>
     <snapshotRepository>
-      <id>nexus-snapshots</id>
-      <url>http://nexus-emtech.bluebank.io/repository/maven-snapshots/</url>
+      <id>central</id>
+      <url>${env.MAVEN_REPO_URL}/maven-snapshots/</url>
       <layout>default</layout>
     </snapshotRepository>
     <repository>
-      <id>nexus-releases</id>
-      <url>http://nexus-emtech.bluebank.io/repository/maven-releases/</url>
+      <id>central</id>
+      <name>central</name>
+      <url>${env.MAVEN_REPO_URL}/maven-releases/</url>
       <layout>default</layout>
     </repository>
   </distributionManagement>
