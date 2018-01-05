@@ -34,7 +34,9 @@
               <target>
                 <delete dir="dist"/>
                 <delete dir="test-dist"/>
-                <delete dir="node_modules"/>
+                <delete includeEmptyDirs="yes">
+                  <fileset dir="node_modules" followsymlinks="no" defaultexcludes="no"/>
+                </delete>
               </target>
             </configuration>
           </execution>

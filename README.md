@@ -2,30 +2,50 @@
 
 [![pipeline status](https://gitlab.bluebank.io/em-tech/braid/badges/master/pipeline.svg)](https://gitlab.bluebank.io/em-tech/braid/commits/master)
 
-![logo](art/logo-small.png)
+![logo](art/logo-small.png) 
 
+_Braid is a high performance reactive rpc library for exposing your services in a secure way, in one line of code, and to consume them in any language, runtime, and platform._
+ 
 ## Context
 
-Writing web-services appear easy at first. However, to create production ready services, REST has drawbacks:
+Writing web-services appears easy at first. But to create production ready services, REST has drawbacks:
 
 * By default, REST frameworks present several security vulnerabilities that need to be carefully plugged e.g. XSS, CORS, JWT handling, implementation leaks in error responses, invalid content-type handling, etc.
 * There is a mismatch between programmatic concepts (such as Types, Functions, Methods etc) to REST and HTTP - with far too great an emphasis on the semantics of HTTP return codes, content types etc.
 * REST isn't suited to reactive, event-driven concepts - often the notion of event streams has to be manually encoded over XHR POST requests or websockets, with all the security issues that this work can often expose.
 * Finally, typically, the authentication and authorisation models are intricate and require careful work to integrate with incumbent security services.
 
-All of the above slow down project delivery, and distract focus from the value of the service being implemented.
+All of the above slow down project delivery, add risks, and distract focus from the value of the service being implemented. 
 
-> The `Braid` project is an answer to the above.
+> ## Braid is an answer to the above
 
-## Structure
+* Expose your services as regular plain old Java/Kotlin/Scala classes.
+* Your methods can return any type including reactive streams.
+* Currently, consume your services in Javascript. Plans are in place for Python, C#, F#, GoLang and more.
+* Makes good assumptions on security, serialisation, and transports - which you can alter if you wish.
+* Uses open protocols for its transports and serialisation: Websockets, HTTP.
+* It's fast - capable of handling 8-9K concurrent requests per second on a small Amazon instance, and scalable.
+* Your services will be exposed with rich metadata (far better than Swagger) that will give you a rich developer experience on the client side.
+* You can plugin your preferred authentication services.
 
-There are three sets of key modules:
+There are two ways at present to host Braid services:
 
-* [`braid-core`](braid-core) and [`braid-client-js`](braid-client-js) - these provide the core functionality of Braid. Transport, encodings, security. Server-side and javascript client side. 
-* [`braid-corda`](braid-corda) - a library that makes it easy for developers to integrate into Corda providing a secure, object-oriented way of accessing Corda core and custom services using JS, F#, Python and Java. Braid is reactive, which means that aside from classic request-response invocations (eg. REST), it can stream results, making it easy to write applications that respond to transactions (eg. SockJS).
-* [`braid-server`](braid-server) - a module that helps create standalone servers typically for spikes. It's not required for Corda cordapps. See [docs](braid-server/README.md) for purpose and reasons.
+### Containers
 
-There are also a set of example projects:
+There are various containers that Braid can work in:
+ 
+* [Standalone processes](braid-server)
+* [Corda nodes](braid-corda)
+
+Both of these rely on [braid-core](braid-core).
+
+### Consuming Services 
+
+Services can be consumed in the following languages and runtimes (more to follow!)
+
+* [javascript](braid-client-js) in a browser or NodeJS.
+
+## Examples
 
 * [`example-cordapp`](example-cordapp) - an example Corda cordapp, with customised authentication, streaming
 * [`example-server`](example-server) - a simple standalone server 
