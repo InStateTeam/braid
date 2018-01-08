@@ -35,6 +35,7 @@
     <module>braid-core</module>
     <module>braid-corda</module>
     <module>example-cordapp</module>
+    <module>braid-client</module>
   </modules>
 
   <distributionManagement>
