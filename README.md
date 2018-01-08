@@ -60,7 +60,7 @@ Nexus exposes a unified repository for both a npm central proxy and a locally de
 The unified repo can be used to install all artifacts. Set is as follows:
 
 ```bash
-npm config set registry http://nexus-emtech.bluebank.io/repository/npm-bluebank-group/
+npm config set registry http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-bluebank-group/
 ```
 Followed by
 
@@ -72,7 +72,7 @@ npm add-user
 To be able to publish modules (such as, say, `braid-client`) add your credential to npm using:
 
 ```bash
-npm add-user --registry=http://nexus-emtech.bluebank.io/repository/npm-local/
+npm add-user --registry=http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-local/
 ```
 
 This will prompt you for your credentials and email. Once successfully authorised, you should be able to publish the 
