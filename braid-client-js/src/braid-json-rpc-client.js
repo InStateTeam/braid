@@ -2,6 +2,7 @@
 
 const SockJS = require('sockjs-client');
 const Promise = require('promise');
+const xhr = require('request');
 
 class JsonRPC {
   constructor(url, options) {
@@ -16,16 +17,38 @@ class JsonRPC {
     // -- PRIVATE FUNCTIONS -- oh Javascript
 
     function checkServiceExistsAndBootstrap() {
+      const infoURL = url + "/info";
+      let strictSSL = true;
+      if (typeof options.strictSSL !== 'undefined') {
+        strictSSL = options.strictSSL;
+      }
+      if (!strictSSL) {
+        if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+          // NOTE: rather nasty - to be used only in local dev for self-signed certificates
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        }
+      }
       // first we do a quick check if the service exists and response to a sockjs info request
       // we do this because sockjs-client doesn't distinguish between, the lack of a sockjs service and the webserver being up
-      const oReq = new XMLHttpRequest();
-      oReq.addEventListener('load', () => onInitialCheck(oReq));
-      oReq.addEventListener('error', (e) => initialCheckFailed(e));
-      oReq.open('GET', url + '/info');
-      oReq.send();
+      xhr({
+        method: "get",
+        uri: infoURL,
+        strictSSL: strictSSL,
+        rejectUnauthorized: !strictSSL,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }, function(err, resp, body) {
+        if (err) {
+          initialCheckFailed(err)
+        } else if (resp) {
+          onInitialCheck(resp)
+        }
+      })
     }
 
     function initialCheckFailed(e) {
+      console.error("failed: ", e);
       if (that.onError) {
         let error;
         if (e.currentTarget.status === 0) {
@@ -40,17 +63,20 @@ class JsonRPC {
     }
 
     function onInitialCheck(oReq) {
-      if ((oReq.status / 100) !== 2) {
-        if (oReq.statusText.startsWith('Braid: ')) {
-          logBraid(oReq.statusText.substring(8));
+      if ((oReq.statusCode / 100) !== 2) {
+        if (oReq.statusMessage.startsWith('Braid: ')) {
+          logBraid(oReq.statusMessage.substring(8));
         } else {
           console.error(oReq.statusText)
         }
         if (that.onError) {
-          that.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusText));
+          that.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusMessage));
         }
         return
       }
+      console.log("preparing ...");
+      options.rejectUnauthorized = false;
+      console.log("url", url);
       that.socket = new SockJS(url, null, options);
       that.socket.onopen = function (e) {
         openHandler(e);
