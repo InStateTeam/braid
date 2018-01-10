@@ -5,6 +5,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.services.JavascriptExecutor
+import io.bluebank.braid.server.util.getFreePort
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
@@ -22,16 +23,16 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.net.ServerSocket
 
 @RunWith(VertxUnitRunner::class)
-class JsonRPCServerTest {
+class ServersideJavascriptTest {
   private val port = getFreePort()
   private val vertx: Vertx = Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
   private val server = createServerBuilder()
       .withVertx(vertx)
       .withPort(port)
       .build()
+
   private val client = vertx.createHttpClient(HttpClientOptions()
       .setDefaultPort(port)
       .setDefaultHost("localhost")
@@ -177,9 +178,4 @@ class JsonRPCServerTest {
     return future
   }
 
-  private fun getFreePort(): Int {
-    return (ServerSocket(0)).use {
-      it.localPort
-    }
-  }
 }

@@ -113,6 +113,7 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
   }
 
   var deploymentId: String? = null
+  val rootPath get() = builder.rootPath
 
   init {
     if (builder.vertx == null) {
@@ -124,8 +125,9 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
    * Start the server
    * The startup is asynchronous.
    */
-  fun start() {
+  fun start() : JsonRPCServer {
     start { }
+    return this
   }
 
   /**

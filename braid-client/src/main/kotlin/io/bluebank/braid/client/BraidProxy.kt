@@ -1,8 +1,14 @@
 package io.bluebank.braid.client
 
+import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
+import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
+import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.reflection.actualReturnType
+import io.bluebank.braid.core.reflection.serviceName
 import io.vertx.core.Future
+import io.vertx.core.Future.future
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
@@ -10,14 +16,15 @@ import io.vertx.core.http.WebSocket
 import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
+import io.vertx.kotlin.core.json.get
 import org.slf4j.Logger
 import rx.Observable
-import rx.Observer
-import rx.Subscriber
+import rx.subjects.PublishSubject
 import java.io.Closeable
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import java.lang.reflect.Type
 import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 
@@ -45,10 +52,10 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
 
   @Suppress("UNCHECKED_CAST")
   fun bind(): Future<ServiceType> {
-    val result = Future.future<ServiceType>()
-    val url = URL("ws", config.serviceURI.host, config.serviceURI.port, config.serviceURI.path)
+    val result = future<ServiceType>()
+    val url = URL("ws", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/${clazz.serviceName()}/websocket")
     client.websocket(url.toString(), { socket ->
-      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), ProxyInvocationHandler(clazz, socket)) as ServiceType
+      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), ProxyInvocationHandler(clazz, socket, config)) as ServiceType
       result.complete(proxy)
     }, { error -> result.fail(error) })
     return result
@@ -63,12 +70,12 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
   }
 }
 
-private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val ) : InvocationHandler {
+private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val config: BraidClientConfig) : InvocationHandler {
   private val nextId = AtomicLong(1)
-  private val subscribers = mutableMapOf<Long, Observer<Buffer>>()
+  private val invocations = mutableMapOf<Long, ProxyInvocation>()
 
   companion object {
-    private val log : Logger = loggerFor<ProxyInvocationHandler<*>>()
+    private val log: Logger = loggerFor<ProxyInvocationHandler<*>>()
   }
 
   init {
@@ -77,8 +84,7 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
-
-    val request = JsonRPCRequest(id = nextId.getAndIncrement(), method = method.name, params = args.toList())
+    return jsonRPC(method.name, method.genericReturnType, *args).awaitResult()
   }
 
   private fun handler(buffer: Buffer) {
@@ -87,10 +93,8 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
       val responseId = jo.getLong("id")
       when {
         responseId == null -> log.error("received response without id {}", buffer.toString())
-        !subscribers.containsKey(responseId) -> log.error("no subscriber found for response id {}", responseId)
-        jo.containsKey("result") -> subscribers[responseId]!!.onNext(buffer)
-        jo.containsKey("error") -> subscribers[responseId]!!.onError(RuntimeException(jo.getJsonObject("error").encode()))
-        jo.containsKey("completed") -> subscribers[responseId]!!.onCompleted()
+        !invocations.containsKey(responseId) -> log.error("no subscriber found for response id {}", responseId)
+        else -> invocations[responseId]!!.handle(jo)
       }
     } catch (err: Throwable) {
       log.error("failed to handle response message", err)
@@ -102,26 +106,65 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
     // TODO: handle retries?
   }
 
-  private fun jsonRPC(url: String, method: String, vararg params: Any?): Observable<Buffer> {
-    return Observable.create { subscriber ->
-      val id = nextId.incrementAndGet()
-      subscribers.put(id, Observer)
-      try {
-        val request = JsonRPCRequest(id = id, method = method, params = params.toList())
-        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-      } catch (err: Throwable) {
-        onRequestError(id, err)
+  private fun jsonRPC(method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
+    val id = nextId.incrementAndGet()
+    val proxyInvocation = ProxyInvocation(returnType)
+    invocations.put(id, proxyInvocation)
+    try {
+      val request = JsonRPCRequest(id = id, method = method, params = params.toList())
+      socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+    } catch (err: Throwable) {
+      onRequestError(id, err)
+    }
+    return proxyInvocation
+  }
+
+  private fun onRequestError(id: Long, err: Throwable) {
+    val proxyInvocation = invocations[id]
+    if (proxyInvocation != null) {
+      proxyInvocation.onError(err)
+      invocations.remove(id)
+    } else {
+      log.warn("could not find invocation object $id to report exception", err)
+    }
+  }
+}
+
+private class ProxyInvocation(private val returnType: Type) {
+  private val payloadType = Json.mapper.typeFactory.constructType(returnType.actualReturnType())
+
+  private val resultStream = PublishSubject.create<Any>()
+
+  fun awaitResult(): Any {
+    return when (returnType) {
+      is Future<*> -> {
+        resultStream.toSingle().toFuture()
+      }
+      is Observable<*> -> {
+        resultStream
+      }
+      else -> {
+        resultStream.toBlocking().first()
       }
     }
   }
 
-  private fun onRequestError(id: Long, err: Throwable) {
-    val subscriber = subscribers[id]
-    if (subscriber != null) {
-      subscriber.onError(err)
-      subscribers.remove(id)
-    } else {
-      // TODO: warn
+  fun handle(jo: JsonObject) {
+    when {
+      jo.containsKey("result") -> {
+        val raw = jo.getValue("result")
+        val result = Json.mapper.convertValue<Any>(raw, payloadType)
+        resultStream.onNext(result)
+      }
+      jo.containsKey("error") -> {
+        val error =jo.getJsonObject("error")
+        onError(RuntimeException(error.encode()))
+      }
+      jo.containsKey("completed") -> resultStream.onCompleted()
     }
+  }
+
+  fun onError(err: Throwable) {
+    resultStream.onError(err)
   }
 }

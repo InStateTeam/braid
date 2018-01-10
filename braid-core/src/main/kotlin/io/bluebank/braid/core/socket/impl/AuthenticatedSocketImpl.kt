@@ -49,7 +49,6 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
     }
   }
 
-
   override fun endHandler(socket: Socket<Buffer, Buffer>) {
     onEnd()
   }
