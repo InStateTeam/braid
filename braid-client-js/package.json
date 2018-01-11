@@ -50,8 +50,8 @@
       ],
       "extensions": "js",
       "quiet": false,
-      "legacyWatch": true,
-      "delay": 1000
+      "legacyWatch": false,
+      "delay": 500
     }
   }
 }
