@@ -7,6 +7,7 @@
     <groupId>io.bluebank.braid</groupId>
     <artifactId>braid</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>braid-client-js</artifactId>
   <name>braid-client-js</name>

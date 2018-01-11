@@ -30,11 +30,11 @@
     <module>braid-client-js</module>
     <module>braid-corda-client-js</module>
     <module>braid-server</module>
-    <module>example-server</module>
+    <module>examples/example-server</module>
     <module>braid-quickstart</module>
     <module>braid-core</module>
     <module>braid-corda</module>
-    <module>example-cordapp</module>
+    <module>examples/example-cordapp</module>
   </modules>
 
   <distributionManagement>
