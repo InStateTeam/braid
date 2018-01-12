@@ -74,8 +74,7 @@ class BraidServiceProxy {
     }
 
     function onErrorTrap(err) {
-      console.log(err);
-      if (err.jsonRPCError && err.jsonRPCError.code === -32601) {
+      if (typeof document !== 'undefined' && err.jsonRPCError && err.jsonRPCError.code === -32601) {
         console.log("%cBraid: %c" + err.message + "\n%cCreate a stub here: " + uri(),
           "font-family: sans-serif; font-size: 14px; font-weight: bold;",
           "",

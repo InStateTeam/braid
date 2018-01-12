@@ -1,6 +1,7 @@
-package io.bluebank.braid.core.socket
+package io.bluebank.braid.core.security
 
-import io.bluebank.braid.core.socket.impl.AuthenticatedSocketImpl
+import io.bluebank.braid.core.security.impl.AuthenticatedSocketImpl
+import io.bluebank.braid.core.socket.SocketProcessor
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.auth.AuthProvider
 

@@ -20,7 +20,7 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
     return if (flow != null) {
       invoke(request, flow)
     } else {
-      Observable.error(MethodDoesNotExist())
+      Observable.error(MethodDoesNotExist(request.method))
     }
   }
 
@@ -42,7 +42,7 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
   private fun invoke(request: JsonRPCRequest, clazz: Class<out FlowLogic<*>>) : Observable<Any> {
     val constructor = clazz.constructors.firstOrNull { it.matches(request) }
     return if (constructor == null) {
-      Observable.error(MethodDoesNotExist())
+      Observable.error(MethodDoesNotExist(request.method))
     } else {
       return Observable.create { subscriber ->
         try {

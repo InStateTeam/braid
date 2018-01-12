@@ -137,7 +137,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
   private fun checkMethodExists(methodName: String) {
     val exists = engine.eval("(typeof $methodName) === 'function'") as Boolean
     if (!exists) {
-      throw MethodDoesNotExist()
+      throw MethodDoesNotExist(methodName)
     }
   }
 

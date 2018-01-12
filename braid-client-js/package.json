@@ -6,7 +6,9 @@
   "repository": "https://gitlab.bluebank.io/em-tech/hermes",
   "scripts": {
     "build": "npm link && babel src -d dist",
-    "watch": "npm-watch"
+    "watch": "npm-watch",
+    "test:integration": "npm install && npm run build && npm run test:run",
+    "test:run": "mocha --exit --require babel-core/register"
   },
   "keywords": [],
   "contributors": [
@@ -35,7 +37,8 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
     "npm-watch": "^0.3.0",
-    "sockjs": "^0.3.19"
+    "sockjs": "^0.3.19",
+    "mocha": "^4.1.0"
   },
   "publishConfig": {
     "registry": "http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-hosted/"

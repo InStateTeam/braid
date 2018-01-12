@@ -76,7 +76,6 @@ class JsonRPC {
       }
       console.log("preparing ...");
       options.rejectUnauthorized = false;
-      console.log("url", url);
       that.socket = new SockJS(url, null, options);
       that.socket.onopen = function (e) {
         openHandler(e);
@@ -139,7 +138,7 @@ class JsonRPC {
     function handleError(message) {
       const msgState = state[message.id];
       if (msgState.onError) {
-        const err = new Error(`json rpc error ${message.error.code} with message ${message.error.message}`);
+        const err = new Error(`json rpc error ${message.error.code} with message: ${message.error.message}`);
         err.jsonRPCError = message.error;
         msgState.onError(err);
       }
@@ -204,7 +203,6 @@ class JsonRPC {
         params: params,
         streamed: streamed
       };
-      // console.log("payload", payload);
       state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
       that.socket.send(JSON.stringify(payload));
       return new CancellableInvocation(this, id);

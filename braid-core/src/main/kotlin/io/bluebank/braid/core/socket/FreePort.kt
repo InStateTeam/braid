@@ -7,3 +7,7 @@ fun findFreePort() : Int {
     it.localPort
   }
 }
+
+fun findFreePorts(count: Int) : IntArray {
+  return (1..count).map { ServerSocket(0) }.map { it.use { it.localPort } }.toIntArray()
+}

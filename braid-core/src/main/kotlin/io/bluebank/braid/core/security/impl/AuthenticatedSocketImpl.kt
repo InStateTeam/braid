@@ -1,11 +1,11 @@
-package io.bluebank.braid.core.socket.impl
+package io.bluebank.braid.core.security.impl
 
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.invalidParams
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
+import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.socket.AbstractSocket
-import io.bluebank.braid.core.socket.AuthenticatedSocket
 import io.bluebank.braid.core.socket.Socket
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
@@ -43,7 +43,8 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
         if (user != null) {
           onData(item)
         } else {
-          socket.write(Json.encodeToBuffer("failed because not logged in"))
+          val msg = JsonRPCErrorResponse.serverError(id = op.id, message = "not authenticated")
+          write(Json.encodeToBuffer(msg))
         }
       }
     }
@@ -71,14 +72,14 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
           sendOk(op)
         } else {
           user = null
-          sendFailed(op, it.cause())
+          sendFailed(op, "failed to authenticate")
         }
       }
     }
   }
 
   private fun sendParameterError(op: JsonRPCRequest) {
-    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object").response
+    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object")
     write(Json.encodeToBuffer(msg))
   }
 
@@ -88,7 +89,11 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   }
 
   private fun sendFailed(op: JsonRPCRequest, cause: Throwable) {
-    val msg = JsonRPCErrorResponse.serverError(id = op.id, message = cause.message ?: "unspecified error").response
+    sendFailed(op, cause.message ?: "unspecified error")
+  }
+
+  private fun sendFailed(op: JsonRPCRequest, message: String) {
+    val msg = JsonRPCErrorResponse.serverError(id = op.id, message = message)
     write(Json.encodeToBuffer(msg))
   }
 }
