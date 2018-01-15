@@ -19,4 +19,5 @@ class BrowserURL {
   }
 }
 
-export default url = buildURLClass();
+const url = buildURLClass();
+export default url;
