@@ -9,7 +9,7 @@ import net.corda.nodeapi.internal.addShutdownHook
 
 class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
   companion object {
-    private val logger = loggerFor<BraidServer>()
+    private val log = loggerFor<BraidServer>()
     init {
       BraidCordaJacksonInit.init()
     }
@@ -25,8 +25,9 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
     vertx = Vertx.vertx()
     vertx.deployVerticle(BraidVerticle(services, config)) {
       if (it.failed()) {
-        logger.error("failed to startup braid server", it.cause())
+        log.error("failed to start braid server on ${config.port}")
       } else {
+        log.info("braid server started successfully on ${config.port}")
         deployId = it.result()
       }
     }

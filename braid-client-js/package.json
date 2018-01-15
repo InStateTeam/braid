@@ -5,6 +5,7 @@
   "main": "dist/braid-service-proxy.js",
   "repository": "https://gitlab.bluebank.io/em-tech/hermes",
   "scripts": {
+    "clean": "rm -rf node_modules && rm -rf dist",
     "build": "npm link && babel src -d dist",
     "watch": "npm-watch",
     "test:integration": "npm install && npm run build && npm run test:run",
@@ -23,7 +24,6 @@
   ],
   "license": "ISC",
   "dependencies": {
-    "jquery": "^3.2.1",
     "promise": "^8.0.1",
     "request": "^2.83.0",
     "sockjs-client": "^1.0.3",

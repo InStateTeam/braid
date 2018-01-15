@@ -5,6 +5,8 @@
 **/file-uploads
 **/pom.xml.versionsBackup
 **/package-lock.json
+build
+build/**
 **/.DS_Store
 # NPM packages folder.
 node_modules/

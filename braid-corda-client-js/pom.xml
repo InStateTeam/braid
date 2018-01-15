@@ -42,22 +42,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>npm setup</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="npm" failonerror="true">
-                  <arg value="version"/>
-                  <arg value="${project.version}"/>
-                  <arg value="--allow-same-version"/>
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
             <id>npm run build</id>
             <phase>compile</phase>
             <goals>
@@ -80,6 +64,11 @@
             </goals>
             <configuration>
               <target>
+                <exec executable="npm" failonerror="true">
+                  <arg value="version"/>
+                  <arg value="${project.version}-${maven.build.timestamp}"/>
+                  <arg value="--allow-same-version"/>
+                </exec>
                 <exec executable="npm" failonerror="true">
                   <arg value="publish"/>
                 </exec>

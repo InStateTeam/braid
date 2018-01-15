@@ -74,6 +74,12 @@
       <version>${corda.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -104,6 +110,13 @@
         <configuration>
           <jvmTarget>1.8</jvmTarget>
           <javaParameters>true</javaParameters>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-javaagent:${basedir}/../lib/quasar.jar</argLine>
         </configuration>
       </plugin>
       <plugin>

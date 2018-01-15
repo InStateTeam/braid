@@ -1,5 +1,6 @@
 package io.bluebank.braid.integration
 
+import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.bluebank.braid.core.socket.findFreePort
 import io.bluebank.braid.integration.server.TestServer
 import io.vertx.ext.unit.TestContext
@@ -35,7 +36,10 @@ class JavascriptIntegrationTests {
     val testDir = getProjectDirectory().resolve("../braid-client-js")
     assertTrue { testDir.exists() }
     val pb = ProcessBuilder("npm", "run", "test:integration")
-    pb.environment().put("braidService", "https://localhost:$port/api/myservice/braid")
+    val apiPath = "/api/"
+    val serviceName = "myservice"
+    val endpoint = defaultServiceEndpoint(apiPath, serviceName)
+    pb.environment().put("braidService", "https://localhost:$port$endpoint")
     pb.directory(testDir)
     val process = pb.start()
     Thread {

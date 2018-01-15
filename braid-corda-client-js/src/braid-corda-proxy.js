@@ -2,11 +2,25 @@
 
 import DynamicProxy from './dynamic-service-proxy';
 
+const xhr = require('request');
+
 class CordaProxy {
   constructor(config, onOpen, onClose, onError, options) {
     if (!config.url) {
       throw "config must include url property e.g. https://localhost:8080"
     }
+
+    let strictSSL = true;
+    if (typeof options.strictSSL !== 'undefined') {
+      strictSSL = options.strictSSL;
+    }
+    if (!strictSSL) {
+      if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+        // NOTE: rather nasty - to be used only in local dev for self-signed certificates
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      }
+    }
+
     const that = this;
     let errors = 0;
     let connections = 0;
@@ -34,30 +48,35 @@ class CordaProxy {
       }
     }
 
-    function onInternalError() {
+    function onInternalError(e) {
       if (++errors === 1 && onError) {
-        onError()
+        onError(e)
       }
     }
 
     function bootstrap() {
-      const url = config.url + "doc/";
-      const oReq = new XMLHttpRequest();
-      oReq.addEventListener('load', () => {
-        if (oReq.status === 200) {
-          bindServices(oReq);
-        } else {
-          clearCredentials();
-          failed("failed to get metadata at " + url + ": " + oReq.statusText);
+      const url = config.url;
+      xhr({
+        method: "get",
+        uri: url,
+        strictSSL: strictSSL,
+        rejectUnauthorized: !strictSSL,
+        headers: {
+          "Content-Type": "application/json"
         }
-      });
-      oReq.addEventListener('error', failed);
-      oReq.open('GET', url);
-      oReq.send();
+      }, function(err, resp, body) {
+        if (err) {
+          clearCredentials();
+          failed("failed to get services descriptor: " + err)
+        } else if (resp) {
+          bindServices(body);
+        }
+      })
     }
 
-    function bindServices(oReq) {
-      const serviceNames = JSON.parse(oReq.response);
+    function bindServices(body) {
+      const services = JSON.parse(body)
+      const serviceNames = Object.keys(services);
       requiredConnections = serviceNames.length;
       for (let idx = 0; idx < serviceNames.length; ++idx) {
         const serviceName = serviceNames[idx];

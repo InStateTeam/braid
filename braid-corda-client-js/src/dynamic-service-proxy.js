@@ -1,6 +1,8 @@
 'use strict';
 
 import ServiceProxy from 'braid-client';
+import URL from 'url-parse';
+import xhr from 'request';
 
 /**
  * This class creates a first-class JS object with methods that proxy to a given service end-point
@@ -27,8 +29,21 @@ class DynamicProxy {
     if (!config.url) {
       throw "missing url property in config";
     }
+
+    let strictSSL = true;
+    if (typeof options.strictSSL !== 'undefined') {
+      strictSSL = options.strictSSL;
+    }
+    if (!strictSSL) {
+      if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+        // NOTE: rather nasty - to be used only in local dev for self-signed certificates
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      }
+    }
+
     config = Object.assign({}, config); // clone so that we can then get rid of the credentials once logged in
-    const proxy = new ServiceProxy(config.url + "jsonrpc/" + serviceName, internalOnOpen, onClose, err => failed(`to open service proxy for ${serviceName}`, err), options);
+    const serviceEndPoint = config.url + serviceName + "/braid";
+    const proxy = new ServiceProxy(serviceEndPoint, internalOnOpen, onClose, err => failed(`to open service proxy for ${serviceName}`, err), options);
 
     // --- PRIVATE FUNCTIONS ---
 
@@ -44,33 +59,52 @@ class DynamicProxy {
           clearCredentials();
           retrieveMetadataAndBind();
         }, err => {
-          retrieveMetadataAndBind();
           failed("failed to open", err)
         });
     }
 
     function retrieveMetadataAndBind() {
-      const url = getMetadataEndpoint(config, serviceName);
-      const oReq = new XMLHttpRequest();
-      oReq.addEventListener('load', () => {
-        bindMetadata(oReq);
-        if (onOpen) {
-          onOpen();
-        }
-      });
-      oReq.addEventListener('error', failed);
-      oReq.open('GET', url);
-      oReq.send();
+      try {
+        const url = getMetadataEndpoint(config, serviceName);
+
+        xhr({
+          method: "get",
+          uri: url,
+          strictSSL: strictSSL,
+          rejectUnauthorized: !strictSSL,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }, function (err, resp, body) {
+          if (err) {
+            failed(err);
+          }
+          else if (resp.statusCode !== 200) {
+            failed(resp.statusMessage)
+          } else if (body) {
+            bindMetadata(body);
+          } else {
+            const message = "no error nor response!";
+            console.error(message, url);
+            failed(message);
+          }
+        });
+      } catch (err) {
+        failed(err);
+      }
     }
 
-    function bindMetadata(oReq) {
-      if (oReq.status !== 200) {
-        failed(oReq.status);
-        return;
-      }
-      const metadata = JSON.parse(oReq.response);
-      for (let idx = 0; idx < metadata.length; ++idx) {
-        bind(metadata[idx]);
+    function bindMetadata(body) {
+      try {
+        const metadata = JSON.parse(body);
+        for (let idx = 0; idx < metadata.length; ++idx) {
+          bind(metadata[idx]);
+        }
+        if (onOpen) {
+          onOpen()
+        }
+      } catch (error) {
+        failed(error);
       }
     }
 
@@ -103,15 +137,14 @@ class DynamicProxy {
     }
 
 
-    function getMetadataEndpoint(config, name) {
+    function getMetadataEndpoint(config, serviceName) {
       const parsed = parseURL(config.url);
-      return parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + "/api/doc/" + name
+      const result = parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + "/api/" + serviceName;
+      return result;
     }
 
     function parseURL(url) {
-      const parser = document.createElement('a');
-      parser.href = url;
-      return parser;
+      return new URL(url)
     }
 
     function clearCredentials() {

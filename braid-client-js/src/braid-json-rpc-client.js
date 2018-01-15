@@ -40,9 +40,14 @@ class JsonRPC {
         }
       }, function(err, resp, body) {
         if (err) {
+          console.log("error!", err);
           initialCheckFailed(err)
         } else if (resp) {
-          onInitialCheck(resp)
+          onInitialCheck(resp);
+        } else {
+          const message = "no error nor response!";
+          console.error(message, infoURL);
+          that.onError(new Error(message));
         }
       })
     }
@@ -64,17 +69,17 @@ class JsonRPC {
 
     function onInitialCheck(oReq) {
       if ((oReq.statusCode / 100) !== 2) {
+        console.log("Failed response", oReq.statusCode, oReq.statusMessage);
         if (oReq.statusMessage.startsWith('Braid: ')) {
           logBraid(oReq.statusMessage.substring(8));
         } else {
-          console.error(oReq.statusText)
+          console.error(oReq.statusMessage)
         }
         if (that.onError) {
           that.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusMessage));
         }
         return
       }
-      console.log("preparing ...");
       options.rejectUnauthorized = false;
       that.socket = new SockJS(url, null, options);
       that.socket.onopen = function (e) {

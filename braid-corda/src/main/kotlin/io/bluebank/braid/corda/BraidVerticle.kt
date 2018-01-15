@@ -14,17 +14,19 @@ class BraidVerticle(private val services: ServiceHubInternal, private val config
   companion object {
     private val log = loggerFor<BraidVerticle>()
   }
-  override fun start(startFuture: Future<Void>?) {
+  override fun start(startFuture: Future<Void>) {
     log.info("starting with ", config)
     val router = setupRouter()
-    setupWebserver(router)
+    setupWebserver(router, startFuture)
     Node.printBasicNodeInfo("Braid server started on", "http://localhost:${config.port}${config.rootPath}")
   }
 
-  private fun setupWebserver(router: Router) {
+  private fun setupWebserver(router: Router, startFuture: Future<Void>) {
     vertx.createHttpServer(config.httpServerOptions.withCompatibleWebsockets())
         .requestHandler(router::accept)
-        .listen(config.port)
+        .listen(config.port) {
+          startFuture.completer().handle(it.mapEmpty())
+        }
   }
 
   private fun setupRouter(): Router {
