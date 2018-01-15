@@ -18,14 +18,7 @@ build:
   tags:
     - script-docker
   script:
-    - mvn $MAVEN_CLI_OPTS compile
-
-test:
-  stage: test
-  tags:
-    - script-docker
-  script:
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS install
 
 deploy:
   stage: deploy
