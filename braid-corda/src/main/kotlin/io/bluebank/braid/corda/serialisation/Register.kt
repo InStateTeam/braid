@@ -61,8 +61,8 @@ class BraidCordaJacksonInit {
 //          .addDeserializer(Amount::class.java, JacksonSupport.AmountDeserializer)
 
           // For OpaqueBytes
-          .addDeserializer(OpaqueBytes::class.java, JacksonSupport.OpaqueBytesDeserializer)
-          .addSerializer(OpaqueBytes::class.java, JacksonSupport.OpaqueBytesSerializer)
+          .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
+          .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
 
           // For X.500 distinguished names
           .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
