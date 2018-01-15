@@ -1,7 +1,11 @@
 import assert from 'assert'
 import {buildProxy} from './util';
 
+/**
+ * Tests for authentication
+ */
 describe('braid authentication', () => {
+
   it('if we do not login, we fail', (done) => {
     buildProxy(done, proxy => {
       proxy.add(5, 6)
