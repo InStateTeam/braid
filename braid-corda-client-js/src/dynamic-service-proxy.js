@@ -1,7 +1,7 @@
 'use strict';
 
 import ServiceProxy from 'braid-client';
-import URL from 'url-parse';
+import URL from './url-parse';
 import xhr from 'request';
 
 /**
