@@ -21,7 +21,8 @@
   "license": "ISC",
   "dependencies": {
     "braid-client": "^1.0.0-SNAPSHOT",
-    "xhr": "^2.4.1"
+    "xhr": "^2.4.1",
+    "request": "^2.83.0"
   },
   "browser": {
     "request": "xhr"
