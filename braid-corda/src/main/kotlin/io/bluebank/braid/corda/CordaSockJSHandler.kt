@@ -6,10 +6,10 @@ import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
+import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.service.MethodDescriptor
 import io.bluebank.braid.core.service.ServiceExecutor
-import io.bluebank.braid.core.socket.AuthenticatedSocket
 import io.bluebank.braid.core.socket.SockJSSocketWrapper
 import io.bluebank.braid.core.socket.Socket
 import io.bluebank.braid.core.socket.TypedSocket

@@ -59,26 +59,32 @@ class JsonRPCServerTest {
 
   @Test
   fun `that we can list services and create them`(testContext: TestContext) {
-    httpGetAsJsonArray("/api/services")
+    val serviceName = "myservice"
+    httpGetAsJsonObject("/api/")
         .compose {
           testContext.assertEquals(0, it.size())
-          httpGet("/api/services/myservice/script")
+          httpGet("/api/$serviceName/script")
         }
         .map {
           testContext.assertEquals("", it.toString())
         }
         .compose {
-          httpGetAsJsonArray("/api/services")
+          httpGetAsJsonObject("/api/")
         }
         .map {
           testContext.assertEquals(1, it.size())
-          testContext.assertEquals("myservice", it.getString(0))
+          testContext.assertTrue(it.containsKey(serviceName))
+          val serviceDef = it.getJsonObject(serviceName)
+          testContext.assertTrue(serviceDef.containsKey("endpoint") && serviceDef.containsKey("documentation"))
+          testContext.assertEquals("/api/$serviceName/braid", serviceDef.getString("endpoint"))
+          testContext.assertEquals("/api/$serviceName", serviceDef.getString("documentation"))
         }
         .setHandler(testContext.asyncAssertSuccess())
   }
 
   @Test
   fun `that we can set a script on a service and execute it`(testContext: TestContext) {
+    val serviceName = "myservice"
     val script = """
       |// This is a comment
       |function add(lhs, rhs) {
@@ -86,9 +92,9 @@ class JsonRPCServerTest {
       |}
       """.trimIndent().trimMargin("|")
 
-    httpPost("/api/services/myservice/script", script)
+    httpPost("/api/$serviceName/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port/api/jsonrpc/myservice/websocket", "add", 1, 2)
+          jsonRPC("ws://localhost:$port/api/$serviceName/braid/websocket", "add", 1, 2)
         }
         .map {
           Json.decodeValue(it, JsonRPCResultResponse::class.java)
@@ -131,6 +137,10 @@ class JsonRPCServerTest {
 
   private fun httpGetAsJsonArray(url: String): Future<JsonArray> {
     return httpGet(url).map { JsonArray(it) }
+  }
+
+  private fun httpGetAsJsonObject(url: String) : Future<JsonObject> {
+    return httpGet(url).map { JsonObject(it) }
   }
 
   private fun httpGet(url: String): Future<Buffer> {

@@ -30,11 +30,11 @@
     <module>braid-client-js</module>
     <module>braid-corda-client-js</module>
     <module>braid-server</module>
-    <module>example-server</module>
+    <module>examples/example-server</module>
     <module>braid-quickstart</module>
     <module>braid-core</module>
     <module>braid-corda</module>
-    <module>example-cordapp</module>
+    <module>examples/example-cordapp</module>
   </modules>
 
   <distributionManagement>
@@ -50,6 +50,13 @@
       <layout>default</layout>
     </repository>
   </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
 
   <build>
     <pluginManagement>
@@ -68,11 +75,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${assembly.plugin.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.jetbrains.kotlin</groupId>
-          <artifactId>kotlin-maven-plugin</artifactId>
-          <version>${kotlin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -108,6 +110,11 @@
             <jvmTarget>1.8</jvmTarget>
             <javaParameters>true</javaParameters>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
         </plugin>
       </plugins>
     </pluginManagement>

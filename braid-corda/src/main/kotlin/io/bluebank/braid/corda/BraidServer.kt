@@ -5,6 +5,7 @@ import io.vertx.core.Vertx
 import net.corda.core.node.ServiceHub
 import net.corda.core.utilities.loggerFor
 import net.corda.node.services.api.ServiceHubInternal
+import net.corda.nodeapi.internal.addShutdownHook
 
 class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
   companion object {
@@ -29,6 +30,7 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
         deployId = it.result()
       }
     }
+    addShutdownHook(this::shutdown)
     return this
   }
 

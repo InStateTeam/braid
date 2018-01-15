@@ -3,7 +3,7 @@ package io.bluebank.braid.core.service
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import rx.Observable
 
-class MethodDoesNotExist : Exception()
+class MethodDoesNotExist(val methodName: String) : Exception()
 
 interface ServiceExecutor {
   fun invoke(request: JsonRPCRequest) : Observable<Any>

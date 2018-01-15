@@ -74,7 +74,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     } catch (err: IllegalArgumentException) {
       JsonRPCErrorResponse.throwMethodNotFound(request.id, "method ${request.method} has multiple implementations with the same number of parameters")
     } catch (err: NoSuchElementException) {
-      JsonRPCErrorResponse.throwMethodNotFound(request.id, "could not find method ${request.method}")
+      throw MethodDoesNotExist(request.method)
     }
   }
 

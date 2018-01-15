@@ -6,9 +6,9 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.service.ServiceExecutor
-import io.bluebank.braid.core.socket.AuthenticatedSocket
 import io.bluebank.braid.core.socket.SockJSSocketWrapper
 import io.bluebank.braid.core.socket.TypedSocket
 import io.bluebank.braid.server.services.CompositeExecutor
@@ -48,14 +48,13 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   private lateinit var router: Router
   private lateinit var sockJSHandler : SockJSHandler
 
-
   override fun start(startFuture: Future<Void>) {
     router = setupRouter()
     setupWebserver(router, startFuture)
   }
 
   private fun wrapConcreteService(service: Any): ServiceExecutor {
-    return CompositeExecutor(ConcreteServiceExecutor(service), JavascriptExecutor(vertx, getServiceName(service)))
+    return CompositeExecutor(JavascriptExecutor(vertx, getServiceName(service)), ConcreteServiceExecutor(service))
   }
 
 
@@ -86,7 +85,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
 
   private fun getJavascriptExecutorForService(serviceName: String): JavascriptExecutor {
     return serviceMap.computeIfAbsent(serviceName) {
-      router.route(sockPath(serviceName)).handler(sockJSHandler)
+      bindServiceSockJSHandler(serviceName)
       JavascriptExecutor(vertx, serviceName)
     }.getJavascriptExecutor()
   }
@@ -115,6 +114,8 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     return this
   }
 
+  private lateinit var servicesRouter: Router
+
   private fun setupRouter(): Router {
     val router = Router.router(vertx)
     router.route().handler(BodyHandler.create())
@@ -127,15 +128,15 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
       }
       it.next()
     }
-    router.get("/_root").handler { it.write("${rootPath}jsonrpc") }
-    val servicesRouter = Router.router(vertx)
-    router.mountSubRouter("${rootPath}services", servicesRouter)
+    servicesRouter = Router.router(vertx)
+    router.mountSubRouter("$rootPath", servicesRouter)
     servicesRouter.get("/").handler { it.getServiceList() }
+    servicesRouter.get("/:serviceId").handler { it.getService(it.pathParam("serviceId"))}
     servicesRouter.get("/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
     servicesRouter.post("/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
     servicesRouter.delete("/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
     servicesRouter.get("/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
-    setupSockJS(router)
+    setupSockJS()
     router.get()
         .last()
         .handler(
@@ -149,7 +150,17 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
 
 
   private fun RoutingContext.getServiceList() {
-    write(serviceMap.keys)
+    data class ServiceDescriptor(val endpoint: String, val documentation: String)
+    val serviceMap = serviceMap.map {
+      it.key to ServiceDescriptor("$rootPath${it.key}/braid", "$rootPath${it.key}")
+    }.toMap()
+    write(serviceMap)
+  }
+
+  private fun RoutingContext.getService(serviceName: String) {
+    data class ServiceDocumentation(val java: String, val script: String, val braid: String)
+    val docs = ServiceDocumentation("$rootPath$serviceName/java", "$rootPath$serviceName/script", "$rootPath$serviceName/braid")
+    write(docs)
   }
 
   private fun RoutingContext.getServiceScript(serviceName: String) {
@@ -183,9 +194,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     write("done")
   }
 
-  private fun sockPath(serviceName: String) = "$sockRootPath$serviceName/*"
-
-  private val sockRootPath = "${rootPath}jsonrpc/"
+  private fun sockPath(serviceName: String) = "$rootPath$serviceName/*"
 
   private fun RoutingContext.getJavaImplementationHeaders(serviceName: String) {
     val service = getJavaExecutorForService(serviceName)
@@ -209,7 +218,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   }
 
   private fun socketHandler(socket: SockJSSocket) {
-    val re = Regex("${sockRootPath.replace("/", "\\/")}([^\\/]+).*")
+    val re = Regex("${rootPath.replace("/", "\\/")}([^\\/]+).*")
     val serviceName = re.matchEntire(socket.uri())?.groupValues?.get(1) ?: ""
 
     val service = serviceMap[serviceName]
@@ -241,12 +250,12 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     return service.javaClass.getDeclaredAnnotation(ServiceDescription::class.java)?.name ?: service.javaClass.simpleName.toLowerCase()
   }
 
-  private fun setupSockJS(router: Router) {
+  private fun setupSockJS() {
     sockJSHandler = SockJSHandler.create(vertx)
     sockJSHandler.socketHandler(this::socketHandler)
     // mount each service
 
-    router.get(sockRootPath + ":serviceId/info").handler {
+    servicesRouter.get("/:serviceId/braid/info").handler {
       val serviceId = it.pathParam("serviceId")
       if (serviceMap.contains(serviceId)) {
         it.next()
@@ -257,7 +266,11 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
       }
     }
     serviceMap.keys.forEach {
-      router.route(sockPath(it)).handler(sockJSHandler)
+      bindServiceSockJSHandler(it)
     }
+  }
+
+  private fun bindServiceSockJSHandler(serviceName: String) {
+    servicesRouter.route("/$serviceName/braid/*").handler(sockJSHandler)
   }
 }

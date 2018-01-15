@@ -89,6 +89,13 @@
       <artifactId>braid-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.bluebank.braid</groupId>
+      <artifactId>braid-client-js</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -104,6 +111,16 @@
         </excludes>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>${project.build.testSourceDirectory}/../resources</directory>
+        <excludes>
+          <exclude>**/service-scripts/**</exclude>
+          <exclude>**/.vertx</exclude>
+          <exclude>**/node_modules/**</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
@@ -130,7 +147,15 @@
           <javaParameters>true</javaParameters>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <phantomjs.binary>${phantomjs.binary}</phantomjs.binary>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
