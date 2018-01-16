@@ -18,6 +18,23 @@
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
+            <id>set immutable version</id>
+            <phase>generate-resources</phase>
+            <goals><goal>run</goal></goals>
+            <configuration>
+              <target>
+                <exec executable="npm" failonerror="true">
+                  <arg value="version"/>
+                  <arg value="${project.version}"/>
+                  <arg value="--allow-same-version"/>
+                </exec>
+                <exec executable="npm" failonerror="true">
+                  <arg value="install"/>
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
             <id>npm clean</id>
             <phase>clean</phase>
             <goals>
@@ -56,8 +73,13 @@
               <target>
                 <exec executable="npm" failonerror="true">
                   <arg value="version"/>
-                  <arg value="${project.version}"/>
+                  <arg value="${project.version}-${timestamp}"/>
                   <arg value="--allow-same-version"/>
+                </exec>
+                <exec executable="npm" failonerror="true">
+                  <arg value="install"/>
+                  <arg value="--save"/>
+                  <arg value="braid-client@${project.version}-${timestamp}"/>
                 </exec>
                 <exec executable="npm" failonerror="true">
                   <arg value="publish"/>

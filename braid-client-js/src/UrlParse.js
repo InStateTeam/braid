@@ -21,5 +21,4 @@ class BrowserURL {
 }
 
 const url = buildURLClass();
-console.log("url is", url);
 export default url;

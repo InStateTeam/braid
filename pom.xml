@@ -25,11 +25,13 @@
     <source.plugin.version>3.0.1</source.plugin.version>
     <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>
     <netty.version>4.1.9.Final</netty.version>
+    <timestamp>${maven.build.timestamp}</timestamp>
+    <maven.build.timestamp.format>yyyyMMddHHmmssSSS</maven.build.timestamp.format>
   </properties>
 
   <modules>
     <module>braid-client-js</module>
-    <module>braid-corda-client-js</module>
+    <!--<module>braid-corda-client-js</module>-->
     <module>braid-server</module>
     <module>examples/example-server</module>
     <module>braid-quickstart</module>

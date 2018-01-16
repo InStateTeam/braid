@@ -1,13 +1,13 @@
 'use strict';
 
-import ServiceProxy from 'braid-client';
-import URL from './url-parse';
+import ServiceProxy from './ServiceProxy';
+import URL from './UrlParse';
 import xhr from 'request';
 
 /**
  * This class creates a first-class JS object with methods that proxy to a given service end-point
  */
-class DynamicProxy {
+export default class DynamicProxy {
   /**
    *
    * @param config - an object with one required field 'url' and an optional field 'credentials' carrying the payload for the authentication service used by the server
@@ -31,6 +31,10 @@ class DynamicProxy {
     }
 
     let strictSSL = true;
+    if (options === null) {
+      options = {};
+    }
+
     if (typeof options.strictSSL !== 'undefined') {
       strictSSL = options.strictSSL;
     }
@@ -187,6 +191,3 @@ class DynamicProxy {
     // --- INITIALISATION ---
   }
 }
-
-
-module.exports = DynamicProxy;

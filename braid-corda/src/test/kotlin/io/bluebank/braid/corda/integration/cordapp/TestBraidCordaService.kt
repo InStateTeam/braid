@@ -33,7 +33,7 @@ class TestBraidCordaService(private val serviceHub: ServiceHub) : SingletonSeria
       log.info("Starting Braid service for $org on port $port")
       BraidConfig()
           .withFlow("echo", EchoFlow::class)
-          .withService("myService", CustomService(serviceHub))
+          .withService(CustomService(serviceHub))
           .withAuthConstructor(this::shiroFactory)
           .withPort(port)
           .bootstrapBraid(serviceHub)
