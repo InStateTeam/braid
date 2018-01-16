@@ -86,11 +86,6 @@
                 <exec executable="npm" failonerror="true">
                   <arg value="publish"/>
                 </exec>
-                <exec executable="npm" failonerror="true">
-                  <arg value="version"/>
-                  <arg value="${project.version}"/>
-                  <arg value="--allow-same-version"/>
-                </exec>
               </target>
             </configuration>
           </execution>

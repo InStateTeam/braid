@@ -74,12 +74,12 @@
                   <arg value="--allow-same-version"/>
                 </exec>
                 <exec executable="npm" failonerror="true">
-                  <arg value="publish"/>
+                  <arg value="install"/>
+                  <arg value="--save"/>
+                  <arg value="braid-client@${project.version}-${timestamp}"/>
                 </exec>
                 <exec executable="npm" failonerror="true">
-                  <arg value="version"/>
-                  <arg value="${project.version}"/>
-                  <arg value="--allow-same-version"/>
+                  <arg value="publish"/>
                 </exec>
               </target>
             </configuration>
