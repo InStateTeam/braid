@@ -28,6 +28,9 @@
                   <arg value="${project.version}"/>
                   <arg value="--allow-same-version"/>
                 </exec>
+                <exec executable="npm" failonerror="true">
+                  <arg value="install"/>
+                </exec>
               </target>
             </configuration>
           </execution>

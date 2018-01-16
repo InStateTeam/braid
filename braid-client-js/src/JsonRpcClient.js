@@ -4,7 +4,7 @@ const SockJS = require('sockjs-client');
 const Promise = require('promise');
 const xhr = require('request');
 
-class JsonRPC {
+export default class JsonRPC {
   constructor(url, options) {
     const that = this;
     let nextId = 1;
@@ -244,5 +244,3 @@ class ErrorEvent {
     this.data = data;
   }
 }
-
-module.exports = JsonRPC;

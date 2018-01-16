@@ -1,6 +1,6 @@
 'use strict';
 
-const JsonRPC = require('./braid-json-rpc-client');
+import JsonRPC from './JsonRpcClient'
 
 /**
  * Provides a dynamic proxy that intercepts all method calls and forwards them to a braid JSONRpc service
@@ -135,17 +135,17 @@ class BraidServiceProxy {
  * @param onOpen - a callback when connection to the service has been successfully made
  * @param onClose - a callback when the connection to service has been closed
  * @param onError - a callback when the connection the service has failed
- * @param options - these are options to control the SockJS transport - see https://github.com/sockjs/sockjs-client
+ * @param transportOptions - these are options to control the SockJS transport - see https://github.com/sockjs/sockjs-client
+ *                           also, includes the flag strictSSL which defaults to true.
  * @returns {Proxy}
  */
-function createProxy(url, onOpen, onClose, onError, options) {
-  return new Proxy(new BraidServiceProxy(url, onOpen, onClose, onError, options), {
+export default function(url, onOpen, onClose, onError, transportOptions) {
+  return new Proxy(new BraidServiceProxy(url, onOpen, onClose, onError, transportOptions), {
     get: (target, propKey) => {
       return function (...args) {
         return target.invoke(propKey, args)
       }
     }
   });
-}
+};
 
-module.exports = createProxy;

@@ -1,10 +1,11 @@
 'use strict';
-
-import DynamicProxy from './dynamic-service-proxy';
-
 const xhr = require('request');
 
-class CordaProxy {
+import DynamicProxy from './DynamicServiceProxy';
+
+export { default as ServiceProxy } from './ServiceProxy';
+
+export class Proxy {
   constructor(config, onOpen, onClose, onError, options) {
     if (!config.url) {
       throw "config must include url property e.g. https://localhost:8080"
@@ -98,8 +99,4 @@ class CordaProxy {
     // --- INITIALISATION ---
     bootstrap();
   }
-
-
 }
-
-module.exports = CordaProxy;

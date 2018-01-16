@@ -27,16 +27,14 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
     }
   }
 
-  private var nodeHandles : List<NodeHandle>? = null
-
   fun withCluster(callback: DriverDSLExposedInterface.() -> Unit) {
-    val parties = listOf("PartyA", "PartyB")
+    val parties = listOf("PartyA")
 
     // setup braid ports per party
     val systemProperties = setupBraidPortsPerParty(parties, braidStartingPort)
 
     println("Starting cluster with Corda base port $cordaStartingPort and Braid base port $braidStartingPort")
-    driver(isDebug = false, startNodesInProcess = false, portAllocation = Incremental(cordaStartingPort), systemProperties = systemProperties) {
+    driver(isDebug = false, startNodesInProcess = true, portAllocation = Incremental(cordaStartingPort), systemProperties = systemProperties) {
 
       setCordappPackages("net.corda.finance", "io.bluebank.braid.corda.integration.cordapp")
 
@@ -77,6 +75,5 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
     }
     return result
   }
-
 }
 

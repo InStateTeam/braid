@@ -52,10 +52,10 @@
           <groupId>net.corda.plugins</groupId>
           <artifactId>cordform-common</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>com.github.corda.crash</groupId>
-          <artifactId>crash.shell</artifactId>
-        </exclusion>
+        <!--<exclusion>-->
+          <!--<groupId>com.github.corda.crash</groupId>-->
+          <!--<artifactId>crash.shell</artifactId>-->
+        <!--</exclusion>-->
         <exclusion>
           <groupId>com.github.bft-smart</groupId>
           <artifactId>library</artifactId>

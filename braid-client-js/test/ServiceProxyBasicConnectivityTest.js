@@ -1,10 +1,10 @@
 import assert from 'assert';
-import {buildProxy} from './util';
+import {buildServiceProxy} from './Utilities';
 
-describe('braid basic connectivity and method invocation', () => {
+describe('ServiceProxyBasicConnectivityTest', () => {
 
   it('connect to a server, login, and call a simple method', (done) => {
-    buildProxy(done, proxy => {
+    buildServiceProxy(done, proxy => {
       proxy.login({username: 'admin', password: 'admin'})
         .then(() => proxy.add(5, 6))
         .then(result => assert.equal(11, result))
@@ -13,7 +13,7 @@ describe('braid basic connectivity and method invocation', () => {
   }).timeout(0);
 
   it('that a method that throws is reported in the client', (done) => {
-    buildProxy(done, proxy => {
+    buildServiceProxy(done, proxy => {
       proxy.login({username: 'admin', password: 'admin'})
         .then(() => proxy.badjuju())
         .then(() => {
@@ -33,7 +33,7 @@ describe('braid basic connectivity and method invocation', () => {
   }).timeout(0);
 
   it('that an unknown method raises an appropriate exception', (done) => {
-    buildProxy(done, proxy => {
+    buildServiceProxy(done, proxy => {
       proxy.login({username: 'admin', password: 'admin'})
         .then(() => proxy.unknownMethod())
         .then(() => {

@@ -25,9 +25,11 @@ class BraidVerticle(private val services: ServiceHubInternal, private val config
     vertx.createHttpServer(config.httpServerOptions.withCompatibleWebsockets())
         .requestHandler(router::accept)
         .listen(config.port) {
+          log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
           startFuture.completer().handle(it.mapEmpty())
         }
   }
+
 
   private fun setupRouter(): Router {
     val router = Router.router(vertx)

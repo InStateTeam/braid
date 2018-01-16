@@ -27,7 +27,7 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
       if (it.failed()) {
         log.error("failed to start braid server on ${config.port}")
       } else {
-        log.info("braid server started successfully on ${config.port}")
+        log.info("Braid server started successfully on ${config.port}")
         deployId = it.result()
       }
     }

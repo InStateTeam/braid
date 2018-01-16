@@ -1,10 +1,9 @@
 import assert from 'assert';
-import {buildProxy} from './util';
+import {buildProxy} from './Utilities';
 
 describe('braid-corda basic connectivity and method invocation', () => {
   it('connect to a server and execute simple flow', (done) => {
-    buildProxy({ credentials: { username: 'admin', password: 'admin' } }, done, proxy => {
-      console.log("logged in!");
+    buildProxy({credentials: {username: 'admin', password: 'admin'}}, done, proxy => {
       const echoParam = "Syd was here"
       proxy.flows.echo(echoParam)
         .then(result => {
@@ -15,8 +14,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
   }).timeout(0)
 
   it('connect to a server and get all network nodes', (done) => {
-    buildProxy({ credentials: { username: 'admin', password: 'admin' } }, done, proxy => {
-      console.log("logged in!");
+    buildProxy({credentials: {username: 'admin', password: 'admin'}}, done, proxy => {
       proxy.network.allNodes()
         .then(nodes => {
           assert.ok(nodes.length >= 0);

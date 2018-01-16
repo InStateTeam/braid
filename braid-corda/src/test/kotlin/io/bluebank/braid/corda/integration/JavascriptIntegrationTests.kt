@@ -20,7 +20,7 @@ class JavascriptIntegrationTests {
   fun runNPMTests() {
     cordaNet.withCluster {
       log.info("project directory is ${getProjectDirectory()}")
-      val testDir = getProjectDirectory().resolve("../braid-corda-client-js")
+      val testDir = getProjectDirectory().resolve("../braid-client-js")
       assertTrue { testDir.exists() }
       val pb = ProcessBuilder("npm", "run", "test:integration")
       pb.environment().put("braidService", "https://localhost:${cordaNet.braidStartingPort}$DEFAULT_API_MOUNT")

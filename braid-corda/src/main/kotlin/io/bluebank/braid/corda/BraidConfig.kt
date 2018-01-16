@@ -62,5 +62,6 @@ data class BraidConfig(val port: Int = 8080,
     return this.copy(registeredFlows = map)
   }
 
+  internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
   fun bootstrapBraid(serviceHub: ServiceHub) = BraidServer.bootstrapBraid(serviceHub, this)
 }
