@@ -10,6 +10,9 @@ class CordaProxy {
       throw "config must include url property e.g. https://localhost:8080"
     }
 
+    if (options === null) {
+      options = {};
+    }
     let strictSSL = true;
     if (typeof options.strictSSL !== 'undefined') {
       strictSSL = options.strictSSL;

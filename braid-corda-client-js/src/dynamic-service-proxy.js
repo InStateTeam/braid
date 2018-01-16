@@ -31,6 +31,10 @@ class DynamicProxy {
     }
 
     let strictSSL = true;
+    if (options === null) {
+      options = {};
+    }
+
     if (typeof options.strictSSL !== 'undefined') {
       strictSSL = options.strictSSL;
     }
