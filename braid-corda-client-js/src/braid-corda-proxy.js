@@ -49,6 +49,7 @@ class CordaProxy {
     }
 
     function onInternalError(e) {
+      console.error(typeof(e), e);
       if (++errors === 1 && onError) {
         onError(e)
       }

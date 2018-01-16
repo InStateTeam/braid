@@ -4,7 +4,8 @@ function buildURLClass() {
   if (typeof(document) !== 'undefined' && typeof(window) !== 'undefined') {
     return BrowserURL;
   } else {
-    return require('url');
+    const { URL } =require('url');
+    return URL;
   }
 }
 
@@ -20,4 +21,5 @@ class BrowserURL {
 }
 
 const url = buildURLClass();
+console.log("url is", url);
 export default url;

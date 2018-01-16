@@ -14,9 +14,10 @@ import net.corda.testing.setCordappPackages
 
 class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStartingPort: Int = 8080) {
   companion object {
+    @JvmStatic
     fun main(args: Array<String>) {
       CordaNet(5005, 8080).withCluster {
-        waitForAllNodesToFinish()
+        readLine()
       }
     }
 
@@ -26,21 +27,28 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
     }
   }
 
-  fun withCluster(callback: DriverDSLExposedInterface.() -> Unit) {
-    println("Starting cluster with Corda base port $cordaStartingPort and Braid base port $braidStartingPort")
-    driver(isDebug = true, startNodesInProcess = true, portAllocation = Incremental(cordaStartingPort)) {
-      val parties = listOf("PartyA", "PartyB")
+  private var nodeHandles : List<NodeHandle>? = null
 
-      // setup braid ports per party
-      setupBraidPortsPerParty(parties, braidStartingPort)
+  fun withCluster(callback: DriverDSLExposedInterface.() -> Unit) {
+    val parties = listOf("PartyA", "PartyB")
+
+    // setup braid ports per party
+    val systemProperties = setupBraidPortsPerParty(parties, braidStartingPort)
+
+    println("Starting cluster with Corda base port $cordaStartingPort and Braid base port $braidStartingPort")
+    driver(isDebug = false, startNodesInProcess = false, portAllocation = Incremental(cordaStartingPort), systemProperties = systemProperties) {
 
       setCordappPackages("net.corda.finance", "io.bluebank.braid.corda.integration.cordapp")
 
       // start up the controller and all the parties
-      val nodes = startupNodes(parties)
+      val nodeHandles = startupNodes(parties)
 
       // run the rest of the programme
       callback()
+
+      nodeHandles.map {
+        it.stop()
+      }.forEach { it.getOrThrow() }
     }
   }
 
@@ -58,12 +66,16 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
         .map { it.getOrThrow() }
   }
 
-  private fun setupBraidPortsPerParty(parties: List<String>, braidStartingPort: Int) {
-    with(System.getProperties()) {
+  private fun setupBraidPortsPerParty(parties: List<String>, braidStartingPort: Int): Map<String, String> {
+    val result = with(System.getProperties()) {
       parties
-          .mapIndexed { idx, party -> "braid.$party.port" to idx + braidStartingPort }
-          .forEach { System.setProperty(it.first, it.second.toString()) }
+          .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
+          .toMap()
     }
+    result.forEach {
+      System.setProperty(it.key, it.value)
+    }
+    return result
   }
 
 }
