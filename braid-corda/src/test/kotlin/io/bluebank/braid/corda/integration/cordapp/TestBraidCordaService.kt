@@ -6,10 +6,15 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
 import io.vertx.core.Future.succeededFuture
 import io.vertx.core.Handler
+import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AbstractUser
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
+import io.vertx.ext.auth.shiro.ShiroAuth
+import io.vertx.ext.auth.shiro.ShiroAuthOptions
+import io.vertx.kotlin.core.json.json
+import io.vertx.kotlin.core.json.obj
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -29,7 +34,7 @@ class TestBraidCordaService(private val serviceHub: ServiceHub) : SingletonSeria
       BraidConfig()
           .withFlow("echo", EchoFlow::class)
           .withService("myService", CustomService(serviceHub))
-          .withAuthConstructor({_ -> MyAuthService()})
+          .withAuthConstructor(this::shiroFactory)
           .withPort(port)
           .bootstrapBraid(serviceHub)
     } else {
@@ -44,6 +49,15 @@ class TestBraidCordaService(private val serviceHub: ServiceHub) : SingletonSeria
       "PartyB" -> 8081
       else -> 0
     }
+  }
+
+  private fun shiroFactory(it: Vertx): AuthProvider {
+    val shiroConfig = json {
+      obj {
+        put("properties_path", "classpath:auth/shiro.properties")
+      }
+    }
+    return ShiroAuth.create(it, ShiroAuthOptions().setConfig(shiroConfig))
   }
 
   class MyAuthService : AuthProvider {
