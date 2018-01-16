@@ -3,7 +3,6 @@ package io.bluebank.braid.integration.server
 import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.vertx.core.AsyncResult
-import io.vertx.core.Future.future
 import io.vertx.core.Vertx
 import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
@@ -23,7 +22,6 @@ class TestServer(private val braidPort: Int) {
   private lateinit var braidServer: JsonRPCServer
 
   fun start(callback: (AsyncResult<Void>) -> Unit) {
-    val result = future<Void>()
     braidServer = createServerBuilder()
         .withVertx(vertx)
         .withPort(braidPort)

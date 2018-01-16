@@ -3,6 +3,8 @@ package io.bluebank.braid.server
 import io.bluebank.braid.core.http.failed
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
+import io.bluebank.braid.core.meta.defaultServiceEndpoint
+import io.bluebank.braid.core.meta.defaultServiceMountpoint
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.services.JavascriptExecutor
 import io.vertx.core.Future
@@ -76,8 +78,8 @@ class JsonRPCServerTest {
           testContext.assertTrue(it.containsKey(serviceName))
           val serviceDef = it.getJsonObject(serviceName)
           testContext.assertTrue(serviceDef.containsKey("endpoint") && serviceDef.containsKey("documentation"))
-          testContext.assertEquals("/api/$serviceName/braid", serviceDef.getString("endpoint"))
-          testContext.assertEquals("/api/$serviceName", serviceDef.getString("documentation"))
+          testContext.assertEquals(defaultServiceEndpoint(serviceName), serviceDef.getString("endpoint"))
+          testContext.assertEquals(defaultServiceMountpoint(serviceName), serviceDef.getString("documentation"))
         }
         .setHandler(testContext.asyncAssertSuccess())
   }
@@ -94,7 +96,7 @@ class JsonRPCServerTest {
 
     httpPost("/api/$serviceName/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port/api/$serviceName/braid/websocket", "add", 1, 2)
+          jsonRPC("ws://localhost:$port${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
         }
         .map {
           Json.decodeValue(it, JsonRPCResultResponse::class.java)
@@ -112,16 +114,19 @@ class JsonRPCServerTest {
     try {
       client.websocket(url) { socket ->
         socket.handler { response ->
-          val jo = JsonObject(response)
-          val responseId = jo.getLong("id")
-          if (responseId != id) {
-            result.fail("expected id $id but $responseId")
-          } else if (jo.containsKey("result")) {
-            result.complete(response)
-          } else if (jo.containsKey("error")) {
-            result.fail(jo.getJsonObject("error").encode())
-          } else if (jo.containsKey("completed")) {
-            // we ignore the 'completed' message
+          try {
+            val jo = JsonObject(response)
+            val responseId = jo.getLong("id")
+            when {
+              responseId != id -> result.fail("expected id $id but $responseId")
+              jo.containsKey("result") -> result.complete(response)
+              jo.containsKey("error") -> result.fail(jo.getJsonObject("error").encode())
+              jo.containsKey("completed") -> {
+                // we ignore the 'completed' message
+              }
+            }
+          } catch (err: Throwable) {
+            result.fail(err)
           }
         }.exceptionHandler { err ->
           result.fail(err)

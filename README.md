@@ -5,6 +5,40 @@
 ![logo](art/logo-small.png) 
 
 _Braid is a high performance reactive rpc library for exposing your services in a secure way, in one line of code, and to consume them in any language, runtime, and platform._
+
+**Easy integration**
+
+Easy integration with Corda, from any
+ 
+* programming language (JS, Python etc)
+* runtime i.e. _not_ only the JVM (you don't need Jython, Nashorn etc)
+* platform (android, iOS, browser, NodeJS, …)
+
+No fiddling with HTTP REST response codes, content-types, errors etc.
+Just simple object oriented code.
+
+**Secure**
+
+* Connections are secured with TLS/SSL
+* Signed Payloads
+
+**Works with the Enterprise**
+
+Multiple transports: 
+
+* HTTP XHR requests (long polls etc)
+* Websockets
+
+Multiple encodings:
+
+* JSON
+* Protobufs (to be introduced soon)
+
+**Reactive**
+
+* Basic request + response
+* Streamed responses
+* Backpressure (to be introduced soon)
  
 ## Context
 
@@ -27,8 +61,6 @@ All of the above slow down project delivery, add risks, and distract focus from 
 * It's fast - capable of handling 8-9K concurrent requests per second on a small Amazon instance, and scalable.
 * Your services will be exposed with rich metadata (far better than Swagger) that will give you a rich developer experience on the client side.
 * You can plugin your preferred authentication services.
-
-There are two ways at present to host Braid services:
 
 ### Containers
 

@@ -6,6 +6,8 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.meta.ServiceDescriptor
+import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.service.ServiceExecutor
@@ -150,16 +152,13 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
 
 
   private fun RoutingContext.getServiceList() {
-    data class ServiceDescriptor(val endpoint: String, val documentation: String)
-    val serviceMap = serviceMap.map {
-      it.key to ServiceDescriptor("$rootPath${it.key}/braid", "$rootPath${it.key}")
-    }.toMap()
-    write(serviceMap)
+    val sm = ServiceDescriptor.createServiceDescriptors(rootPath, serviceMap.keys)
+    write(sm)
   }
 
   private fun RoutingContext.getService(serviceName: String) {
-    data class ServiceDocumentation(val java: String, val script: String, val braid: String)
-    val docs = ServiceDocumentation("$rootPath$serviceName/java", "$rootPath$serviceName/script", "$rootPath$serviceName/braid")
+    data class ServiceDocumentation(val java: String, val script: String, val endpoint: String)
+    val docs = ServiceDocumentation("$rootPath$serviceName/java", "$rootPath$serviceName/script", defaultServiceEndpoint(rootPath, serviceName))
     write(docs)
   }
 
