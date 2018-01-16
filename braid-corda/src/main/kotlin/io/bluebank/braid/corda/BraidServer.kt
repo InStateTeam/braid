@@ -25,7 +25,7 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
     vertx = Vertx.vertx()
     vertx.deployVerticle(BraidVerticle(services, config)) {
       if (it.failed()) {
-        log.error("failed to start braid server on ${config.port}")
+        log.error("failed to start braid server on ${config.port}", it.cause())
       } else {
         log.info("braid server started successfully on ${config.port}")
         deployId = it.result()
@@ -37,6 +37,7 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
 
   fun shutdown() {
     if (deployId != null) {
+      log.info("shutting down braid server on port: ${config.port}")
       vertx.undeploy(deployId) // async
       deployId = null
       vertx.close() // async
