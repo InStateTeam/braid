@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>io.bluebank.braid</groupId>
-      <artifactId>braid-server</artifactId>
+      <artifactId>braid-standalone-server</artifactId>
       <version>${braid.version}</version>
     </dependency>
   </dependencies>

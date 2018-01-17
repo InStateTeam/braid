@@ -66,7 +66,7 @@ All of the above slow down project delivery, add risks, and distract focus from 
 
 There are various containers that Braid can work in:
  
-* [Standalone processes](braid-server)
+* [Standalone processes](braid-standalone-server)
 * [Corda nodes](braid-corda)
 
 Both of these rely on [braid-core](braid-core).
