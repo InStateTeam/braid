@@ -159,11 +159,55 @@ export default class JsonRPC {
     function handleError(message) {
       const msgState = state[message.id];
       if (msgState.onError) {
-        const err = new Error(`json rpc error ${message.error.code} with message: ${message.error.message}`);
-        err.jsonRPCError = message.error;
-        msgState.onError(err);
+        let e = {
+          code: message.error.code,
+          codeDescription: translateErrorCode(message.error),
+          message: translateErrorMessage(message.error)
+        };
+        e.toString = errorToString;
+        msgState.onError(e);
       }
       delete state[message.id];
+    }
+
+    function errorToString() {
+      return `${this.code}: ${this.message}`;
+    }
+
+    function translateErrorCode(error) {
+      if (typeof(error.code) === 'undefined' || error.code === null) return "Unknown error";
+
+      let code = "unknown error";
+        switch(error.code) {
+          case -32700:
+            code = "Parse error";
+            break;
+          case -32600:
+            code = "Invalid request";
+            break;
+          case -32601:
+            code = "Method not found";
+            break;
+          case -32602:
+            code = "Invalid params";
+            break;
+          case -32603:
+            code = "Internal error";
+            break;
+          default:
+            if (error.code >= -32099 && error.code <= -32000) {
+              code = "Server error";
+            } else {
+              code = "Unknown error";
+            }
+            break;
+        }
+      return code;
+    }
+
+    function translateErrorMessage(error) {
+      if (typeof(error.message) === 'undefined' || error.message === null) return "";
+      else return error.message;
     }
 
     function handleResponse(message) {

@@ -38,6 +38,10 @@ class CustomService(private val serviceHub: ServiceHub) {
   }
 
   fun streamedResult() : Observable<Int> {
-    return Observable.range(0, 10, Schedulers.computation()).delay(10, TimeUnit.MILLISECONDS)
+    return Observable.range(0, 10, Schedulers.computation()).delay(1, TimeUnit.MILLISECONDS)
+  }
+
+  fun streamedResultThatFails() : Observable<Int> {
+    return Observable.range(0, 10, Schedulers.computation()).doOnNext { if (it == 5) throw RuntimeException("boom") }
   }
 }

@@ -29,13 +29,8 @@ describe('ServiceProxyAuthTest', () => {
           throw new Error("should have raised a not authenticated error");
         })
         .catch(err => {
-          // console.log(err);
-          if (typeof(err.jsonRPCError) !== 'undefined') { // this is a rpc error
-            assert.equal(-32000, err.jsonRPCError.code)
-            assert.ok(err.jsonRPCError.message.includes('not authenticated'))
-          } else {
-            throw err;
-          }
+          assert.equal(err.codeDescription, "Server error");
+          assert.ok(err.message.includes('not authenticated'));
         })
         .then(done, done)
     })
@@ -49,12 +44,8 @@ describe('ServiceProxyAuthTest', () => {
         })
         .catch(err => {
           // console.log(err);
-          if (typeof(err.jsonRPCError) !== 'undefined') { // this is a rpc error
-            assert.equal(-32000, err.jsonRPCError.code)
-            assert.ok(err.jsonRPCError.message.includes('failed to authenticate'))
-          } else {
-            throw err;
-          }
+          assert.equal(err.codeDescription, "Server error");
+          assert.ok(err.message.includes('failed to authenticate'));
         })
         .then(done, done)
     })

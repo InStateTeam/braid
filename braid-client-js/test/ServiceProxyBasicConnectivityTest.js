@@ -36,13 +36,8 @@ describe('ServiceProxyBasicConnectivityTest', () => {
           throw new Error("method should have raised an error");
         })
         .catch(err => {
-          // console.log(err);
-          if (typeof(err.jsonRPCError) !== 'undefined') { // this is a rpc error
-            assert.equal(-32000, err.jsonRPCError.code)
-            assert.equal("I threw an exception", err.jsonRPCError.message)
-          } else {
-            throw err;
-          }
+          assert.equal(err.codeDescription, "Server error");
+          assert.equal(err.message, "I threw an exception");
         })
         .then(done, done)
     });
@@ -56,13 +51,8 @@ describe('ServiceProxyBasicConnectivityTest', () => {
           throw new Error("method should have raised an error");
         })
         .catch(err => {
-          // console.log(err);
-          if (typeof(err.jsonRPCError) !== 'undefined') { // this is a rpc error
-            assert.equal(-32601	, err.jsonRPCError.code)
-            assert.ok(err.jsonRPCError.message.includes('unknownMethod'))
-          } else {
-            throw err;
-          }
+          assert.equal(err.codeDescription, "Method not found");
+          assert.ok(err.message.includes('unknownMethod'));
         })
         .then(done, done)
     });
