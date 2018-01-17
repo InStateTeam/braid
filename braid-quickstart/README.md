@@ -14,11 +14,11 @@ mvn install -pl braid-quickstart archetype:update-local-catalog
 Interactive mode:
 
 ```bash
-mvn archetype:generate -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart 
+mvn archetype:generate -DarchetypeGroupId=io.bluebank -DarchetypeArtifactId=braid-quickstart 
 ```
 
 Non-interactive mode:
 
 ```bash
-mvn archetype:generate -B -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart -DgroupId=io.bluebank.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
+mvn archetype:generate -B -DarchetypeGroupId=io.bluebank -DarchetypeArtifactId=braid-quickstart -DgroupId=io.bluebank.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
 ```

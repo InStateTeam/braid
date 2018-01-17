@@ -34,7 +34,7 @@ repositories {
 You also need to add ```braid-corda``` to the dependencies section of the build.gradle file:
 
 ```gradle
-compile "io.bluebank.braid:braid-corda:$braid_version"
+compile "io.bluebank:braid-corda:$braid_version"
 ```
 
 Finally we need to specify the braid version.  We do this in the ```cordapp/build.gradle``` file by adding:
