@@ -72,10 +72,10 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
 
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
     try {
-      if (err is MethodDoesNotExist) {
-        JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
-      } else {
-        serverError(request.id, err.message).send()
+      when (err) {
+        is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
+        is JsonRPCException -> err.response.send()
+        else -> serverError(request.id, err.message).send()
       }
     } finally {
       activeSubscriptions.remove(request)
