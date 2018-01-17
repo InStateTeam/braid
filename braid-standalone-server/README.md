@@ -10,7 +10,7 @@ Also, new services can be added at run-time, again using Javascript.
 Simple example:
 
 ```kotlin
-import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
+import io.bluebank.server.JsonRPCServerBuilder.Companion.createServerBuilder
 
 fun main(args: Array<String>) {
   val server = createServerBuilder()

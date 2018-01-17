@@ -37,7 +37,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.bluebank.braid</groupId>
+      <groupId>io.bluebank</groupId>
       <artifactId>braid-standalone-server</artifactId>
       <version>${braid.version}</version>
     </dependency>

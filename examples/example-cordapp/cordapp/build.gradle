@@ -73,7 +73,7 @@ dependencies {
     // Specify your CorDapp's dependencies below, including dependent CorDapps.
     // We've defined Cash as a dependent CorDapp as an example.
     cordapp project(":cordapp-contracts-states")
-    compile "io.bluebank.braid:braid-corda:$braid_version"
+    compile "io.bluebank:braid-corda:$braid_version"
 }
 
 task integrationTest(type: Test, dependsOn: []) {

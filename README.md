@@ -54,7 +54,7 @@ All of the above slow down project delivery, add risks, and distract focus from 
 
 > ## Braid is an answer to the above
 
-* Expose your services as regular plain old Java/Kotlin/Scala classes.
+* Expose your services as plain old Java/Kotlin/Scala classes.
 * Your methods can return any type including reactive streams.
 * Currently, consume your services in Javascript. Plans are in place for Python, C#, F#, GoLang and more.
 * Makes good assumptions on security, serialisation, and transports - which you can alter if you wish.
@@ -116,7 +116,7 @@ This will prompt you for your credentials and email. Once successfully authorise
 You will need:
 
 * Maven 3.5.x
-* Node JS. We use 9.3.0 together with 5.6.0.
+* Node JS. We use 9.3.0 together with NPM 5.6.0.
 
 
 The build for all modules (Kotlin, Javascript, Cordapps etc) is orchestrated with maven.
@@ -133,10 +133,6 @@ The project can be loaded into any IDE that can read Maven POMs.
 
 ```bash 
 mvn clean deploy
-cd client
-npm install
-npm run build
-npm publish
 ```
 
 

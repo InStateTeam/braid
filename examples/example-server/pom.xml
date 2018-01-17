@@ -19,7 +19,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>braid</artifactId>
-    <groupId>io.bluebank.braid</groupId>
+    <groupId>io.bluebank</groupId>
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
@@ -54,8 +54,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.bluebank.braid</groupId>
-      <artifactId>braid-server</artifactId>
+      <groupId>io.bluebank</groupId>
+      <artifactId>braid-standalone-server</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -109,7 +109,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>io.bluebank.braid.sample.AppKt</mainClass>
+                  <mainClass>io.bluebank.sample.AppKt</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
