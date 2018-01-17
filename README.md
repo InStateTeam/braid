@@ -21,6 +21,7 @@ Just simple object oriented code.
 
 * Connections are secured with TLS/SSL
 * Signed Payloads
+* Easy to integrate with Enterprise authentication and authorisation services
 
 **Works with the Enterprise**
 
