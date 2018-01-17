@@ -25,6 +25,6 @@ deploy:
   tags:
     - script-docker
   script:
-    - mvn $MAVEN_CLI_OPTS deploy
+    - mvn $MAVEN_CLI_OPTS clean install deploy -DskipTests
   only:
     - master
