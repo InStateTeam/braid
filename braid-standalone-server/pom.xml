@@ -11,9 +11,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>braid-server</artifactId>
+  <artifactId>braid-standalone-server</artifactId>
   <packaging>jar</packaging>
-  <name>braid-server</name>
+  <name>braid-standalone-server</name>
 
   <dependencies>
     <dependency>
