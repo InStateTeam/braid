@@ -1,6 +1,6 @@
 # Braid
 
-[![pipeline status](https://gitlab.bluebank.io/em-tech/braid/badges/master/pipeline.svg)](https://gitlab.bluebank.io/em-tech/braid/commits/master)
+[![pipeline status](https://gitlab.com/bluebank/braid/badges/master/pipeline.svg)](https://gitlab.bluebank.io/em-tech/braid/commits/master)
 
 ![logo](art/logo-small.png) 
 
