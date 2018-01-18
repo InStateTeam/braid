@@ -24,10 +24,51 @@
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
   <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
 
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
   <scm>
-    <url>https://gitlab.bluebank.io/em-tech/hermes</url>
-    <developerConnection>scm:git:gitlab.bluebank.io:em-tech/hermes.git</developerConnection>
+    <connection>scm:git:git://gitlab.com/bluebank/braid.git</connection>
+    <developerConnection>scm:git:ssh://gitlab.com:bluebank/braid.git</developerConnection>
+    <url>http://gitlab.com/bluebank/braid/tree/master</url>
   </scm>
+
+  <developers>
+    <developer>
+      <name>Farzad Pezeshkpour</name>
+      <email>fuzz@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Chris Jones</name>
+      <email>chris.jones@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Ben Wyeth</name>
+      <email>ben.wyeth@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Mark Simpson</name>
+      <email>mark.simpson@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Ramiz Amad</name>
+      <email>ramiz.amad@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+  </developers>
 
   <properties>
     <kotlin.version>1.1.4-3</kotlin.version>
@@ -43,6 +84,8 @@
     <netty.version>4.1.9.Final</netty.version>
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyyMMddHHmmssSSS</maven.build.timestamp.format>
+    <dokka.version>0.9.15</dokka.version>
+    <maven.javadoc.skip>true</maven.javadoc.skip><!-- We use Dokka instead. -->
   </properties>
 
   <modules>
@@ -74,7 +117,25 @@
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
     </repository>
+    <repository>
+      <id>bluebank.io</id>
+      <url>http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jcenter</id>
+      <name>JCenter</name>
+      <url>https://jcenter.bintray.com/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencyManagement>
     <dependencies>
@@ -183,9 +244,36 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jetbrains.dokka</groupId>
+        <artifactId>dokka-maven-plugin</artifactId>
+        <version>${dokka.version}</version>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.jetbrains.dokka</groupId>
+          <artifactId>dokka-maven-plugin</artifactId>
+          <version>${dokka.version}</version>
+          <executions>
+            <execution>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>javadocJar</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <outputFormat>javadoc</outputFormat>
+            <jdkVersion>8</jdkVersion>
+            <reportNotDocumented>false</reportNotDocumented>
+            <externalDocumentationLinks></externalDocumentationLinks>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
@@ -240,6 +328,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>2.9</version>
         </plugin>
       </plugins>
     </pluginManagement>

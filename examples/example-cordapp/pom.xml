@@ -31,6 +31,52 @@
 
   <name>braid example-cordapp</name>
 
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://gitlab.com/bluebank/braid.git</connection>
+    <developerConnection>scm:git:ssh://gitlab.com:bluebank/braid.git</developerConnection>
+    <url>http://gitlab.com/bluebank/braid/tree/master</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Farzad Pezeshkpour</name>
+      <email>fuzz@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Chris Jones</name>
+      <email>chris.jones@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Ben Wyeth</name>
+      <email>ben.wyeth@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Mark Simpson</name>
+      <email>mark.simpson@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+    <developer>
+      <name>Ramiz Amad</name>
+      <email>ramiz.amad@bluebank.io</email>
+      <organization>Royal Bank of Scotland</organization>
+      <organizationUrl>https://www.rbs.com</organizationUrl>
+    </developer>
+  </developers>
+
   <dependencies>
     <dependency>
       <groupId>io.bluebank</groupId>
@@ -44,34 +90,6 @@
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     <finalName>${project.artifactId}</finalName>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>deployNodes</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
-                  <arg value="deployNodes"/>
-                  <arg value="-Pext.braid_version=${project.version}"/>
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -99,6 +117,38 @@
                 </replaceregexp>
               </target>
             </configuration>
+          </execution>
+          <execution>
+            <id>deployNodes</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
+                  <arg value="deployNodes"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jetbrains.dokka</groupId>
+        <artifactId>dokka-maven-plugin</artifactId>
+        <version>${dokka.version}</version>
+        <executions>
+          <execution>
+            <phase>none</phase>
           </execution>
         </executions>
       </plugin>
