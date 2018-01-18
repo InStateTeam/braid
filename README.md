@@ -83,9 +83,7 @@ Services can be consumed in the following languages and runtimes (more to follow
 * [`example-cordapp`](examples/example-cordapp) - an example Corda cordapp, with customised authentication, streaming
 * [`example-server`](examples/example-server) - a simple standalone server 
 
-### Setting up Local Maven to use Nexus3
 
-Download <a href="https://gitlab.com/bluebank/braid/raw/master/maven/settings.xml" download>settings.xml</a> to `~/.m2/settings.xml`
 
 ### Setting up NPM with Nexus3
 
