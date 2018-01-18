@@ -80,8 +80,8 @@ Services can be consumed in the following languages and runtimes (more to follow
 
 ## Examples
 
-* [`example-cordapp`](example-cordapp) - an example Corda cordapp, with customised authentication, streaming
-* [`example-server`](example-server) - a simple standalone server 
+* [`example-cordapp`](examples/example-cordapp) - an example Corda cordapp, with customised authentication, streaming
+* [`example-server`](examples/example-server) - a simple standalone server 
 
 ### Setting up Local Maven to use Nexus3
 
