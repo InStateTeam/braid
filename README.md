@@ -85,7 +85,7 @@ Services can be consumed in the following languages and runtimes (more to follow
 
 ### Setting up Local Maven to use Nexus3
 
-Download <a href="https://gitlab.bluebank.io/em-tech/braid/raw/master/maven/settings.xml" download>settings.xml</a> to `~/.m2/settings.xml`
+Download <a href="https://gitlab.com/bluebank/braid/raw/master/maven/settings.xml" download>settings.xml</a> to `~/.m2/settings.xml`
 
 ### Setting up NPM with Nexus3
 
