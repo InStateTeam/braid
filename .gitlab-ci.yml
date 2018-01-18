@@ -23,6 +23,6 @@ deploy:
   tags:
     - script-docker
   script:
-    - mvn $MAVEN_CLI_OPTS clean install deploy -DskipTests
+    - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests
   only:
     - master
