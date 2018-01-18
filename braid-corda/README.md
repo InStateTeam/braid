@@ -1,7 +1,5 @@
 # Braid Corda
 
-NEEDS UPDATING/CORRECTING BY LORD FUZZ OF SOUTHWOLD
-
 Braid Corda allows you to create Braid endpoints and streams from your corda node.  This facilitates:
 
  * testing your CorDapp
@@ -114,7 +112,7 @@ simple contents:
 
 ### Integration Test
 
-THIS BIT NEEDS UPDATING WITH PROXIED CODE
+> This section requires updating with the JVM Proxy work
 
 Finally we change ```DriverTest``` to contain this:
 
