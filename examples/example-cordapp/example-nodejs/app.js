@@ -16,19 +16,23 @@
 
 const CordaProxy = require('braid-client').Proxy;
 
-let corda = new CordaProxy({ url: "https://localhost:8080/api/",
-  credentials: {username: 'banka',
+let corda = new CordaProxy({
+  url: "https://localhost:8080/api/",
+  credentials: {
+    username: 'banka',
     password: 'password'
-  } }, onOpen, onClose, onError, {  strictSSL: false });
+  }
+}, onOpen, onClose, onError, {strictSSL: false});
 
 
 function onOpen() {
   // console.log(corda);
   printMyInfo(corda)
-    .then(() => getNotaries())
-    .then(() => registerForCashNotifications())
-    .then(() => issueCash('$100', 'ref01'))
-    .then(() => issueCash('$200', 'ref02'))
+    // .then(() => invokeEchoFlow())
+    // .then(() => getNotaries())
+    // .then(() => registerForCashNotifications())
+    // .then(() => issueCash('$100', 'ref01'))
+    // .then(() => issueCash('$200', 'ref02'))
     .then(() => {
       console.log('finished');
       process.exit(0);
@@ -54,6 +58,14 @@ function printMyInfo() {
     });
 }
 
+function invokeEchoFlow() {
+  "use strict";
+  return corda.flows.echoFlow("Echo Message")
+    .then(result => {
+      console.log('Echo response:', result);
+    });
+}
+
 function getNotaries() {
   return corda.network.notaryIdentities()
     .then(notaries => {
@@ -64,16 +76,17 @@ function getNotaries() {
 }
 
 function registerForCashNotifications() {
-  console.log('*** registerForCashNotifications ***');
+  console.log('\n*** registerForCashNotifications ***');
   return corda.myService.listenForCashUpdates(onCashNotification)
 }
 
 function onCashNotification(update) {
-  console.log('\n!! cash notification:', update);
+  console.log('\n*** cash notification: ***\n');
+  console.log(JSON.stringify(update, null, 2));
 }
 
 function issueCash(amount, ref) {
-  console.log('*** issueCash', amount, ' ***');
+  console.log('\n*** issueCash', amount, ' ***');
   return corda.flows.issueCash(amount, ref, notary)
-    .then(result => console.log('txid for ref', ref, result), err => console.error(err));
+    .then(result => console.log('\n*** issueCash - txid for ref', ref, result), err => console.error(err));
 }
