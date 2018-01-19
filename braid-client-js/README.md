@@ -27,14 +27,3 @@ Clicking on the URL takes the UI developer to the Braid Editor to add the new me
 
 ```npm run build```
 
-## Publish to Nexus
-
-```npm publish```
-
-You will be ask for the username, password and email. I used:
-
-```bash
-user: admin
-password: 8a5500n!
-email: fuzz@bluebank.io
-```
