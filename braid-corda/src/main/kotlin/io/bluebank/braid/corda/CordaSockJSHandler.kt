@@ -22,6 +22,7 @@ import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.meta.ServiceDescriptor
 import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.bluebank.braid.core.security.AuthenticatedSocket
@@ -45,6 +46,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubI
   : Handler<SockJSSocket> {
 
   companion object {
+    private val log = loggerFor<CordaSockJSHandler>()
     private val REGISTERED_HANDLERS = mapOf(
         "network" to this::createNetworkMapService,
         "flows" to this::createFlowService
@@ -90,7 +92,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubI
 
     private fun mountServiceName(serviceName: String, protocol: String, config: BraidConfig, router: Router, sockJSHandler: SockJSHandler) {
       val endpoint = defaultServiceEndpoint(config.rootPath, serviceName) + "/*"
-      println("mounting $serviceName to $protocol://localhost:${config.port}$endpoint")
+      log.info("mounting $serviceName to $protocol://localhost:${config.port}$endpoint")
       router.route(endpoint).handler(sockJSHandler)
     }
 
