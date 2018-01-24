@@ -5,7 +5,6 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 
-
 @InitiatingFlow
 @StartableByRPC
 class EchoFlow(private val text: String) : FlowLogic<String>() {

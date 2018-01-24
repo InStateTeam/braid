@@ -14,66 +14,79 @@
  * limitations under the License.
  */
 
-'use strict';
-import { Proxy } from 'braid-client';
+const Proxy = require('braid-client').Proxy;
 
-console.log('demo started');
+let corda = new Proxy({
+  url: "https://localhost:8080/api/",
+  credentials: {
+    username: 'banka',
+    password: 'password'
+  }
+}, onOpen, onClose, onError, {strictSSL: false});
 
-export const corda = new Proxy({
-    url: 'https://localhost:8080/api/',
-    credentials: {
-        username: 'banka',
-        password: 'password'
-    }
-}, onOpen, onClose, onError, { strictSSL: false });
-
-let notary;
 
 function onOpen() {
-    console.log('opened')
-    printMyInfo(corda)
+  // console.log(corda.network.getNodeByLegalName.docs());
+  printMyInfo(corda)
+    .then(() => invokeEchoFlow())
     .then(() => getNotaries())
     .then(() => registerForCashNotifications())
     .then(() => issueCash('$100', 'ref01'))
-    .then(() => issueCash('$200', 'ref02'))
-    .then(() => console.log('finished'), err => console.error('failed', err));
+    .then(() => issueCash('£200', 'ref02'))
+    .then(() => {
+      console.log('finished');
+      process.exit(0);
+    }, err => {
+      console.error('failed', err);
+      process.exit(1);
+    });
 }
-
 
 function onClose() {
-    console.log('closed');
+  console.log("disconnected");
 }
 
-function onError(e) {
-    console.error('failed with error;', e);
+function onError(err) {
+  console.error("error", err);
 }
 
 function printMyInfo() {
   return corda.network.myNodeInfo()
     .then(ni => {
+      console.log("\n*** printMyInfo ***\n");
       console.log('network info for node: ', ni);
+    });
+}
+
+function invokeEchoFlow() {
+  "use strict";
+  return corda.flows.echoFlow("Echo Message")
+    .then(result => {
+      console.log('Echo response:', result);
     });
 }
 
 function getNotaries() {
   return corda.network.notaryIdentities()
     .then(notaries => {
+      console.log("\n*** getNotaries ***\n");
       console.log('notaries', notaries);
       notary = notaries[0];
     })
 }
 
 function registerForCashNotifications() {
-  console.log('registered for cash notifications')
+  console.log('\n*** registerForCashNotifications ***');
   return corda.myService.listenForCashUpdates(onCashNotification)
 }
 
 function onCashNotification(update) {
-  console.log('cash notification:', update);
+  console.log('\n*** cash notification: ***\n');
+  console.log(JSON.stringify(update, null, 2));
 }
 
 function issueCash(amount, ref) {
-  console.log('issuing', amount)
+  console.log('\n*** issueCash', amount, ' ***');
   return corda.flows.issueCash(amount, ref, notary)
-    .then(result => console.log('txid for ref', ref, result), err => console.error(err));
+    .then(result => console.log('\n*** issueCash - txid for ref', ref, result), err => console.error(err));
 }

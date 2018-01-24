@@ -16,29 +16,23 @@ import net.corda.node.services.api.ServiceHubInternal
 
 @CordaService
 class Server(private val serviceHub: ServiceHub) : SingletonSerializeAsToken() {
-  companion object {
-    private val log = loggerFor<Server>()
-  }
 
   init {
-    val config = BraidConfig.fromResource(configFileName)
-    if (config == null) {
-      log.warn("config $configFileName not found")
-    } else {
-      bootstrap(config)
-    }
+    BraidConfig.fromResource(configFileName)?.bootstrap()
   }
 
-  private fun bootstrap(config: BraidConfig) {
-    config
-        .withFlow(EchoFlow::class)
+  private fun BraidConfig.bootstrap() {
+    this.withFlow(EchoFlow::class)
         .withFlow("issueCash", CashIssueFlow::class)
         .withService("myService", MyService(serviceHub as ServiceHubInternal))
-        .withAuthConstructor(this::shiroFactory)
+        .withAuthConstructor({ createAuthProvider(it) })
         .bootstrapBraid(serviceHub)
   }
 
-  private fun shiroFactory(it: Vertx): AuthProvider {
+  private fun createAuthProvider(it: Vertx): AuthProvider {
+    // this can be any auth provider
+    // important for integration into enterprise Auth* services
+    // for now, we just use a Shiro in-memory provider
     val shiroConfig = json {
       obj {
         put("properties_path", "classpath:shiro.properties")
@@ -47,6 +41,9 @@ class Server(private val serviceHub: ServiceHub) : SingletonSerializeAsToken() {
     return ShiroAuth.create(it, ShiroAuthOptions().setConfig(shiroConfig))
   }
 
+  /**
+   * config file name based on the node legal identity
+   */
   private val configFileName: String
     get() {
       val name = serviceHub.myInfo.legalIdentities.first().name.organisation
