@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const CordaProxy = require('braid-client').Proxy;
+const Proxy = require('braid-client').Proxy;
 
-let corda = new CordaProxy({
+let corda = new Proxy({
   url: "https://localhost:8080/api/",
   credentials: {
     username: 'banka',
@@ -26,13 +26,13 @@ let corda = new CordaProxy({
 
 
 function onOpen() {
-  // console.log(corda);
+  // console.log(corda.network.getNodeByLegalName.docs());
   printMyInfo(corda)
-    // .then(() => invokeEchoFlow())
-    // .then(() => getNotaries())
-    // .then(() => registerForCashNotifications())
-    // .then(() => issueCash('$100', 'ref01'))
-    // .then(() => issueCash('$200', 'ref02'))
+    .then(() => invokeEchoFlow())
+    .then(() => getNotaries())
+    .then(() => registerForCashNotifications())
+    .then(() => issueCash('$100', 'ref01'))
+    .then(() => issueCash('£200', 'ref02'))
     .then(() => {
       console.log('finished');
       process.exit(0);
