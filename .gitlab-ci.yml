@@ -11,6 +11,11 @@ cache:
   paths:
     - /root/.m2/repository
 
+stages:
+  - build
+  - snapshot_release
+  - release
+
 build:
   stage: build
   tags:
@@ -22,7 +27,7 @@ build:
     - mvn $MAVEN_CLI_OPTS install
 
 deploy:
-  stage: deploy
+  stage: snapshot_release
   tags:
     - script-docker
   script:
