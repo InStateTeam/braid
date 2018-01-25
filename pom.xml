@@ -16,7 +16,7 @@
 
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.bluebank</groupId>
+  <groupId>io.bluebank.braid</groupId>
   <artifactId>braid</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
