@@ -43,5 +43,7 @@ release:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   only:
     - /^[0-9]+\.[0-9]+\.[0-9]+$/
+  when: manual
   script:
-    - echo $BRAID_VERSION
+    - mvn versions:set -DnewVersion=$BRAID_VERSION
+    - mvn clean install deploy
