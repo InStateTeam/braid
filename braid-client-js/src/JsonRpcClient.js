@@ -30,15 +30,19 @@ export default class JsonRPC {
     that.onClose = null;
     that.onError = null;
 
+    if (typeof options === 'undefined') {
+      options = {}
+    }
+
+    if (typeof options.strictSSL === 'undefined') {
+      options.strictSSL = true;
+    }
+
     // -- PRIVATE FUNCTIONS -- oh Javascript
 
     function checkServiceExistsAndBootstrap() {
       const infoURL = url + "/info";
-      let strictSSL = true;
-      if (typeof options.strictSSL !== 'undefined') {
-        strictSSL = options.strictSSL;
-      }
-      if (!strictSSL) {
+      if (!options.strictSSL) {
         if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
           // NOTE: rather nasty - to be used only in local dev for self-signed certificates
           process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -49,8 +53,8 @@ export default class JsonRPC {
       xhr({
         method: "get",
         uri: infoURL,
-        strictSSL: strictSSL,
-        rejectUnauthorized: !strictSSL,
+        strictSSL: options.strictSSL,
+        rejectUnauthorized: !options.strictSSL,
         headers: {
           "Content-Type": "application/json"
         }

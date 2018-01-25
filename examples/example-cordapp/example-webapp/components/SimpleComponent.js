@@ -29,4 +29,5 @@ class SimpleComponent extends HTMLElement {
   $(selector) {
     return this.shadowRoot.querySelector(selector);
   }
+
 }

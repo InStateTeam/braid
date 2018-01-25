@@ -17,6 +17,7 @@
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.core.http.setupAllowAnyCORS
+import io.bluebank.braid.core.http.setupOptionsMethod
 import io.bluebank.braid.core.http.withCompatibleWebsockets
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AbstractVerticle
@@ -51,6 +52,7 @@ class BraidVerticle(private val services: ServiceHubInternal, private val config
     val router = Router.router(vertx)
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
+    router.setupOptionsMethod()
     router.setupSockJSHandler(vertx, services, config)
     return router
   }
