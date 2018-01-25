@@ -37,9 +37,10 @@ deploy:
 
 release:
   stage: release
+  tags:
+    - script-docker
   variables:
     BRAID-VERSION: $CI_COMMIT_REF_NAME
-
   only:
     - /^[0-9]+\.[0-9]+\.[0-9]+$/
   script:
