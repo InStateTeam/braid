@@ -11,18 +11,36 @@ cache:
   paths:
     - /root/.m2/repository
 
+stages:
+  - build
+  - snapshot_release
+  - release
+
 build:
   stage: build
   tags:
     - script-docker
+  only:
+    - master
+    - /^[0-9]+-.*$/
   script:
     - mvn $MAVEN_CLI_OPTS install
 
 deploy:
-  stage: deploy
+  stage: snapshot_release
   tags:
     - script-docker
   script:
     - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests
   only:
     - master
+
+release:
+  stage: release
+  variables:
+    BRAID-VERSION: $CI_COMMIT_REF_NAME
+
+  only:
+    - /^[0-9]+\.[0-9]+\.[0-9]+$/
+  script:
+    - echo $BRAID_VERSION
