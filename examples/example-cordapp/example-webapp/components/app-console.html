@@ -93,7 +93,7 @@
         for (let idx in args) {
           let arg = args[idx];
           if (typeof arg === 'object') {
-            arg = JSON.stringify(arg)
+            arg = JSON.stringify(arg, null, ' ');
           }
           arr[idx] = "" + arg;
         }

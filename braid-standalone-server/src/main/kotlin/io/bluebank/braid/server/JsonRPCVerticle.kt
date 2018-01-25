@@ -17,6 +17,8 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.core.annotation.ServiceDescription
+import io.bluebank.braid.core.http.setupAllowAnyCORS
+import io.bluebank.braid.core.http.setupOptionsMethod
 import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
@@ -137,15 +139,8 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   private fun setupRouter(): Router {
     val router = Router.router(vertx)
     router.route().handler(BodyHandler.create())
-    router.route().handler {
-      // allow all origins
-      val origin = it.request().getHeader("Origin")
-      if (origin != null) {
-        it.response().putHeader("Access-Control-Allow-Origin", origin)
-        it.response().putHeader("Access-Control-Allow-Credentials", "true")
-      }
-      it.next()
-    }
+    router.setupAllowAnyCORS()
+    router.setupOptionsMethod()
     servicesRouter = Router.router(vertx)
     router.mountSubRouter("$rootPath", servicesRouter)
     servicesRouter.get("/").handler { it.getServiceList() }

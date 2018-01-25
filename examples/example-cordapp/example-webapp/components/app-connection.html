@@ -21,8 +21,8 @@
   <div class="widget">
     <label>Server</label> &nbsp;
     <select id="endpoint">
-      <option value="https://localhost:8080/api/jsonrpc">bank a</option>
-      <option value="https://localhost:8081/api/jsonrpc">bank b</option>
+      <option value="https://localhost:8080/api/">bank a</option>
+      <option value="https://localhost:8081/api/">bank b</option>
     </select>
     <button id='endpoint-connect'>Connect</button>
     <span id='status'></span>
@@ -56,11 +56,17 @@
         const thisObj = this;
         const option = this._getEndPoint();
         const url = option.value;
-        const name = option.innerText
+        const name = option.innerText;
+        const username = option.innerText.replace(/ /g, '');
+        const password = "password";
         this.dispatchEvent(new CustomEvent('connect', {
           detail: {
             url: url,
-            name: name
+            name: name,
+            credentials: {
+              username: username,
+              password: password
+            }
           }
         }));
       }

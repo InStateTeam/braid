@@ -18,6 +18,7 @@ package io.bluebank.braid.sample
 
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.vertx.core.Vertx
+import io.vertx.core.logging.SLF4JLogDelegateFactory
 import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
@@ -26,6 +27,7 @@ import io.vertx.kotlin.core.json.obj
 
 
 fun main(args: Array<String>) {
+  System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory::class.qualifiedName)
   val vertx = Vertx.vertx()
   val server = createServerBuilder()
       .withVertx(vertx)

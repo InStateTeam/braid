@@ -21,12 +21,12 @@
   <div class="widget hidden">
     <label>Issue Currency</label><br>
     <label class="small">currency</label>
-    <select>
-      <option value="GBP">GBP</option>
-      <option value="USD">USD</option>
+    <select id="currency">
+      <option value="£">GBP</option>
+      <option value="$">USD</option>
     </select>
     <label class="small">amount</label>
-    <input type=number value="100">
+    <input id="amount" type=number value="100">
     <button id='btn_issue'>Issue</button>
   </div>
   <style>
@@ -45,8 +45,35 @@
 
       connectedCallback() {
         const thisObj = this;
+        const logger = document.querySelector('#console');
         const bt = this.$('#btn_issue');
-        bt.onclick = () => { thisObj._issue() }
+        let nextRef = 1;
+        bt.onclick = () => { issue() }
+
+        function issue() {
+          const proxy = thisObj._proxy;
+          const elCcy = thisObj.$('#currency');
+          const ccy = elCcy[elCcy.selectedIndex].value;
+          const amount = thisObj.$('#amount').value;
+          logger.log("issuing", ccy + amount);
+          proxy.network.notaryIdentities()
+            .then(notaries => {
+              return notaries[0];
+            })
+            .then(notary => {
+              return proxy.flows.issueCash(ccy + amount, "ref" + (nextRef++), notary);
+            })
+            .then(tx => {
+              return tx.stx.transaction;
+            })
+            .then(tx => {
+              logger.log("issued transaction", tx.id);
+              logger.log("outputs", tx.outputs[0].data);
+            })
+            .catch(e => {
+              logger.error("failed to issue", e);
+            })
+        }
       }
 
       disconnectedCallback() {
@@ -54,9 +81,10 @@
         bt.onclick = null;
       }
 
-      setConnection(connection) {
-        this._connection = connection;
-        if (connection !== null) {
+      setConnection(proxy) {
+        window.proxy = proxy;
+        this._proxy = proxy;
+        if (proxy !== null) {
           this.$('.widget').classList.remove('hidden');
         } else {
           this.$('.widget').classList.add('hidden');

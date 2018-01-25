@@ -13,11 +13,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "1.0.0-SNAPSHOT",
+    "braid-client": "^1.0.0-SNAPSHOT",
     "jquery": "^3.2.1",
     "promise": "^8.0.1",
-    "sockjs-client": "^1.0.3",
-    "braid-corda-client": "1.0.0-SNAPSHOT"
+    "sockjs-client": "^1.0.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -25,7 +24,7 @@
     "babel-preset-env": "^1.6.1",
     "rimraf": "^2.6.2",
     "watchify": "^3.9.0",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.3"
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.11.1"
   }
 }

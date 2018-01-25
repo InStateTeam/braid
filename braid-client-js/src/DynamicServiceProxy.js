@@ -46,15 +46,15 @@ export default class DynamicProxy {
       throw "missing url property in config";
     }
 
-    let strictSSL = true;
-    if (options === null) {
+    if (typeof options === 'undefined') {
       options = {};
     }
 
-    if (typeof options.strictSSL !== 'undefined') {
-      strictSSL = options.strictSSL;
+    if (typeof options.strictSSL === 'undefined') {
+      options.strictSSL = true;
     }
-    if (!strictSSL) {
+
+    if (!options.strictSSL) {
       if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
         // NOTE: rather nasty - to be used only in local dev for self-signed certificates
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -90,8 +90,8 @@ export default class DynamicProxy {
         xhr({
           method: "get",
           uri: url,
-          strictSSL: strictSSL,
-          rejectUnauthorized: !strictSSL,
+          strictSSL: options.strictSSL,
+          rejectUnauthorized: !options.strictSSL,
           headers: {
             "Content-Type": "application/json"
           }

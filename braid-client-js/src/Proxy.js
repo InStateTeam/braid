@@ -27,14 +27,14 @@ export class Proxy {
       throw "config must include url property e.g. https://localhost:8080"
     }
 
-    if (options === null) {
+    if (typeof options === 'undefined') {
       options = {};
     }
-    let strictSSL = true;
-    if (typeof options.strictSSL !== 'undefined') {
-      strictSSL = options.strictSSL;
+
+    if (typeof options.strictSSL === 'undefined') {
+      options.strictSSL = true;
     }
-    if (!strictSSL) {
+    if (!options.strictSSL) {
       if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
         // NOTE: rather nasty - to be used only in local dev for self-signed certificates
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -80,8 +80,8 @@ export class Proxy {
       xhr({
         method: "get",
         uri: url,
-        strictSSL: strictSSL,
-        rejectUnauthorized: !strictSSL,
+        strictSSL: options.strictSSL,
+        rejectUnauthorized: !options.strictSSL,
         headers: {
           "Content-Type": "application/json"
         }

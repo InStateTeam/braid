@@ -26,6 +26,9 @@
 
   <logger name="io.netty" level="WARN"/>
   <logger name="io.bluebank" level="INFO"/>
+  <logger name="io.vertx" level="WARN">
+    <appender-ref ref="STDOUT"/>
+  </logger>
   <root level="WARN">
     <appender-ref ref="STDOUT" />
   </root>

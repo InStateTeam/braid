@@ -15,7 +15,7 @@
  */
 
 'use strict';
-import CordaProxy from 'braid-corda-client';
+import {Proxy} from 'braid-client';
 
 let output;
 let corda;
@@ -32,22 +32,21 @@ function onLoaded() {
 }
 
 function connect(e) {
-  const url = e.detail.url;
-  corda = new CordaProxy({
-    url: url
-  }, onOpen, onClose, onError);
+  console.log("details", e.detail);
+  corda = new Proxy(e.detail, onOpen, onClose, onError);
 }
 
 function onOpen() {
   output.log('opened');
+  $('#issue').setConnection(corda);
 }
 
 function onClose() {
-
+  output.log('closed');
 }
 
-function onError() {
-
+function onError(e) {
+  output.error('error', e);
 }
 
 function $(query) {
