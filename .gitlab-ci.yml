@@ -45,5 +45,5 @@ release:
     - /^[0-9]+\.[0-9]+\.[0-9]+$/
   when: manual
   script:
-    - mvn versions:set -DnewVersion=$BRAID_VERSION
-    - mvn clean install deploy
+    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=$BRAID_VERSION
+    - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests
