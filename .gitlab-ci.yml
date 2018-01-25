@@ -38,4 +38,4 @@ release:
   only:
     - /^[0-9]+\.[0-9]+\.[0-9]+$/
   script:
-    - echo "Deployment version: $BRAID_VERSION"
+    - echo $BRAID_VERSION
