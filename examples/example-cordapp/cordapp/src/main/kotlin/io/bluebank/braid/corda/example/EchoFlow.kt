@@ -11,5 +11,3 @@ class EchoFlow(private val text: String) : FlowLogic<String>() {
     @Suspendable
     override fun call() : String = text
 }
-
-
