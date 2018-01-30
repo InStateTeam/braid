@@ -25,7 +25,7 @@ build:
     - /^[0-9]+-.*$/
   script:
     - gpg --import $GPG_KEY
-#    - mvn $MAVEN_CLI_OPTS install
+    - mvn $MAVEN_CLI_OPTS install -P sign build-extras
 
 deploy:
   stage: snapshot_release
