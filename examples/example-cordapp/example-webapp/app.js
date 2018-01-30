@@ -34,6 +34,7 @@ function onLoaded() {
 function connect(e) {
   console.log("details", e.detail);
   corda = new Proxy(e.detail, onOpen, onClose, onError);
+  window.proxy = corda;
 }
 
 function onOpen() {
