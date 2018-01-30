@@ -24,8 +24,8 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
-    - gpg --version
-    - echo $GPG_KEY | gpg --import
+    - gpg2 --version
+    - echo $GPG_KEY | gpg2 --import
     - mvn $MAVEN_CLI_OPTS install -P sign build-extras
 
 deploy:
