@@ -26,7 +26,8 @@ build:
   script:
     - gpg2 --version
     - gpg2 --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
-    - mvn $MAVEN_CLI_OPTS install -P sign -P build-extras
+    - gpg2 --import-ownertrust <<< "$GPG_OWNER_TRUST"
+    - mvn $MAVEN_CLI_OPTS install -P sign,build-extras
 
 deploy:
   stage: snapshot_release
