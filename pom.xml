@@ -365,10 +365,6 @@
               <keyname>${env.GPG_KEYNAME}</keyname>
               <passphrase>${env.GPG_PASSPHRASE}</passphrase>
               <gpgArguments>
-                <arg>--verify-options</arg>
-                <arg>no-show-photos</arg>
-                <arg>--pinentry-mode</arg>
-                <arg>loopback</arg>
               </gpgArguments>
             </configuration>
           </plugin>
