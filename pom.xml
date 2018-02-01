@@ -364,6 +364,10 @@
               <executable>gpg2</executable>
               <keyname>${env.GPG_KEYNAME}</keyname>
               <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+              <gpgArguments>
+                <arg>--no-show-photos</arg>
+                <arg>--pinentry-mode loopback</arg>
+              </gpgArguments>
             </configuration>
           </plugin>
         </plugins>
