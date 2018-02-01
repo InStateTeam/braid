@@ -24,7 +24,7 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
-    - mvn $MAVEN_CLI_OPTS install
+    - mvn $MAVEN_CLI_OPTS clean install
 
 deploy:
   stage: snapshot_release
@@ -42,8 +42,12 @@ release:
   variables:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   only:
-    - /^[0-9]+\.[0-9]+\.[0-9]+$/
+    - v/^[0-9]+\.[0-9]+\.[0-9]+$/
   when: manual
   script:
-    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=$BRAID_VERSION
-    - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests
+    - rm -rf ~/.gnupg
+    - gpg --version
+    - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
+    - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
+    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
+    - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests -P sign,build-extras
