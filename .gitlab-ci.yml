@@ -24,6 +24,7 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
+    - rm -rf ~/.gnupg
     - gpg --version
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
     - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
