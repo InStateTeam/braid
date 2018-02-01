@@ -341,7 +341,7 @@
     <profile>
       <id>sign</id>
       <properties>
-        <gpg.executable>gpg</gpg.executable>
+        <gpg.executable>gpg2</gpg.executable>
         <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
