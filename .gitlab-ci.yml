@@ -24,9 +24,9 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
-    - "gpg2 --version"
-    - gpg2 --import <<< "$GPG_KEY"
-    - "mvn $MAVEN_CLI_OPTS install -P sign build-extras"
+    - gpg2 --version
+    - gpg2 --import --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
+    - mvn $MAVEN_CLI_OPTS install -P sign build-extras
 
 deploy:
   stage: snapshot_release
