@@ -42,7 +42,7 @@ release:
   variables:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   only:
-    - v/^[0-9]+\.[0-9]+\.[0-9]+$/
+    - /^v[0-9]+\.[0-9]+\.[0-9]+$/
   when: manual
   script:
     - rm -rf ~/.gnupg
