@@ -1,0 +1,87 @@
+/*
+ * Copyright 2018 Royal Bank of Scotland
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.calls
+  background #ECECEC
+  bottom 0
+  display inline-block
+  left 0px
+  padding-left 5px
+  position absolute
+  top 0
+  transition all 0.3s
+  width 225px
+  z-index -1
+
+  ul
+    background #ECECEC
+    list-style none
+    margin 0 5px 20px 0
+    padding 0
+    width 220px
+
+    li          
+      box-sizing border-box
+      border-radius 3px
+      color #FFF
+      margin-bottom 2px
+      padding 5px 10px 6px
+      width 220px
+
+      &:hover
+        cursor pointer
+
+      .title
+        font-size 20px
+        font-weight normal 
+        margin 0
+                
+      .content
+        &.hide
+          display none
+        
+        div
+          border-top 1px solid #888
+          padding-left 5px
+
+          h4
+            margin-top 8px
+
+          &.description
+            margin-top 10px
+          
+          .parameters-content
+            background #000
+            border-radius 3px
+            font-family monospace
+            padding 10px 0 10px 10px
+
+          .return-type-content
+            background #000
+            border-radius 3px
+            padding 10px 0 10px 10px
+      
+    &.implemented-functions
+    
+      li
+        background #49CC90
+        border 2px solid #49CC90     
+      
+    &.stubbed-functions
+    
+      li
+        background #FCA130;
+        border 2px solid #FCA130;

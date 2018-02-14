@@ -1,0 +1,52 @@
+/*
+ * Copyright 2018 Royal Bank of Scotland
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Corda dark color theme */
+* {
+    -color-0: rgba(0, 0, 0, 1); /* Background color */
+    -color-1: rgba(0, 0, 0, 0.1); /* Background color layer 1*/
+    -color-2: white; /* Background color layer 2*/
+    -color-3: rgba(219, 0, 23, 1); /* Corda logo color */
+    -color-4: rgba(239, 0, 23, 1); /* Corda logo color light */
+    -color-5: rgb(255, 191, 198); /* Corda logo highlight */
+    -color-6: rgba(219, 0, 23, 0.2); /* Corda logo highlight */
+}
+
+.root {
+    -fx-background: #f4f4f4;
+    -fx-control-inner-background: white;
+    -fx-dark-text-color: black;
+    -fx-mid-text-color: #292929;
+    -fx-light-text-color: white;
+    -fx-accent: -color-5;
+    -fx-focus-color: -color-3;
+    -fx-color: -fx-base;
+    -fx-disabled-opacity: 0.4;
+    -fx-cell-hover-color: -color-6;
+    -fx-cell-focus-inner-border: -color-5;
+    -fx-page-bullet-border: #acacac;
+    -fx-page-indicator-hover-border: -color-6;
+    -fx-faint-focus-color: #d3524422;
+}
+
+/* Global Style*/
+.corda-logo {
+    -fx-image: url("../images/Logo-03.png");
+}
+
+.corda-text-logo {
+    -fx-image: url("../images/Logo-04.png");
+}

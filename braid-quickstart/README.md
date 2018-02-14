@@ -20,5 +20,5 @@ mvn archetype:generate -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactI
 Non-interactive mode:
 
 ```bash
-mvn archetype:generate -B -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart -DgroupId=io.bluebank.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
+mvn archetype:generate -B -DarchetypeGroupId=io.bluebank.braid -DarchetypeArtifactId=braid-quickstart -DgroupId=io.bluebank.braid.play -DartifactId=myservice -Dversion=1.0-SNAPSHOT 
 ```

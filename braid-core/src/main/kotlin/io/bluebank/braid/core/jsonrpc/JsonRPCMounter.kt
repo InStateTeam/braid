@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Royal Bank of Scotland
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.bluebank.braid.core.jsonrpc
 
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.serverError
@@ -56,10 +72,10 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
 
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
     try {
-      if (err is MethodDoesNotExist) {
-        JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").response.send()
-      } else {
-        serverError(request.id, err.message).response.send()
+      when (err) {
+        is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
+        is JsonRPCException -> err.response.send()
+        else -> serverError(request.id, err.message).send()
       }
     } finally {
       activeSubscriptions.remove(request)

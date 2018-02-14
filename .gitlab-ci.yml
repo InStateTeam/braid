@@ -2,7 +2,6 @@ image: docker-java8-mvn-nodejs-npm:latest
 
 variables:
   MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=maven/repository"
 
 before_script:
 - npm set registry $NPM_REPO
@@ -10,28 +9,45 @@ before_script:
 
 cache:
   paths:
-    - maven/repository/
-    - target/
+    - /root/.m2/repository
+
+stages:
+  - build
+  - snapshot_release
+  - release
 
 build:
   stage: build
   tags:
     - script-docker
-  script:
-    - mvn $MAVEN_CLI_OPTS compile
-
-test:
-  stage: test
-  tags:
-    - script-docker
-  script:
-    - mvn $MAVEN_CLI_OPTS test
-
-deploy:
-  stage: deploy
-  tags:
-    - script-docker
-  script:
-    - mvn $MAVEN_CLI_OPTS deploy
   only:
     - master
+    - /^[0-9]+-.*$/
+  script:
+    - mvn $MAVEN_CLI_OPTS clean install
+
+deploy:
+  stage: snapshot_release
+  tags:
+    - script-docker
+  script:
+    - mvn $MAVEN_CLI_OPTS clean install deploy
+  only:
+    - master
+
+release:
+  stage: release
+  tags:
+    - script-docker
+  variables:
+    BRAID_VERSION: $CI_COMMIT_REF_NAME
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+$/
+  when: manual
+  script:
+    - rm -rf ~/.gnupg
+    - gpg --version
+    - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
+    - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
+    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
+    - mvn $MAVEN_CLI_OPTS clean install dokka:javadocJar deploy -DskipTests -P sign,build-extras

@@ -1,10 +1,45 @@
 # Braid
 
-[![pipeline status](https://gitlab.bluebank.io/em-tech/braid/badges/master/pipeline.svg)](https://gitlab.bluebank.io/em-tech/braid/commits/master)
+[![pipeline status](https://gitlab.com/bluebank/braid/badges/master/pipeline.svg)](https://gitlab.com/bluebank/braid/commits/master)
 
 ![logo](art/logo-small.png) 
 
-_Braid is a high performance reactive rpc library for exposing your services in a secure way, in one line of code, and to consume them in any language, runtime, and platform._
+_Braid is a high performance reactive rpc library for exposing your services in a secure way, with very little code, and to consume them in any language, runtime, and platform._
+
+**Easy integration**
+
+Easy integration with Corda, from any
+ 
+* programming language: currently Javascript. Python, F#, and more planned
+* runtime i.e. you don't need Jython, Nashorn etc
+* platform: currenlty browser and NodeJS. iOS and more planned
+
+No fiddling with HTTP REST response codes, content-types, errors etc.
+Just simple object oriented code.
+
+**Secure**
+
+* Connections are secured with TLS/SSL
+* Signed Payloads
+* Easy to integrate with Enterprise authentication and authorisation services
+
+**Works with the Enterprise**
+
+Multiple transports: 
+
+* HTTP XHR requests (long polls etc)
+* Websockets
+
+Multiple encodings:
+
+* JSON
+* Protobufs (to be introduced soon)
+
+**Reactive**
+
+* Basic request + response
+* Streamed responses
+* Backpressure (to be introduced soon)
  
 ## Context
 
@@ -19,7 +54,7 @@ All of the above slow down project delivery, add risks, and distract focus from 
 
 > ## Braid is an answer to the above
 
-* Expose your services as regular plain old Java/Kotlin/Scala classes.
+* Expose your services as plain old Java/Kotlin/Scala classes.
 * Your methods can return any type including reactive streams.
 * Currently, consume your services in Javascript. Plans are in place for Python, C#, F#, GoLang and more.
 * Makes good assumptions on security, serialisation, and transports - which you can alter if you wish.
@@ -28,13 +63,11 @@ All of the above slow down project delivery, add risks, and distract focus from 
 * Your services will be exposed with rich metadata (far better than Swagger) that will give you a rich developer experience on the client side.
 * You can plugin your preferred authentication services.
 
-There are two ways at present to host Braid services:
-
 ### Containers
 
 There are various containers that Braid can work in:
  
-* [Standalone processes](braid-server)
+* [Standalone processes](braid-standalone-server)
 * [Corda nodes](braid-corda)
 
 Both of these rely on [braid-core](braid-core).
@@ -47,12 +80,10 @@ Services can be consumed in the following languages and runtimes (more to follow
 
 ## Examples
 
-* [`example-cordapp`](example-cordapp) - an example Corda cordapp, with customised authentication, streaming
-* [`example-server`](example-server) - a simple standalone server 
+* [`example-cordapp`](examples/example-cordapp) - an example Corda cordapp, with customised authentication, streaming
+* [`example-server`](examples/example-server) - a simple standalone server 
 
-### Setting up Local Maven to use Nexus3
 
-Download <a href="https://gitlab.bluebank.io/em-tech/braid/raw/master/maven/settings.xml" download>settings.xml</a> to `~/.m2/settings.xml`
 
 ### Setting up NPM with Nexus3
 
@@ -60,7 +91,7 @@ Nexus exposes a unified repository for both a npm central proxy and a locally de
 The unified repo can be used to install all artifacts. Set is as follows:
 
 ```bash
-npm config set registry http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-bluebank-group/
+npm config set registry http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-group/
 ```
 Followed by
 
@@ -72,7 +103,7 @@ npm add-user
 To be able to publish modules (such as, say, `braid-client`) add your credential to npm using:
 
 ```bash
-npm add-user --registry=http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-local/
+npm add-user --registry=http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-hosted/
 ```
 
 This will prompt you for your credentials and email. Once successfully authorised, you should be able to publish the 
@@ -83,7 +114,7 @@ This will prompt you for your credentials and email. Once successfully authorise
 You will need:
 
 * Maven 3.5.x
-* Node JS. We use 9.3.0 together with 5.6.0.
+* Node JS. We use 9.3.0 together with NPM 5.6.0.
 
 
 The build for all modules (Kotlin, Javascript, Cordapps etc) is orchestrated with maven.
@@ -100,10 +131,6 @@ The project can be loaded into any IDE that can read Maven POMs.
 
 ```bash 
 mvn clean deploy
-cd client
-npm install
-npm run build
-npm publish
 ```
 
 
