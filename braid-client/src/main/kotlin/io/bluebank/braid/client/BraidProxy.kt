@@ -53,8 +53,11 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
   @Suppress("UNCHECKED_CAST")
   fun bind(): Future<ServiceType> {
     val result = future<ServiceType>()
-    val url = URL("ws", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/${clazz.serviceName()}/websocket")
-    client.websocket(url.toString(), { socket ->
+    // TODO find nicer way to deal with URL not understanding the ws protocol
+//    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/${clazz.serviceName()}/websocket")
+    val url = "https://${config.serviceURI.host}:${config.serviceURI.port}${config.serviceURI.path}/websocket"
+
+    client.websocket(url, { socket ->
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), ProxyInvocationHandler(clazz, socket, config)) as ServiceType
       result.complete(proxy)
     }, { error -> result.fail(error) })
@@ -72,6 +75,7 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
 
 private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val config: BraidClientConfig) : InvocationHandler {
   private val nextId = AtomicLong(1)
+  // TODO: need a timeout in here so we can hoover up old invocations and not run out of memory...
   private val invocations = mutableMapOf<Long, ProxyInvocation>()
 
   companion object {
@@ -98,12 +102,14 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
       }
     } catch (err: Throwable) {
       log.error("failed to handle response message", err)
+      // TODO: do we need to handle the error here? and throw it?
     }
   }
 
   private fun exceptionHandler(error: Throwable) {
     log.error("exception from socket", error)
     // TODO: handle retries?
+    // TODO: handle error!
   }
 
   private fun jsonRPC(method: String, returnType: Type, vararg params: Any?): ProxyInvocation {

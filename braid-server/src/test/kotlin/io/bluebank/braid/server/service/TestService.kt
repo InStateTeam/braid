@@ -9,9 +9,12 @@ import rx.Observable
 interface MyService {
   fun add(lhs: Double, rhs: Double): Double
   fun noResult()
-  fun longRunning() : Future<Void>
+  fun longRunning() : Future<Int>
   fun stream() : Observable<Int>
+  fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject
 }
+
+data class ComplexObject(val a: String, val b: Int, val c: Double)
 
 @ServiceDescription("my-service", "a simple service")
 class MyServiceImpl(private val vertx: Vertx) : MyService {
@@ -22,15 +25,19 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   override fun noResult() {
   }
 
-  override fun longRunning(): Future<Void> {
-    val result = future<Void>()
+  override fun longRunning(): Future<Int> {
+    val result = future<Int>()
     vertx.setTimer(100) {
-      result.complete()
+      result.complete(5)
     }
     return result
   }
 
   override fun stream(): Observable<Int> {
     return Observable.from(0 .. 10)
+  }
+
+  override fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject {
+    return inComplexObject
   }
 }
