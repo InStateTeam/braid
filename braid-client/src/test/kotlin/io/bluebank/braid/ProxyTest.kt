@@ -28,12 +28,9 @@ class ProxyTest {
 
   lateinit var myService: MyService
 
-  companion object {
-    private val setupLatch = CountDownLatch(1)
-  }
-
   @Before
   fun beforeClass(context: TestContext) {
+    val async = context.async()
     rpcServer = createServerBuilder()
         .withVertx(vertx)
         .withService(MyServiceImpl(vertx))
@@ -46,26 +43,22 @@ class ProxyTest {
 
       braidClient.bind().map {
         myService = it
-        setupLatch.countDown()
+        async.complete()
       }.setHandler {
         if (it.failed()) {
           println(it.cause().message)
           throw RuntimeException(it.cause())
         }
       }
-
     }
-  }
 
-  @Before
-  fun checkSetupLatch() {
-    Assert.assertTrue("Woah, setup didn't complete....",setupLatch.await(15, TimeUnit.SECONDS))
+    async.awaitSuccess()
   }
 
   @After
-  fun afterClass() {
+  fun afterClass(context: TestContext) {
     rpcServer.stop()
-    vertx.close()
+    vertx.close(context.asyncAssertSuccess())
   }
 
   @Test
