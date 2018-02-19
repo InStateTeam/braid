@@ -41,7 +41,7 @@
     "mocha": "^4.1.0"
   },
   "publishConfig": {
-    "registry": "http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-hosted/"
+    "registry": "https://registry.npmjs.org/"
   },
   "browser": {
     "request": "xhr"
