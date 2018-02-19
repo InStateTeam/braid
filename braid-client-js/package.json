@@ -3,7 +3,7 @@
   "version": "1.0.0-SNAPSHOT",
   "description": "service proxies for Braid JsonRPC services",
   "main": "dist/Proxy.js",
-  "repository": "https://gitlab.bluebank.io/em-tech/hermes",
+  "repository": "https://gitlab.com/bluebank/braid",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "babel src -d dist",
