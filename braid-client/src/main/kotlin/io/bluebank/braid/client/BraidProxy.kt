@@ -8,6 +8,7 @@ import io.bluebank.braid.core.reflection.actualType
 import io.bluebank.braid.core.reflection.isStreaming
 import io.vertx.core.Future
 import io.vertx.core.Future.future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
@@ -46,8 +47,9 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
     }
   }
 
+  // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>): Future<ServiceType> {
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (Void) -> Unit = {}): Future<ServiceType> {
     val result = future<ServiceType>()
     val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
@@ -55,7 +57,8 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
       sockets.put(clazz, socket)
       socket.handler(this::handler)
-      socket.exceptionHandler(this::exceptionHandler)
+      socket.exceptionHandler(exceptionHandler)
+      socket.closeHandler(closeHandler)
       result.complete(proxy)
     }, { error -> result.fail(error) })
     return result
