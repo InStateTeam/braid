@@ -22,7 +22,7 @@
       "email": "chris.jones@bluebank.io"
     }
   ],
-  "license": "ISC",
+  "licenses" : [ { "type": "Apache-2.0", "url": "https://opensource.org/licenses/apache2.0.php" } ],
   "dependencies": {
     "promise": "^8.0.1",
     "request": "^2.83.0",
