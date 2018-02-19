@@ -10,5 +10,4 @@ build/**
 **/.DS_Store
 # NPM packages folder.
 node_modules/
-
-
+target

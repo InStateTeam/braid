@@ -358,15 +358,15 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <executable>${gpg.executable}</executable>
+                  <keyname>${env.GPG_KEYNAME}</keyname>
+                  <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                  <gpgArguments>
+                  </gpgArguments>
+                </configuration>
               </execution>
             </executions>
-            <configuration>
-              <executable>${gpg.executable}</executable>
-              <keyname>${env.GPG_KEYNAME}</keyname>
-              <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-              <gpgArguments>
-              </gpgArguments>
-            </configuration>
           </plugin>
         </plugins>
       </build>
