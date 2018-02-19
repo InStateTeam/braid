@@ -18,8 +18,6 @@ import java.net.ServerSocket
 import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO - why is this blowing up while shutting down?
-
 @RunWith(VertxUnitRunner::class)
 class ProxyTest {
   private val vertx = Vertx.vertx()
@@ -58,8 +56,8 @@ class ProxyTest {
 
   @After
   fun after(context: TestContext) {
-    rpcServer.stop()
     vertx.close(context.asyncAssertSuccess())
+    braidClient.close()
   }
 
   @Test

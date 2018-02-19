@@ -20,6 +20,7 @@ import rx.Observable
 import rx.subjects.PublishSubject
 import java.io.Closeable
 import java.lang.reflect.*
+import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -32,7 +33,6 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
       .setSsl(config.tls)
       .setVerifyHost(config.verifyHost)
       .setTrustAll(config.trustAll))
-
 
   companion object {
     inline fun <reified T : Any> createProxy(config: BraidClientConfig): BraidProxy<T> {
@@ -47,11 +47,9 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
   @Suppress("UNCHECKED_CAST")
   fun bind(): Future<ServiceType> {
     val result = future<ServiceType>()
-    // TODO find nicer way to deal with URL not understanding the ws protocol
-//    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/${clazz.serviceName()}/websocket")
-    val url = "https://${config.serviceURI.host}:${config.serviceURI.port}${config.serviceURI.path}/websocket"
+    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
-    client.websocket(url, { socket ->
+    client.websocket(url.toString(), { socket ->
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), ProxyInvocationHandler(clazz, socket, config)) as ServiceType
       result.complete(proxy)
     }, { error -> result.fail(error) })
@@ -68,9 +66,10 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
 }
 
 private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val config: BraidClientConfig) : InvocationHandler {
+
   private val nextId = AtomicLong(1)
-  // TODO: do we need a timeout here?  wouldn't work with observables, ofcourse...
-  private val invocations = mutableMapOf<Long, ProxyInvocation>()
+
+  val invocations = mutableMapOf<Long, ProxyInvocation>()
 
   companion object {
     private val log: Logger = loggerFor<ProxyInvocationHandler<*>>()
@@ -96,7 +95,6 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
       }
     } catch (err: Throwable) {
       log.error("failed to handle response message", err)
-      // TODO: do we need to handle the error here? and throw it?
     }
   }
 
@@ -128,49 +126,59 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
       log.warn("could not find invocation object $id to report exception", err)
     }
   }
-}
 
-private class ProxyInvocation(private val returnType: Type) {
-  private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
+  private inner class ProxyInvocation(private val returnType: Type) {
 
-  private val resultStream = PublishSubject.create<Any>()
+    private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
 
-  fun awaitResult(): Any {
+    private val resultStream = PublishSubject.create<Any>()
 
-    return when (returnType.actualType()) {
-      Future::class.java -> {
-        resultStream.toSingle().toFuture()
-      }
-      Observable::class.java -> {
-        resultStream
-      }
-      else -> {
-        resultStream.toBlocking().first()
-      }
-    }
-  }
-
-  fun handle(jo: JsonObject) {
-    when {
-      jo.containsKey("result") -> {
-        val raw = jo.getValue("result")
-        val result = Json.mapper.convertValue<Any>(raw, payloadType)
-        resultStream.onNext(result)
-
-        if (!returnType.isStreaming()) {
-          resultStream.onCompleted()
+    fun awaitResult(): Any {
+      return when (returnType.actualType()) {
+        Future::class.java -> {
+          resultStream.toSingle().toFuture()
         }
-
+        Observable::class.java -> {
+          resultStream
+        }
+        else -> {
+          resultStream.toBlocking().first()
+        }
       }
-      jo.containsKey("error") -> {
-        val error =jo.getJsonObject("error")
-        onError(RuntimeException(error.encode()))
-      }
-      jo.containsKey("completed") -> resultStream.onCompleted() //TODO surely remove the handler here?
     }
-  }
 
-  fun onError(err: Throwable) {
-    resultStream.onError(err)
+    fun handle(jo: JsonObject) {
+      val responseId = jo.getLong("id")
+      when {
+        jo.containsKey("result") -> {
+          val raw = jo.getValue("result")
+          val result = Json.mapper.convertValue<Any>(raw, payloadType)
+          resultStream.onNext(result)
+
+          if (!returnType.isStreaming()) {
+            resultStream.onCompleted()
+            invocations.remove(responseId)
+          }
+
+        }
+        jo.containsKey("error") -> {
+          val error= jo.getJsonObject("error")
+          onError(RuntimeException(error.encode()))
+          invocations.remove(responseId)
+        }
+        jo.containsKey("completed") -> {
+          if (!returnType.isStreaming()) {
+            log.error("Not expecting completed messages for anything other than Observables")
+          }
+
+          resultStream.onCompleted()
+          invocations.remove(responseId)
+        }
+      }
+    }
+
+    fun onError(err: Throwable) {
+      resultStream.onError(err)
+    }
   }
 }
