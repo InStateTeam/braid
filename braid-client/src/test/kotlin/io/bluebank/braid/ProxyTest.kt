@@ -63,6 +63,7 @@ class ProxyTest {
   @Test
   fun `should be able to add two numbers together`() {
     val result = myService.add(1.0, 2.0)
+    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
     Assert.assertEquals(3.0, result, 0.0001)
   }
 
@@ -70,12 +71,14 @@ class ProxyTest {
   fun `should be able to get a complex object back from the proxy`() {
     val complexObject = ComplexObject("1", 2, 3.0)
     val result = myService.echoComplexObject(complexObject)
+    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
     Assert.assertEquals(complexObject, result)
   }
 
   @Test
   fun `should be able to call method with no arguments`() {
     val result = myService.noArgs()
+    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
     Assert.assertEquals(5, result)
   }
 
@@ -83,7 +86,9 @@ class ProxyTest {
   fun `should be able to get a future back from the proxy`(context: TestContext) {
     myService.longRunning().map{
       context.assertEquals(5, it)
-    }.setHandler(context.asyncAssertSuccess())
+    }.setHandler(context.asyncAssertSuccess({
+      context.assertEquals(0, braidClient.currentlyOpenHandlers())
+    }))
   }
 
   @Test
@@ -97,6 +102,7 @@ class ProxyTest {
       context.fail(it.message)
     }, {
       context.assertEquals(11, sequence.get())
+      context.assertEquals(0, braidClient.currentlyOpenHandlers())
       async.complete()
     })
   }
@@ -118,12 +124,12 @@ class ProxyTest {
       context.fail("should never get called")
     }, {
       context.assertEquals("stream error", it.message)
+      context.assertEquals(0, braidClient.currentlyOpenHandlers())
       async.complete()
     }, {
       context.fail("should never get called")
     })
   }
-
 
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {

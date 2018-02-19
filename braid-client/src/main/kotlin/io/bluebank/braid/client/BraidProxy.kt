@@ -47,9 +47,13 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
     }
   }
 
+  fun currentlyOpenHandlers(): Int {
+    return invocations.size
+  }
+
   // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (Void) -> Unit = {}): Future<ServiceType> {
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
     val result = future<ServiceType>()
     val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
@@ -92,6 +96,10 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
     } catch (err: Throwable) {
       log.error("failed to handle response message", err)
     }
+  }
+
+  private fun closeHandler() {
+      log.info("closing...")
   }
 
   private fun exceptionHandler(error: Throwable) {
@@ -149,25 +157,28 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
         jo.containsKey("result") -> {
           val raw = jo.getValue("result")
           val result = Json.mapper.convertValue<Any>(raw, payloadType)
-          resultStream.onNext(result)
 
-          if (!returnType.isStreaming()) {
-            resultStream.onCompleted()
+          // TODO: this is moderately horrific - otherwise it's hard to make assertions about the number of handlers
+          if (returnType.isStreaming()) {
+            resultStream.onNext(result)
+          } else {
             invocations.remove(responseId)
+            resultStream.onNext(result)
+            resultStream.onCompleted()
           }
         }
         jo.containsKey("error") -> {
           val error= jo.getJsonObject("error")
-          onError(RuntimeException(error.getString("message")))
           invocations.remove(responseId)
+          onError(RuntimeException(error.getString("message")))
         }
         jo.containsKey("completed") -> {
           if (!returnType.isStreaming()) {
             log.error("Not expecting completed messages for anything other than Observables")
           }
 
-          resultStream.onCompleted()
           invocations.remove(responseId)
+          resultStream.onCompleted()
         }
       }
     }
@@ -176,4 +187,10 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
       resultStream.onError(err)
     }
   }
+}
+
+fun WebSocket.closeHandler(fn: () -> Unit) {
+    this.closeHandler { _: Void ->
+        fn()
+    }
 }
