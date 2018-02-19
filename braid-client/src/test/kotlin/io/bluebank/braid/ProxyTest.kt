@@ -9,13 +9,16 @@ import io.bluebank.braid.server.service.MyServiceImpl
 import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import org.junit.*
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.ServerSocket
 import java.net.URI
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
+// TODO - why is this blowing up while shutting down?
 
 @RunWith(VertxUnitRunner::class)
 class ProxyTest {
@@ -24,12 +27,10 @@ class ProxyTest {
   private lateinit var rpcServer : JsonRPCServer
   private lateinit var braidClient : BraidProxy<MyService>
 
-  private val testLatch = CountDownLatch(1)
-
   lateinit var myService: MyService
 
   @Before
-  fun beforeClass(context: TestContext) {
+  fun before(context: TestContext) {
     val async = context.async()
     rpcServer = createServerBuilder()
         .withVertx(vertx)
@@ -56,7 +57,7 @@ class ProxyTest {
   }
 
   @After
-  fun afterClass(context: TestContext) {
+  fun after(context: TestContext) {
     rpcServer.stop()
     vertx.close(context.asyncAssertSuccess())
   }
@@ -67,32 +68,44 @@ class ProxyTest {
     Assert.assertEquals(3.0, result, 0.0001)
   }
 
-//  @Test
-//  fun `should be able to get a complex object back from the proxy`() {
-//    braidClient.bind().map {
-//      val complexObject = ComplexObject("1", 2, 3.0)
-//      println("making call")
-//      val result = it.echoComplexObject(complexObject)
-//      Assert.assertEquals(complexObject, result)
-//      latch.countDown()
-//    }
-//    Assert.assertTrue(latch.await(15, TimeUnit.SECONDS))
-//  }
-//
-//  @Test
-//  fun `should be able to get a future back from the proxy`() {
-//    braidClient.bind().map {
-//      it.longRunning()
-//    }.map{
-//      it.setHandler { Assert.fail("it")}
-//    }
-//    latch.await(5, TimeUnit.SECONDS)
-//  }
+  @Test
+  fun `should be able to get a complex object back from the proxy`() {
+    val complexObject = ComplexObject("1", 2, 3.0)
+    val result = myService.echoComplexObject(complexObject)
+    Assert.assertEquals(complexObject, result)
+  }
+
+  @Test
+  fun `should be able to call method with no arguments`() {
+    val result = myService.noArgs()
+    Assert.assertEquals(5, result)
+  }
+
+  @Test
+  fun `should be able to get a future back from the proxy`(context: TestContext) {
+    myService.longRunning().map{
+      context.assertEquals(5, it)
+    }.setHandler(context.asyncAssertSuccess())
+  }
+
+  @Test
+  fun `should be able to get a stream of events back from the proxy`(context: TestContext) {
+    val sequence = AtomicInteger(0)
+    val async = context.async()
+
+    myService.stream().subscribe({
+      context.assertEquals(sequence.getAndIncrement(), it, "incorrect message received")
+    }, {
+      context.fail(it.message)
+    }, {
+      context.assertEquals(11, sequence.get())
+      async.complete()
+    })
+  }
 
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {
       it.localPort
     }
   }
-
 }

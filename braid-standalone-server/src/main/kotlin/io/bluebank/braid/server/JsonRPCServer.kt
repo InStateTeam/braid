@@ -141,9 +141,8 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
    * Start the server
    * The startup is asynchronous.
    */
-  fun start() : JsonRPCServer {
+  fun start() {
     start { }
-    return this
   }
 
   /**

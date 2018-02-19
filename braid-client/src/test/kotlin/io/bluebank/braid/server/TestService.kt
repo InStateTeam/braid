@@ -8,6 +8,7 @@ import rx.Observable
 
 interface MyService {
   fun add(lhs: Double, rhs: Double): Double
+  fun noArgs(): Int
   fun noResult()
   fun longRunning() : Future<Int>
   fun stream() : Observable<Int>
@@ -20,6 +21,10 @@ data class ComplexObject(val a: String, val b: Int, val c: Double)
 class MyServiceImpl(private val vertx: Vertx) : MyService {
   override fun add(lhs: Double, rhs: Double): Double {
     return lhs + rhs
+  }
+
+  override fun noArgs(): Int {
+    return 5
   }
 
   override fun noResult() {

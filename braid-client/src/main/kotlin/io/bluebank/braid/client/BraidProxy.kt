@@ -2,11 +2,10 @@ package io.bluebank.braid.client
 
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
-import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
-import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.reflection.actualReturnType
-import io.bluebank.braid.core.reflection.serviceName
+import io.bluebank.braid.core.reflection.underlyingGenericType
+import io.bluebank.braid.core.reflection.actualType
+import io.bluebank.braid.core.reflection.isStreaming
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
@@ -16,16 +15,11 @@ import io.vertx.core.http.WebSocket
 import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
-import io.vertx.kotlin.core.json.get
 import org.slf4j.Logger
 import rx.Observable
 import rx.subjects.PublishSubject
 import java.io.Closeable
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
-import java.lang.reflect.Type
-import java.net.URL
+import java.lang.reflect.*
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -75,7 +69,7 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
 
 private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val config: BraidClientConfig) : InvocationHandler {
   private val nextId = AtomicLong(1)
-  // TODO: need a timeout in here so we can hoover up old invocations and not run out of memory...
+  // TODO: do we need a timeout here?  wouldn't work with observables, ofcourse...
   private val invocations = mutableMapOf<Long, ProxyInvocation>()
 
   companion object {
@@ -87,8 +81,8 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
     socket.exceptionHandler(this::exceptionHandler)
   }
 
-  override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
-    return jsonRPC(method.name, method.genericReturnType, *args).awaitResult()
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+    return jsonRPC(method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
   }
 
   private fun handler(buffer: Buffer) {
@@ -117,7 +111,7 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
     val proxyInvocation = ProxyInvocation(returnType)
     invocations.put(id, proxyInvocation)
     try {
-      val request = JsonRPCRequest(id = id, method = method, params = params.toList())
+      val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
       socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
     } catch (err: Throwable) {
       onRequestError(id, err)
@@ -137,16 +131,17 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
 }
 
 private class ProxyInvocation(private val returnType: Type) {
-  private val payloadType = Json.mapper.typeFactory.constructType(returnType.actualReturnType())
+  private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
 
   private val resultStream = PublishSubject.create<Any>()
 
   fun awaitResult(): Any {
-    return when (returnType) {
-      is Future<*> -> {
+
+    return when (returnType.actualType()) {
+      Future::class.java -> {
         resultStream.toSingle().toFuture()
       }
-      is Observable<*> -> {
+      Observable::class.java -> {
         resultStream
       }
       else -> {
@@ -161,12 +156,17 @@ private class ProxyInvocation(private val returnType: Type) {
         val raw = jo.getValue("result")
         val result = Json.mapper.convertValue<Any>(raw, payloadType)
         resultStream.onNext(result)
+
+        if (!returnType.isStreaming()) {
+          resultStream.onCompleted()
+        }
+
       }
       jo.containsKey("error") -> {
         val error =jo.getJsonObject("error")
         onError(RuntimeException(error.encode()))
       }
-      jo.containsKey("completed") -> resultStream.onCompleted()
+      jo.containsKey("completed") -> resultStream.onCompleted() //TODO surely remove the handler here?
     }
   }
 
