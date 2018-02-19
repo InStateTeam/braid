@@ -24,9 +24,12 @@ import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 
 
-class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, private val config: BraidClientConfig) : Closeable {
+class BraidProxyClient(private val config: BraidClientConfig) : Closeable, InvocationHandler  {
   private val vertx: Vertx = Vertx.vertx()
-
+  private val nextId = AtomicLong(1)
+  private val invocations = mutableMapOf<Long, ProxyInvocation>()
+  // change this to Proxy rather than Any?
+  private val sockets = mutableMapOf<Class<*>, WebSocket>()
 
   private val client = vertx.createHttpClient(HttpClientOptions()
       .setDefaultHost(config.serviceURI.host)
@@ -36,22 +39,23 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
       .setTrustAll(config.trustAll))
 
   companion object {
-    inline fun <reified T : Any> createProxy(config: BraidClientConfig): BraidProxy<T> {
-      return createProxy(T::class.java, config)
-    }
+    private val log: Logger = loggerFor<BraidProxyClient>()
 
-    fun <T : Any> createProxy(clazz: Class<T>, config: BraidClientConfig): BraidProxy<T> {
-      return BraidProxy(clazz, config)
+    fun <T : Any> createProxyClient(config: BraidClientConfig): BraidProxyClient {
+      return BraidProxyClient(config)
     }
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun bind(): Future<ServiceType> {
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>): Future<ServiceType> {
     val result = future<ServiceType>()
     val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
     client.websocket(url.toString(), { socket ->
-      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), ProxyInvocationHandler(clazz, socket, config)) as ServiceType
+      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
+      sockets.put(clazz, socket)
+      socket.handler(this::handler)
+      socket.exceptionHandler(this::exceptionHandler)
       result.complete(proxy)
     }, { error -> result.fail(error) })
     return result
@@ -64,25 +68,13 @@ class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, priva
       vertx.close()
     }
   }
-}
-
-private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, private val socket: WebSocket, private val config: BraidClientConfig) : InvocationHandler {
-
-  private val nextId = AtomicLong(1)
-
-  val invocations = mutableMapOf<Long, ProxyInvocation>()
-
-  companion object {
-    private val log: Logger = loggerFor<ProxyInvocationHandler<*>>()
-  }
-
-  init {
-    socket.handler(this::handler)
-    socket.exceptionHandler(this::exceptionHandler)
-  }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-    return jsonRPC(method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
+    val socket = sockets[method.declaringClass]
+    if (socket != null) {
+      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
+    }
+    throw IllegalStateException("no socket for proxy")
   }
 
   private fun handler(buffer: Buffer) {
@@ -105,7 +97,7 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
     // TODO: handle error!
   }
 
-  private fun jsonRPC(method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
+  private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.incrementAndGet()
     val proxyInvocation = ProxyInvocation(returnType)
     invocations.put(id, proxyInvocation)

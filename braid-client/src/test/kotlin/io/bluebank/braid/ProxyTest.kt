@@ -1,7 +1,7 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.client.BraidClientConfig
-import io.bluebank.braid.client.BraidProxy
+import io.bluebank.braid.client.BraidProxyClient
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.service.ComplexObject
 import io.bluebank.braid.server.service.MyService
@@ -23,7 +23,7 @@ class ProxyTest {
   private val vertx = Vertx.vertx()
   private val port = getFreePort()
   private lateinit var rpcServer : JsonRPCServer
-  private lateinit var braidClient : BraidProxy<MyService>
+  private lateinit var braidClient : BraidProxyClient
 
   lateinit var myService: MyService
 
@@ -38,9 +38,9 @@ class ProxyTest {
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidProxy(MyService::class.java, BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false))
+      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false))
 
-      braidClient.bind().map {
+      braidClient.bind(MyService::class.java).map {
         myService = it
         async.complete()
       }.setHandler {
