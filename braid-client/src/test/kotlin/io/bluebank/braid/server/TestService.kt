@@ -12,7 +12,9 @@ interface MyService {
   fun noResult()
   fun longRunning() : Future<Int>
   fun stream() : Observable<Int>
+  fun largelyNotStream(): Observable<Int>
   fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject
+  fun blowUp()
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
@@ -42,7 +44,15 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
     return Observable.from(0 .. 10)
   }
 
+  override fun largelyNotStream(): Observable<Int> {
+    return Observable.error(RuntimeException("stream error"))
+  }
+
   override fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject {
     return inComplexObject
+  }
+
+  override fun blowUp() {
+    throw RuntimeException("expected exception")
   }
 }

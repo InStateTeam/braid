@@ -101,6 +101,30 @@ class ProxyTest {
     })
   }
 
+  @Test
+  fun `should blow up and report runtime exception`(context: TestContext) {
+      try {
+          myService.blowUp()
+      } catch (e: RuntimeException) {
+          context.assertEquals("expected exception", e.message)
+      }
+  }
+
+  @Test
+  fun `should blow up and remove handler for streaming error`(context: TestContext) {
+    val async = context.async()
+
+    myService.largelyNotStream().subscribe({
+      context.fail("should never get called")
+    }, {
+      context.assertEquals("stream error", it.message)
+      async.complete()
+    }, {
+      context.fail("should never get called")
+    })
+  }
+
+
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {
       it.localPort

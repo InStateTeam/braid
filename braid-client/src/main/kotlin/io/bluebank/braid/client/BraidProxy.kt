@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong
 class BraidProxy<ServiceType : Any>(private val clazz: Class<ServiceType>, private val config: BraidClientConfig) : Closeable {
   private val vertx: Vertx = Vertx.vertx()
 
+
   private val client = vertx.createHttpClient(HttpClientOptions()
       .setDefaultHost(config.serviceURI.host)
       .setDefaultPort(config.serviceURI.port)
@@ -159,11 +160,10 @@ private class ProxyInvocationHandler<T : Any>(private val clazz: Class<T>, priva
             resultStream.onCompleted()
             invocations.remove(responseId)
           }
-
         }
         jo.containsKey("error") -> {
           val error= jo.getJsonObject("error")
-          onError(RuntimeException(error.encode()))
+          onError(RuntimeException(error.getString("message")))
           invocations.remove(responseId)
         }
         jo.containsKey("completed") -> {
