@@ -63,7 +63,7 @@ class ProxyTest {
   @Test
   fun `should be able to add two numbers together`() {
     val result = myService.add(1.0, 2.0)
-    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
+    Assert.assertEquals(0, braidClient.activeRequestsCount())
     Assert.assertEquals(3.0, result, 0.0001)
   }
 
@@ -71,14 +71,14 @@ class ProxyTest {
   fun `should be able to get a complex object back from the proxy`() {
     val complexObject = ComplexObject("1", 2, 3.0)
     val result = myService.echoComplexObject(complexObject)
-    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
+    Assert.assertEquals(0, braidClient.activeRequestsCount())
     Assert.assertEquals(complexObject, result)
   }
 
   @Test
   fun `should be able to call method with no arguments`() {
     val result = myService.noArgs()
-    Assert.assertEquals(0, braidClient.currentlyOpenHandlers())
+    Assert.assertEquals(0, braidClient.activeRequestsCount())
     Assert.assertEquals(5, result)
   }
 
@@ -87,7 +87,7 @@ class ProxyTest {
     myService.longRunning().map{
       context.assertEquals(5, it)
     }.setHandler(context.asyncAssertSuccess({
-      context.assertEquals(0, braidClient.currentlyOpenHandlers())
+      context.assertEquals(0, braidClient.activeRequestsCount())
     }))
   }
 
@@ -102,7 +102,7 @@ class ProxyTest {
       context.fail(it.message)
     }, {
       context.assertEquals(11, sequence.get())
-      context.assertEquals(0, braidClient.currentlyOpenHandlers())
+      context.assertEquals(0, braidClient.activeRequestsCount())
       async.complete()
     })
   }
@@ -124,7 +124,7 @@ class ProxyTest {
       context.fail("should never get called")
     }, {
       context.assertEquals("stream error", it.message)
-      context.assertEquals(0, braidClient.currentlyOpenHandlers())
+      context.assertEquals(0, braidClient.activeRequestsCount())
       async.complete()
     }, {
       context.fail("should never get called")

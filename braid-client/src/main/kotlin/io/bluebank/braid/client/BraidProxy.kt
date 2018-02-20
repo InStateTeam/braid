@@ -47,7 +47,7 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
     }
   }
 
-  fun currentlyOpenHandlers(): Int {
+  fun activeRequestsCount(): Int {
     return invocations.size
   }
 
