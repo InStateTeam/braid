@@ -29,8 +29,13 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
     init {
       BraidCordaJacksonInit.init()
     }
-    fun bootstrapBraid(serviceHub: ServiceHub, config: BraidConfig = BraidConfig()) =
-        BraidServer(serviceHub, config).start()
+    fun bootstrapBraid(serviceHub: ServiceHub, config: BraidConfig = BraidConfig()) : BraidServer {
+      val result = BraidServer(serviceHub, config).start()
+      net.corda.nodeapi.internal.addShutdownHook {
+        result.shutdown()
+      }
+      return result
+    }
   }
 
   private val services : ServiceHubInternal = serviceHub as ServiceHubInternal

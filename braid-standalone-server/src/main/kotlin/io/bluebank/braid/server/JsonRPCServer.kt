@@ -129,6 +129,7 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
   }
 
   var deploymentId: String? = null
+  val rootPath get() = builder.rootPath
 
   init {
     if (builder.vertx == null) {

@@ -24,6 +24,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.reflection.serviceName
 import io.bluebank.braid.core.meta.ServiceDescriptor
 import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.bluebank.braid.core.security.AuthenticatedSocket
@@ -257,7 +258,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   }
 
   private fun getServiceName(service: Any): String {
-    return service.javaClass.getDeclaredAnnotation(ServiceDescription::class.java)?.name ?: service.javaClass.simpleName.toLowerCase()
+    return service.javaClass.serviceName()
   }
 
   private fun setupSockJS() {
