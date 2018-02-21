@@ -8,7 +8,6 @@ import io.bluebank.braid.core.reflection.actualType
 import io.bluebank.braid.core.reflection.isStreaming
 import io.vertx.core.Future
 import io.vertx.core.Future.future
-import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
@@ -25,11 +24,9 @@ import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 
 
-class BraidProxyClient(private val config: BraidClientConfig) : Closeable, InvocationHandler  {
-  private val vertx: Vertx = Vertx.vertx()
+class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
   private val nextId = AtomicLong(1)
   private val invocations = mutableMapOf<Long, ProxyInvocation>()
-  // change this to Proxy rather than Any?
   private val sockets = mutableMapOf<Class<*>, WebSocket>()
 
   private val client = vertx.createHttpClient(HttpClientOptions()
@@ -42,8 +39,8 @@ class BraidProxyClient(private val config: BraidClientConfig) : Closeable, Invoc
   companion object {
     private val log: Logger = loggerFor<BraidProxyClient>()
 
-    fun <T : Any> createProxyClient(config: BraidClientConfig): BraidProxyClient {
-      return BraidProxyClient(config)
+    fun <T : Any> createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
+      return BraidProxyClient(config, vertx)
     }
   }
 
