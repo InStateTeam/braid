@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 @RunWith(VertxUnitRunner::class)
 class ProxyTest {
   private val vertx = Vertx.vertx()
+  private val clientVertx = Vertx.vertx()
   private val port = getFreePort()
   private lateinit var rpcServer : JsonRPCServer
   private lateinit var braidClient : BraidProxyClient
@@ -38,7 +39,7 @@ class ProxyTest {
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false))
+      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
 
       braidClient.bind(MyService::class.java).map {
         myService = it
