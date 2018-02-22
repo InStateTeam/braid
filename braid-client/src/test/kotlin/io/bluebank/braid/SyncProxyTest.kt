@@ -1,7 +1,8 @@
-package io.bluebank.braid.server
+package io.bluebank.braid
 
 import io.bluebank.braid.client.BraidClientConfig
 import io.bluebank.braid.client.BraidProxyClient
+import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.service.ComplexObject
 import io.bluebank.braid.server.service.MyService
@@ -19,7 +20,7 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(VertxUnitRunner::class)
-class ProxyTest {
+class SyncProxyTest {
   private val vertx = Vertx.vertx()
   private val clientVertx = Vertx.vertx()
   private val port = getFreePort()
@@ -41,15 +42,8 @@ class ProxyTest {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
       braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
 
-      braidClient.bindAsync(MyService::class.java).map {
-        myService = it
-        async.complete()
-      }.setHandler {
-        if (it.failed()) {
-          println(it.cause().message)
-          throw RuntimeException(it.cause())
-        }
-      }
+      myService = braidClient.bind(MyService::class.java)
+      async.complete()
     }
 
     async.awaitSuccess()

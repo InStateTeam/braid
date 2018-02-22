@@ -1,5 +1,6 @@
 package io.bluebank.braid.client
 
+import io.bluebank.braid.core.async.getOrThrow
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.logging.loggerFor
@@ -21,6 +22,7 @@ import rx.subjects.PublishSubject
 import java.io.Closeable
 import java.lang.reflect.*
 import java.net.URL
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -48,9 +50,13 @@ class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) 
     return invocations.size
   }
 
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): ServiceType {
+    return bindAsync(clazz, exceptionHandler, closeHandler).getOrThrow()
+  }
+
   // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
+  fun <ServiceType : Any> bindAsync(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
     val result = future<ServiceType>()
     val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
