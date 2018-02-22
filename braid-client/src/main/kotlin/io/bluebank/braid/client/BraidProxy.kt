@@ -193,7 +193,7 @@ class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) 
 }
 
 fun WebSocket.closeHandler(fn: () -> Unit) {
-    this.closeHandler { _: Void ->
+    this.closeHandler {
         fn()
     }
 }
