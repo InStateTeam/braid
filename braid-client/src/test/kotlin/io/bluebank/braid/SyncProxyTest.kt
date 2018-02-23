@@ -126,6 +126,11 @@ class SyncProxyTest {
     })
   }
 
+  @Test(expected = IllegalArgumentException::class)
+  fun `should throw exception if json object blows up`() {
+    myService.stuffedJsonObject()
+  }
+
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {
       it.localPort
