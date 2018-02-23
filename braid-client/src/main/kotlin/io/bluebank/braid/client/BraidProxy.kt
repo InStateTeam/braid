@@ -88,18 +88,27 @@ class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) 
   }
 
   private fun handler(buffer: Buffer) {
+    val jo = JsonObject(buffer)
+    val responseId = jo.getLong("id")
     try {
-      val jo = JsonObject(buffer)
-      val responseId = jo.getLong("id")
       when {
         responseId == null -> log.error("received response without id {}", buffer.toString())
         !invocations.containsKey(responseId) -> log.error("no subscriber found for response id {}", responseId)
-        else -> invocations[responseId]!!.handle(jo)
+        else -> handleInvocationWithResponse(responseId, jo)
       }
     } catch (err: Throwable) {
       log.error("failed to handle response message", err)
     }
   }
+
+  private fun handleInvocationWithResponse(responseId: Long, jo: JsonObject) {
+    try {
+      invocations[responseId]!!.handle(jo)
+    } catch (err: Throwable) {
+      invocations[responseId]!!.onError(err)
+    }
+  }
+
 
   private fun closeHandler() {
       log.info("closing...")

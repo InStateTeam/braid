@@ -14,10 +14,16 @@ interface MyService {
   fun stream() : Observable<Int>
   fun largelyNotStream(): Observable<Int>
   fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject
+  fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
+
+data class JsonStuffedObject(val a: String) {
+  val b: String
+    get() = a
+}
 
 @ServiceDescription("my-service", "a simple service")
 class MyServiceImpl(private val vertx: Vertx) : MyService {
@@ -54,5 +60,9 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
 
   override fun blowUp() {
     throw RuntimeException("expected exception")
+  }
+
+  override fun stuffedJsonObject(): JsonStuffedObject {
+    return JsonStuffedObject("this is hosed")
   }
 }
