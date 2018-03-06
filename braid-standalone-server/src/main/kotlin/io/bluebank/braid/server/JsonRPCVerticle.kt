@@ -16,7 +16,6 @@
 
 package io.bluebank.braid.server
 
-import io.bluebank.braid.core.annotation.ServiceDescription
 import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
 import io.bluebank.braid.core.http.write
@@ -24,9 +23,9 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.reflection.serviceName
 import io.bluebank.braid.core.meta.ServiceDescriptor
 import io.bluebank.braid.core.meta.defaultServiceEndpoint
+import io.bluebank.braid.core.reflection.serviceName
 import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.service.ServiceExecutor
@@ -135,22 +134,21 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     return this
   }
 
-  private lateinit var servicesRouter: Router
+  private val servicesRouter: Router = Router.router(vertx)
 
   private fun setupRouter(): Router {
     val router = Router.router(vertx)
-    router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
     router.setupOptionsMethod()
-    servicesRouter = Router.router(vertx)
-    router.mountSubRouter("$rootPath", servicesRouter)
+    setupSockJS()
+    servicesRouter.post().handler(BodyHandler.create())
     servicesRouter.get("/").handler { it.getServiceList() }
     servicesRouter.get("/:serviceId").handler { it.getService(it.pathParam("serviceId"))}
     servicesRouter.get("/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
     servicesRouter.post("/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
     servicesRouter.delete("/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
     servicesRouter.get("/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
-    setupSockJS()
+    router.mountSubRouter("$rootPath", servicesRouter)
     router.get()
         .last()
         .handler(

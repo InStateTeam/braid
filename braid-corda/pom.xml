@@ -198,6 +198,14 @@
                   <pattern>io.netty</pattern>
                   <shadedPattern>io.bluebank.braid.shaded.io.netty</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>com.fasterxml</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.com.fasterxml</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.swagger</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>
+                </relocation>
               </relocations>
             </configuration>
           </execution>
