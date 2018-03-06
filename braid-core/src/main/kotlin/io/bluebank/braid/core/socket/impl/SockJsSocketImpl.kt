@@ -28,8 +28,6 @@ class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer
     sockJS.handler { onData(it) }
     sockJS.endHandler {
       onEnd()
-      sockJS.handler(null)
-      sockJS.endHandler(null)
     }
   }
 

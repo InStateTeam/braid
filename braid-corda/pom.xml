@@ -123,6 +123,7 @@
           <artifactId>library</artifactId>
         </exclusion>
       </exclusions>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>net.corda</groupId>
@@ -180,6 +181,35 @@
         <configuration>
           <argLine>-javaagent:${basedir}/../lib/quasar.jar</argLine>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>io.netty</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.io.netty</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.fasterxml</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.com.fasterxml</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>io.swagger</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

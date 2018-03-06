@@ -112,7 +112,7 @@ class JsonRPCServerTest {
 
     httpPost("/api/$serviceName/script", script)
         .compose {
-          jsonRPC("ws://localhost:$port${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
+          jsonRPC("${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
         }
         .map {
           Json.decodeValue(it, JsonRPCResultResponse::class.java)
@@ -128,7 +128,7 @@ class JsonRPCServerTest {
     val id = 1L
     val result = future<Buffer>()
     try {
-      client.websocket(url) { socket ->
+      client.websocket(url, { socket ->
         socket.handler { response ->
           try {
             val jo = JsonObject(response)
@@ -149,7 +149,9 @@ class JsonRPCServerTest {
         }
         val request = JsonRPCRequest(id = id, method = method, params = params.toList())
         socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-      }
+      }, { connectionError ->
+        result.fail(connectionError)
+      })
     } catch (err: Throwable) {
       result.fail(err)
     }
