@@ -20,7 +20,7 @@
   <parent>
     <artifactId>braid</artifactId>
     <groupId>io.bluebank.braid</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -205,6 +205,10 @@
                 <relocation>
                   <pattern>io.swagger</pattern>
                   <shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>rx.*</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>
