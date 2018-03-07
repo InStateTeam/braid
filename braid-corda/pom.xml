@@ -207,7 +207,7 @@
                   <shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>rx.*</pattern>
+                  <pattern>rx</pattern>
                   <shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>
                 </relocation>
               </relocations>
