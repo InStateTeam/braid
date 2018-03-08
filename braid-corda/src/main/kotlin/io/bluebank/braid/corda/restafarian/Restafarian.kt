@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.bluebank.braid.core.restafarian
+package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.core.http.bind
 import io.vertx.core.Future
