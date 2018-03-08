@@ -17,6 +17,7 @@
 package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.core.http.end
+import io.bluebank.braid.core.http.parseQueryParams
 import io.bluebank.braid.core.http.withErrorHandler
 import io.swagger.annotations.ApiParam
 import io.vertx.core.Future
@@ -29,7 +30,6 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.javaType
-
 
 fun <R> Route.bind(fn: KCallable<R>) {
   this.handler {
@@ -67,8 +67,6 @@ private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
   }
 }
 
-
-
 private fun KParameter.parseSimpleType(paramString: String): Any {
   val k = this.getType()
   return when (k) {
@@ -84,7 +82,6 @@ private fun KParameter.parseSimpleType(paramString: String): Any {
   }
 }
 
-
 private fun KParameter.getType(): KClass<*> {
   return when (this.type.classifier) {
     is KClass<*> -> {
@@ -94,12 +91,6 @@ private fun KParameter.getType(): KClass<*> {
   }
 }
 
-
-
-
-
-
-
 private fun KParameter.parseParameter(context: RoutingContext): Any? {
   return this.parsePathParameter(context) ?: this.parseQueryParameter(context) ?: this.parseBodyParameter(context)
 }
@@ -108,7 +99,7 @@ private fun KParameter.parseQueryParameter(context: RoutingContext): Any? {
   return when {
     this.isSimpleType() -> {
       val parameterName = this.parameterName() ?: return null
-      val queryParam = context.queryParam(parameterName).firstOrNull()
+      val queryParam = context.request().query().parseQueryParams().get(parameterName)
       // TODO: handle arrays
       if (queryParam != null) {
         this.parseSimpleType(queryParam)

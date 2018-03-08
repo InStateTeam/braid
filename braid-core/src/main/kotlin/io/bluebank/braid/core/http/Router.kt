@@ -16,8 +16,6 @@
 
 package io.bluebank.braid.core.http
 
-import io.netty.handler.codec.http.HttpHeaderValues
-import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Future
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerResponse
@@ -63,7 +61,7 @@ fun HttpServerResponse.end(error: Throwable) {
   val e = if (error is InvocationTargetException) error.targetException else error
   val message = if (e.message != null) e.message else "Undefined error"
   this.setStatusMessage(message)
-      .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+      .setStatusCode(500)
       .end()
 }
 
@@ -86,7 +84,7 @@ fun <T> HttpServerResponse.end(value: T) {
       val payload = Json.encode(value)
       this
           .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-          .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+          .putHeader(HttpHeaders.CONTENT_TYPE,  "application/json")
           .end(payload)
     }
   }
@@ -94,7 +92,7 @@ fun <T> HttpServerResponse.end(value: T) {
 
 fun HttpServerResponse.endWithString(value: String) {
   this.putHeader(HttpHeaders.CONTENT_LENGTH, value.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN)
+      .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
       .end(value)
 }
 
@@ -102,7 +100,7 @@ fun HttpServerResponse.end(value: JsonArray) {
   val payload = value.encode()
   this
       .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+      .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
       .end(payload)
 }
 
@@ -110,7 +108,7 @@ fun HttpServerResponse.end(value: JsonObject) {
   val payload = value.encode()
   this
       .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+      .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
       .end(payload)
 }
 
