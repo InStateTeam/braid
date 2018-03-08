@@ -219,6 +219,10 @@
                   <pattern>io.vertx</pattern>
                   <shadedPattern>io.bluebank.braid.shaded.io.vertx</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>org.apache</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.org.apache</shadedPattern>
+                </relocation>
               </relocations>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
