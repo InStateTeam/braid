@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.bluebank.braid.core.restafarian
+package io.bluebank.braid.corda.restafarian
 
 
-import io.bluebank.braid.core.restafarian.Paths.PATH_PARAMS_RE
+import io.bluebank.braid.corda.restafarian.Paths.PATH_PARAMS_RE
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus

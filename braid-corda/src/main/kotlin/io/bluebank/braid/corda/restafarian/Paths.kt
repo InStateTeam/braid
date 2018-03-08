@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.bluebank.braid.core.restafarian
+package io.bluebank.braid.corda.restafarian
 
 internal object Paths {
   val PATH_PARAMS_RE : Regex = """(:([^\/]+))""".toRegex()

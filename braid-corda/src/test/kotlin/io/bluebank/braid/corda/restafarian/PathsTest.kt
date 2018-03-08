@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.bluebank.braid.core.restafarian
+package io.bluebank.braid.corda.restafarian
 
 import org.junit.Test
 

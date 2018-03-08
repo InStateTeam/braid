@@ -12,3 +12,4 @@ build/**
 # NPM packages folder.
 node_modules/
 target
+**/dependency-reduced-pom.xml
