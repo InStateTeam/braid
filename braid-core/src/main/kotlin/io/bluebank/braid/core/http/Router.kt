@@ -18,23 +18,15 @@ package io.bluebank.braid.core.http
 
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.netty.handler.codec.http.HttpResponseStatus
-import io.swagger.annotations.ApiParam
 import io.vertx.core.Future
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.InvocationTargetException
-import kotlin.reflect.KCallable
-import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.jvm.javaType
 
 fun Router.setupAllowAnyCORS() {
   route().handler {
@@ -55,27 +47,6 @@ fun Router.setupOptionsMethod() {
       .putHeader(HttpHeaders.CONTENT_TYPE, "text/*")
       .putHeader(HttpHeaders.CONTENT_TYPE, "application/*")
       .end()
-  }
-}
-
-
-fun <R> Route.bind(fn: KCallable<R>) {
-  this.handler {
-    it.withErrorHandler {
-      val args = fn.parseArguments(it)
-      val result = fn.call(*args)
-      it.response().end(result)
-    }
-  }
-}
-
-@JvmName("bindOnFuture")
-fun <R> Route.bind(fn: KCallable<Future<R>>) {
-  this.handler {
-    it.withErrorHandler {
-      val args = fn.parseArguments(it)
-      it.response().end(fn.call(*args))
-    }
   }
 }
 
@@ -142,95 +113,4 @@ fun HttpServerResponse.end(value: JsonObject) {
       .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
       .end(payload)
 }
-
-private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?> {
-  return this.parameters.map { it.parseParameter(context) }.toTypedArray()
-}
-
-private fun KParameter.parseParameter(context: RoutingContext): Any? {
-  return this.parsePathParameter(context) ?: this.parseQueryParameter(context) ?: this.parseBodyParameter(context)
-}
-
-private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
-  return context.body.let {
-    if (it != null && it.length() > 0) {
-      val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)
-      Json.mapper.readValue<Any>(it.toString(), constructType)
-    } else {
-
-    }
-  }
-}
-
-private fun KParameter.parseQueryParameter(context: RoutingContext): Any? {
-  return when {
-    this.isSimpleType() -> {
-      val parameterName = this.parameterName() ?: return null
-      val queryParam = context.queryParam(parameterName).firstOrNull()
-      // TODO: handle arrays
-      if (queryParam != null) {
-        this.parseSimpleType(queryParam)
-      } else {
-        null
-      }
-    }
-    else -> {
-      null
-    }
-  }
-}
-
-private fun KParameter.parsePathParameter(context: RoutingContext): Any? {
-  return when {
-    this.isSimpleType() -> {
-      val parameterName = this.parameterName() ?: return null
-      val paramString = context.pathParam(parameterName)
-      if (paramString == null) {
-        null
-      } else {
-        this.parseSimpleType(paramString)
-      }
-    }
-    else -> {
-      null
-    }
-  }
-}
-
-private fun KParameter.parseSimpleType(paramString: String): Any {
-  val k = this.getType()
-  return when (k) {
-    Int::class -> paramString.toInt()
-    Double::class -> paramString.toDouble()
-    Float::class -> paramString.toFloat()
-    Boolean::class -> paramString.toBoolean()
-    Short::class -> paramString.toShort()
-    Long::class -> paramString.toLong()
-    Byte::class -> paramString.toByte()
-    String::class -> paramString
-    else -> throw RuntimeException("don't know how to simple-parse $k")
-  }
-}
-
-private fun KParameter.isSimpleType(): Boolean {
-  val k = this.getType()
-  return (Number::class.isSuperclassOf(k) || k == String::class || k == Boolean::class)
-}
-
-private fun KParameter.getType(): KClass<*> {
-  return when (this.type.classifier) {
-    is KClass<*> -> {
-      this.type.classifier as KClass<*>
-    }
-    else -> throw RuntimeException("parameter doesn't have a class type")
-  }
-}
-
-private fun KParameter.parameterName(): String? {
-  return this.findAnnotation<ApiParam>()?.name ?: this.name
-}
-
-
-
-
 
