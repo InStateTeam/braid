@@ -1,14 +1,12 @@
 package io.bluebank.braid.corda.example
 
-import io.vertx.core.AsyncResult
-import io.vertx.core.Future
-import io.vertx.core.Handler
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AbstractUser
-import io.vertx.ext.auth.AuthProvider
-import io.vertx.ext.auth.User
-import io.vertx.kotlin.core.json.json
-import io.vertx.kotlin.core.json.obj
+import io.bluebank.braid.shaded.io.vertx.core.AsyncResult
+import io.bluebank.braid.shaded.io.vertx.core.Future
+import io.bluebank.braid.shaded.io.vertx.core.Handler
+import io.bluebank.braid.shaded.io.vertx.core.json.JsonObject
+import io.bluebank.braid.shaded.io.vertx.ext.auth.AbstractUser
+import io.bluebank.braid.shaded.io.vertx.ext.auth.AuthProvider
+import io.bluebank.braid.shaded.io.vertx.ext.auth.User
 
 class MySimpleAuthProvider : AuthProvider {
   override fun authenticate(authInfo: JsonObject, callback: Handler<AsyncResult<User>>) {
@@ -27,9 +25,9 @@ class MySimpleUser(private val userName: String): AbstractUser() {
   }
 
   override fun principal(): JsonObject {
-    return json {
-      obj ("username" to userName)
-    }
+    val result = JsonObject()
+    result.put("username", userName)
+    return result
   }
 
   override fun setAuthProvider(provider: AuthProvider) {}
