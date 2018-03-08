@@ -107,6 +107,10 @@
                   <pattern>rx</pattern>
                   <shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>io.vertx</pattern>
+                  <shadedPattern>io.bluebank.braid.shaded.io.vertx</shadedPattern>
+                </relocation>
               </relocations>
             </configuration>
           </execution>
