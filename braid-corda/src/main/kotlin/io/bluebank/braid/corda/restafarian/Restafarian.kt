@@ -16,7 +16,7 @@
 
 package io.bluebank.braid.corda.restafarian
 
-import io.bluebank.braid.core.http.bind
+
 import io.vertx.core.Future
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.Router
