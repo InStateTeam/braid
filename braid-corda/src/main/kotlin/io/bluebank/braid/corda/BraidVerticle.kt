@@ -16,6 +16,7 @@
 
 package io.bluebank.braid.corda
 
+import io.bluebank.braid.corda.router.Routers
 import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
 import io.bluebank.braid.core.http.withCompatibleWebsockets
@@ -49,7 +50,7 @@ class BraidVerticle(private val services: ServiceHubInternal, private val config
 
 
   private fun setupRouter(): Router {
-    val router = Router.router(vertx)
+    val router = Routers.create(vertx, config.port)
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
     router.setupOptionsMethod()
