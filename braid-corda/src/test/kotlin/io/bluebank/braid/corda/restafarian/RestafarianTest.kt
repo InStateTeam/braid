@@ -16,10 +16,8 @@
 
 package io.bluebank.braid.corda.restafarian
 
-import io.bluebank.braid.corda.router.Routers
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
@@ -44,17 +42,10 @@ class RestafarianTest {
 
   @Test
   fun `test that we can mount restafarian and access via swagger`(context: TestContext) {
-    val router = Routers.create(vertx, port)
-    Restafarian.mount(serviceName = "my-service", basePath = "http://localhost:$port", router = router) {
-      this.get("/hello", service::sayHello)
-    }
-    vertx.createHttpServer()
-        .requestHandler(router::accept)
-        .listen(port)
+    MyServiceSetup(vertx, port, MyService())
     val client = vertx.createHttpClient()
     val async1 = context.async()
-    client.get(port, "localhost", "/api")
-        .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+    client.get(port, "localhost", "/api/swagger.json")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
@@ -89,7 +80,3 @@ class RestafarianTest {
   }
 }
 
-
-class MyService {
-  fun sayHello() = "hello"
-}

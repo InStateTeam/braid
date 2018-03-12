@@ -1685,7 +1685,7 @@
 }
 
 .swagger-ui .topbar .wrapper a:after {
-    content: 'DGL';
+    content: '';
     margin-left: 4px;
     display: block
 }
