@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.bluebank.braid</groupId>
   <artifactId>braid</artifactId>
-  <version>1.0.8-SNAPSHOT</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>braid parent</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
