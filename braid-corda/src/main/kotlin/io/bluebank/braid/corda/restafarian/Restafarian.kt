@@ -24,13 +24,26 @@ import io.vertx.ext.web.handler.StaticHandler
 import kotlin.reflect.KCallable
 
 
-class Restafarian(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", private val path: String = "/api", val router: Router) {
+class Restafarian(
+    serviceName: String = "",
+    description: String = "",
+    basePath: String = "http://localhost:8080",
+    private val path: String = "/api",
+    val router: Router
+) {
   private var groupName : String = ""
   private val docsHandler = DocsHandler(serviceName = serviceName, description = description, basePath = basePath, publicPath = path)
 
   companion object {
-    fun mount(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", publicPath: String = "/api", router: Router, fn: Restafarian.(Router) -> Unit) {
-      Restafarian(serviceName, description, basePath, publicPath, router).mount(fn)
+    fun mount(
+        serviceName: String = "",
+        description: String = "",
+        basePath: String = "http://localhost:8080",
+        path: String = "/api",
+        router: Router,
+        fn: Restafarian.(Router) -> Unit
+    ) {
+      Restafarian(serviceName, description, basePath, path, router).mount(fn)
     }
   }
 
