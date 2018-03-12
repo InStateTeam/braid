@@ -65,7 +65,7 @@ class RestafarianTest {
         .end()
 
     val async2 = context.async()
-    client.get(port, "localhost", "/")
+    client.get(port, "localhost", "/api")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {

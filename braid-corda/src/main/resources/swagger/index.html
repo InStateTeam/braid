@@ -80,7 +80,7 @@
 <script>
   window.onload = function () {
     const location = window.location;
-    const apiLocation = location.protocol +  "//" + location.host + "/api";
+    const apiLocation = location.protocol +  "//" + location.host + location.pathname;
     console.log("serving api from location:", apiLocation);
     // Build a system
     const ui = SwaggerUIBundle({

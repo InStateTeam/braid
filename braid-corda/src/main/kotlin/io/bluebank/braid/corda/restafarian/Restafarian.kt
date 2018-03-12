@@ -24,20 +24,20 @@ import io.vertx.ext.web.handler.StaticHandler
 import kotlin.reflect.KCallable
 
 
-class Restafarian(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", private val publicPath: String = "/api", private val swaggerUIMount: String = "/", val router: Router) {
+class Restafarian(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", private val path: String = "/api", val router: Router) {
   private var groupName : String = ""
-  private val docsHandler = DocsHandler(serviceName = serviceName, description = description, basePath = basePath, publicPath = publicPath)
+  private val docsHandler = DocsHandler(serviceName = serviceName, description = description, basePath = basePath, publicPath = path)
 
   companion object {
-    fun mount(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", publicPath: String = "/api", swaggerUIMount: String = "/", router: Router, fn: Restafarian.(Router) -> Unit) {
-      Restafarian(serviceName, description, basePath, publicPath, swaggerUIMount, router).mount(fn)
+    fun mount(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", publicPath: String = "/api", router: Router, fn: Restafarian.(Router) -> Unit) {
+      Restafarian(serviceName, description, basePath, publicPath, router).mount(fn)
     }
   }
 
   fun mount(fn: Restafarian.(Router) -> Unit) {
     this.fn(router)
-    router.get(publicPath).consumes("application/json").handler(docsHandler)
-    router.get("$swaggerUIMount*").handler(StaticHandler.create("swagger").setCachingEnabled(false))
+    router.get(path).consumes("application/json").handler(docsHandler)
+    router.get(path).handler(StaticHandler.create("swagger").setCachingEnabled(false))
   }
 
   fun group(groupName: String, fn: () -> Unit) {
@@ -73,13 +73,13 @@ class Restafarian(serviceName: String = "", description: String = "", basePath: 
   }
 
   private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Future<Response>>) {
-    router.route(method, "$publicPath$path").bind(fn)
-    docsHandler.add(groupName, method, "$publicPath$path", fn)
+    router.route(method, "${this.path}$path").bind(fn)
+    docsHandler.add(groupName, method, "${this.path}$path", fn)
   }
 
   @JvmName("bindMethod0")
   private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
-    router.route(method, "$publicPath$path").bind(fn)
+    router.route(method, "${this.path}$path").bind(fn)
     docsHandler.add(groupName, method, path, fn)
   }
 }
