@@ -36,7 +36,7 @@ class Restafarian(serviceName: String = "", description: String = "", basePath: 
 
   fun mount(fn: Restafarian.(Router) -> Unit) {
     this.fn(router)
-    router.get(publicPath).handler(docsHandler)
+    router.get(publicPath).consumes("application/json").handler(docsHandler)
     router.get("$swaggerUIMount*").handler(StaticHandler.create("swagger").setCachingEnabled(false))
   }
 
@@ -79,7 +79,7 @@ class Restafarian(serviceName: String = "", description: String = "", basePath: 
 
   @JvmName("bindMethod0")
   private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
-    router.route(method, path).bind(fn)
+    router.route(method, "$publicPath$path").bind(fn)
     docsHandler.add(groupName, method, path, fn)
   }
 }
