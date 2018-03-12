@@ -1,5 +1,5 @@
 {
-  "name": "example-nodejs",
+  "name": "swagger",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "1.0.9-SNAPSHOT"
+    "swagger-ui-dist": "^3.9.3"
   }
 }
