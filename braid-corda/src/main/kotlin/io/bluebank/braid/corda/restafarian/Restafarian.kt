@@ -82,5 +82,4 @@ class Restafarian(serviceName: String = "", description: String = "", basePath: 
     router.route(method, path).bind(fn)
     docsHandler.add(groupName, method, path, fn)
   }
-
 }

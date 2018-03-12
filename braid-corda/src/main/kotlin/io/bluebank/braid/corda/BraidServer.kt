@@ -39,9 +39,11 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
   }
 
   private val services : ServiceHubInternal = serviceHub as ServiceHubInternal
-  private lateinit var vertx: Vertx
-  private var deployId : String? = null
 
+  lateinit var vertx: Vertx
+  private set
+
+  private var deployId : String? = null
   private fun start() : BraidServer {
     vertx = Vertx.vertx()
     vertx.deployVerticle(BraidVerticle(services, config)) {
