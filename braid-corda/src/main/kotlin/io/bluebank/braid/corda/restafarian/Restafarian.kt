@@ -24,20 +24,51 @@ import io.vertx.ext.web.handler.StaticHandler
 import kotlin.reflect.KCallable
 
 
-class Restafarian(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", private val path: String = "/api", val router: Router) {
+class Restafarian(
+    serviceName: String = "",
+    description: String = "",
+    hostAndPortUri: String = "http://localhost:8080",
+    apiPath: String = "/api",
+    private val router: Router
+) {
+  init {
+    if (!apiPath.startsWith("/")) throw RuntimeException("path must begin with a /")
+  }
+
   private var groupName : String = ""
-  private val docsHandler = DocsHandler(serviceName = serviceName, description = description, basePath = basePath, publicPath = path)
+
+  private val path: String = if (apiPath.endsWith("/")) {
+    apiPath.dropLast(1)
+  } else {
+    apiPath
+  }
+
+  private val docsHandler = DocsHandler(
+      serviceName = serviceName,
+      description = description,
+      basePath = hostAndPortUri + path
+  )
 
   companion object {
-    fun mount(serviceName: String = "", description: String = "", basePath: String = "http://localhost:8080", publicPath: String = "/api", router: Router, fn: Restafarian.(Router) -> Unit) {
-      Restafarian(serviceName, description, basePath, publicPath, router).mount(fn)
+    fun mount(
+        serviceName: String = "",
+        description: String = "",
+        hostAndPortUri: String = "http://localhost:8080",
+        apiPath: String = "/api",
+        router: Router,
+        fn: Restafarian.(Router) -> Unit
+    ) {
+      Restafarian(serviceName, description, hostAndPortUri, apiPath, router).mount(fn)
     }
   }
 
   fun mount(fn: Restafarian.(Router) -> Unit) {
     this.fn(router)
-    router.get(path).consumes("application/json").handler(docsHandler)
-    router.get(path).handler(StaticHandler.create("swagger").setCachingEnabled(false))
+    router.get(path + "/swagger.json")
+        .handler(docsHandler)
+    val sh = StaticHandler.create("swagger").setCachingEnabled(false)
+    router.get("/swagger/*").last().handler(sh)
+    router.get(path + "/*").last().handler(sh)
   }
 
   fun group(groupName: String, fn: () -> Unit) {

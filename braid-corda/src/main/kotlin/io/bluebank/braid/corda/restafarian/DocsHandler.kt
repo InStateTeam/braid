@@ -90,7 +90,11 @@ data class EndPoint(val groupName: String,
     }
 }
 
-class DocsHandler(private val serviceName: String = "", private val description: String = "", private val basePath: String = "http://localhost:8080", private val publicPath: String = "/api") : Handler<RoutingContext> {
+class DocsHandler(
+    private val serviceName: String = "",
+    private val description: String = "",
+    private val basePath: String = "http://localhost:8080"
+) : Handler<RoutingContext> {
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
   private val models = mutableMapOf<String, Model>()
@@ -115,7 +119,7 @@ class DocsHandler(private val serviceName: String = "", private val description:
     return Swagger()
         .info(info)
         .host(url.host + ":" + url.port)
-        .basePath("/")
+        .basePath(url.path)
         .securityDefinition("Authorization", ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER))
         .scheme(Scheme.HTTP)
         .consumes(APPLICATION_JSON.toString())
