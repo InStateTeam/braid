@@ -36,7 +36,7 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
     mount(
         serviceName = "my-service",
         hostAndPortUri = "http://localhost:$port",
-        apiPath = "/api",
+        apiPath = "/rest",
         router = router
     ) {
       this.group("General Ledger") {
