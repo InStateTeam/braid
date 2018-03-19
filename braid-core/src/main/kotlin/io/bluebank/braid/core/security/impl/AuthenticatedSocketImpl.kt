@@ -77,10 +77,10 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
 
   @Suppress("UNCHECKED_CAST")
   private fun handleAuthRequest(op: JsonRPCRequest) {
-    if (op.params == null || op.params !is Map<*, *>) {
+    if (op.params == null || op.params !is List<*> || op.params.size != 1 || op.params.first() !is Map<*, *>) {
       sendParameterError(op)
     } else {
-      val m = op.params as Map<String, Any>
+      val m = op.params.first() as Map<String, Any>
       authProvider.authenticate(JsonObject(m)) {
         if (it.succeeded()) {
           user = it.result()

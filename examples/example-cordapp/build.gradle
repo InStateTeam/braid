@@ -20,7 +20,7 @@ buildscript {
     ext.kotlin_version = '1.1.4'
     ext.junit_version = '4.12'
     ext.quasar_version = '0.7.6'
-    ext.braid_version = '1.0.10-SNAPSHOT'
+    ext.braid_version = '1.0.13-SNAPSHOT'
 
     repositories {
         mavenLocal()
