@@ -68,8 +68,6 @@ class BraidServiceProxy {
       if (args) {
         if (args.length === 0) {
           args = null;
-        } else if (args.length === 1) {
-          args = args[0];
         }
       }
       return args;
