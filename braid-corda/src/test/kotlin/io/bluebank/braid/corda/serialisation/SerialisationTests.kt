@@ -22,14 +22,24 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
-import net.corda.testing.DUMMY_BANK_A
-import net.corda.testing.withTestSerialization
+import net.corda.testing.core.DUMMY_BANK_A_NAME
+import net.corda.testing.core.SerializationEnvironmentRule
+import net.corda.testing.core.TestIdentity
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class SerialisationTests {
+  companion object {
+    val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
+  }
+
+  @Rule
+  @JvmField
+  val testSerialization = SerializationEnvironmentRule()
+
   @Before
   fun before() {
     BraidCordaJacksonInit.init()
@@ -54,11 +64,9 @@ class SerialisationTests {
 
   @Test
   fun `that Amount of Issued Currency can be serialised and deserialised`() {
-    withTestSerialization {
-      val expected = Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
-      val encoded = Json.encode(expected)
-      val actual = Json.decodeValue(encoded, Amount::class.java)
-      assertEquals(expected, actual)
-    }
+    val expected = Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
+    val encoded = Json.encode(expected)
+    val actual = Json.decodeValue(encoded, Amount::class.java)
+    assertEquals(expected, actual)
   }
 }

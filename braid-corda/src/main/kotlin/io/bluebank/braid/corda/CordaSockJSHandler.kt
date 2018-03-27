@@ -39,10 +39,11 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
-import net.corda.node.services.api.ServiceHubInternal
+import net.corda.core.node.AppServiceHub
+import net.corda.node.services.api.StartedNodeServices
 
 
-class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubInternal, config: BraidConfig)
+class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceHub, config: BraidConfig)
   : Handler<SockJSSocket> {
 
   companion object {
@@ -52,7 +53,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubI
         "flows" to this::createFlowService
     )
 
-    fun setupSockJSHandler(router: Router, vertx: Vertx, services: ServiceHubInternal, config: BraidConfig) {
+    fun setupSockJSHandler(router: Router, vertx: Vertx, services: AppServiceHub, config: BraidConfig) {
       val sockJSHandler = SockJSHandler.create(vertx)
       val handler = CordaSockJSHandler(vertx, services, config)
       sockJSHandler.socketHandler(handler)
@@ -96,10 +97,10 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubI
       router.route(endpoint).handler(sockJSHandler)
     }
 
-    private fun createNetworkMapService(services: ServiceHubInternal, config: BraidConfig) : ServiceExecutor =
+    private fun createNetworkMapService(services: AppServiceHub, config: BraidConfig) : ServiceExecutor =
         ConcreteServiceExecutor(SimpleNetworkMapService(services, config))
 
-    private fun createFlowService(services: ServiceHubInternal, config: BraidConfig): ServiceExecutor =
+    private fun createFlowService(services: AppServiceHub, config: BraidConfig): ServiceExecutor =
         CordaFlowServiceExecutor(services, config)
   }
 
@@ -150,7 +151,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: ServiceHubI
   }
 }
 
-fun Router.setupSockJSHandler(vertx: Vertx, services: ServiceHubInternal, config: BraidConfig): Router {
+fun Router.setupSockJSHandler(vertx: Vertx, services: AppServiceHub, config: BraidConfig): Router {
   CordaSockJSHandler.setupSockJSHandler(this, vertx, services, config)
   return this
 }

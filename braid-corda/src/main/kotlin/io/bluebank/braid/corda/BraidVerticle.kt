@@ -25,10 +25,11 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import net.corda.core.node.AppServiceHub
 import net.corda.node.internal.Node
-import net.corda.node.services.api.ServiceHubInternal
+import net.corda.node.services.api.StartedNodeServices
 
-class BraidVerticle(private val services: ServiceHubInternal, private val config: BraidConfig) : AbstractVerticle() {
+class BraidVerticle(private val services: AppServiceHub, private val config: BraidConfig) : AbstractVerticle() {
   companion object {
     private val log = loggerFor<BraidVerticle>()
   }
