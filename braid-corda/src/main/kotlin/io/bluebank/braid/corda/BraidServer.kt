@@ -18,27 +18,31 @@ package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.vertx.core.Vertx
-import net.corda.core.node.ServiceHub
+import net.corda.core.node.AppServiceHub
 import net.corda.core.utilities.loggerFor
-import net.corda.node.services.api.ServiceHubInternal
 import net.corda.nodeapi.internal.addShutdownHook
+import java.util.concurrent.ConcurrentHashMap
 
-class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
+class BraidServer(private val services: AppServiceHub, private val config: BraidConfig) {
   companion object {
     private val log = loggerFor<BraidServer>()
+    private val servers = ConcurrentHashMap<Int, BraidServer>()
+
     init {
       BraidCordaJacksonInit.init()
     }
-    fun bootstrapBraid(serviceHub: ServiceHub, config: BraidConfig = BraidConfig()) : BraidServer {
-      val result = BraidServer(serviceHub, config).start()
-      net.corda.nodeapi.internal.addShutdownHook {
+
+    fun bootstrapBraid(serviceHub: AppServiceHub, config: BraidConfig = BraidConfig()) : BraidServer {
+      val result = servers.computeIfAbsent(config.port) {
+        log.info("starting up braid server for ${serviceHub.myInfo.legalIdentities.first().name.organisation} on port ${config.port}")
+        BraidServer(serviceHub, config).start()
+      }
+      serviceHub.registerUnloadHandler {
         result.shutdown()
       }
       return result
     }
   }
-
-  private val services : ServiceHubInternal = serviceHub as ServiceHubInternal
 
   lateinit var vertx: Vertx
   private set
@@ -61,9 +65,10 @@ class BraidServer(serviceHub: ServiceHub, private val config: BraidConfig) {
   fun shutdown() {
     if (deployId != null) {
       log.info("shutting down braid server on port: ${config.port}")
-      vertx.undeploy(deployId) // async
-      deployId = null
-      vertx.close() // async
+      vertx.undeploy(deployId) {
+        deployId = null
+        vertx.close()
+      }
     }
   }
 }

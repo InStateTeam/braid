@@ -79,7 +79,7 @@
   </developers>
 
   <properties>
-    <corda.version>2.0.0</corda.version>
+    <corda.version>corda-3.0</corda.version>
   </properties>
 
   <dependencies>
@@ -119,14 +119,14 @@
           <groupId>net.corda.plugins</groupId>
           <artifactId>cordform-common</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>com.github.corda.crash</groupId>
-          <artifactId>crash.shell</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.github.bft-smart</groupId>
-          <artifactId>library</artifactId>
-        </exclusion>
+        <!--<exclusion>-->
+          <!--<groupId>com.github.corda.crash</groupId>-->
+          <!--<artifactId>crash.shell</artifactId>-->
+        <!--</exclusion>-->
+        <!--<exclusion>-->
+          <!--<groupId>com.github.bft-smart</groupId>-->
+          <!--<artifactId>library</artifactId>-->
+        <!--</exclusion>-->
       </exclusions>
       <scope>provided</scope>
     </dependency>

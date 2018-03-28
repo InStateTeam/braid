@@ -25,6 +25,7 @@ import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import net.corda.core.flows.FlowLogic
+import net.corda.core.node.AppServiceHub
 import net.corda.core.node.ServiceHub
 import kotlin.reflect.KClass
 
@@ -79,5 +80,5 @@ data class BraidConfig(val port: Int = 8080,
   }
 
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
-  fun bootstrapBraid(serviceHub: ServiceHub) = BraidServer.bootstrapBraid(serviceHub, this)
+  fun bootstrapBraid(serviceHub: AppServiceHub) = BraidServer.bootstrapBraid(serviceHub, this)
 }

@@ -23,14 +23,18 @@ import io.bluebank.braid.core.jsonschema.toSimpleJavascriptType
 import io.bluebank.braid.core.service.MethodDescriptor
 import io.bluebank.braid.core.service.MethodDoesNotExist
 import io.bluebank.braid.core.service.ServiceExecutor
+import net.corda.core.concurrent.CordaFuture
+import net.corda.core.context.InvocationContext
 import net.corda.core.flows.FlowLogic
+import net.corda.core.internal.FlowStateMachine
+import net.corda.core.node.AppServiceHub
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
-import net.corda.node.services.api.ServiceHubInternal
+import net.corda.node.services.api.StartedNodeServices
 import rx.Observable
 import java.lang.reflect.Constructor
 
-class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val config: BraidConfig) : ServiceExecutor {
+class CordaFlowServiceExecutor(private val services: AppServiceHub, val config: BraidConfig) : ServiceExecutor {
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     val flow = config.registeredFlows[request.method]
     return if (flow != null) {
@@ -65,8 +69,10 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
           val params = request.mapParams(constructor)
           @Suppress("UNCHECKED_CAST")
           val flow = constructor.newInstance(*params) as FlowLogic<Any>
-          val sm = services.startFlow(flow)
-          sm.resultFuture.toObservable().subscribe({item ->
+
+
+          services.startFlow(flow).returnValue
+              .toObservable().subscribe({item ->
             subscriber.onNext(item)
           }, {err ->
             subscriber.onError(err)
@@ -82,3 +88,7 @@ class CordaFlowServiceExecutor(private val services: ServiceHubInternal, val con
 }
 
 private fun Constructor<*>.matches(request: JsonRPCRequest)  = this.parameterCount == request.paramCount()
+private fun <T> StartedNodeServices.startFlow(flow: FlowLogic<T>): CordaFuture<FlowStateMachine<T>> {
+  val context = InvocationContext.service(this.javaClass.name, myInfo.legalIdentities[0].name)
+  return  this.startFlow(flow, context)
+}

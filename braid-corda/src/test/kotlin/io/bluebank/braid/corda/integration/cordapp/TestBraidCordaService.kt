@@ -31,12 +31,13 @@ import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
+import net.corda.core.node.AppServiceHub
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
 
 @CordaService
-class TestBraidCordaService(private val serviceHub: ServiceHub) : SingletonSerializeAsToken() {
+class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
   companion object {
     private val log = loggerFor<TestBraidCordaService>()
   }
@@ -44,6 +45,7 @@ class TestBraidCordaService(private val serviceHub: ServiceHub) : SingletonSeria
   private val org = serviceHub.myInfo.legalIdentities.first().name.organisation
 
   init {
+    log.info("Starting TestBraidCordaService for ${serviceHub.myInfo.legalIdentities.first().name.organisation}")
     val port = getBraidPort()
     if (port > 0) {
       log.info("Starting Braid service for $org on port $port")

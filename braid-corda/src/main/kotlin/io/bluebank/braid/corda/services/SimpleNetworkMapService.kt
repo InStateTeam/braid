@@ -19,14 +19,15 @@ package io.bluebank.braid.corda.services
 import io.bluebank.braid.corda.BraidConfig
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
+import net.corda.core.node.AppServiceHub
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
 import net.corda.core.utilities.NetworkHostAndPort
-import net.corda.node.services.api.ServiceHubInternal
+import net.corda.node.services.api.StartedNodeServices
 import rx.Observable
 import rx.Subscription
 
-class SimpleNetworkMapService(private val services: ServiceHubInternal, private val config: BraidConfig) {
+class SimpleNetworkMapService(private val services: AppServiceHub, private val config: BraidConfig) {
 
   data class SimpleNodeInfo(
       val addresses: List<NetworkHostAndPort>,
@@ -72,7 +73,7 @@ class SimpleNetworkMapService(private val services: ServiceHubInternal, private 
 
     return Observable.create { subscriber ->
       val dataFeed = services.networkMapCache.track()
-      services.database.transaction {
+      services.transaction {
         val snapshot = dataFeed.snapshot.map { SimpleNodeInfo(it) }
         subscriber.onNext(snapshot)
         var subscription: Subscription? = null
@@ -90,25 +91,25 @@ class SimpleNetworkMapService(private val services: ServiceHubInternal, private 
   }
 
   fun notaryIdentities(): List<Party> {
-    return services.database.transaction {
+    return services.transaction {
       services.networkMapCache.notaryIdentities
     }
   }
 
   fun getNotary(cordaX500Name: CordaX500Name): Party? {
-    return services.database.transaction {
+    return services.transaction {
       services.networkMapCache.getNotary(cordaX500Name)
     }
   }
 
   fun getNodeByAddress(hostAndPort: String): SimpleNodeInfo? {
-    return services.database.transaction {
+    return services.transaction {
       services.networkMapCache.getNodeByAddress(NetworkHostAndPort.parse(hostAndPort))?.asSimple()
     }
   }
 
   fun getNodeByLegalName(name: CordaX500Name): SimpleNodeInfo? {
-    return services.database.transaction {
+    return services.transaction {
       services.networkMapCache.getNodeByLegalName(name)?.asSimple()
     }
   }
@@ -120,4 +121,8 @@ private fun NetworkMapCache.MapChange.asSimple(): SimpleNetworkMapService.MapCha
 
 private fun NodeInfo.asSimple(): SimpleNetworkMapService.SimpleNodeInfo {
   return SimpleNetworkMapService.SimpleNodeInfo(this)
+}
+
+fun <T> AppServiceHub.transaction(fn: () -> T) : T {
+  return fn()
 }

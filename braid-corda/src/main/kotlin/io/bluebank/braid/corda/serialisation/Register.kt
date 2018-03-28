@@ -59,12 +59,9 @@ class BraidCordaJacksonInit {
           .addDeserializer(SecureHash.SHA256::class.java, JacksonSupport.SecureHashDeserializer())
 
           // For ed25519 pubkeys
-          .addSerializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeySerializer)
-          .addDeserializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeyDeserializer)
-
-          // For composite keys
-          .addSerializer(CompositeKey::class.java, JacksonSupport.CompositeKeySerializer)
-          .addDeserializer(CompositeKey::class.java, JacksonSupport.CompositeKeyDeserializer)
+          // TODO: Fix these
+//          .addSerializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeySerializer)
+//          .addDeserializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeyDeserializer)
 
           // For NodeInfo
           // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.

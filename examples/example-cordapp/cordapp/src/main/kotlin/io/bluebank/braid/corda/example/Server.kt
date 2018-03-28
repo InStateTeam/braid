@@ -1,6 +1,7 @@
 package io.bluebank.braid.corda.example
 
 import io.bluebank.braid.corda.BraidConfig
+import net.corda.core.node.AppServiceHub
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -8,7 +9,7 @@ import net.corda.finance.flows.CashIssueFlow
 import net.corda.node.services.api.ServiceHubInternal
 
 @CordaService
-class Server(private val serviceHub: ServiceHub) : SingletonSerializeAsToken() {
+class Server(private val serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
 
   init {
     BraidConfig.fromResource(configFileName)?.bootstrap()
