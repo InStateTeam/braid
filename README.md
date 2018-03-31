@@ -76,7 +76,8 @@ Both of these rely on [braid-core](braid-core).
 
 Services can be consumed in the following languages and runtimes (more to follow!)
 
-* [javascript](braid-client-js) in a browser or NodeJS.
+* [javascript](braid-client-js) in a browser or NodeJS
+* [any JVM language](braid-client)
 
 ## Examples
 
