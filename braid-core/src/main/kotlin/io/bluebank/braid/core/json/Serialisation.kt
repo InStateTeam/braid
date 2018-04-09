@@ -16,6 +16,7 @@
 
 package io.bluebank.braid.core.json
 
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
@@ -25,12 +26,18 @@ class BraidJacksonInit {
   companion object {
     init {
       with(KotlinModule()) {
-        this.addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
-        this.addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
+//        this.addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
+//        this.addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
         Json.mapper.registerModule(this)
         Json.prettyMapper.registerModule(this)
       }
 
+      val sm = SimpleModule()
+        .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
+        .addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
+
+      Json.mapper.registerModule(sm)
+      Json.prettyMapper.registerModule(sm)
 
     }
     fun init() {
