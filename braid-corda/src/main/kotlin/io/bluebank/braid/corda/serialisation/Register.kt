@@ -23,7 +23,6 @@ import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
-import net.corda.core.crypto.CompositeKey
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
@@ -32,7 +31,6 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
-import net.i2p.crypto.eddsa.EdDSAPublicKey
 import java.math.BigDecimal
 import java.security.PublicKey
 

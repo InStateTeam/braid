@@ -16,6 +16,8 @@
 
 package io.bluebank.braid.core.jsonrpc
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
 import org.junit.Assert.assertEquals
@@ -34,4 +36,28 @@ class JsonRPCRequestTest {
     val result = Json.decodeValue(str, JsonRPCRequest::class.java)
     assertEquals(-9007199254740991, result.id)
   }
+
+  @Test
+  fun shouldBeAbleToPreserveTypeInformationInMultipleParameterMethodsWithoutMethod() {
+    val expected = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"fish\",\"params\":[\"wibble\",{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"}],\"streamed\":false}"
+    val params = listOf<Any?>("wibble", MeteringModelData("wobble"))
+    val jsonRequest = JsonRPCRequest(id = 1, method = "fish", params = params, streamed = false)
+    val actual = Json.encode(jsonRequest)
+    println(expected)
+    println(actual)
+    assertEquals(expected, actual)
+  }
+
+  @JsonTypeInfo(
+      use = JsonTypeInfo.Id.NAME,
+      include = JsonTypeInfo.As.PROPERTY,
+      property = "type"
+  )
+  @JsonSubTypes(
+      JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
+  )
+  interface ModelData
+
+  data class MeteringModelData(val someString: String) : ModelData
+
 }

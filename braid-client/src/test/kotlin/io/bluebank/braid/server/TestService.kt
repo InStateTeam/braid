@@ -1,5 +1,7 @@
 package io.bluebank.braid.server.service
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Future
 import io.vertx.core.Future.future
@@ -16,6 +18,7 @@ interface MyService {
   fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject
   fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
+  fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
@@ -65,4 +68,21 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   override fun stuffedJsonObject(): JsonStuffedObject {
     return JsonStuffedObject("this is hosed")
   }
+
+  override fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData {
+    return md
+  }
+
 }
+
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
+)
+interface ModelData
+
+data class MeteringModelData(val someString: String) : ModelData

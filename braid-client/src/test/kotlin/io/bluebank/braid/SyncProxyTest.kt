@@ -5,6 +5,7 @@ import io.bluebank.braid.client.BraidProxyClient
 import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.service.ComplexObject
+import io.bluebank.braid.server.service.MeteringModelData
 import io.bluebank.braid.server.service.MyService
 import io.bluebank.braid.server.service.MyServiceImpl
 import io.vertx.core.Vertx
@@ -129,6 +130,14 @@ class SyncProxyTest {
   @Test(expected = IllegalArgumentException::class)
   fun `should throw exception if json object blows up`() {
     myService.stuffedJsonObject()
+  }
+
+  @Test
+  fun `should be able to bounce data classes with default params`() {
+    val modelData = MeteringModelData("wobble")
+    val result = myService.exposeParameterListTypeIssue("wibble", modelData)
+    Assert.assertEquals(0, braidClient.activeRequestsCount())
+    Assert.assertEquals(modelData, result)
   }
 
   private fun getFreePort(): Int {

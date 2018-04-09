@@ -4,9 +4,9 @@ import io.bluebank.braid.core.async.getOrThrow
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.reflection.underlyingGenericType
 import io.bluebank.braid.core.reflection.actualType
 import io.bluebank.braid.core.reflection.isStreaming
+import io.bluebank.braid.core.reflection.underlyingGenericType
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
@@ -20,9 +20,11 @@ import org.slf4j.Logger
 import rx.Observable
 import rx.subjects.PublishSubject
 import java.io.Closeable
-import java.lang.reflect.*
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
+import java.lang.reflect.Type
 import java.net.URL
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicLong
 
 
