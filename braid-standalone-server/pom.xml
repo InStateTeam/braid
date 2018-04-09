@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.bluebank.braid</groupId>
     <artifactId>braid</artifactId>
-    <version>1.0.14-SNAPSHOT</version>
+    <version>3.0.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
