@@ -42,7 +42,10 @@ class JsonRPCRequestTest {
     val expected = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"fish\",\"params\":[\"wibble\",{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"}],\"streamed\":false}"
     val params = listOf<Any?>("wibble", MeteringModelData("wobble"))
     val jsonRequest = JsonRPCRequest(id = 1, method = "fish", params = params, streamed = false)
-    assertEquals(expected, Json.encode(jsonRequest))
+    val actual = Json.encode(jsonRequest)
+    println(expected)
+    println(actual)
+    assertEquals(expected, actual)
   }
 
   @JsonTypeInfo(
