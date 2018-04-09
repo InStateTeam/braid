@@ -130,9 +130,25 @@ The project can be loaded into any IDE that can read Maven POMs.
 
 ## Publishing / Deploying Artifacts
 
-```bash 
-mvn clean deploy
+1. Checkout master
+2. Make sure you pull the latest master
+3. Use maven versions plugin to bump the version to the next snapshot
+
+```
+mvn versions:set -DnewVersion=3.0.3-SNAPSHOT
 ```
 
+4. Git add and commit 
+5. Don’t push yet (to speed up the process)
+6. Git create a new branch off master with the correct release version e.g. v3.0.2
 
+```
+git checkout -b v3.0.2
+```
+
+7. Push this release branch (ie not the master branch)
+8. In gitlab CI there is a manual job for the branch that you will kick off
+9. Then checkout master and push it
+
+Obviously the above should be automated with a script - ideally integrated worth maven
 
