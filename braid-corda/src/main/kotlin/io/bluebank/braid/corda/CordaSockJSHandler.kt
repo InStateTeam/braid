@@ -17,7 +17,7 @@
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
-import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
@@ -40,7 +40,6 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import net.corda.core.node.AppServiceHub
-import net.corda.node.services.api.StartedNodeServices
 
 
 class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceHub, config: BraidConfig)
@@ -98,7 +97,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceH
     }
 
     private fun createNetworkMapService(services: AppServiceHub, config: BraidConfig) : ServiceExecutor =
-        ConcreteServiceExecutor(SimpleNetworkMapService(services, config))
+        ConcreteServiceExecutor(SimpleNetworkMapServiceImpl(services, config))
 
     private fun createFlowService(services: AppServiceHub, config: BraidConfig): ServiceExecutor =
         CordaFlowServiceExecutor(services, config)
