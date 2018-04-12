@@ -11,7 +11,6 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 // will come back to map once we've figured out the structure - presumably Map<String, Any>
 class JsonRPCReqestSerializer : StdSerializer<JsonRPCRequest>(JsonRPCRequest::class.java) {
   override fun serialize(value: JsonRPCRequest, generator: JsonGenerator, provider: SerializerProvider) {
-    println("in the serialiser...")
     generator.writeStartObject()
     generator.writeStringField("jsonrpc", value.jsonrpc)
     generator.writeNumberField("id", value.id)
