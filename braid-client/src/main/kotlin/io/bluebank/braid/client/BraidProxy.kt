@@ -26,12 +26,13 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.lang.reflect.Type
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 
 open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
   private val nextId = AtomicLong(1)
-  private val invocations = mutableMapOf<Long, ProxyInvocation>()
+  private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
   private val sockets = mutableMapOf<Class<*>, WebSocket>()
 
   private val client = vertx.createHttpClient(HttpClientOptions()
@@ -130,10 +131,12 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.incrementAndGet()
     val proxyInvocation = ProxyInvocation(returnType)
-    invocations.put(id, proxyInvocation)
+    invocations[id] = proxyInvocation
     try {
       val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
-      socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+      vertx.runOnContext {
+        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+      }
     } catch (err: Throwable) {
       onRequestError(id, err)
     }
