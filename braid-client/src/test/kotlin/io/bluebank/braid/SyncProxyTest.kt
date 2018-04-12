@@ -145,4 +145,5 @@ class SyncProxyTest {
       it.localPort
     }
   }
+
 }

@@ -43,8 +43,6 @@ class JsonRPCRequestTest {
     val params = listOf<Any?>("wibble", MeteringModelData("wobble"))
     val jsonRequest = JsonRPCRequest(id = 1, method = "fish", params = params, streamed = false)
     val actual = Json.encode(jsonRequest)
-    println(expected)
-    println(actual)
     assertEquals(expected, actual)
   }
 

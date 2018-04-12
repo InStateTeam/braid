@@ -2,6 +2,7 @@ package io.bluebank.braid.client
 
 import io.bluebank.braid.core.async.getOrThrow
 import io.bluebank.braid.core.async.toFuture
+import io.bluebank.braid.core.json.BraidJacksonInit
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.reflection.actualType
@@ -28,7 +29,7 @@ import java.net.URL
 import java.util.concurrent.atomic.AtomicLong
 
 
-class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
+open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
   private val nextId = AtomicLong(1)
   private val invocations = mutableMapOf<Long, ProxyInvocation>()
   private val sockets = mutableMapOf<Class<*>, WebSocket>()
@@ -42,6 +43,10 @@ class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) 
 
   companion object {
     private val log: Logger = loggerFor<BraidProxyClient>()
+
+    init {
+      BraidJacksonInit.init()
+    }
 
     fun <T : Any> createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
       return BraidProxyClient(config, vertx)

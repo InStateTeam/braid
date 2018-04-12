@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "1.0.14-SNAPSHOT",
+    "braid-client": "3.0.4-SNAPSHOT",
     "jquery": "^3.2.1",
     "promise": "^8.0.1",
     "sockjs-client": "^1.0.3"

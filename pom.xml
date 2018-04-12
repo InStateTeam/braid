@@ -72,6 +72,7 @@
 
   <properties>
     <kotlin.version>1.1.60</kotlin.version>
+    <corda.version>corda-3.0</corda.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.12</junit.version>
     <vertx.version>3.4.2</vertx.version>
@@ -97,6 +98,7 @@
     <module>braid-core</module>
     <module>braid-corda</module>
     <module>braid-client</module>
+    <module>braid-corda-client</module>
     <module>examples/example-cordapp</module>
   </modules>
 

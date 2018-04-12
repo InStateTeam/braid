@@ -78,10 +78,6 @@
     </developer>
   </developers>
 
-  <properties>
-    <corda.version>corda-3.0</corda.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
