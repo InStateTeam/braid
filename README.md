@@ -85,31 +85,6 @@ Services can be consumed in the following languages and runtimes (more to follow
 * [`example-server`](examples/example-server) - a simple standalone server 
 
 
-
-### Setting up NPM with Nexus3
-
-Nexus exposes a unified repository for both a npm central proxy and a locally deployed repo (private to bluebank.)
-The unified repo can be used to install all artifacts. Set is as follows:
-
-```bash
-npm config set registry http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-group/
-```
-Followed by
-
-```bash
-npm add-user
-```
-... to add your credentials for the nexus npm repository.
-
-To be able to publish modules (such as, say, `braid-client`) add your credential to npm using:
-
-```bash
-npm add-user --registry=http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/npm-hosted/
-```
-
-This will prompt you for your credentials and email. Once successfully authorised, you should be able to publish the 
-`braid-client` module in the [client](client) directory.
-
 ## Building locally
 
 You will need:
