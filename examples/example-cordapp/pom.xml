@@ -134,6 +134,21 @@
             </configuration>
           </execution>
           <execution>
+            <id>test</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
+                  <arg value="test"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
             <id>deployNodes</id>
             <phase>compile</phase>
             <goals>
