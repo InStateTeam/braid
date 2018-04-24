@@ -38,7 +38,7 @@ data class CreateAccountRequest(
     @ApiModelProperty(example = "my-account-1")
     val accountId: String,
     @ApiModelProperty(example = "GBP")
-    val currency: Currency,
+    val currency: Currenc,
     val functionalUnitId: UUID,
     val aliases: Set<Tag> = emptySet(),
     @ApiModelProperty(example = "0")

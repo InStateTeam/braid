@@ -93,7 +93,8 @@ data class EndPoint(val groupName: String,
 class DocsHandler(
     private val serviceName: String = "",
     private val description: String = "",
-    private val basePath: String = "http://localhost:8080"
+    private val basePath: String = "http://localhost:8080",
+    private val scheme: Scheme = Scheme.HTTPS
 ) : Handler<RoutingContext> {
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
@@ -121,7 +122,7 @@ class DocsHandler(
         .host(url.host + ":" + url.port)
         .basePath(url.path)
         .securityDefinition("Authorization", ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER))
-        .scheme(Scheme.HTTP)
+        .scheme(scheme)
         .consumes(APPLICATION_JSON.toString())
         .produces(APPLICATION_JSON.toString())
   }

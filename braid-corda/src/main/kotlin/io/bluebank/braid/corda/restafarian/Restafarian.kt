@@ -17,6 +17,7 @@
 package io.bluebank.braid.corda.restafarian
 
 
+import io.swagger.models.Scheme
 import io.vertx.core.Future
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.Router
@@ -29,6 +30,7 @@ class Restafarian(
     description: String = "",
     hostAndPortUri: String = "http://localhost:8080",
     apiPath: String = "/api",
+    scheme: String = "https",
     private val router: Router
 ) {
   init {
@@ -46,7 +48,8 @@ class Restafarian(
   private val docsHandler = DocsHandler(
       serviceName = serviceName,
       description = description,
-      basePath = hostAndPortUri + path
+      basePath = hostAndPortUri + path,
+      scheme = Scheme.forValue(scheme)
   )
 
   companion object {
@@ -56,9 +59,10 @@ class Restafarian(
         hostAndPortUri: String = "http://localhost:8080",
         apiPath: String = "/api",
         router: Router,
+        scheme: String,
         fn: Restafarian.(Router) -> Unit
     ) {
-      Restafarian(serviceName, description, hostAndPortUri, apiPath, router).mount(fn)
+      Restafarian(serviceName, description, hostAndPortUri, apiPath, scheme, router).mount(fn)
     }
   }
 
