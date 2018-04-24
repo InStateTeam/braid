@@ -49,7 +49,7 @@ class RestafarianTest {
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
-            val json = it.toJsonObject()
+            it.toJsonObject()
             async1.complete()
           }
         }
