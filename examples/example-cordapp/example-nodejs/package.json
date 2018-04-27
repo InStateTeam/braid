@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "braid-client": "3.0.6-SNAPSHOT"
+    "braid-client": "3.1.2-SNAPSHOT"
   }
 }
