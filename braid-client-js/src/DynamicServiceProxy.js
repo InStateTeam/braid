@@ -26,7 +26,11 @@ import xhr from 'request';
 export default class DynamicProxy {
   /**
    *
-   * @param config - an object with one required field 'url' and an optional field 'credentials' carrying the payload for the authentication service used by the server
+   * @param config - an object with the following fields
+   *  'url' - required - the url that this proxy will connect to
+   *  'credentials' - optional - payload for the authentication service used by the server - default is no auth expected
+   *  'console' - optional - the console implementation (according to the Javascript spec https://developer.mozilla.org/en-US/docs/Web/API/console)
+   *
    *  example: {
    *    url: 'https://localhost:8080/api',
    *    credentials: {
@@ -42,8 +46,16 @@ export default class DynamicProxy {
    */
   constructor(config, serviceName, onOpen, onClose, onError, options) {
     const that = this;
+    if (config === null) {
+      throw "config must not be null and must have a url field"
+    }
+
     if (!config.url) {
       throw "missing url property in config";
+    }
+
+    if (!config.console) {
+      config.console = console;
     }
 
     if (typeof options === 'undefined') {
@@ -105,7 +117,7 @@ export default class DynamicProxy {
             bindMetadata(body);
           } else {
             const message = "no error nor response!";
-            console.error(message, url);
+            config.console.error(message, url);
             failed(message);
           }
         });
@@ -135,7 +147,8 @@ export default class DynamicProxy {
           return invoke(name, ...args)
         };
         fn.__metadata = []; // to populate with metadata on signature and documentation
-        fn.docs = function () { printDocs(fn); };
+        fn.docs = function () { config.console.log(getDocs(fn)); };
+        fn.getDocs = function() { return getDocs(fn); };
         that[name] = fn;
       }
       // append the metadata for the method. N.B. methods can have overloads, hence the use of an array.
@@ -152,7 +165,7 @@ export default class DynamicProxy {
       if (onError) {
         onError({ reason: reason, error: e });
       } else {
-        console.error(reason, e);
+        config.console.error(reason, e);
       }
     }
 
@@ -176,7 +189,7 @@ export default class DynamicProxy {
      *
      * @param fn - the respective function
      */
-    function printDocs(fn) {
+    function getDocs(fn) {
       let msg = "API documentation\n" +
                 "-----------------\n";
       for (let idx in fn.__metadata) {
@@ -189,7 +202,7 @@ export default class DynamicProxy {
         apifn += generateParamDocs(methodDefinition);
         msg += apifn + '\n\n';
       }
-      console.log(msg);
+      return msg;
     }
 
     function generateParamList(methodDefinition) {
