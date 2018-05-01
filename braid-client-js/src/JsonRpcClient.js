@@ -290,12 +290,12 @@ class CancellableInvocation {
   }
 
   cancel() {
-    if (this.jsonRPC.state[id]) {
+    if (this.jsonRPC.state[this.id]) {
       const payload = {
         cancel: this.id
       };
       this.jsonRPC.socket.send(payload);
-      delete this.jsonRPC.state[id];
+      delete this.jsonRPC.state[this.id];
     }
   }
 }
