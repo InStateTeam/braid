@@ -27,7 +27,6 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import net.corda.core.node.AppServiceHub
 import net.corda.node.internal.Node
-import net.corda.node.services.api.StartedNodeServices
 
 class BraidVerticle(private val services: AppServiceHub, private val config: BraidConfig) : AbstractVerticle() {
   companion object {
@@ -44,7 +43,11 @@ class BraidVerticle(private val services: AppServiceHub, private val config: Bra
     vertx.createHttpServer(config.httpServerOptions.withCompatibleWebsockets())
         .requestHandler(router::accept)
         .listen(config.port) {
-          log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
+          if (it.succeeded()) {
+            log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
+          } else {
+            log.error("failed to start server: ${it.cause().message}")
+          }
           startFuture.completer().handle(it.mapEmpty())
         }
   }

@@ -1,5 +1,3 @@
-image: docker-java8-mvn-nodejs-npm:latest
-
 variables:
   MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
 
@@ -19,7 +17,7 @@ stages:
 build:
   stage: build
   tags:
-    - script-docker
+    - script-maven
   only:
     - master
     - /^[0-9]+-.*$/
@@ -29,7 +27,7 @@ build:
 deploy:
   stage: snapshot_release
   tags:
-    - script-docker
+    - script-maven
   script:
     - mvn $MAVEN_CLI_OPTS clean install deploy
   only:
@@ -38,7 +36,7 @@ deploy:
 release:
   stage: release
   tags:
-    - script-docker
+    - script-maven
   variables:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   only:

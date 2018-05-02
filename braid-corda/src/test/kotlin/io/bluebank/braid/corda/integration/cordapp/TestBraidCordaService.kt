@@ -17,6 +17,7 @@
 package io.bluebank.braid.corda.integration.cordapp
 
 import io.bluebank.braid.corda.BraidConfig
+import io.bluebank.braid.corda.BraidServer
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
@@ -32,29 +33,32 @@ import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
 import net.corda.core.node.AppServiceHub
-import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
+import java.util.concurrent.ConcurrentHashMap
 
 @CordaService
 class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
   companion object {
     private val log = loggerFor<TestBraidCordaService>()
+    private val cache = ConcurrentHashMap<Pair<String, Int>, BraidServer>() // to work around a problem with Corda 3.1. See https://github.com/corda/corda/issues/2898
   }
 
   private val org = serviceHub.myInfo.legalIdentities.first().name.organisation
-
+  private val vertx = Vertx.vertx()
   init {
-    log.info("Starting TestBraidCordaService for ${serviceHub.myInfo.legalIdentities.first().name.organisation}")
     val port = getBraidPort()
     if (port > 0) {
-      log.info("Starting Braid service for $org on port $port")
-      BraidConfig()
-          .withFlow("echo", EchoFlow::class)
-          .withService(CustomService(serviceHub))
-          .withAuthConstructor(this::shiroFactory)
-          .withPort(port)
-          .bootstrapBraid(serviceHub)
+      val key = org to port
+      cache.computeIfAbsent(key) {
+        log.info("Starting Braid service for $org on port $port")
+        BraidConfig()
+            .withFlow("echo", EchoFlow::class)
+            .withService(CustomService(serviceHub))
+            .withAuthConstructor(this::shiroFactory)
+            .withPort(port)
+            .bootstrapBraid(serviceHub)
+      }
     } else {
       log.info("No port defined for $org")
     }
