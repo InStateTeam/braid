@@ -56,7 +56,6 @@ describe('braid-corda basic connectivity and method invocation', () => {
       }, done, () => {
       });
       cancellable.cancel();
-      done();
     });
   }).timeout(0);
 
