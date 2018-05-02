@@ -28,7 +28,7 @@ import rx.Subscription
 
 class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
   private lateinit var socket: Socket<JsonRPCRequest, JsonRPCResponse>
-  private val activeSubscriptions = mutableMapOf<JsonRPCRequest, Subscription>()
+  private val activeSubscriptions = mutableMapOf<Long, Subscription>()
 
   override fun onRegister(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
     this.socket = socket
@@ -52,10 +52,23 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
   private fun handleRequest(request: JsonRPCRequest) {
     try {
       checkVersion(request)
-      val subscription = executor.invoke(request).subscribe({ handleDataItem(it, request)}, { err -> handlerError(err, request) }, { handleCompleted(request) })
-      activeSubscriptions[request] = subscription
+      if (request.method == "_cancelStream") {
+        stopStream(request)
+      } else {
+        val subscription = executor.invoke(request).subscribe({ handleDataItem(it, request) }, { err -> handlerError(err, request) }, { handleCompleted(request) })
+        activeSubscriptions[request.id] = subscription
+      }
     } catch (err: JsonRPCException) {
       err.response.send()
+    }
+  }
+
+  private fun stopStream(request: JsonRPCRequest) {
+    activeSubscriptions[request.id]?.apply {
+      if (!this.isUnsubscribed) {
+        this.unsubscribe()
+      }
+      activeSubscriptions.remove(request.id)
     }
   }
 
@@ -66,7 +79,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
         socket.write(payload)
       }
     } finally {
-      activeSubscriptions.remove(request)
+      activeSubscriptions.remove(request.id)
     }
   }
 
@@ -78,7 +91,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
         else -> serverError(request.id, err.message).send()
       }
     } finally {
-      activeSubscriptions.remove(request)
+      activeSubscriptions.remove(request.id)
     }
   }
 
@@ -86,8 +99,8 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
     val payload = JsonRPCResultResponse(result = result, id = request.id)
     socket.write(payload)
     if (!request.streamed) {
-      activeSubscriptions[request]?.unsubscribe()
-      activeSubscriptions.remove(request)
+      activeSubscriptions[request.id]?.unsubscribe()
+      activeSubscriptions.remove(request.id)
     }
   }
 

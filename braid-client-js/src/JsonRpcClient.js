@@ -274,7 +274,7 @@ export default class JsonRPC {
       };
       state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
       that.socket.send(JSON.stringify(payload));
-      return new CancellableInvocation(this, id);
+      return new CancellableInvocation(this, id, state);
     }
 
     // -- INITIALISATION --
@@ -284,19 +284,27 @@ export default class JsonRPC {
 }
 
 class CancellableInvocation {
-  constructor(jsonRPC, id) {
+  constructor(jsonRPC, id, state) {
     this.jsonRPC = jsonRPC;
+    this.state = state;
     this.id = id;
   }
 
   cancel() {
-    if (this.jsonRPC.state[this.id]) {
+    console.log("cancelling", this.id);
+    if (!this.cancelled()) {
       const payload = {
-        cancel: this.id
+        id: this.id,
+        jsonrpc: "2.0",
+        method: "_cancelStream"
       };
-      this.jsonRPC.socket.send(payload);
-      delete this.jsonRPC.state[this.id];
+      this.jsonRPC.socket.send(JSON.stringify(payload));
+      delete this.state[this.id];
     }
+  }
+
+  cancelled() {
+    return !(this.state.hasOwnProperty(this.id))
   }
 }
 

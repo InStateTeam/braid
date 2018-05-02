@@ -52,10 +52,13 @@ describe('braid-corda basic connectivity and method invocation', () => {
 
   it('that we can cancel an observed stream', done => {
     buildProxy({credentials: {username: 'admin', password: 'admin'}}, done, proxy => {
-      const cancellable = proxy.customService.streamedResult(result => {
+      const cancellable = proxy.customService.infiniteStream(result => {
+        if (!cancellable.cancelled()) {
+          cancellable.cancel();
+        }
+        done()
       }, done, () => {
       });
-      cancellable.cancel();
     });
   }).timeout(0);
 
