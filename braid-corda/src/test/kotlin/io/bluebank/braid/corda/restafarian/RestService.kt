@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.corda.restafarian.Restafarian.Companion.mount
 import io.bluebank.braid.corda.router.Routers
+import io.swagger.models.Scheme
 import io.vertx.core.Vertx
 
 class MyService {
@@ -37,7 +38,7 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
         hostAndPortUri = "http://localhost:$port",
         apiPath = "/api",
         router = router,
-        scheme = "http"
+        scheme = Scheme.HTTP
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)
