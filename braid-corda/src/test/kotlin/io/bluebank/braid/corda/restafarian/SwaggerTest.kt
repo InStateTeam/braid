@@ -123,7 +123,7 @@ class SwaggerTest {
                 .schema(RefProperty(Account::class.simpleName)))
     ))
 
-    val encoder = Yaml.pretty().writeValueAsString(swagger)
+    Yaml.pretty().writeValueAsString(swagger)
   }
 
   private inline fun <reified T : Any> MutableMap<String, Model>.readType(type: KClass<T>): MutableMap<String, Model> {
@@ -222,9 +222,7 @@ definitions:
 
     val property = ModelConverters.getInstance().readAsProperty(Account::class.java)
     val model = PropertyBuilder.toModel(property)
-    val modelString = model.toString()
-    val swagger = Yaml.mapper().readValue(yml, Swagger::class.java)
+    model.toString()
+    Yaml.mapper().readValue(yml, Swagger::class.java)
   }
-
-
 }
