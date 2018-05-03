@@ -339,7 +339,7 @@
             <include>**/*.md</include>
           </includes>
           <excludes>
-            <exclude>braid-standalone-server/src/editor/app/assets/monaco-editor/**</exclude>
+            <exclude>**/monaco-editor/**/*</exclude>
             <exclude>**/*.txt</exclude>
             <exclude>**/pom.xml.versionsBackup</exclude>
             <exclude>**/*.json</exclude>
