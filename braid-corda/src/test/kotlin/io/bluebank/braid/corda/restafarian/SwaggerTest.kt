@@ -38,7 +38,7 @@ data class CreateAccountRequest(
     @ApiModelProperty(example = "my-account-1")
     val accountId: String,
     @ApiModelProperty(example = "GBP")
-    val currency: Currenc,
+    val currency: Currency,
     val functionalUnitId: UUID,
     val aliases: Set<Tag> = emptySet(),
     @ApiModelProperty(example = "0")
@@ -132,7 +132,7 @@ class SwaggerTest {
 
   private fun MutableMap<String, Model>.readType(type: Type): MutableMap<String, Model> {
     ModelConverters.getInstance().readAll(type).forEach { k, v ->
-      this.put(k, v)
+      this[k] = v
     }
     return this
   }
