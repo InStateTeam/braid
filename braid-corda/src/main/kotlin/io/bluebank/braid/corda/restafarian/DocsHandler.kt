@@ -94,7 +94,11 @@ class DocsHandler(
     private val serviceName: String = "",
     private val description: String = "",
     private val basePath: String = "http://localhost:8080",
-    private val scheme: Scheme = Scheme.HTTPS
+    private val scheme: Scheme = Scheme.HTTPS,
+    private val contact : Contact = Contact()
+        .name("")
+        .email("")
+        .url("")
 ) : Handler<RoutingContext> {
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
@@ -131,13 +135,8 @@ class DocsHandler(
     val info = Info()
         .version("1.0.0")
         .title(serviceName)
-
     info.description = description
-
-    info.contact = Contact()
-        .name("Em Tech")
-        .email("support@bluebank.io")
-        .url("http://bluebank.io")
+    info.contact = contact
     return info
   }
 
