@@ -42,6 +42,8 @@ import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import java.net.URL
+import javax.ws.rs.DefaultValue
+import javax.ws.rs.core.MediaType
 import kotlin.reflect.KCallable
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -220,6 +222,11 @@ class DocsHandler(
       val p = BodyParameter()
           .schema(bodyParameter.type.getSwaggerModelReference())
           .setExamples(bodyParameter)
+      bodyParameter.findAnnotation<ApiParam>()?.apply {
+        if (this.example.isNotEmpty()) {
+           p.addExample(MediaType.APPLICATION_JSON, this.example)
+        }
+      }
       p.name = bodyParameter.name
       p.required = true
       p
@@ -239,6 +246,9 @@ class DocsHandler(
       val q = QueryParameter()
           .name(param.name)
           .property(param.type.getSwaggerProperty())
+      param.findAnnotation<DefaultValue>()?.apply {
+        q.setDefaultValue(this.value)
+      }
       q.type("simple")
       q.required = true
       if (param.isOptional) {
@@ -258,6 +268,9 @@ class DocsHandler(
           .name(pathParam.name)
           .property(swaggerProperty)
           .type(swaggerProperty.type)
+      pathParam.findAnnotation<DefaultValue>()?.apply {
+        p.setDefaultValue(this.value)
+      }
       p.required = true
       p
     }

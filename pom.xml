@@ -333,12 +333,8 @@
         <version>3.0</version>
         <configuration>
           <header>LICENSE</header>
-          <includes>
-            <include>**/*.kt</include>
-            <include>**/*.js</include>
-            <include>**/*.md</include>
-          </includes>
           <excludes>
+            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
             <exclude>**/monaco-editor/**/*</exclude>
             <exclude>**/*.txt</exclude>
             <exclude>**/pom.xml.versionsBackup</exclude>
@@ -348,19 +344,26 @@
             <exclude>LICENSE</exclude>
             <exclude>**/.babelrc</exclude>
           </excludes>
-          <mapping>
+          <includes>
+            <include>**/*.kt</include>
+            <include>**/*.js</include>
+            <include>**/*.md</include>
+          </includes>
+          <mappSing>
             <md>XML_STYLE</md>
-          </mapping>
+          </mappSing>
         </configuration>
         <executions>
           <execution>
             <id>license-format</id>
+            <phase>none</phase>
             <goals>
               <goal>format</goal>
             </goals>
           </execution>
           <execution>
             <id>license-check</id>
+            <phase>none</phase>
             <goals>
               <goal>check</goal>
             </goals>
