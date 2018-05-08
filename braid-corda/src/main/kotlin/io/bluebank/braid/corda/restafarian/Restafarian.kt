@@ -86,9 +86,10 @@ class Restafarian(
         contact: Contact = Contact().email("").name("").url(""),
         authSchema: AuthSchema = AuthSchema.None,
         authProvider: AuthProvider? = null,
+        vertx: Vertx,
         fn: Restafarian.(Router) -> Unit
     ) {
-      Restafarian(serviceName, description, hostAndPortUri, apiPath, scheme, contact, authSchema, authProvider, router).mount(fn)
+      Restafarian(serviceName, description, hostAndPortUri, apiPath, scheme, contact, authSchema, authProvider, router, vertx).mount(fn)
     }
   }
 

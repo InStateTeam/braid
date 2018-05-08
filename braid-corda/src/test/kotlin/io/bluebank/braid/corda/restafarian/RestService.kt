@@ -38,7 +38,8 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
         hostAndPortUri = "http://localhost:$port",
         apiPath = "/api",
         router = router,
-        scheme = Scheme.HTTP
+        scheme = Scheme.HTTP,
+        vertx = vertx
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)
