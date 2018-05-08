@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.corda.restafarian
 
-
 import io.swagger.models.Contact
 import io.swagger.models.Scheme
 import io.swagger.models.auth.ApiKeyAuthDefinition
@@ -43,6 +42,7 @@ class Restafarian(
     description: String = "",
     hostAndPortUri: String = "http://localhost:8080",
     apiPath: String = "/api",
+    swaggerPath: String = "/",
     scheme: Scheme = Scheme.HTTPS,
     contact: Contact = Contact().name("").email("").url(""),
     private val authSchema: AuthSchema = AuthSchema.None,
@@ -60,6 +60,12 @@ class Restafarian(
     apiPath.dropLast(1)
   } else {
     apiPath
+  }
+
+  private val swaggerPath: String = if (swaggerPath.endsWith("/")) {
+    swaggerPath.dropLast(1)
+  } else {
+    swaggerPath
   }
 
   private val docsHandler = DocsHandler(
@@ -81,6 +87,7 @@ class Restafarian(
         description: String = "",
         hostAndPortUri: String = "http://localhost:8080",
         apiPath: String = "/api",
+        swaggerPath: String = "/",
         router: Router,
         scheme: Scheme = Scheme.HTTPS,
         contact: Contact = Contact().email("").name("").url(""),
@@ -89,7 +96,7 @@ class Restafarian(
         vertx: Vertx,
         fn: Restafarian.(Router) -> Unit
     ) {
-      Restafarian(serviceName, description, hostAndPortUri, apiPath, scheme, contact, authSchema, authProvider, router, vertx).mount(fn)
+      Restafarian(serviceName, description, hostAndPortUri, apiPath, swaggerPath, scheme, contact, authSchema, authProvider, router, vertx).mount(fn)
     }
   }
 
@@ -104,12 +111,12 @@ class Restafarian(
 
   private fun configureSwaggerAndStatic() {
     // configure the swagger json
-    router.get("$path/swagger.json").handler(docsHandler)
+    router.get("$swaggerPath/swagger.json").handler(docsHandler)
 
     // and now for the swagger static
     val sh = StaticHandler.create("swagger").setCachingEnabled(false)
     router.get("/swagger/*").last().handler(sh)
-    router.get("$path/*").last().handler(sh)
+    router.get("$swaggerPath/*").last().handler(sh)
   }
 
   private fun setupAuthRouting() {

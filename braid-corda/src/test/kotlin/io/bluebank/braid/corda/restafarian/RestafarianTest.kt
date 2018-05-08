@@ -44,7 +44,7 @@ class RestafarianTest {
     MyServiceSetup(vertx, port, MyService())
     val client = vertx.createHttpClient()
     val async1 = context.async()
-    client.get(port, "localhost", "/api/swagger.json")
+    client.get(port, "localhost", "/swagger.json")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
@@ -55,7 +55,7 @@ class RestafarianTest {
         .end()
 
     val async2 = context.async()
-    client.get(port, "localhost", "/api")
+    client.get(port, "localhost", "/")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
