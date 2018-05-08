@@ -253,7 +253,6 @@ class DocsHandler(
       param.findAnnotation<DefaultValue>()?.apply {
         q.setDefaultValue(this.value)
       }
-      q.type("simple")
       q.required = true
       if (param.isOptional) {
         q.minItems = 0
