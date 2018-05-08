@@ -24,8 +24,7 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import io.swagger.converter.ModelConverters
 import io.swagger.models.*
-import io.swagger.models.auth.ApiKeyAuthDefinition
-import io.swagger.models.auth.In
+import io.swagger.models.auth.SecuritySchemeDefinition
 import io.swagger.models.parameters.BodyParameter
 import io.swagger.models.parameters.Parameter
 import io.swagger.models.parameters.PathParameter
@@ -96,10 +95,11 @@ class DocsHandler(
     private val description: String = "",
     private val basePath: String = "http://localhost:8080",
     private val scheme: Scheme = Scheme.HTTPS,
-    private val contact : Contact = Contact()
+    private val contact: Contact = Contact()
         .name("")
         .email("")
-        .url("")
+        .url(""),
+    private val auth: SecuritySchemeDefinition?
 ) : Handler<RoutingContext> {
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
@@ -126,7 +126,11 @@ class DocsHandler(
         .info(info)
         .host(url.host + ":" + url.port)
         .basePath(url.path)
-        .securityDefinition("Authorization", ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER))
+        .apply {
+          if (auth != null) {
+            securityDefinition("Authorization", auth)
+          }
+        }
         .scheme(scheme)
         .consumes(APPLICATION_JSON.toString())
         .produces(APPLICATION_JSON.toString())
