@@ -161,6 +161,15 @@ class Restafarian(
     bind(HttpMethod.GET, path, fn)
   }
 
+  @JvmName("putFuture")
+  fun <Response> put(path: String, fn: KCallable<Future<Response>>) {
+    bind(HttpMethod.PUT, path, fn)
+  }
+
+  fun <Response> put(path: String, fn: KCallable<Response>) {
+    bind(HttpMethod.PUT, path, fn)
+  }
+
   fun <Response> post(path: String, fn: KCallable<Response>) {
     bind(HttpMethod.POST, path, fn)
   }
