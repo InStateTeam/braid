@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.restafarian
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.models.Contact
 import io.swagger.models.Scheme
 import io.swagger.models.auth.ApiKeyAuthDefinition
@@ -40,7 +41,7 @@ enum class AuthSchema {
 class Restafarian(
     serviceName: String = "",
     description: String = "",
-    hostAndPortUri: String = "http://localhost:8080",
+    private val hostAndPortUri: String = "http://localhost:8080",
     apiPath: String = "/api",
     swaggerPath: String = "/",
     scheme: Scheme = Scheme.HTTPS,
@@ -82,6 +83,8 @@ class Restafarian(
   )
 
   companion object {
+    private val log = loggerFor<Restafarian>()
+
     fun mount(
         serviceName: String = "",
         description: String = "",
@@ -102,21 +105,23 @@ class Restafarian(
 
   fun mount(fn: Restafarian.(Router) -> Unit) {
     setupAuthRouting()
-
     // pass control to caller to setup rest bindings
     this.fn(router)
-
+    log.info("Rest end point bound to $hostAndPortUri$path")
     configureSwaggerAndStatic()
   }
 
   private fun configureSwaggerAndStatic() {
     // configure the swagger json
     router.get("$swaggerPath/swagger.json").handler(docsHandler)
+    log.info("swagger json bound to $hostAndPortUri$swaggerPath/swagger.json")
 
     // and now for the swagger static
     val sh = StaticHandler.create("swagger").setCachingEnabled(false)
     router.get("/swagger/*").last().handler(sh)
     router.get("$swaggerPath/*").last().handler(sh)
+
+    log.info("Swagger UI bound to $hostAndPortUri$swaggerPath")
   }
 
   private fun setupAuthRouting() {
