@@ -24,7 +24,7 @@ fun findFreePort() : Int {
 }
 
 fun findFreePorts(count: Int) : IntArray {
-  return (1..count).map { ServerSocket(0) }.map { it.use { it.localPort } }.toIntArray()
+  return (1..count).toList().map { ServerSocket(0) }.map { it.use { it.localPort } }.toIntArray()
 }
 
 fun findConsequtiveFreePorts(count: Int) : Int {
