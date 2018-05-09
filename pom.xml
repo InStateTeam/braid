@@ -349,9 +349,9 @@
             <include>**/*.js</include>
             <include>**/*.md</include>
           </includes>
-          <mappSing>
+          <mapping>
             <md>XML_STYLE</md>
-          </mappSing>
+          </mapping>
         </configuration>
         <executions>
           <execution>
