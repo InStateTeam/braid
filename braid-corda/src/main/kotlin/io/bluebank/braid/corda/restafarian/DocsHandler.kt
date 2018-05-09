@@ -42,7 +42,6 @@ import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import java.net.URL
 import javax.ws.rs.DefaultValue
-import javax.ws.rs.core.MediaType
 import kotlin.reflect.KCallable
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -226,11 +225,6 @@ class DocsHandler(
       val p = BodyParameter()
           .schema(bodyParameter.type.getSwaggerModelReference())
           .setExamples(bodyParameter)
-      bodyParameter.findAnnotation<ApiParam>()?.apply {
-        if (this.example.isNotEmpty()) {
-           p.addExample(MediaType.APPLICATION_JSON, this.example)
-        }
-      }
       p.name = bodyParameter.name
       p.required = true
       p
