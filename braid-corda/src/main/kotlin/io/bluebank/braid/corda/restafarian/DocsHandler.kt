@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.bluebank.braid.corda.restafarian
 
 
@@ -25,8 +24,7 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import io.swagger.converter.ModelConverters
 import io.swagger.models.*
-import io.swagger.models.auth.ApiKeyAuthDefinition
-import io.swagger.models.auth.In
+import io.swagger.models.auth.SecuritySchemeDefinition
 import io.swagger.models.parameters.BodyParameter
 import io.swagger.models.parameters.Parameter
 import io.swagger.models.parameters.PathParameter
@@ -43,6 +41,7 @@ import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import java.net.URL
+import javax.ws.rs.DefaultValue
 import kotlin.reflect.KCallable
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -93,7 +92,13 @@ data class EndPoint(val groupName: String,
 class DocsHandler(
     private val serviceName: String = "",
     private val description: String = "",
-    private val basePath: String = "http://localhost:8080"
+    private val basePath: String = "http://localhost:8080",
+    private val scheme: Scheme = Scheme.HTTPS,
+    private val contact: Contact = Contact()
+        .name("")
+        .email("")
+        .url(""),
+    private val auth: SecuritySchemeDefinition?
 ) : Handler<RoutingContext> {
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
@@ -120,8 +125,12 @@ class DocsHandler(
         .info(info)
         .host(url.host + ":" + url.port)
         .basePath(url.path)
-        .securityDefinition("Authorization", ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER))
-        .scheme(Scheme.HTTP)
+        .apply {
+          if (auth != null) {
+            securityDefinition("Authorization", auth)
+          }
+        }
+        .scheme(scheme)
         .consumes(APPLICATION_JSON.toString())
         .produces(APPLICATION_JSON.toString())
   }
@@ -130,13 +139,8 @@ class DocsHandler(
     val info = Info()
         .version("1.0.0")
         .title(serviceName)
-
     info.description = description
-
-    info.contact = Contact()
-        .name("Em Tech")
-        .email("support@bluebank.io")
-        .url("http://bluebank.io")
+    info.contact = contact
     return info
   }
 
@@ -240,7 +244,9 @@ class DocsHandler(
       val q = QueryParameter()
           .name(param.name)
           .property(param.type.getSwaggerProperty())
-      q.type("simple")
+      param.findAnnotation<DefaultValue>()?.apply {
+        q.setDefaultValue(this.value)
+      }
       q.required = true
       if (param.isOptional) {
         q.minItems = 0
@@ -259,6 +265,9 @@ class DocsHandler(
           .name(pathParam.name)
           .property(swaggerProperty)
           .type(swaggerProperty.type)
+      pathParam.findAnnotation<DefaultValue>()?.apply {
+        p.setDefaultValue(this.value)
+      }
       p.required = true
       p
     }

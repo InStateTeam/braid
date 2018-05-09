@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.bluebank.braid.corda.restafarian
 
-
+import io.bluebank.braid.core.logging.loggerFor
+import io.swagger.models.Contact
+import io.swagger.models.Scheme
+import io.swagger.models.auth.ApiKeyAuthDefinition
+import io.swagger.models.auth.BasicAuthDefinition
+import io.swagger.models.auth.In
 import io.vertx.core.Future
+import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
+import io.vertx.ext.auth.AuthProvider
+import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.StaticHandler
+import io.vertx.ext.web.handler.*
+import io.vertx.ext.web.sstore.LocalSessionStore
 import kotlin.reflect.KCallable
 
+enum class AuthSchema {
+  None,
+  Basic,
+  Token
+}
 
 class Restafarian(
     serviceName: String = "",
     description: String = "",
-    hostAndPortUri: String = "http://localhost:8080",
+    private val hostAndPortUri: String = "http://localhost:8080",
     apiPath: String = "/api",
-    private val router: Router
+    swaggerPath: String = "/",
+    scheme: Scheme = Scheme.HTTPS,
+    contact: Contact = Contact().name("").email("").url(""),
+    private val authSchema: AuthSchema = AuthSchema.None,
+    private val authProvider: AuthProvider? = null,
+    private val router: Router,
+    private val vertx: Vertx
 ) {
   init {
     if (!apiPath.startsWith("/")) throw RuntimeException("path must begin with a /")
@@ -43,32 +63,88 @@ class Restafarian(
     apiPath
   }
 
+  private val swaggerPath: String = if (swaggerPath.endsWith("/")) {
+    swaggerPath.dropLast(1)
+  } else {
+    swaggerPath
+  }
+
   private val docsHandler = DocsHandler(
       serviceName = serviceName,
       description = description,
-      basePath = hostAndPortUri + path
+      basePath = hostAndPortUri + path,
+      scheme = scheme,
+      contact = contact,
+      auth = when(authSchema) {
+        AuthSchema.Basic -> BasicAuthDefinition()
+        AuthSchema.Token -> ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
+        else -> null
+      }
   )
 
   companion object {
+    private val log = loggerFor<Restafarian>()
+
     fun mount(
         serviceName: String = "",
         description: String = "",
         hostAndPortUri: String = "http://localhost:8080",
         apiPath: String = "/api",
+        swaggerPath: String = "/",
         router: Router,
+        scheme: Scheme = Scheme.HTTPS,
+        contact: Contact = Contact().email("").name("").url(""),
+        authSchema: AuthSchema = AuthSchema.None,
+        authProvider: AuthProvider? = null,
+        vertx: Vertx,
         fn: Restafarian.(Router) -> Unit
     ) {
-      Restafarian(serviceName, description, hostAndPortUri, apiPath, router).mount(fn)
+      Restafarian(serviceName, description, hostAndPortUri, apiPath, swaggerPath, scheme, contact, authSchema, authProvider, router, vertx).mount(fn)
     }
   }
 
   fun mount(fn: Restafarian.(Router) -> Unit) {
+    setupAuthRouting()
+    // pass control to caller to setup rest bindings
     this.fn(router)
-    router.get(path + "/swagger.json")
-        .handler(docsHandler)
+    log.info("Rest end point bound to $hostAndPortUri$path")
+    configureSwaggerAndStatic()
+  }
+
+  private fun configureSwaggerAndStatic() {
+    // configure the swagger json
+    router.get("$swaggerPath/swagger.json").handler(docsHandler)
+    log.info("swagger json bound to $hostAndPortUri$swaggerPath/swagger.json")
+
+    // and now for the swagger static
     val sh = StaticHandler.create("swagger").setCachingEnabled(false)
     router.get("/swagger/*").last().handler(sh)
-    router.get(path + "/*").last().handler(sh)
+    router.get("$swaggerPath/*").last().handler(sh)
+
+    log.info("Swagger UI bound to $hostAndPortUri$swaggerPath")
+  }
+
+  private fun setupAuthRouting() {
+    when (authSchema) {
+      AuthSchema.Basic -> {
+        verifyAuthProvider()
+        router.route("$path/*").handler(CookieHandler.create())
+        router.route("$path/*").handler(SessionHandler.create(LocalSessionStore.create(vertx)))
+        router.route("$path/*").handler(UserSessionHandler.create(authProvider))
+        router.route("$path/*").handler(BasicAuthHandler.create(authProvider))
+      }
+      AuthSchema.Token -> {
+        verifyAuthProvider()
+        router.route("$path/*").handler(JWTAuthHandler.create(authProvider as JWTAuth))
+      }
+      else -> {
+        // don't add any auth provider
+      }
+    }
+  }
+
+  private fun verifyAuthProvider() {
+    authProvider ?: throw RuntimeException("no auth provider given for auth schema $authSchema")
   }
 
   fun group(groupName: String, fn: () -> Unit) {
@@ -83,6 +159,15 @@ class Restafarian(
 
   fun <Response> get(path: String, fn: KCallable<Response>) {
     bind(HttpMethod.GET, path, fn)
+  }
+
+  @JvmName("putFuture")
+  fun <Response> put(path: String, fn: KCallable<Future<Response>>) {
+    bind(HttpMethod.PUT, path, fn)
+  }
+
+  fun <Response> put(path: String, fn: KCallable<Response>) {
+    bind(HttpMethod.PUT, path, fn)
   }
 
   fun <Response> post(path: String, fn: KCallable<Response>) {

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.corda.restafarian.Restafarian.Companion.mount
 import io.bluebank.braid.corda.router.Routers
+import io.swagger.models.Scheme
 import io.vertx.core.Vertx
 
 class MyService {
@@ -37,7 +37,9 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
         serviceName = "my-service",
         hostAndPortUri = "http://localhost:$port",
         apiPath = "/api",
-        router = router
+        router = router,
+        scheme = Scheme.HTTP,
+        vertx = vertx
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)

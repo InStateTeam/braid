@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
@@ -42,7 +41,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import net.corda.core.node.AppServiceHub
 
 
-class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceHub, config: BraidConfig)
+class CordaSockJSHandler private constructor(vertx: Vertx, serviceHub: AppServiceHub, config: BraidConfig)
   : Handler<SockJSSocket> {
 
   companion object {
@@ -52,9 +51,9 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceH
         "flows" to this::createFlowService
     )
 
-    fun setupSockJSHandler(router: Router, vertx: Vertx, services: AppServiceHub, config: BraidConfig) {
+    fun setupSockJSHandler(router: Router, vertx: Vertx, serviceHub: AppServiceHub, config: BraidConfig) {
       val sockJSHandler = SockJSHandler.create(vertx)
-      val handler = CordaSockJSHandler(vertx, services, config)
+      val handler = CordaSockJSHandler(vertx, serviceHub, config)
       sockJSHandler.socketHandler(handler)
       val protocol = if (config.httpServerOptions.isSsl) "https" else "http"
 
@@ -104,7 +103,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, services: AppServiceH
   }
 
   private val authProvider = config.authConstructor?.invoke(vertx)
-  private val serviceMap = REGISTERED_HANDLERS.map { it.key to it.value(services, config) }.toMap() +
+  private val serviceMap = REGISTERED_HANDLERS.map { it.key to it.value(serviceHub, config) }.toMap() +
       config.services.map { it.key to ConcreteServiceExecutor(it.value) }.toMap()
   private val pathRegEx = Regex("${config.rootPath.replace("/", "\\/")}([^\\/]+).*")
 

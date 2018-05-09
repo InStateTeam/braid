@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.core.socket.findFreePort
@@ -45,7 +44,7 @@ class RestafarianTest {
     MyServiceSetup(vertx, port, MyService())
     val client = vertx.createHttpClient()
     val async1 = context.async()
-    client.get(port, "localhost", "/api/swagger.json")
+    client.get(port, "localhost", "/swagger.json")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
@@ -56,7 +55,7 @@ class RestafarianTest {
         .end()
 
     val async2 = context.async()
-    client.get(port, "localhost", "/api")
+    client.get(port, "localhost", "/")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
