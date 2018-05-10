@@ -50,10 +50,10 @@ class BraidCordaJacksonInit {
 //          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
           .addSerializer(BigDecimal::class.java, JacksonSupport.ToStringSerializer)
           .addDeserializer(BigDecimal::class.java, NumberDeserializers.BigDecimalDeserializer())
-          .addSerializer(SecureHash::class.java, JacksonSupport.SecureHashSerializer)
-          .addSerializer(SecureHash.SHA256::class.java, JacksonSupport.SecureHashSerializer)
-          .addDeserializer(SecureHash::class.java, JacksonSupport.SecureHashDeserializer())
-          .addDeserializer(SecureHash.SHA256::class.java, JacksonSupport.SecureHashDeserializer())
+          .addSerializer(SecureHash::class.java, SecureHashSerializer)
+          .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
+          .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
+          .addDeserializer(SecureHash.SHA256::class.java, SecureHashDeserializer())
 
           // For ed25519 pubkeys
           // TODO: Fix these
