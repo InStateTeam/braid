@@ -11,7 +11,7 @@
     * [Containers](#containers)
     * [Consuming Services](#consuming-services)
     * [Protocol](#protocol)   
-3. [Buildig locally](#building-locally)
+3. [Building locally](#building-locally)
 4. [Publishing / Deploying Artifacts](#publishing-/-deploying-artifacts)
  
 ## Introduction
