@@ -4,6 +4,20 @@
 
 ![logo](art/logo-small.png) 
 
+## Contents
+
+1. [Introduction](#introduction) 
+2. [Context](#context)
+
+    1. [Containers](#containers)
+    2. [Consuming Services](#consuming-services)
+    3. [Protocol](#protocol)
+    
+3. [Buildig locally](#building-locally)
+4. [Publishing / Deploying Artifacts](#publishing-/-deploying-artifacts)
+ 
+## Introduction
+
 _Braid is a high performance reactive rpc library for exposing your services in a secure way, with very little code, and to consume them in any language, runtime, and platform._
 
 **Easy integration**
@@ -52,7 +66,7 @@ Writing web-services appears easy at first. But to create production ready servi
 
 All of the above slow down project delivery, add risks, and distract focus from the value of the service being implemented. 
 
-> ## Braid is an answer to the above
+**Braid is an answer to the above**
 
 * Expose your services as plain old Java/Kotlin/Scala classes.
 * Your methods can return any type including reactive streams.
