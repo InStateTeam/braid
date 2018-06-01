@@ -22,7 +22,7 @@ The extension applies to the [Request payload](http://www.jsonrpc.org/specificat
 Braid adds one addition field:
 
 **streamed** - this is an **optional** `boolean`, with the default being `false`. If `true`, this client is expecting a streamed response. 
-When `true`, if the `method` being called returns an `Observable` stream, the Braid server will send responses that meet the **Response** payload extension.
+When `true`, the Braid server will send responses that meet the **Response** payload extension.
 
 
 ### Response payload extension
