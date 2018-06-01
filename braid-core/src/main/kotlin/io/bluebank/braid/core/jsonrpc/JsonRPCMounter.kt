@@ -54,6 +54,9 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
       if (request.method == "_cancelStream") {
         stopStream(request)
       } else {
+        if (activeSubscriptions.containsKey(request.id)) {
+          throw RuntimeException("a request with duplicate request id '${request.id}' is in progress for this connection")
+        }
         val subscription = executor.invoke(request).subscribe({ handleDataItem(it, request) }, { err -> handlerError(err, request) }, { handleCompleted(request) })
         activeSubscriptions[request.id] = subscription
       }
