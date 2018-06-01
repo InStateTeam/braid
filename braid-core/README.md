@@ -11,8 +11,8 @@
 
 ## Invocation Protocol
 
-The Braid invocation protocol is a backwards compatible extension to [JsonRPC 2.0](http://www.jsonrpc.org/specification).
-This extension is to facilitate the treatment of streamed replies to a given request. 
+The Braid invocation protocol is a backwards-compatible extension to [JsonRPC 2.0](http://www.jsonrpc.org/specification).
+This extension is provides the capability for streamed replies to a given request. 
 The extension applies to the [Request payload](http://www.jsonrpc.org/specification#request_object) and the 
 [Response payload](http://www.jsonrpc.org/specification#response_object).
 
@@ -21,8 +21,8 @@ The extension applies to the [Request payload](http://www.jsonrpc.org/specificat
 [JsonRPC 2.0](http://www.jsonrpc.org/specification#request_object) defines the following standard fields: `jsonrpc`, `method`, `params`, and `id`.
 Braid adds one addition field:
 
-**streamed** - this is an **optional** `boolean`, with the default being `false`. If `true`, this client is expecting a streamed response. 
-When `true`, the Braid server will send responses that meet the **Response** payload extension.
+**`streamed`** - this is an **optional** `boolean`, with the default being `false`. If `true`, the requests denotes that the client is expecting a streamed response. 
+When `true`, the Braid server will send responses that meet the **Response** payload extension (see below).
 
 
 ### Response payload extension
@@ -30,15 +30,15 @@ When `true`, the Braid server will send responses that meet the **Response** pay
 [JsonRPC 2.0](http://www.jsonrpc.org/specification#response_object) defines the following standard fields: `jsonrpc`, `result`, `error`, and `id`.
 In addition, the Braid extension specifies one additional field:
 
-**completed** - this is an **optional** field indicating if this response is the last result package for request with the same `id`. 
-The presence of the field is sufficient to terminate the flow.
+**`completed`** - this is an **optional** field. When present, it denotes that the response is the last result packet for request with the same `id`. 
+The presence of the field, irrespective of its value, is sufficient to terminate the flow.
 
 ### Stream semantics
 
 Braid's stream semantics follow that of [RX](http://reactivex.io/) Observer pattern. Given a streamed invocation, the server will continue to send packets __without the flag__ 
-whilst there are more items in the stream. The stream is terminated with an JsonRPCv2 error packet __or__ a packet with the `completed` field set.
+whilst there are more items in the stream. The stream is terminated either with a [JsonRPC 2.0 error packet](http://www.jsonrpc.org/specification#error_object) __or__ a packet with the `completed` flag present.
 
-### Examples
+### Examples of streamed requests and responses
 
 Syntax:
 
@@ -55,21 +55,21 @@ Call to a method `f1` that returns a stream of two results:
 <-- {"jsonrpc": "2.0", "result": 2, "id": 1, "completed": true}
 ```
 
-Call to method `f2` that returns only one result (but with streaming enabled):
+Call to method `f2` that returns only one result:
 
 ```
 --> {"jsonrpc": "2.0", "method": "f2", "params": [], "id": 2, streamed: true}
 <-- {"jsonrpc": "2.0", "result": 1, "id": 2, "completed": true}
 ```
 
-Call to method `f3` that returns no results (but with streaming enabled):
+Call to method `f3` that returns no results:
 
 ```
 --> {"jsonrpc": "2.0", "method": "f3", "params": [], "id": 3, streamed: true}
 <-- {"jsonrpc": "2.0", "id": 3, "completed": true}
 ```
 
-Call to method `f4` that return two items, before terminating with an error:
+Call to method `f4` that returns two items, before terminating with an error:
 
 ```
 --> {"jsonrpc": "2.0", "method": "f4", "params": [], "id": 4, streamed: true}
@@ -89,7 +89,7 @@ By convention, the web root of the API is located at `https://<host>:<port>/api`
 
 ### API
 
-**GET /**
+**GET `/`**
 
 Returns a JSON object of the form
 
@@ -132,16 +132,16 @@ As an example, here is a [cordite](http://cordite.foundation/) node's end-point:
 }
 ```
 
-**GET <endpoint-url> and the sockjs protocol**
+**GET `<endpoint-url>` and the sockjs protocol**
 
 Each `endpoint` URL resolves to a [SockJS](https://github.com/sockjs/sockjs-protocol) compliant server.
-You can use any one of the many SockJS clients to bind to this end point.
+You can use any one of the many SockJS clients to bind to this URL.
 Typically you should be able to connect to the websocket API of the SockJS endpoint on `<endpoint-url>/websocket`.
-This shouldn't be relied upon though in general - socketjs gracefully degrades from websocket connections to simple HTTPS POST
-polls. This may happen either due to the way the server is configured, or any restrictions on the servers firewall rules. 
+The websocket binding must not be relied upon to be available, in general - SockJS gracefully degrades from websocket connections to simple HTTPS POST
+polls in the event that the network (e.g. corporate firewalls) restrict websocket traffic. 
 
 
-**GET <documentation-url>**
+**GET `<documentation-url>`**
 
 The `documentation` URL resolves to a JSON document of the form:
 
@@ -161,12 +161,26 @@ The `documentation` URL resolves to a JSON document of the form:
 
 Type descriptors are in the [JsonSchema](http://json-schema.org/) format.
 
-> The way Braid uses JsonSchema is fairly naive. JsonSchema doesn't have a formalised means of providing named types. 
-> The intention is to create a second type protocol that uses a richer data structure language e.g. Protobufs.
+> The way Braid uses JsonSchema is fairly simple. JsonSchema doesn't have a formalised means of providing named types. 
+> At present, this can make the documentation for a method rather verbose
+> The intention is to create a second Type API that uses a richer data structure language e.g. Protobufs.
 
 ### Streamed results
 
 In the case where a method returns a streamed response, the `returnType` schema definition is prepended with the characters `stream-of `.
+
+e.g.
+
+```json
+  {
+    "name": "streamTransactions",
+    "description": "",
+    "parameters": {
+      "account": "string"
+    },
+    "returnType": "stream-of {id: String, amount: String, description: String}"
+  }
+```
 
 ### Service documentation example
 
