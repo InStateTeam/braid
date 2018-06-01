@@ -79,6 +79,8 @@ Services can be consumed in the following languages and runtimes (more to follow
 * [javascript](braid-client-js) in a browser or NodeJS
 * [any JVM language](braid-client)
 
+### Protocol
+
 If you want to implement your own client, or are just interested in how Braid works, the protocol is defined [here](./braid-core/README.md).
 
 ## Examples
