@@ -41,7 +41,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import net.corda.core.node.AppServiceHub
 
 
-class CordaSockJSHandler private constructor(vertx: Vertx, serviceHub: AppServiceHub, config: BraidConfig)
+class CordaSockJSHandler private constructor(private val vertx: Vertx, serviceHub: AppServiceHub, config: BraidConfig)
   : Handler<SockJSSocket> {
 
   companion object {
@@ -137,7 +137,7 @@ class CordaSockJSHandler private constructor(vertx: Vertx, serviceHub: AppServic
   }
 
   private fun createSocketAdapter(socket: SockJSSocket, authProvider: AuthProvider?): Socket<Buffer, Buffer> {
-    val sockJSWrapper = SockJSSocketWrapper.create(socket)
+    val sockJSWrapper = SockJSSocketWrapper.create(socket, vertx)
     return if (authProvider == null) {
       sockJSWrapper
     } else {

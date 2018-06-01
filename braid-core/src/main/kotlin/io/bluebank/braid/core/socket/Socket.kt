@@ -17,11 +17,32 @@ package io.bluebank.braid.core.socket
 
 import io.vertx.ext.auth.User
 
+/**
+ * Abstract for a bi-directional network socket
+ * A client of this socket will receive objects of type [R] and send objects of type [S]
+ */
 interface Socket<R, S> {
+  /**
+   * called to register a listener on a socket
+   * @return this socket
+   */
   fun addListener(listener: SocketListener<R, S>): Socket<R, S>
+
+  /**
+   * Writes an object into the socket
+   * @return this socket
+   */
   fun write(obj: S): Socket<R, S>
+
+
+  /**
+   * A socket can have a [User] associated with it. This function returns the user
+   */
   fun user(): User?
 
+  /**
+   * Registers a general purpose callback for items (of type [R]) received by the socket
+   */
   fun onData(fn: Socket<R, S>.(item: R) -> Unit) {
     this.addListener(object : SocketListener<R, S> {
       override fun dataHandler(socket: Socket<R, S>, item: R) {
@@ -36,6 +57,9 @@ interface Socket<R, S> {
     })
   }
 
+  /**
+   * Registers a general purpose callback for when the socket is closed
+   */
   fun onEnd(fn: Socket<R, S>.() -> Unit) {
     this.addListener(object : SocketListener<R, S> {
       override fun dataHandler(socket: Socket<R, S>, item: R) {
