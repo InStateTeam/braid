@@ -9,9 +9,9 @@
 1. [Introduction](#introduction) 
 2. [Context](#context)
 
-    1. [Containers](#containers)
-    2. [Consuming Services](#consuming-services)
-    3. [Protocol](#protocol)
+    * [Containers](#containers)
+    * [Consuming Services](#consuming-services)
+    * [Protocol](#protocol)
     
 3. [Buildig locally](#building-locally)
 4. [Publishing / Deploying Artifacts](#publishing-/-deploying-artifacts)
