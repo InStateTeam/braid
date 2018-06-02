@@ -12,23 +12,23 @@
 ## Invocation Protocol
 
 The Braid invocation protocol is a backwards-compatible extension to [JsonRPC 2.0](http://www.jsonrpc.org/specification).
-This extension is provides the capability for streamed replies to a given request. 
+This extension provides the capability for streamed replies to a given request. 
 The extension applies to the [Request payload](http://www.jsonrpc.org/specification#request_object) and the 
 [Response payload](http://www.jsonrpc.org/specification#response_object).
 
 ### Request payload extension
  
 [JsonRPC 2.0](http://www.jsonrpc.org/specification#request_object) defines the following standard fields: `jsonrpc`, `method`, `params`, and `id`.
-Braid adds one addition field:
+Braid adds one additional field:
 
-**`streamed`** - this is an **optional** `boolean`, with the default being `false`. If `true`, the requests denotes that the client is expecting a streamed response. 
+**`streamed`** - this is an **optional** `boolean`, with the default being `false`. If `true`, the request denotes that the client is expecting a streamed response. 
 When `true`, the Braid server will send responses that meet the **Response** payload extension (see below).
 
 
 ### Response payload extension
 
 [JsonRPC 2.0](http://www.jsonrpc.org/specification#response_object) defines the following standard fields: `jsonrpc`, `result`, `error`, and `id`.
-In addition, the Braid extension specifies one additional field:
+Braid specifies one additional field:
 
 **`completed`** - this is an **optional** field. When present, it denotes that the response is the last result packet for request with the same `id`. 
 The presence of the field, irrespective of its value, is sufficient to terminate the flow.
