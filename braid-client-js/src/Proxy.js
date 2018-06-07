@@ -63,7 +63,7 @@ export class Proxy {
     }
 
     function onInternalClose() {
-      if (connections <= 0 && errors === 0 && onClose) {
+      if (--connections <= 0 && errors === 0 && onClose) {
         onClose()
       }
     }
