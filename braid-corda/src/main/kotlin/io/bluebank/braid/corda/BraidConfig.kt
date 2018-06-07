@@ -25,15 +25,25 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import net.corda.core.flows.FlowLogic
 import net.corda.core.node.AppServiceHub
-import net.corda.core.node.ServiceHub
 import kotlin.reflect.KClass
 
+/**
+ * Configuration class for Braid
+ * @param port - port that the service is bound on
+ * @param rootPath - the HTTP path that is at the root of the API
+ * @param registeredFlows - a map from flow name to [FlowLogic] class
+ * @param services - map from service name to service instance
+ * @param authConstructor - a lambda that is creates a [Vertx] [AuthProvider]
+ * @param httpServerOptions - these options control all HTTP transport concerns e.g. TLS
+ * @param threadPoolSize - the number of executor threads available for each connected client
+ */
 data class BraidConfig(val port: Int = 8080,
                        val rootPath: String = "/api/",
                        val registeredFlows: Map<String, Class<out FlowLogic<*>>> = emptyMap(),
                        val services: Map<String, Any> = emptyMap(),
                        val authConstructor: ((Vertx) -> AuthProvider)? = null,
-                       val httpServerOptions: HttpServerOptions = defaultServerOptions()) {
+                       val httpServerOptions: HttpServerOptions = defaultServerOptions(),
+                       val threadPoolSize : Int = 1) {
 
   companion object {
     private val log = loggerFor<BraidConfig>()
@@ -66,6 +76,9 @@ data class BraidConfig(val port: Int = 8080,
     map.put(name, service)
     return this.copy(services = map)
   }
+  fun withThreadPoolSize(threadCount: Int) : BraidConfig {
+    return this.copy(threadPoolSize = threadCount)
+  }
   inline fun <reified T : FlowLogic<*>> withFlow(name: String, flowClass: KClass<T>) = withFlow(name, flowClass.java)
   inline fun <reified T : FlowLogic<*>> withFlow(flowClass: KClass<T>) = withFlow(flowClass.java)
 
@@ -79,5 +92,6 @@ data class BraidConfig(val port: Int = 8080,
   }
 
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
+
   fun bootstrapBraid(serviceHub: AppServiceHub) = BraidServer.bootstrapBraid(serviceHub, this)
 }
