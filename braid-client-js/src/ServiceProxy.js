@@ -139,7 +139,6 @@ class BraidServiceProxy {
         return invokeForPromise(method, args);
       }
     }
-
   }
 }
 

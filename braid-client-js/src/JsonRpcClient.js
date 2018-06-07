@@ -26,9 +26,10 @@ export default class JsonRPC {
     let nextId = 1;
     let state = {};
     let status = "CLOSED";
-    that.onOpen = null;
-    that.onClose = null;
-    that.onError = null;
+    this.onOpen = null;
+    this.onClose = null;
+    this.onError = null;
+    this.socket = null;
 
     if (typeof options === 'undefined') {
       options = {}
@@ -58,7 +59,7 @@ export default class JsonRPC {
         headers: {
           "Content-Type": "application/json"
         }
-      }, function(err, resp, body) {
+      }, function(err, resp) {
         if (err) {
           console.log("error!", err);
           initialCheckFailed(err)
@@ -100,6 +101,7 @@ export default class JsonRPC {
         }
         return
       }
+
       options.rejectUnauthorized = false;
       that.socket = new SockJS(url, null, options);
       that.socket.onopen = function (e) {
@@ -138,7 +140,7 @@ export default class JsonRPC {
     }
 
     function errorHandler(err) {
-      that.status = "FAILED";
+      status = "FAILED";
       if (that.onError) {
         that.onError(err);
       }
@@ -257,7 +259,7 @@ export default class JsonRPC {
       return new Promise(function (resolve, reject) {
         that.invokeForStream(method, params, resolve, reject, undefined, false);
       });
-    }
+    };
 
     that.invokeForStream = function(method, params, onNext, onError, onCompleted, streamed) {
       const id = nextId++;
@@ -275,11 +277,11 @@ export default class JsonRPC {
       state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
       that.socket.send(JSON.stringify(payload));
       return new CancellableInvocation(this, id, state);
-    }
+    };
 
     // -- INITIALISATION --
 
-    checkServiceExistsAndBootstrap()
+    checkServiceExistsAndBootstrap();
   }
 }
 
