@@ -89,7 +89,7 @@ class ProxyTest {
 
     val sockJSHandler = SockJSHandler.create(rule.vertx())
     sockJSHandler.socketHandler {
-      val wrapper = SockJSSocketWrapper.create(it)
+      val wrapper = SockJSSocketWrapper.create(it, rule.vertx())
       val typedSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
       val mounter = JsonRPCMounter(ConcreteServiceExecutor(GreeterService(rule.vertx())))
 

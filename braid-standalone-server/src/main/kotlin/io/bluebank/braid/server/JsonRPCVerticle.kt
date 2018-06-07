@@ -234,7 +234,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
       // TODO: the pipeline setup is complex. rework this to ease comprehension
       // the slight gotcha is that the service may or may not be authenticated
       // perhaps all services should be authenticated?
-      val sockWrapper = with(SockJSSocketWrapper.create(socket)) {
+      val sockWrapper = with(SockJSSocketWrapper.create(socket, vertx)) {
         if (authProvider != null) {
           val authenticatedSocket = AuthenticatedSocket.create(authProvider)
           this.addListener(authenticatedSocket)

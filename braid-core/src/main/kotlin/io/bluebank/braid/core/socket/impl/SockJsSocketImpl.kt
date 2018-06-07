@@ -24,7 +24,9 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer, Buffer>(), SockJSSocketWrapper {
 
   init {
-    sockJS.handler { onData(it) }
+    sockJS.handler { buffer ->
+        onData(buffer)
+    }
     sockJS.endHandler {
       onEnd()
     }

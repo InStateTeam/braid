@@ -98,7 +98,7 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   }
 
   private fun socketHandler(socket: SockJSSocket, timeService: TimeService) {
-    val wrapper = SockJSSocketWrapper.create(socket)
+    val wrapper = SockJSSocketWrapper.create(socket, vertx)
     val auth = AuthenticatedSocket.create(getAuthProvider())
     val mount = JsonRPCMounter(ConcreteServiceExecutor(timeService))
     val transformer = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
