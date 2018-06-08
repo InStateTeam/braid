@@ -17,11 +17,18 @@ package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.corda.restafarian.Restafarian.Companion.mount
 import io.bluebank.braid.corda.router.Routers
+import io.netty.buffer.ByteBuf
 import io.swagger.models.Scheme
 import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
+import java.nio.ByteBuffer
 
 class MyService {
   fun sayHello() = "hello"
+  fun getBuffer() : Buffer = Buffer.buffer("hello")
+  fun getByteArray() : ByteArray = Buffer.buffer("hello").bytes
+  fun getByteBuf() : ByteBuf = Buffer.buffer("hello").byteBuf
+  fun getByteBuffer() :ByteBuffer = Buffer.buffer("hello").byteBuf.nioBuffer()
 }
 
 class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
@@ -43,6 +50,10 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)
+        this.get("/buffer", service::getBuffer)
+        this.get("/bytearray", service::getByteArray)
+        this.get("/bytebuf", service::getByteBuf)
+        this.get("/bytebuffer", service::getByteBuffer)
       }
     }
     vertx.createHttpServer()

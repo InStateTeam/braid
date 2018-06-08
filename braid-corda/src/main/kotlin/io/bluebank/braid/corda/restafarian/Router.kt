@@ -18,11 +18,14 @@ package io.bluebank.braid.corda.restafarian
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
 import io.bluebank.braid.core.http.withErrorHandler
+import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiParam
 import io.vertx.core.Future
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
+import java.nio.ByteBuffer
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -57,11 +60,27 @@ private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?
 
 private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
   return context.body.let {
-    if (it != null && it.length() > 0) {
-      val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)
-      Json.mapper.readValue<Any>(it.toString(), constructType)
-    } else {
-      null
+    when (this.getType()) {
+      Buffer::class -> {
+        it
+      }
+      ByteArray::class -> {
+        it.bytes
+      }
+      ByteBuf::class -> {
+        it.byteBuf
+      }
+      ByteBuffer::class -> {
+        ByteBuffer.wrap(it.bytes)
+      }
+      else -> {
+        if (it != null && it.length() > 0) {
+          val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)
+          Json.mapper.readValue<Any>(it.toString(), constructType)
+        } else {
+          null
+        }
+      }
     }
   }
 }

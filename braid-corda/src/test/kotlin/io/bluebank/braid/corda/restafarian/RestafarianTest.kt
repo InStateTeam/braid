@@ -16,7 +16,9 @@
 package io.bluebank.braid.corda.restafarian
 
 import io.bluebank.braid.core.socket.findFreePort
+import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
@@ -76,6 +78,56 @@ class RestafarianTest {
           }
         }
         .end()
+
+    val async4 = context.async()
+    client.get(port, "localhost", "/api/buffer")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals(HttpHeaderValues.APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals("hello", body.toString())
+          async4.complete()
+        }
+      }
+      .end()
+
+
+    val async5 = context.async()
+    client.get(port, "localhost", "/api/bytearray")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals(HttpHeaderValues.APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals("hello", body.toString())
+          async5.complete()
+        }
+      }
+      .end()
+
+
+    val async6 = context.async()
+    client.get(port, "localhost", "/api/bytebuf")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals(HttpHeaderValues.APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals("hello", body.toString())
+          async6.complete()
+        }
+      }
+      .end()
+
+    val async7 = context.async()
+    client.get(port, "localhost", "/api/bytebuffer")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals(HttpHeaderValues.APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals("hello", body.toString())
+          async7.complete()
+        }
+      }
+      .end()
   }
 }
 
