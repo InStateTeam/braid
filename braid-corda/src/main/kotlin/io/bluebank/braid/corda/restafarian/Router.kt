@@ -30,25 +30,32 @@ import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.javaType
 
 fun <R> Route.bind(fn: KCallable<R>) {
-  this.handler {
-    it.withErrorHandler {
-      val args = fn.parseArguments(it)
-      val result = fn.call(*args)
-      it.response().end(result)
+  this.handler { rc ->
+    rc.withErrorHandler {
+      rc.request().bodyHandler { body ->
+        rc.body = body
+        val args = fn.parseArguments(rc)
+        val result = fn.call(*args)
+        rc.response().end(result)
+      }
     }
   }
 }
 
 @JvmName("bindOnFuture")
 fun <R> Route.bind(fn: KCallable<Future<R>>) {
-  this.handler {
-    it.withErrorHandler {
-      val args = fn.parseArguments(it)
-      it.response().end(fn.call(*args))
+  this.handler { rc ->
+    rc.withErrorHandler {
+      rc.request().bodyHandler { body ->
+        rc.body = body
+        val args = fn.parseArguments(rc)
+        rc.response().end(fn.call(*args))
+      }
     }
   }
 }
@@ -59,24 +66,25 @@ private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?
 
 
 private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
-  return context.body.let {
-    when (this.getType()) {
-      Buffer::class -> {
-        it
+  return context.body.let { body ->
+    val type = this.getType()
+    when {
+      type.isSubclassOf(Buffer::class)-> {
+        body
       }
-      ByteArray::class -> {
-        it.bytes
+      type.isSubclassOf(ByteArray::class)-> {
+        body.bytes
       }
-      ByteBuf::class -> {
-        it.byteBuf
+      type.isSubclassOf(ByteBuf::class) -> {
+        body.byteBuf
       }
-      ByteBuffer::class -> {
-        ByteBuffer.wrap(it.bytes)
+      type.isSubclassOf(ByteBuffer::class) -> {
+        ByteBuffer.wrap(body.bytes)
       }
       else -> {
-        if (it != null && it.length() > 0) {
+        if (body != null && body.length() > 0) {
           val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)
-          Json.mapper.readValue<Any>(it.toString(), constructType)
+          Json.mapper.readValue<Any>(body.toString(), constructType)
         } else {
           null
         }
@@ -117,7 +125,7 @@ private fun KParameter.parseQueryParameter(context: RoutingContext): Any? {
   return when {
     this.isSimpleType() -> {
       val parameterName = this.parameterName() ?: return null
-      val queryParam = context.request().query().parseQueryParams().get(parameterName)
+      val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
       // TODO: handle arrays
       if (queryParam != null) {
         this.parseSimpleType(queryParam)

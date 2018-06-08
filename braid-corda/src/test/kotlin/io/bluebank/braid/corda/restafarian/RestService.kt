@@ -25,10 +25,16 @@ import java.nio.ByteBuffer
 
 class MyService {
   fun sayHello() = "hello"
-  fun getBuffer() : Buffer = Buffer.buffer("hello")
-  fun getByteArray() : ByteArray = Buffer.buffer("hello").bytes
-  fun getByteBuf() : ByteBuf = Buffer.buffer("hello").byteBuf
-  fun getByteBuffer() :ByteBuffer = Buffer.buffer("hello").byteBuf.nioBuffer()
+  fun echo(msg: String) = "echo: $msg"
+  fun getBuffer(): Buffer = Buffer.buffer("hello")
+  fun getByteArray(): ByteArray = Buffer.buffer("hello").bytes
+  fun getByteBuf(): ByteBuf = Buffer.buffer("hello").byteBuf
+  fun getByteBuffer(): ByteBuffer = Buffer.buffer("hello").byteBuf.nioBuffer()
+  fun doubleBuffer(bytes: Buffer): Buffer =
+    Buffer.buffer(bytes.length() * 2)
+      .appendBytes(bytes.bytes)
+      .appendBytes(bytes.bytes)
+
 }
 
 class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
@@ -38,26 +44,29 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
       MyServiceSetup(Vertx.vertx(), 8080, MyService())
     }
   }
+
   init {
     val router = Routers.create(vertx, port)
     mount(
-        serviceName = "my-service",
-        hostAndPortUri = "http://localhost:$port",
-        apiPath = "/api",
-        router = router,
-        scheme = Scheme.HTTP,
-        vertx = vertx
+      serviceName = "my-service",
+      hostAndPortUri = "http://localhost:$port",
+      apiPath = "/api",
+      router = router,
+      scheme = Scheme.HTTP,
+      vertx = vertx
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)
+        this.post("/echo", service::echo)
         this.get("/buffer", service::getBuffer)
         this.get("/bytearray", service::getByteArray)
         this.get("/bytebuf", service::getByteBuf)
         this.get("/bytebuffer", service::getByteBuffer)
+        this.post("/doublebuffer", service::doubleBuffer)
       }
     }
     vertx.createHttpServer()
-        .requestHandler(router::accept)
-        .listen(port)
+      .requestHandler(router::accept)
+      .listen(port)
   }
 }
