@@ -15,7 +15,10 @@
  */
 package io.bluebank.braid.core.http
 
+import io.netty.buffer.ByteBuf
+import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.Future
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
@@ -24,6 +27,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.InvocationTargetException
+import java.nio.ByteBuffer
 
 fun Router.setupAllowAnyCORS() {
   route().handler {
@@ -77,13 +81,17 @@ fun <T> HttpServerResponse.end(future: Future<T>) {
 fun <T> HttpServerResponse.end(value: T) {
   when (value) {
     is String -> this.endWithString(value)
+    is Buffer -> this.endWithBuffer(value)
+    is ByteArray -> this.endWithByteArray(value)
+    is ByteBuffer -> this.endWithByteBuffer(value)
+    is ByteBuf -> this.endWithByteBuf(value)
     is JsonArray -> this.end(value)
     is JsonObject -> this.end(value)
     else -> {
       val payload = Json.encode(value)
       this
           .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-          .putHeader(HttpHeaders.CONTENT_TYPE,  "application/json")
+          .putHeader(HttpHeaders.CONTENT_TYPE,  HttpHeaderValues.APPLICATION_JSON)
           .end(payload)
     }
   }
@@ -91,8 +99,27 @@ fun <T> HttpServerResponse.end(value: T) {
 
 fun HttpServerResponse.endWithString(value: String) {
   this.putHeader(HttpHeaders.CONTENT_LENGTH, value.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
+      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN)
       .end(value)
+}
+
+fun HttpServerResponse.endWithBuffer(value: Buffer) {
+  this.putHeader(HttpHeaders.CONTENT_LENGTH, value.length().toString())
+    .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM)
+    .end(value)
+}
+
+fun HttpServerResponse.endWithByteBuffer(value: ByteBuffer) {
+  endWithByteArray(value.array())
+}
+
+fun HttpServerResponse.endWithByteArray(value: ByteArray) {
+  endWithBuffer(Buffer.buffer(value))
+}
+
+
+fun HttpServerResponse.endWithByteBuf(value: ByteBuf) {
+  endWithBuffer(Buffer.buffer(value))
 }
 
 fun HttpServerResponse.end(value: JsonArray) {

@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda
 
 import com.google.common.io.Resources
+import io.bluebank.braid.corda.restafarian.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
@@ -43,7 +44,8 @@ data class BraidConfig(val port: Int = 8080,
                        val services: Map<String, Any> = emptyMap(),
                        val authConstructor: ((Vertx) -> AuthProvider)? = null,
                        val httpServerOptions: HttpServerOptions = defaultServerOptions(),
-                       val threadPoolSize : Int = 1) {
+                       val threadPoolSize : Int = 1,
+                       val restConfig: RestConfig? = null) {
 
   companion object {
     private val log = loggerFor<BraidConfig>()
@@ -79,6 +81,9 @@ data class BraidConfig(val port: Int = 8080,
   fun withThreadPoolSize(threadCount: Int) : BraidConfig {
     return this.copy(threadPoolSize = threadCount)
   }
+  fun withRestConfig(restConfig: RestConfig) : BraidConfig {
+    return this.copy(restConfig = restConfig)
+  }
   inline fun <reified T : FlowLogic<*>> withFlow(name: String, flowClass: KClass<T>) = withFlow(name, flowClass.java)
   inline fun <reified T : FlowLogic<*>> withFlow(flowClass: KClass<T>) = withFlow(flowClass.java)
 
@@ -93,5 +98,5 @@ data class BraidConfig(val port: Int = 8080,
 
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
-  fun bootstrapBraid(serviceHub: AppServiceHub) = BraidServer.bootstrapBraid(serviceHub, this)
+  fun bootstrapBraid(serviceHub: AppServiceHub? = null) = BraidServer.bootstrapBraid(serviceHub, this)
 }
