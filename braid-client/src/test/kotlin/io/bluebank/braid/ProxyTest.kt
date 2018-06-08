@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid
 
 import io.bluebank.braid.client.BraidClientConfig
 import io.bluebank.braid.client.BraidProxyClient
+import io.bluebank.braid.server.ComplexObject
+import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
-import io.bluebank.braid.server.service.ComplexObject
-import io.bluebank.braid.server.service.MyService
-import io.bluebank.braid.server.service.MyServiceImpl
+import io.bluebank.braid.server.MyService
+import io.bluebank.braid.server.MyServiceImpl
 import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner

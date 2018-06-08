@@ -85,7 +85,7 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
 
     client.websocket(url.toString(), { socket ->
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
-      sockets.put(clazz, socket)
+      sockets[clazz] = socket
       socket.handler(this::handler)
       socket.exceptionHandler(exceptionHandler)
       socket.closeHandler(closeHandler)

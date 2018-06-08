@@ -75,7 +75,7 @@ data class BraidConfig(val port: Int = 8080,
   fun withService(service: Any) = withService(service.javaClass.simpleName.decapitalize(), service)
   fun withService(name: String, service: Any) : BraidConfig {
     val map = services.toMutableMap()
-    map.put(name, service)
+    map[name] = service
     return this.copy(services = map)
   }
   fun withThreadPoolSize(threadCount: Int) : BraidConfig {
@@ -92,7 +92,7 @@ data class BraidConfig(val port: Int = 8080,
 
   fun <T : FlowLogic<*>> withFlow(name: String, flowClass: Class<T>): BraidConfig {
     val map = registeredFlows.toMutableMap()
-    map.put(name, flowClass)
+    map[name] = flowClass
     return this.copy(registeredFlows = map)
   }
 

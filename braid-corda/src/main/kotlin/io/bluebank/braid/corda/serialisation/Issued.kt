@@ -27,21 +27,21 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import java.util.*
 
-private val _PRODUCT_TYPE_FIELD = "_productType"
-private val _ISSUER_FIELD = "issuer"
-private val _PRODUCT_FIELD = "product"
+private const val PRODUCT_TYPE_FIELD = "_productType"
+private const val ISSUER_FIELD = "issuer"
+private const val PRODUCT_FIELD = "product"
 
 class IssuedSerializer : StdSerializer<Issued<Any>>(Issued::class.java) {
   override fun serialize(value: Issued<Any>, generator: JsonGenerator, provider: SerializerProvider) {
     generator.writeStartObject()
-    generator.writeObjectField(_ISSUER_FIELD, value.issuer)
+    generator.writeObjectField(ISSUER_FIELD, value.issuer)
     val product = value.product
     when (product) {
-      is String -> generator.writeStringField(_PRODUCT_FIELD, product)
-      is Currency -> generator.writeObjectField(_PRODUCT_FIELD, product)
+      is String -> generator.writeStringField(PRODUCT_FIELD, product)
+      is Currency -> generator.writeObjectField(PRODUCT_FIELD, product)
       else -> {
-        generator.writeObjectField(_PRODUCT_FIELD, product)
-        generator.writeObjectField(_PRODUCT_TYPE_FIELD, product.javaClass.name)
+        generator.writeObjectField(PRODUCT_FIELD, product)
+        generator.writeObjectField(PRODUCT_TYPE_FIELD, product.javaClass.name)
       }
     }
     generator.writeEndObject()
@@ -63,12 +63,12 @@ class IssuedDeserializer : StdDeserializer<Issued<Any>>(Issued::class.java) {
 
   private fun checkNode(node: JsonNode, parser: JsonParser) {
     checkIsObject(node, parser)
-    checkHasField(_ISSUER_FIELD, node, parser)
-    checkHasField(_PRODUCT_FIELD, node, parser)
+    checkHasField(ISSUER_FIELD, node, parser)
+    checkHasField(PRODUCT_FIELD, node, parser)
   }
 
   private fun parseProduct(node: JsonNode): Any {
-    return if (node.has(_PRODUCT_TYPE_FIELD)) {
+    return if (node.has(PRODUCT_TYPE_FIELD)) {
       parserProductByType(node)
     } else {
       parseProductFromString(node)
@@ -76,7 +76,7 @@ class IssuedDeserializer : StdDeserializer<Issued<Any>>(Issued::class.java) {
   }
 
   private fun parseProductFromString(node: JsonNode): Any {
-    val productString = node[_PRODUCT_FIELD].textValue()
+    val productString = node[PRODUCT_FIELD].textValue()
     return try {
       Currency.getInstance(productString)
     } catch (err: IllegalArgumentException) {
@@ -85,11 +85,11 @@ class IssuedDeserializer : StdDeserializer<Issued<Any>>(Issued::class.java) {
   }
 
   private fun parserProductByType(node: JsonNode): Any {
-    val productClass = Class.forName(node[_PRODUCT_TYPE_FIELD].textValue())
-    return Json.mapper.readerFor(productClass).readValue<Any>(node[_PRODUCT_FIELD])
+    val productClass = Class.forName(node[PRODUCT_TYPE_FIELD].textValue())
+    return Json.mapper.readerFor(productClass).readValue<Any>(node[PRODUCT_FIELD])
   }
 
   private fun parserPartyAndRef(node: JsonNode): PartyAndReference {
-    return Json.mapper.readerFor(PartyAndReference::class.java).readValue<PartyAndReference>(node[_ISSUER_FIELD])
+    return Json.mapper.readerFor(PartyAndReference::class.java).readValue<PartyAndReference>(node[ISSUER_FIELD])
   }
 }

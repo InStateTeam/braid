@@ -33,17 +33,17 @@ import java.lang.reflect.Proxy
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
-data class ServiceEndpoint(val host : String = "localhost",
-                           val ssl : Boolean = false,
-                           val path : String = "/api/",
-                           val port : Int = 8080,
+data class ServiceEndpoint(val host: String = "localhost",
+                           val ssl: Boolean = false,
+                           val path: String = "/api/",
+                           val port: Int = 8080,
                            val credentials: JsonObject? = null)
 
 private class InvocationClosure(val subscriber: Subscriber<*>, returnType: Class<*>)
 
 class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   private val vertx = Vertx.vertx()
-  private val client : HttpClient
+  private val client: HttpClient
   private lateinit var socket: WebSocket
   private val nextId = AtomicLong()
   private val activeRequests = mutableMapOf<Long, InvocationClosure>()
@@ -51,10 +51,10 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   init {
     client = vertx.createHttpClient()
     val ro = RequestOptions()
-        .setHost(endpoint.host)
-        .setPort(endpoint.port)
-        .setSsl(endpoint.ssl)
-        .setURI(endpoint.path)
+      .setHost(endpoint.host)
+      .setPort(endpoint.port)
+      .setSsl(endpoint.ssl)
+      .setURI(endpoint.path)
     client.websocket(ro) { ws ->
       socket = ws
       socket.handler(this::handler)
@@ -69,13 +69,13 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
     return when {
       (method.returnType == Observable::class.java) -> {
-        return invokeForObservable(proxy, method, args)
+        invokeForObservable(proxy, method, args)
       }
       (method.returnType == Future::class.java) -> {
-        return invokeForFuture(proxy, method, args)
+        invokeForFuture(proxy, method, args)
       }
       (method.returnType.simpleName == "void") -> {
-        return invokeForVoid(proxy, method, args)
+        invokeForVoid(proxy, method, args)
       }
       else -> {
         throw RuntimeException("return type unhandled: " + method.returnType.name)
@@ -90,7 +90,7 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   private fun invokeForFuture(proxy: Any, method: Method, args: Array<out Any>): Future<*> {
     val result = Future.future<Any>()
     invokeForObservable(proxy, method, args)
-        .subscribe(result::complete, result::fail)
+      .subscribe(result::complete, result::fail)
     return result
   }
 
@@ -108,7 +108,7 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
 
 inline fun <reified T : Any> KClass<T>.braidProxy(endpoint: ServiceEndpoint) = braidProxy(T::class.java, endpoint)
 
-fun <T: Any> braidProxy(clazz: Class<T>, endpoint: ServiceEndpoint) : T {
+fun <T : Any> braidProxy(clazz: Class<T>, endpoint: ServiceEndpoint): T {
   val loader = clazz.classLoader
   val interfaces = arrayOf(clazz)
   val invocationHandler = BraidInvocationHandler(endpoint)

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
