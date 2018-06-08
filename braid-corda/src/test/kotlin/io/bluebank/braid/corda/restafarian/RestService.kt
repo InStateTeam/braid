@@ -15,11 +15,11 @@
  */
 package io.bluebank.braid.corda.restafarian
 
-import io.bluebank.braid.corda.restafarian.Restafarian.Companion.mount
-import io.bluebank.braid.corda.router.Routers
+import io.bluebank.braid.corda.BraidConfig
+import io.bluebank.braid.core.http.HttpServerConfig
 import io.netty.buffer.ByteBuf
 import io.swagger.models.Scheme
-import io.vertx.core.Vertx
+import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import java.nio.ByteBuffer
 
@@ -37,23 +37,22 @@ class MyService {
 
 }
 
-class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
+class MyServiceSetup(port: Int, service: MyService) {
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
-      MyServiceSetup(Vertx.vertx(), 8080, MyService())
+      MyServiceSetup(8080, MyService())
     }
   }
 
-  init {
-    val router = Routers.create(vertx, port)
-    mount(
+  val server = BraidConfig()
+    .withPort(port)
+    .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
+    .withRestConfig(RestConfig(
       serviceName = "my-service",
       hostAndPortUri = "http://localhost:$port",
       apiPath = "/api",
-      router = router,
-      scheme = Scheme.HTTP,
-      vertx = vertx
+      scheme = Scheme.HTTP
     ) {
       this.group("General Ledger") {
         this.get("/hello", service::sayHello)
@@ -64,9 +63,8 @@ class MyServiceSetup(vertx: Vertx, port: Int, service: MyService) {
         this.get("/bytebuffer", service::getByteBuffer)
         this.post("/doublebuffer", service::doubleBuffer)
       }
-    }
-    vertx.createHttpServer()
-      .requestHandler(router::accept)
-      .listen(port)
-  }
+    }).bootstrapBraid()
+
+  fun whenReady(): Future<String> = server.whenReady()
+  fun shutdown() = server.shutdown()
 }

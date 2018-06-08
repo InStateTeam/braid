@@ -37,12 +37,9 @@ import kotlin.reflect.jvm.javaType
 fun <R> Route.bind(fn: KCallable<R>) {
   this.handler { rc ->
     rc.withErrorHandler {
-      rc.request().bodyHandler { body ->
-        rc.body = body
-        val args = fn.parseArguments(rc)
-        val result = fn.call(*args)
-        rc.response().end(result)
-      }
+      val args = fn.parseArguments(rc)
+      val result = fn.call(*args)
+      rc.response().end(result)
     }
   }
 }
@@ -51,11 +48,8 @@ fun <R> Route.bind(fn: KCallable<R>) {
 fun <R> Route.bind(fn: KCallable<Future<R>>) {
   this.handler { rc ->
     rc.withErrorHandler {
-      rc.request().bodyHandler { body ->
-        rc.body = body
-        val args = fn.parseArguments(rc)
-        rc.response().end(fn.call(*args))
-      }
+      val args = fn.parseArguments(rc)
+      rc.response().end(fn.call(*args))
     }
   }
 }
@@ -69,10 +63,10 @@ private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
   return context.body.let { body ->
     val type = this.getType()
     when {
-      type.isSubclassOf(Buffer::class)-> {
+      type.isSubclassOf(Buffer::class) -> {
         body
       }
-      type.isSubclassOf(ByteArray::class)-> {
+      type.isSubclassOf(ByteArray::class) -> {
         body.bytes
       }
       type.isSubclassOf(ByteBuf::class) -> {

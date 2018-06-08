@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda
 
+import io.bluebank.braid.corda.restafarian.Restafarian
 import io.bluebank.braid.corda.router.Routers
 import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
@@ -27,7 +28,7 @@ import io.vertx.ext.web.handler.BodyHandler
 import net.corda.core.node.AppServiceHub
 import net.corda.node.internal.Node
 
-class BraidVerticle(private val services: AppServiceHub, private val config: BraidConfig) : AbstractVerticle() {
+class BraidVerticle(private val services: AppServiceHub?, private val config: BraidConfig) : AbstractVerticle() {
   companion object {
     private val log = loggerFor<BraidVerticle>()
   }
@@ -57,7 +58,12 @@ class BraidVerticle(private val services: AppServiceHub, private val config: Bra
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
     router.setupOptionsMethod()
-    router.setupSockJSHandler(vertx, services, config)
+    services?.let {
+      router.setupSockJSHandler(vertx, services, config)
+    }
+    config.restConfig?.let {
+      Restafarian.mount(it, router, vertx)
+    }
     return router
   }
 }

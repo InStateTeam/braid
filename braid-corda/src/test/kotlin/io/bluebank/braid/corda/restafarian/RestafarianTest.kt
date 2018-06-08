@@ -18,7 +18,6 @@ package io.bluebank.braid.corda.restafarian
 import io.bluebank.braid.core.socket.findFreePort
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpHeaders.CONTENT_LENGTH
@@ -33,23 +32,21 @@ import org.junit.runner.RunWith
 @RunWith(VertxUnitRunner::class)
 class RestafarianTest {
   private val port = findFreePort()
-  private lateinit var vertx: Vertx
-  private val service = MyService()
+  private val service = MyServiceSetup(port, MyService())
+
   @Before
-  fun before() {
-    vertx = Vertx.vertx()
+  fun before(context: TestContext) {
+    service.whenReady().setHandler(context.asyncAssertSuccess())
   }
 
   @After
   fun after(context: TestContext) {
-    vertx.close(context.asyncAssertSuccess())
+    service.shutdown()
   }
 
   @Test
   fun `test that we can mount restafarian and access via swagger`(context: TestContext) {
-    MyServiceSetup(vertx, port, MyService())
-    val client = vertx.createHttpClient()
-
+    val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     client.get(port, "localhost", "/swagger.json")
         .exceptionHandler(context::fail)
