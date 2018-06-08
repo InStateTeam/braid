@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package io.bluebank.braid.corda.restafarian.docs
-
 
 import io.bluebank.braid.corda.restafarian.toSwaggerPath
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON

@@ -15,20 +15,15 @@
  */
 package io.bluebank.braid.corda.restafarian
 
-import io.bluebank.braid.corda.restafarian.docs.DocsHandler
 import io.bluebank.braid.core.socket.findFreePort
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM
-import io.swagger.annotations.ApiOperation
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpHeaders.CONTENT_LENGTH
 import io.vertx.core.http.HttpHeaders.CONTENT_TYPE
-import io.vertx.core.http.HttpMethod
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import io.vertx.ext.web.RoutingContext
-import net.corda.nodeapi.internal.SignedNodeInfo
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
