@@ -19,7 +19,6 @@ import io.bluebank.braid.client.BraidClientConfig
 import io.bluebank.braid.client.BraidCordaProxyClient
 import io.bluebank.braid.client.BraidProxyClient
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
-import io.bluebank.braid.server.service.ComplexObject
 import io.bluebank.braid.server.service.MyService
 import io.bluebank.braid.server.service.MyServiceImpl
 import io.vertx.core.Vertx
@@ -32,7 +31,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.ServerSocket
 import java.net.URI
-import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(VertxUnitRunner::class)
 class ProxyTest {

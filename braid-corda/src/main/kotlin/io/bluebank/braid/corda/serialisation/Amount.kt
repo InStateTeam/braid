@@ -70,7 +70,7 @@ class AmountDeserializer : StdDeserializer<Amount<Any>>(Amount::class.java) {
         Amount.parseCurrency(node.textValue()) as Amount<Any>
       }
       else -> {
-        throw RuntimeException("should never get here");
+        throw RuntimeException("should never get here")
       }
     }
   }

@@ -41,8 +41,7 @@ class HttpServerConfig {
         baos.write(jksStream.read())
       }
       val jksBytes = baos.toByteArray()!!
-      val jksBuffer = Buffer.buffer(jksBytes)
-      return jksBuffer
+      return Buffer.buffer(jksBytes)
     }
   }
 }

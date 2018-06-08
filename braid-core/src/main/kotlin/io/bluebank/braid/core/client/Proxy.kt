@@ -83,7 +83,7 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
     }
   }
 
-  private fun invokeForVoid(proxy: Any, method: Method, args: Array<out Any>): Unit {
+  private fun invokeForVoid(proxy: Any, method: Method, args: Array<out Any>) {
     invokeForObservable(proxy, method, args).subscribe()
   }
 

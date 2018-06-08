@@ -102,10 +102,6 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
     write(Json.encodeToBuffer(msg))
   }
 
-  private fun sendFailed(op: JsonRPCRequest, cause: Throwable) {
-    sendFailed(op, cause.message ?: "unspecified error")
-  }
-
   private fun sendFailed(op: JsonRPCRequest, message: String) {
     val msg = JsonRPCErrorResponse.serverError(id = op.id, message = message)
     write(Json.encodeToBuffer(msg))

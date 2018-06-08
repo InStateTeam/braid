@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.restafarian
 
+import io.bluebank.braid.corda.restafarian.docs.DocsHandler
 import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.models.Contact
 import io.swagger.models.Scheme

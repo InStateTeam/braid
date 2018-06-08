@@ -67,7 +67,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     }
   }
 
-  private val scriptPath = "${SCRIPTS_PATH}/$name.js"
+  private val scriptPath = "$SCRIPTS_PATH/$name.js"
   private var engine: ScriptEngine = createEngine()
   private val invocable: Invocable
     get() {

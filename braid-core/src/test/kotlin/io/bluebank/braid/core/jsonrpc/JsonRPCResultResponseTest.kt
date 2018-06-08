@@ -17,7 +17,6 @@ package io.bluebank.braid.core.jsonrpc
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
 import org.junit.Assert

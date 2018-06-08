@@ -64,7 +64,7 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
       BraidJacksonInit.init()
     }
 
-    fun <T : Any> createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
+    fun createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
       return BraidProxyClient(config, vertx)
     }
   }
