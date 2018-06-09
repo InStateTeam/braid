@@ -40,13 +40,13 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 
-class KEndPoint(groupName: String,
-                method: HttpMethod,
-                path: String,
+class KEndPoint(override val groupName: String,
+                override val method: HttpMethod,
+                override val path: String,
                 val name: String,
                 val parameters: List<KParameter>,
                 private val returnType: KType,
-                private val annotations: List<Annotation>) : EndPoint(groupName, method, path) {
+                private val annotations: List<Annotation>) : EndPoint() {
 
   private val _pathParams = Paths.PATH_PARAMS_RE.findAll(path)
     .map { it.groups[2]!!.value }

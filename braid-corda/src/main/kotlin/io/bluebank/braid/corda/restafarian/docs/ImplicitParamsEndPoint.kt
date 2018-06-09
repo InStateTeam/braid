@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.bluebank.braid.corda.restafarian.docs
 
 import io.swagger.models.Operation
 import io.swagger.models.parameters.Parameter
 import io.vertx.core.http.HttpMethod
 
-abstract class EndPoint {
-  abstract val groupName: String
-  abstract val method: HttpMethod
-  abstract val path: String
-  abstract val description: String
-  abstract fun decorateOperationWithResponseType(operation: Operation)
-  abstract fun toSwaggerParams(): List<Parameter>
+class ImplicitParamsEndPoint(override val groupName: String, override val method: HttpMethod, override val path: String) : EndPoint() {
+  override val description: String
+    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+  override fun decorateOperationWithResponseType(operation: Operation) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun toSwaggerParams(): List<Parameter> {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
 }
