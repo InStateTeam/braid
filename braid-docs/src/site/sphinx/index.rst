@@ -2,12 +2,6 @@
 Braid
 #####
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   concepts.rst
-
 Introduction
 ============
 

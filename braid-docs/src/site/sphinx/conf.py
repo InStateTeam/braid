@@ -20,8 +20,8 @@
 # -- Project information -----------------------------------------------------
 
 project = u'braid'
-copyright = u'2018, Fuzz'
-author = u'Fuzz'
+copyright = u'2018, Bluebank'
+author = u'Bluebank'
 
 # The short X.Y version
 version = u''
@@ -77,7 +77,7 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic'
+# html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -132,7 +132,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'braid.tex', u'braid Documentation',
-     u'Fuzz', 'manual'),
+     u'Bluebank', 'manual'),
 ]
 
 
