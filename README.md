@@ -2,7 +2,7 @@
 
 [![pipeline status](https://gitlab.com/bluebank/braid/badges/master/pipeline.svg)](https://gitlab.com/bluebank/braid/commits/master)
 
-![logo](docs/src/site/sphinx/images/logo-small.png) 
+![logo](braid-docs/src/site/sphinx/images/logo-small.png) 
 
 ## Contents
 

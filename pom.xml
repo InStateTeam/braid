@@ -109,7 +109,7 @@
     <module>braid-client</module>
     <module>braid-corda-client</module>
     <module>examples/example-cordapp</module>
-    <module>docs</module>
+    <module>braid-docs</module>
   </modules>
 
   <distributionManagement>
