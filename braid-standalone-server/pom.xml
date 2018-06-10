@@ -275,4 +275,28 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <inherited>false</inherited>
+            <reports/>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>sphinx-maven-plugin</artifactId>
+        <version>2.2.2</version>
+        <reportSets>
+          <reportSet>
+            <inherited>false</inherited>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

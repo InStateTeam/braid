@@ -51,12 +51,14 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
       val key = org to port
       cache.computeIfAbsent(key) {
         log.info("Starting Braid service for $org on port $port")
+        // DOCSTART 1
         BraidConfig()
             .withFlow("echo", EchoFlow::class)
             .withService(CustomService(serviceHub))
             .withAuthConstructor(this::shiroFactory)
             .withPort(port)
             .bootstrapBraid(serviceHub)
+        // DOCEND 1
       }
     } else {
       log.info("No port defined for $org")
