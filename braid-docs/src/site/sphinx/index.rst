@@ -2,6 +2,12 @@
 Braid
 #####
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   concepts.rst
+
 Introduction
 ============
 
@@ -33,7 +39,7 @@ Multiple transports:
 * HTTP XHR requests (long polls etc)
 * Websockets
 
-All using the power of `SockJS https://github.com/sockjs`
+All using the power of `SockJS <https://github.com/sockjs>`_
 
 Multiple encodings:
 
@@ -57,6 +63,31 @@ Writing web-services appears easy at first. But to create production ready servi
 * Finally, typically, the authentication and authorisation models are intricate and require careful work to integrate with incumbent security services.
 
 REST slows down project delivery, adds risk, and distracts focus from the value of the service being implemented.
+
+**Braid is an answer to the above**
+
+* Expose your services as plain old Java/Kotlin/Scala classes.
+* Your methods can return any type including Futures and reactive streams.
+* Currently, consume your services in Javascript. Plans are in place for Python, C#, F#, GoLang and more.
+* Braid makes good assumptions on security, serialisation, and transports - which you can alter if you wish.
+* Uses open protocols for its transports and serialisation: Websockets, HTTP.
+* It's fast - capable of handling 8-9K concurrent requests per second on a small Amazon instance; and it scales well.
+* Your services will be exposed with rich metadata (far better than Swagger) that will give you a rich developer experience on the client side.
+* You can plugin your preferred authentication services.
+
+Whilst Braid takes every effort to provide an efficient, reactive and enterprise ready transport, it also recognises that
+many items of work still require a REST interface to be provided. As such, Braid also ships with a very efficient REST
+engine that exports your services with a Swagger endpoint.
+
+Containers
+^^^^^^^^^^
+
+There are various containers that Braid can work in:
+
+* `Standalone processes <../../../braid-standalone-server>`_
+* `Corda nodes <../../../braid-corda>`_
+
+Both of these rely on `braid-core <../../../braid-core>`_.
 
 
 .. container:: codeset
