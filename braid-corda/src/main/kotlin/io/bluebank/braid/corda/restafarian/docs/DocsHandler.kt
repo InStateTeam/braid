@@ -86,14 +86,7 @@ class DocsHandler(
 
   private fun Swagger.addEndpoint(endpoint: EndPoint) {
 
-    val operation = Operation().consumes(APPLICATION_JSON.toString())
-    operation.description = endpoint.description
-
-    endpoint.decorateOperationWithResponseType(operation)
-    operation.parameters = endpoint.toSwaggerParams()
-    operation.tag(endpoint.groupName)
     val swaggerPath = endpoint.path.toSwaggerPath()
-
     val path = if (this.paths != null && this.paths.contains(swaggerPath)) {
       paths[swaggerPath]!!
     } else {
@@ -101,6 +94,7 @@ class DocsHandler(
       this.path(swaggerPath, path)
       path
     }
+    val operation = endpoint.toOperation()
 
     when (endpoint.method) {
       GET -> path.get(operation)
@@ -113,15 +107,16 @@ class DocsHandler(
   }
 
   fun <Response> add(groupName: String, method: HttpMethod, path: String, handler: KCallable<Response>) {
-    val endpoint = KEndPoint(groupName, method, path, handler.name, handler.parameters, handler.returnType, handler.annotations)
+    val endpoint = EndPoint.create(groupName, method, path, handler.name, handler.parameters, handler.returnType, handler.annotations)
     add(endpoint)
   }
 
   fun add(groupName: String, method: HttpMethod, path: String, handler: (RoutingContext) -> Unit) {
-    TODO()
+    val endpoint = EndPoint.create(groupName, method, path, handler)
+    add(endpoint)
   }
 
-  private fun add(endpoint: KEndPoint) {
+  private fun add(endpoint: EndPoint) {
     endpoints.add(endpoint)
     endpoint.addTypes(models)
   }

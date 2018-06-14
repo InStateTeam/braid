@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(VertxUnitRunner::class)
 class RestafarianTest {
   private val port = findFreePort()
-  private val service = MyServiceSetup(port, MyService())
+  private val service = TestServiceApp(port, TestService())
 
   @Before
   fun before(context: TestContext) {
