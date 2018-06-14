@@ -64,7 +64,7 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
       BraidJacksonInit.init()
     }
 
-    fun <T : Any> createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
+    fun createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
       return BraidProxyClient(config, vertx)
     }
   }
@@ -85,7 +85,7 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
 
     client.websocket(url.toString(), { socket ->
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
-      sockets.put(clazz, socket)
+      sockets[clazz] = socket
       socket.handler(this::handler)
       socket.exceptionHandler(exceptionHandler)
       socket.closeHandler(closeHandler)

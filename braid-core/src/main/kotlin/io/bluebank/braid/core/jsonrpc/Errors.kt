@@ -27,12 +27,12 @@ class JsonRPCException(val response: JsonRPCErrorResponse) : Exception() {
 
 class JsonRPCError(val code: Int, val message: String) {
   companion object {
-    val PARSE_ERROR = -32700
-    val INVALID_REQUEST = -32600
-    val METHOD_NOT_FOUND = -32601
-    val INVALID_PARAMS = -32602
-    val INTERNAL_ERROR = -32603
-    val BASE_SERVER_ERROR = -32000 // to -32099
+    const val PARSE_ERROR = -32700
+    const val INVALID_REQUEST = -32600
+    const val METHOD_NOT_FOUND = -32601
+    const val INVALID_PARAMS = -32602
+    const val INTERNAL_ERROR = -32603
+    const val BASE_SERVER_ERROR = -32000 // to -32099
   }
 }
 

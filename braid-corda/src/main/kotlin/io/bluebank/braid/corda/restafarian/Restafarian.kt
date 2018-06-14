@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.restafarian
 
+import io.bluebank.braid.corda.restafarian.docs.DocsHandler
 import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.models.Contact
 import io.swagger.models.Scheme
@@ -28,6 +29,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.*
 import io.vertx.ext.web.sstore.LocalSessionStore
 import kotlin.reflect.KCallable
@@ -38,17 +40,39 @@ enum class AuthSchema {
   Token
 }
 
-data class RestConfig(val serviceName: String = "",
-                      val description: String = "",
-                      val hostAndPortUri: String = "http://localhost:8080",
-                      val apiPath: String = "/api",
-                      val swaggerPath: String = "/",
-                      val scheme: Scheme = Scheme.HTTPS,
-                      val contact: Contact = Contact().email("").name("").url(""),
-                      val authSchema: AuthSchema = AuthSchema.None,
-                      val authProvider: AuthProvider? = null,
-                      val fn: (Restafarian.(Router) -> Unit) = {}
-)
+data class RestConfig(val serviceName: String = DEFAULT_SERVICE_NAME,
+                      val description: String = DEFAULT_DESCRIPTION,
+                      val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
+                      val apiPath: String = DEFAULT_API_PATH,
+                      val swaggerPath: String = DEFAULT_SWAGGER_PATH,
+                      val scheme: Scheme = DEFAULT_SCHEME,
+                      val contact: Contact = DEFAULT_CONTACT,
+                      val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
+                      val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
+                      val initHandler: (Restafarian.(Router) -> Unit) = {}
+) {
+  companion object {
+    const val DEFAULT_SERVICE_NAME = ""
+    const val DEFAULT_DESCRIPTION = ""
+    const val DEFAULT_HOST_AND_PORT_URI = "http://localhost:8080"
+    const val DEFAULT_API_PATH = "/api/rest"
+    const val DEFAULT_SWAGGER_PATH = "/"
+    val DEFAULT_SCHEME = Scheme.HTTPS
+    val DEFAULT_CONTACT : Contact = Contact().email("").name("").url("")
+    val DEFAULT_AUTH_SCHEMA = AuthSchema.None
+    val DEFAULT_AUTH_PROVIDER : AuthProvider? = null
+  }
+  fun withServiceName(value: String) = this.copy(serviceName = value)
+  fun withDescription(value: String) = this.copy(description = value)
+  fun withHostAndPortUri(value: String) = this.copy(description = value)
+  fun withApiPath(value: String) = this.copy(apiPath = value)
+  fun withSwaggerPath(value: String) = this.copy(swaggerPath = value)
+  fun withScheme(value: Scheme) = this.copy(scheme = value)
+  fun withAuthScheme(value: AuthSchema) = this.copy(authSchema = value)
+  fun withContact(value: Contact) = this.copy(contact = value)
+  fun withAuthProvider(value: AuthProvider?) = this.copy(authProvider = value)
+  fun withInitHandler(value: Restafarian.(Router) -> Unit) = this.copy(initHandler = value)
+}
 
 class Restafarian(
   private val config: RestConfig = RestConfig(),
@@ -110,7 +134,7 @@ class Restafarian(
 
   init {
     if (!config.apiPath.startsWith("/")) throw RuntimeException("path must begin with a /")
-    mount(config.fn)
+    mount(config.initHandler)
   }
 
   private fun mount(fn: Restafarian.(Router) -> Unit) {
@@ -171,12 +195,22 @@ class Restafarian(
     bind(HttpMethod.GET, path, fn)
   }
 
+  @JvmName("getRaw")
+  fun get(path: String, fn: RoutingContext.() -> Unit) {
+    bind(HttpMethod.GET, path, fn)
+  }
+
   @JvmName("putFuture")
   fun <Response> put(path: String, fn: KCallable<Future<Response>>) {
     bind(HttpMethod.PUT, path, fn)
   }
 
   fun <Response> put(path: String, fn: KCallable<Response>) {
+    bind(HttpMethod.PUT, path, fn)
+  }
+
+  @JvmName("putRaw")
+  fun put(path: String, fn: RoutingContext.() -> Unit) {
     bind(HttpMethod.PUT, path, fn)
   }
 
@@ -189,6 +223,11 @@ class Restafarian(
     bind(HttpMethod.POST, path, fn)
   }
 
+  @JvmName("postRaw")
+  fun post(path: String, fn: RoutingContext.() -> Unit) {
+    bind(HttpMethod.POST, path, fn)
+  }
+
   fun <Response> delete(path: String, fn: KCallable<Response>) {
     bind(HttpMethod.DELETE, path, fn)
   }
@@ -198,9 +237,19 @@ class Restafarian(
     bind(HttpMethod.DELETE, path, fn)
   }
 
+  @JvmName("deleteRaw")
+  fun delete(path: String, fn: RoutingContext.() -> Unit) {
+    bind(HttpMethod.DELETE, path, fn)
+  }
+
+  private fun bind(method: HttpMethod, path: String, fn: RoutingContext.() -> Unit) {
+    router.route(method, "${this.path}$path").handler { it.fn() }
+    docsHandler.add(groupName, method, path, fn)
+  }
+
   private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Future<Response>>) {
     router.route(method, "${this.path}$path").bind(fn)
-    docsHandler.add(groupName, method, "${this.path}$path", fn)
+    docsHandler.add(groupName, method, path, fn)
   }
 
   @JvmName("bindMethod0")

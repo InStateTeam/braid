@@ -158,8 +158,8 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
           } else {
             deploymentId = it.result()
             val protocol = if (builder.httpServerOptions.isSsl) "https" else "http"
-            println("server mounted on ${protocol}://localhost:$port$rootPath")
-            println("editor mounted on ${protocol}://localhost:$port")
+            println("server mounted on $protocol://localhost:$port$rootPath")
+            println("editor mounted on $protocol://localhost:$port")
             callback(succeededFuture())
           }
         }

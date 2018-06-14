@@ -69,7 +69,7 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
     return this
   }
 
-  fun whenReady() = fDeployId
+  fun whenReady(): Future<String> = fDeployId
 
   fun shutdown() {
     if (deployId != null) {

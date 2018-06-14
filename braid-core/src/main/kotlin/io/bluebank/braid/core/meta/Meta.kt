@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.core.meta
 
-val DEFAULT_API_MOUNT = "/api/"
+const val DEFAULT_API_MOUNT = "/api/"
 
 fun defaultServiceEndpoint(serviceName: String) = "${defaultServiceMountpoint(DEFAULT_API_MOUNT, serviceName)}/braid"
 fun defaultServiceEndpoint(rootAPIPath: String, serviceName: String) = "${defaultServiceMountpoint(rootAPIPath, serviceName)}/braid"

@@ -147,7 +147,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     servicesRouter.post("/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
     servicesRouter.delete("/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
     servicesRouter.get("/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
-    router.mountSubRouter("$rootPath", servicesRouter)
+    router.mountSubRouter(rootPath, servicesRouter)
     router.get()
         .last()
         .handler(

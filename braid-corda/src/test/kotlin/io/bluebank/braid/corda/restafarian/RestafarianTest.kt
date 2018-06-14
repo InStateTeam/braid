@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(VertxUnitRunner::class)
 class RestafarianTest {
   private val port = findFreePort()
-  private val service = MyServiceSetup(port, MyService())
+  private val service = TestServiceApp(port, TestService())
 
   @Before
   fun before(context: TestContext) {
@@ -71,7 +71,7 @@ class RestafarianTest {
         .end()
 
     val async3 = context.async()
-    client.get(port, "localhost", "/api/hello")
+    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/hello")
         .exceptionHandler(context::fail)
         .handler {
           it.bodyHandler {
@@ -82,7 +82,7 @@ class RestafarianTest {
         .end()
 
     val async4 = context.async()
-    client.get(port, "localhost", "/api/buffer")
+    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/buffer")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -95,7 +95,7 @@ class RestafarianTest {
 
 
     val async5 = context.async()
-    client.get(port, "localhost", "/api/bytearray")
+    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytearray")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -108,7 +108,7 @@ class RestafarianTest {
 
 
     val async6 = context.async()
-    client.get(port, "localhost", "/api/bytebuf")
+    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytebuf")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -120,7 +120,7 @@ class RestafarianTest {
       .end()
 
     val async7 = context.async()
-    client.get(port, "localhost", "/api/bytebuffer")
+    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytebuffer")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -133,7 +133,7 @@ class RestafarianTest {
 
     val async8 = context.async()
     val bytes = Buffer.buffer("hello")
-    client.post(port, "localhost", "/api/doublebuffer")
+    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/doublebuffer")
       .putHeader(CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM)
       .putHeader(CONTENT_LENGTH, bytes.length().toString())
       .exceptionHandler(context::fail)
@@ -148,7 +148,7 @@ class RestafarianTest {
       .end(bytes)
 
     val async9 = context.async()
-    client.post(port, "localhost", "/api/echo")
+    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/echo")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
