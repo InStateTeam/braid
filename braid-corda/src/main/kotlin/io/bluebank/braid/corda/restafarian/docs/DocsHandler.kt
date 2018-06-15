@@ -94,6 +94,7 @@ class DocsHandler(
       this.path(swaggerPath, path)
       path
     }
+
     val operation = endpoint.toOperation()
 
     when (endpoint.method) {

@@ -15,21 +15,27 @@
  */
 package io.bluebank.braid.corda.restafarian.docs
 
-import io.netty.handler.codec.http.HttpHeaderValues
+import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.swagger.models.Operation
 import io.swagger.models.Response
+import io.swagger.models.parameters.BodyParameter
 import io.swagger.models.parameters.Parameter
+import io.swagger.models.parameters.PathParameter
+import io.swagger.models.parameters.QueryParameter
+import io.swagger.models.properties.BinaryProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.PropertyBuilder
-import io.swagger.models.properties.StringProperty
 import io.vertx.core.Future
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.nio.ByteBuffer
+import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
@@ -52,10 +58,22 @@ abstract class EndPoint {
   protected abstract val annotations: List<Annotation>
   abstract val parameterTypes: List<Type>
 
+  val operation : ApiOperation? by lazy {
+    annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
+  }
+
   val description: String
     get() {
-      return annotations.filter { it is ApiOperation }.map { it as ApiOperation }.map { it.value }.firstOrNull() ?: ""
+      return operation?.value ?: ""
     }
+
+  val produces : String get() {
+    return operation?.produces ?: returnType.mediaType()
+  }
+
+  val consumes : String get() {
+    return operation?.consumes ?: mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
+  }
 
   fun addTypes(models: MutableMap<String, Model>) {
     addType(this.returnType, models)
@@ -65,7 +83,7 @@ abstract class EndPoint {
   }
 
   fun toOperation(): Operation {
-    val operation = Operation().consumes(HttpHeaderValues.APPLICATION_JSON.toString())
+    val operation = Operation().consumes(consumes)
     operation.description = description
     decorateOperationWithResponseType(operation)
     operation.parameters = toSwaggerParams()
@@ -73,9 +91,9 @@ abstract class EndPoint {
     return operation
   }
 
-  protected abstract fun mapBodyParameter(): Parameter?
-  protected abstract fun mapQueryParameters(): List<Parameter>
-  protected abstract fun mapPathParameters(): List<Parameter>
+  protected abstract fun mapBodyParameter(): BodyParameter?
+  protected abstract fun mapQueryParameters(): List<QueryParameter>
+  protected abstract fun mapPathParameters(): List<PathParameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
     return when (method) {
@@ -85,7 +103,7 @@ abstract class EndPoint {
         return pathParams + queryParams
       }
       else -> {
-        val pathParameters = mapPathParameters()
+        val pathParameters = mapPathParameters() as List<Parameter>
         val bodyParameter = mapBodyParameter()
         if (bodyParameter != null) {
           pathParameters + bodyParameter
@@ -100,10 +118,24 @@ abstract class EndPoint {
     return getKType().javaType.getSwaggerProperty()
   }
 
-
   protected fun KType.getSwaggerModelReference(): Model {
     val property = getSwaggerProperty()
     return PropertyBuilder.toModel(property)
+  }
+
+  protected fun Type.getSwaggerModelReference(): Model {
+    val property = getSwaggerProperty()
+    return PropertyBuilder.toModel(property)
+  }
+
+  protected fun Type.getSwaggerProperty(): Property {
+    val actualType = if (this is ParameterizedType && this.rawType == Future::class) this.actualTypeArguments[0]
+    else this
+    return if (actualType.isBinary()) {
+      BinaryProperty()
+    } else {
+      ModelConverters.getInstance().readAsProperty(this)
+    }
   }
 
   private fun decorateOperationWithResponseType(operation: Operation) {
@@ -114,7 +146,7 @@ abstract class EndPoint {
       else -> {
         val responseSchema = returnType.getSwaggerProperty()
         operation
-          .produces(responseSchema.toMediaType())
+          .produces(produces)
           .defaultResponse(Response().schema(responseSchema))
       }
     }
@@ -129,7 +161,7 @@ abstract class EndPoint {
           addType(it, models)
         }
       }
-    } else {
+    } else if (!type.isBinary()) {
       models += type.createSwaggerModels()
     }
   }
@@ -146,15 +178,20 @@ abstract class EndPoint {
     }
   }
 
-  private fun Type.getSwaggerProperty(): Property {
-    return ModelConverters.getInstance().readAsProperty(this)
-  }
-
-  private fun Property.toMediaType(): String {
+  private fun Type.isBinary() : Boolean {
     return when (this) {
-      is StringProperty -> HttpHeaderValues.TEXT_PLAIN.toString()
-      else -> HttpHeaderValues.APPLICATION_JSON.toString()
+      Buffer::class.java,
+      ByteArray::class.java,
+      ByteBuffer::class.java,
+      ByteBuf::class.java-> true
+      else -> false
     }
   }
 
+  protected fun Type.mediaType() : String {
+    return when {
+      this.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      else -> MediaType.APPLICATION_JSON
+    }
+  }
 }

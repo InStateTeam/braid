@@ -23,8 +23,6 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import kotlin.reflect.KAnnotatedElement
-import kotlin.reflect.KType
-import kotlin.reflect.full.createType
 
 class ImplicitParamsEndPoint(
   override val groupName: String,
@@ -55,26 +53,25 @@ class ImplicitParamsEndPoint(
     }.firstOrNull()
       ?: Unit::class.java
 
-  private val pathParams = implicitParams.filter { it.type == "path" }
-  private val queryParams = implicitParams.filter { it.type == "query" }
-  private val bodyParam = implicitParams.singleOrNull { it.type == "body" }
+  private val pathParams = implicitParams.filter { it.paramType == "path" }
+  private val queryParams = implicitParams.filter { it.paramType == "query" }
+  private val bodyParam = implicitParams.singleOrNull { it.paramType == "body" }
 
-  override fun mapBodyParameter(): Parameter? {
-    return bodyParam?.getSwaggerParameter()
+  override fun mapBodyParameter(): BodyParameter? {
+    return bodyParam?.getSwaggerParameter() as BodyParameter?
   }
 
-  override fun mapQueryParameters(): List<Parameter> {
+  override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { queryParam ->
-      queryParam.getSwaggerParameter()
+      queryParam.getSwaggerParameter() as QueryParameter
     }
   }
 
-  override fun mapPathParameters(): List<Parameter> {
+  override fun mapPathParameters(): List<PathParameter> {
     return pathParams.map { pathParam ->
-      pathParam.getSwaggerParameter()
+      pathParam.getSwaggerParameter() as PathParameter
     }
   }
-
 
   private fun BodyParameter.setExamples(parameter: ApiImplicitParam): BodyParameter {
     this.examples = parameter.examples.value.map { it.mediaType to it.value }.toMap()
@@ -88,7 +85,7 @@ class ImplicitParamsEndPoint(
         QueryParameter().apply {
           setProperty(ip.getDataType().getSwaggerProperty())
           setDefaultValue(ip.defaultValue)
-          setExample(ip.example)
+          setExample(ip.firstExample())
           type(ip.type)
         }
       }
@@ -96,7 +93,7 @@ class ImplicitParamsEndPoint(
         PathParameter().apply {
           setProperty(ip.getDataType().getSwaggerProperty())
           setDefaultValue(ip.defaultValue)
-          setExample(ip.example)
+          setExample(ip.firstExample())
           type(ip.type)
         }
       }
@@ -110,7 +107,7 @@ class ImplicitParamsEndPoint(
         HeaderParameter().apply {
           setProperty(ip.getDataType().getSwaggerProperty())
           setDefaultValue(ip.defaultValue)
-          setExample(ip.example)
+          setExample(ip.firstExample())
           type(ip.type)
         }
       }
@@ -119,7 +116,7 @@ class ImplicitParamsEndPoint(
         FormParameter().apply {
           setProperty(ip.getDataType().getSwaggerProperty())
           setDefaultValue(ip.defaultValue)
-          setExample(ip.example)
+          setExample(ip.firstExample())
           type(ip.type)
         } as Parameter // required to resolve the when statement to the correct type - Kotlin compiler bug?
       }
@@ -132,10 +129,18 @@ class ImplicitParamsEndPoint(
     }
   }
 
-  private fun ApiImplicitParam.getDataType(): KType {
+  private fun ApiImplicitParam.getDataType(): Type {
     return when {
-      this.dataType != "" -> Class.forName(this.dataType).kotlin.createType()
-      else -> this.dataTypeClass.createType()
+      this.dataType != "" -> Class.forName(this.dataType)
+      else -> this.dataTypeClass.java
+    }
+  }
+
+  private fun ApiImplicitParam.firstExample(): String {
+    return when {
+      example != "" -> example
+      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
+      else -> ""
     }
   }
 }

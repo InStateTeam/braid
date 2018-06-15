@@ -141,7 +141,7 @@ class Restafarian(
     setupAuthRouting()
     // pass control to caller to setup rest bindings
     this.fn(router)
-    log.info("Rest end point bound to ${config.hostAndPortUri}$path")
+    log.info("REST end point bound to ${config.hostAndPortUri}$path")
     configureSwaggerAndStatic()
   }
 

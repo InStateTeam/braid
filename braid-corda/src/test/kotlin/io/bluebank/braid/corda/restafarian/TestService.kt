@@ -19,9 +19,7 @@ import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.core.http.HttpServerConfig
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http.HttpHeaderValues
-import io.swagger.annotations.ApiImplicitParam
-import io.swagger.annotations.ApiImplicitParams
-import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.*
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
@@ -48,6 +46,7 @@ import net.corda.testing.core.TestIdentity
 import java.nio.ByteBuffer
 import java.sql.Connection
 import java.time.Clock
+import javax.ws.rs.core.MediaType
 
 class TestService {
   fun sayHello() = "hello"
@@ -60,10 +59,11 @@ class TestService {
     Buffer.buffer(bytes.length() * 2)
       .appendBytes(bytes.bytes)
       .appendBytes(bytes.bytes)
-  @ApiOperation(value = "do something custom", response = String::class)
-  @ApiImplicitParams(ApiImplicitParam(name = "foo", value = "foo parameter", dataTypeClass = String::class))
+  @ApiOperation(value = "do something custom", response = String::class, consumes = MediaType.TEXT_PLAIN, produces = MediaType.TEXT_PLAIN)
+  @ApiImplicitParams(ApiImplicitParam(name = "name", value = "name parameter", dataTypeClass = String::class, paramType = "path", defaultValue = "Margaret", required = true, examples = Example(ExampleProperty("Satoshi"), ExampleProperty("Margaret"), ExampleProperty("Alan"))))
   fun somethingCustom(rc: RoutingContext) {
-    rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode("custom operation done!"))
+    val name = rc.request().getParam("foo") ?: "Margaret"
+    rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode("Hello, $name!"))
   }
 }
 
@@ -88,7 +88,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
         this.get("/bytebuf", service::getByteBuf)
         this.get("/bytebuffer", service::getByteBuffer)
         this.post("/doublebuffer", service::doubleBuffer)
-        this.get("/custom", service::somethingCustom)
+        this.post("/custom", service::somethingCustom)
       }
     })
   .bootstrapBraid(TestAppServiceHub())
