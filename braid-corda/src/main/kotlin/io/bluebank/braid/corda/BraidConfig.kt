@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import net.corda.core.flows.FlowLogic
 import net.corda.core.node.AppServiceHub
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 /**
@@ -50,6 +51,7 @@ data class BraidConfig(val port: Int = 8080,
   companion object {
     private val log = loggerFor<BraidConfig>()
 
+    @Suppress("unused")
     @JvmStatic
     fun fromResource(resourcePath: String): BraidConfig? {
       val fullConfig = try {
@@ -69,15 +71,20 @@ data class BraidConfig(val port: Int = 8080,
   }
 
   fun withPort(port: Int) = this.copy(port = port)
+  @Suppress("unused")
   fun withRootPath(rootPath: String) = this.copy(rootPath = rootPath)
-  fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) = this.copy(authConstructor = authConstructor)
+
+  fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) = this.copy(authConstructor = memoize(authConstructor))
   fun withHttpServerOptions(httpServerOptions: HttpServerOptions) = this.copy(httpServerOptions = httpServerOptions)
   fun withService(service: Any) = withService(service.javaClass.simpleName.decapitalize(), service)
+  @Suppress("MemberVisibilityCanBePrivate")
   fun withService(name: String, service: Any) : BraidConfig {
     val map = services.toMutableMap()
     map[name] = service
     return this.copy(services = map)
   }
+
+  @Suppress("unused")
   fun withThreadPoolSize(threadCount: Int) : BraidConfig {
     return this.copy(threadPoolSize = threadCount)
   }
@@ -85,6 +92,7 @@ data class BraidConfig(val port: Int = 8080,
     return this.copy(restConfig = restConfig)
   }
   inline fun <reified T : FlowLogic<*>> withFlow(name: String, flowClass: KClass<T>) = withFlow(name, flowClass.java)
+  @Suppress("unused")
   inline fun <reified T : FlowLogic<*>> withFlow(flowClass: KClass<T>) = withFlow(flowClass.java)
 
   fun <T : FlowLogic<*>> withFlow(flowClass: Class<T>) =
@@ -99,4 +107,13 @@ data class BraidConfig(val port: Int = 8080,
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
   fun bootstrapBraid(serviceHub: AppServiceHub? = null) = BraidServer.bootstrapBraid(serviceHub, this)
+}
+
+private inline fun <reified T : Any, reified R : Any> memoize(crossinline fn: (T) -> R): (T) -> R {
+  val concurrentMap = ConcurrentHashMap<T, R>()
+  return { t ->
+    concurrentMap.computeIfAbsent(t) {
+      fn(t)
+    }
+  }
 }

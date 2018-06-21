@@ -29,13 +29,14 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
 
-class KEndPoint(override val groupName: String,
-                override val method: HttpMethod,
-                override val path: String,
+class KEndPoint(groupName: String,
+                protected: Boolean,
+                method: HttpMethod,
+                path: String,
                 val name: String,
                 val parameters: List<KParameter>,
                 override val returnType: Type,
-                override val annotations: List<Annotation>) : EndPoint() {
+                override val annotations: List<Annotation>) : EndPoint(groupName, protected, method, path) {
 
   init {
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations

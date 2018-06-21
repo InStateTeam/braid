@@ -41,19 +41,17 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 
-abstract class EndPoint {
+abstract class EndPoint(private val groupName: String, val protected: Boolean, val method: HttpMethod, val path: String) {
   companion object {
-    fun create(groupName: String, method: HttpMethod, path: String, name: String, parameters: List<KParameter>, returnType: KType, annotations: List<Annotation>): EndPoint{
-      return KEndPoint(groupName, method, path, name, parameters, returnType.javaType, annotations)
+    fun create(groupName: String, protected: Boolean, method: HttpMethod, path: String, name: String, parameters: List<KParameter>, returnType: KType, annotations: List<Annotation>): EndPoint {
+      return KEndPoint(groupName, protected, method, path, name, parameters, returnType.javaType, annotations)
     }
 
-    fun create(groupName: String, method: HttpMethod, path: String, fn: RoutingContext.() -> Unit) : EndPoint {
-      return ImplicitParamsEndPoint(groupName, method, path, fn)
+    fun create(groupName: String, protected: Boolean, method: HttpMethod, path: String, fn: RoutingContext.() -> Unit): EndPoint {
+      return ImplicitParamsEndPoint(groupName, protected, method, path, fn)
     }
   }
-  abstract val groupName: String
-  abstract val method: HttpMethod
-  abstract val path: String
+
   abstract val returnType: Type
   protected abstract val annotations: List<Annotation>
   abstract val parameterTypes: List<Type>
@@ -88,6 +86,9 @@ abstract class EndPoint {
     decorateOperationWithResponseType(operation)
     operation.parameters = toSwaggerParams()
     operation.tag(groupName)
+    if (protected) {
+      operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
+    }
     return operation
   }
 

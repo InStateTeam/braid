@@ -25,10 +25,11 @@ import java.lang.reflect.Type
 import kotlin.reflect.KAnnotatedElement
 
 class ImplicitParamsEndPoint(
-  override val groupName: String,
-  override val method: HttpMethod,
-  override val path: String,
-  fn: (RoutingContext) -> Unit) : EndPoint() {
+  groupName: String,
+  protected: Boolean,
+  method: HttpMethod,
+  path: String,
+  fn: (RoutingContext) -> Unit) : EndPoint(groupName, protected, method, path) {
 
   private val annotated = (fn as KAnnotatedElement)
   override val annotations: List<Annotation> = annotated.annotations
