@@ -40,16 +40,20 @@ class DocsHandler(
     .url(""),
   private val auth: SecuritySchemeDefinition? = null
 ) : Handler<RoutingContext> {
+  companion object {
+    internal const val SECURITY_DEFINITION_NAME = "Authorization"
+  }
+
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
   private val models = mutableMapOf<String, Model>()
+  private val swagger: Swagger by lazy {
+    createSwagger()
+  }
 
   override fun handle(context: RoutingContext) {
-    val swagger = createSwagger()
-    swagger.addAllModels(models)
-    endpoints.forEach {
-      swagger.addEndpoint(it)
-    }
+    val absoluteURI = URL(context.request().absoluteURI())
+    swagger.host = absoluteURI.authority
     val output = Json.pretty().writeValueAsString(swagger)
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
@@ -67,12 +71,18 @@ class DocsHandler(
       .basePath(url.path)
       .apply {
         if (auth != null) {
-          securityDefinition("Authorization", auth)
+          securityDefinition(SECURITY_DEFINITION_NAME, auth)
         }
       }
       .scheme(scheme)
       .consumes(APPLICATION_JSON.toString())
       .produces(APPLICATION_JSON.toString())
+      .apply {
+        addAllModels(models)
+        endpoints.forEach {
+          addEndpoint(it)
+        }
+      }
   }
 
   private fun createSwaggerInfo(): Info? {
@@ -94,6 +104,7 @@ class DocsHandler(
       this.path(swaggerPath, path)
       path
     }
+
     val operation = endpoint.toOperation()
 
     when (endpoint.method) {
@@ -106,13 +117,13 @@ class DocsHandler(
     }
   }
 
-  fun <Response> add(groupName: String, method: HttpMethod, path: String, handler: KCallable<Response>) {
-    val endpoint = EndPoint.create(groupName, method, path, handler.name, handler.parameters, handler.returnType, handler.annotations)
+  fun <Response> add(groupName: String, protected: Boolean, method: HttpMethod, path: String, handler: KCallable<Response>) {
+    val endpoint = EndPoint.create(groupName, protected, method, path, handler.name, handler.parameters, handler.returnType, handler.annotations)
     add(endpoint)
   }
 
-  fun add(groupName: String, method: HttpMethod, path: String, handler: (RoutingContext) -> Unit) {
-    val endpoint = EndPoint.create(groupName, method, path, handler)
+  fun add(groupName: String, protected: Boolean, method: HttpMethod, path: String, handler: (RoutingContext) -> Unit) {
+    val endpoint = EndPoint.create(groupName, protected, method, path, handler)
     add(endpoint)
   }
 

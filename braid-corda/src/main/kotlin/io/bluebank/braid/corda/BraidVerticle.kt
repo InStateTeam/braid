@@ -21,7 +21,6 @@ import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
 import io.bluebank.braid.core.http.withCompatibleWebsockets
 import io.bluebank.braid.core.logging.loggerFor
-import io.swagger.models.Scheme
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.ext.web.Router
@@ -65,17 +64,10 @@ class BraidVerticle(private val services: AppServiceHub?, private val config: Br
     }
     config.restConfig?.let { restConfig ->
       val host = URL(restConfig.hostAndPortUri).host
-      val updatedHostAndPort = "$config.protocol://$host:${config.port}"
-      val updatedRestConfig = restConfig.let {
-        it.withHostAndPortUri(updatedHostAndPort)
-        it.withScheme(
-          when (config.httpServerOptions.isSsl) {
-            true -> Scheme.HTTPS
-            else -> Scheme.HTTP
-          }
-        )
-      }
-      Restafarian.mount(updatedRestConfig, router, vertx)
+      val updatedHostAndPort = "${config.protocol}://$host:${config.port}"
+      val moddedConfig = restConfig.withHostAndPortUri(updatedHostAndPort).withAuth(config.authConstructor?.invoke(vertx))
+
+      Restafarian.mount(moddedConfig, router, vertx)
     }
     return router
   }

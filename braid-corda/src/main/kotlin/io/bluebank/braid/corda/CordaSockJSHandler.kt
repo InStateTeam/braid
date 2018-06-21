@@ -59,7 +59,7 @@ class CordaSockJSHandler private constructor(private val vertx: Vertx, serviceHu
 
       // mount each service
       println("Mounting braid services...")
-      println("Root API mount: ${config.rootPath}")
+      log.info("root API mount for braid: ${config.rootPath}")
       registerCoreServices(protocol, config, router, sockJSHandler)
       registerCustomService(config, protocol, router, sockJSHandler)
       router.get(config.rootPath).handler {
@@ -91,7 +91,7 @@ class CordaSockJSHandler private constructor(private val vertx: Vertx, serviceHu
 
     private fun mountServiceName(serviceName: String, protocol: String, config: BraidConfig, router: Router, sockJSHandler: SockJSHandler) {
       val endpoint = defaultServiceEndpoint(config.rootPath, serviceName) + "/*"
-      log.info("mounting $serviceName to $protocol://localhost:${config.port}$endpoint")
+      log.info("mounting braid service $serviceName to $protocol://localhost:${config.port}$endpoint")
       router.route(endpoint).handler(sockJSHandler)
     }
 

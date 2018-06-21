@@ -29,13 +29,14 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
 
-class KEndPoint(override val groupName: String,
-                override val method: HttpMethod,
-                override val path: String,
+class KEndPoint(groupName: String,
+                protected: Boolean,
+                method: HttpMethod,
+                path: String,
                 val name: String,
                 val parameters: List<KParameter>,
                 override val returnType: Type,
-                override val annotations: List<Annotation>) : EndPoint() {
+                override val annotations: List<Annotation>) : EndPoint(groupName, protected, method, path) {
 
   init {
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
@@ -62,7 +63,7 @@ class KEndPoint(override val groupName: String,
     }
   }
 
-  override fun mapPathParameters(): List<Parameter> {
+  override fun mapPathParameters(): List<PathParameter> {
     return pathParams.map { pathParam ->
       val swaggerProperty = pathParam.type.getSwaggerProperty()
       val p = PathParameter()
@@ -77,7 +78,7 @@ class KEndPoint(override val groupName: String,
     }
   }
 
-  override fun mapQueryParameters(): List<Parameter> {
+  override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { param ->
       val q = QueryParameter()
         .name(param.name)
@@ -96,7 +97,7 @@ class KEndPoint(override val groupName: String,
     }
   }
 
-  override fun mapBodyParameter(): Parameter? {
+  override fun mapBodyParameter(): BodyParameter? {
     return bodyParameter?.let {
       BodyParameter().apply {
         schema(bodyParameter.type.getSwaggerModelReference())

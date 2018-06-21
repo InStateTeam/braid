@@ -22,6 +22,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpHeaders.CONTENT_LENGTH
 import io.vertx.core.http.HttpHeaders.CONTENT_TYPE
+import io.vertx.core.json.Json
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
@@ -148,14 +149,30 @@ class RestafarianTest {
       .end(bytes)
 
     val async9 = context.async()
+    var token = ""
+    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/login")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          token = body.toString()
+          async9.complete()
+        }
+      }
+      .setChunked(true)
+      .end(Json.encode(LoginRequest(user = "sa", password = "admin")))
+
+    async9.await()
+
+    val async10 = context.async()
     client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/echo")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
           context.assertEquals("echo: hello", body.toString())
-          async9.complete()
+          async10.complete()
         }
       }
+      .putHeader("Authorization", "Bearer $token")
       .setChunked(true)
       .end("\"hello\"")
   }
