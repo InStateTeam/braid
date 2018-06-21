@@ -32,29 +32,9 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.auth.jwt.JWTOptions
 import io.vertx.ext.web.RoutingContext
-import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.contracts.StateRef
-import net.corda.core.contracts.TransactionState
-import net.corda.core.cordapp.CordappProvider
-import net.corda.core.flows.FlowLogic
-import net.corda.core.messaging.FlowHandle
-import net.corda.core.messaging.FlowProgressHandle
-import net.corda.core.node.AppServiceHub
-import net.corda.core.node.NetworkParameters
-import net.corda.core.node.NodeInfo
-import net.corda.core.node.StatesToRecord
-import net.corda.core.node.services.*
-import net.corda.core.serialization.SerializeAsToken
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.utilities.NetworkHostAndPort
-import net.corda.testing.core.DUMMY_BANK_A_NAME
-import net.corda.testing.core.TestIdentity
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
-import java.sql.Connection
-import java.time.Clock
 import javax.ws.rs.core.MediaType
 
 class TestService {
@@ -153,60 +133,3 @@ class TestServiceApp(port: Int, private val service: TestService) {
 
 data class LoginRequest(@ApiModelProperty(value = "user name", example = "sa") val user: String, @ApiModelProperty(value = "password", example = "admin") val password: String)
 
-class TestAppServiceHub : AppServiceHub {
-  override val attachments: AttachmentStorage
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val clock: Clock
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val contractUpgradeService: ContractUpgradeService
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val cordappProvider: CordappProvider
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val identityService: IdentityService
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val keyManagementService: KeyManagementService
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val myInfo: NodeInfo
-    get() = NodeInfo(listOf(NetworkHostAndPort("localhost", 10001)), listOf(TestIdentity(DUMMY_BANK_A_NAME, 40).identity), 3, 1)
-  override val networkMapCache: NetworkMapCache
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val networkParameters: NetworkParameters
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val transactionVerifierService: TransactionVerifierService
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val validatedTransactions: TransactionStorage
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-  override val vaultService: VaultService
-    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-
-  override fun <T : SerializeAsToken> cordaService(type: Class<T>): T {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun jdbcSession(): Connection {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun loadState(stateRef: StateRef): TransactionState<*> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun loadStates(stateRefs: Set<StateRef>): Set<StateAndRef<ContractState>> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun recordTransactions(statesToRecord: StatesToRecord, txs: Iterable<SignedTransaction>) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun registerUnloadHandler(runOnStop: () -> Unit) {
-  }
-
-  override fun <T> startFlow(flow: FlowLogic<T>): FlowHandle<T> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun <T> startTrackedFlow(flow: FlowLogic<T>): FlowProgressHandle<T> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-}

@@ -47,13 +47,13 @@ class DocsHandler(
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
   private val models = mutableMapOf<String, Model>()
+  private val swagger: Swagger by lazy {
+    createSwagger()
+  }
 
   override fun handle(context: RoutingContext) {
-    val swagger = createSwagger()
-    swagger.addAllModels(models)
-    endpoints.forEach {
-      swagger.addEndpoint(it)
-    }
+    val absoluteURI = URL(context.request().absoluteURI())
+    swagger.host = absoluteURI.authority
     val output = Json.pretty().writeValueAsString(swagger)
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
@@ -61,7 +61,6 @@ class DocsHandler(
       .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
       .end(output)
   }
-
 
   private fun createSwagger(): Swagger {
     val url = URL(basePath)
@@ -78,6 +77,12 @@ class DocsHandler(
       .scheme(scheme)
       .consumes(APPLICATION_JSON.toString())
       .produces(APPLICATION_JSON.toString())
+      .apply {
+        addAllModels(models)
+        endpoints.forEach {
+          addEndpoint(it)
+        }
+      }
   }
 
   private fun createSwaggerInfo(): Info? {
