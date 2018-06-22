@@ -39,6 +39,7 @@ import javax.ws.rs.core.MediaType
 
 class TestService {
   fun sayHello() = "hello"
+  fun sayHelloAsync() = Future.succeededFuture<String>("hello, async!")
   fun echo(msg: String) = "echo: $msg"
   fun getBuffer(): Buffer = Buffer.buffer("hello")
   fun getByteArray(): ByteArray = Buffer.buffer("hello").bytes
@@ -83,6 +84,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
         .withPaths {
           group("General Ledger") {
             unprotected {
+              get("/hello-async", service::sayHelloAsync)
               post("/login", thisObj::login)
               get("/hello", service::sayHello)
               get("/buffer", service::getBuffer)

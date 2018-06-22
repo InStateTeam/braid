@@ -54,7 +54,7 @@ class DocsHandler(
   override fun handle(context: RoutingContext) {
     val absoluteURI = URL(context.request().absoluteURI())
     swagger.host = absoluteURI.authority
-    val output = Json.pretty().writeValueAsString(swagger)
+    val output = Json.pretty().writeValueAsString(createSwagger())
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
       .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)

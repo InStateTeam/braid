@@ -130,12 +130,16 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   protected fun Type.getSwaggerProperty(): Property {
-    val actualType = if (this is ParameterizedType && this.rawType == Future::class) this.actualTypeArguments[0]
-    else this
+    val actualType = if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
+      this.actualTypeArguments[0]
+    } else {
+      this
+    }
+
     return if (actualType.isBinary()) {
       BinaryProperty()
     } else {
-      ModelConverters.getInstance().readAsProperty(this)
+      ModelConverters.getInstance().readAsProperty(actualType)
     }
   }
 
@@ -155,7 +159,7 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
 
   private fun addType(type: Type, models: MutableMap<String, Model>) {
     if (type is ParameterizedType) {
-      if (type.rawType == Future::class) {
+      if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
         this.addType(type.actualTypeArguments[0], models)
       } else {
         type.actualTypeArguments.forEach {
