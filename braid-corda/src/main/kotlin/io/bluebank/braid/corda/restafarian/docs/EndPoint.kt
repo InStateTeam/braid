@@ -56,7 +56,7 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   protected abstract val annotations: List<Annotation>
   abstract val parameterTypes: List<Type>
 
-  val operation : ApiOperation? by lazy {
+  val operation: ApiOperation? by lazy {
     annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
   }
 
@@ -65,13 +65,15 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
       return operation?.value ?: ""
     }
 
-  val produces : String get() {
-    return operation?.produces ?: returnType.mediaType()
-  }
+  val produces: String
+    get() {
+      return operation?.produces ?: returnType.mediaType()
+    }
 
-  val consumes : String get() {
-    return operation?.consumes ?: mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
-  }
+  val consumes: String
+    get() {
+      return operation?.consumes ?: mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
+    }
 
   fun addTypes(models: MutableMap<String, Model>) {
     addType(this.returnType, models)
@@ -130,12 +132,7 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   protected fun Type.getSwaggerProperty(): Property {
-    val actualType = if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
-      this.actualTypeArguments[0]
-    } else {
-      this
-    }
-
+    val actualType = this.actualType()
     return if (actualType.isBinary()) {
       BinaryProperty()
     } else {
@@ -144,7 +141,7 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   private fun decorateOperationWithResponseType(operation: Operation) {
-    when (returnType) {
+    when (returnType.actualType()) {
       Unit::class.java, Void::class.java -> {
         // we don't decorate the swagger definition with void types
       }
@@ -166,7 +163,7 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
           addType(it, models)
         }
       }
-    } else if (!type.isBinary()) {
+    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
       models += type.createSwaggerModels()
     }
   }
@@ -183,20 +180,28 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
     }
   }
 
-  private fun Type.isBinary() : Boolean {
+  private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,
       ByteArray::class.java,
       ByteBuffer::class.java,
-      ByteBuf::class.java-> true
+      ByteBuf::class.java -> true
       else -> false
     }
   }
 
-  protected fun Type.mediaType() : String {
+  protected fun Type.mediaType(): String {
     return when {
       this.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
       else -> MediaType.APPLICATION_JSON
+    }
+  }
+
+  private fun Type.actualType(): Type {
+    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
+      this.actualTypeArguments[0]
+    } else {
+      this
     }
   }
 }
