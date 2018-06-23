@@ -54,7 +54,7 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
     get() = fDeployId.result()
 
   private fun start() : BraidServer {
-    vertx = Vertx.vertx()
+    vertx = config.vertx ?: Vertx.vertx()
     vertx.deployVerticle(BraidVerticle(services, config)) {
       if (it.failed()) {
         val msg = "failed to start braid server on ${config.port}"

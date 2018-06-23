@@ -65,14 +65,22 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
       return operation?.value ?: ""
     }
 
-  val produces: String
+  open val produces: String
     get() {
-      return operation?.produces ?: returnType.mediaType()
+      return if (operation != null && !operation!!.produces.isBlank()) {
+        operation!!.produces
+      } else {
+        returnType.mediaType()
+      }
     }
 
-  val consumes: String
+  open val consumes: String
     get() {
-      return operation?.consumes ?: mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
+      return if (operation != null && !operation!!.consumes.isBlank()) {
+        operation!!.consumes
+      } else {
+        mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
+      }
     }
 
   fun addTypes(models: MutableMap<String, Model>) {
@@ -91,6 +99,8 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
     if (protected) {
       operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
     }
+    operation.addResponse("200", operation.responses["default"])
+    operation.addResponse("500", Response().description("server failure"))
     return operation
   }
 
@@ -143,13 +153,15 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   private fun decorateOperationWithResponseType(operation: Operation) {
     when (returnType.actualType()) {
       Unit::class.java, Void::class.java -> {
-        // we don't decorate the swagger definition with void types
+        operation
+          .produces(MediaType.TEXT_PLAIN)
+          .defaultResponse(Response().description("empty response"))
       }
       else -> {
         val responseSchema = returnType.getSwaggerProperty()
         operation
           .produces(produces)
-          .defaultResponse(Response().schema(responseSchema))
+          .defaultResponse(Response().schema(responseSchema).description("default response"))
       }
     }
   }
@@ -191,8 +203,10 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   protected fun Type.mediaType(): String {
+    val actualType = this.actualType()
     return when {
-      this.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      actualType.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      actualType == String::class.java -> MediaType.TEXT_PLAIN
       else -> MediaType.APPLICATION_JSON
     }
   }

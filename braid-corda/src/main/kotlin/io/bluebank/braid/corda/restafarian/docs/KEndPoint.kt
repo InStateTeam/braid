@@ -25,6 +25,7 @@ import io.swagger.models.parameters.QueryParameter
 import io.vertx.core.http.HttpMethod
 import java.lang.reflect.Type
 import javax.ws.rs.DefaultValue
+import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
@@ -50,6 +51,12 @@ class KEndPoint(groupName: String,
     .toList()
 
   private val queryParams = parameters - pathParams
+
+  override val consumes: String
+    get() {
+      return bodyParameter?.type?.javaType?.mediaType() ?: MediaType.APPLICATION_JSON
+    }
+
   override val parameterTypes: List<Type>
     get() = parameters.map { it.type.javaType }
 

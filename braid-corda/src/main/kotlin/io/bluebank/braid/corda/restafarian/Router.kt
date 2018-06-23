@@ -75,6 +75,9 @@ private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
       type.isSubclassOf(ByteBuffer::class) -> {
         ByteBuffer.wrap(body.bytes)
       }
+      type == String::class -> {
+        body.toString()
+      }
       else -> {
         if (body != null && body.length() > 0) {
           val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)

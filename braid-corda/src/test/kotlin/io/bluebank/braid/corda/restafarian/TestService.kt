@@ -62,6 +62,8 @@ class TestService {
 
 class TestServiceApp(port: Int, private val service: TestService) {
   companion object {
+    const val SWAGGER_ROOT = "/rest/swagger"
+    const val REST_API_ROOT = "/rest/api"
     @JvmStatic
     fun main(args: Array<String>) {
       TestServiceApp(8080, TestService())
@@ -83,6 +85,8 @@ class TestServiceApp(port: Int, private val service: TestService) {
       .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
       .withRestConfig(RestConfig(serviceName = "my-service")
         .withAuthSchema(AuthSchema.Token)
+        .withSwaggerPath(SWAGGER_ROOT)
+        .withApiPath(REST_API_ROOT)
         .withPaths {
           group("General Ledger") {
             unprotected {

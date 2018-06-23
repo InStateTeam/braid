@@ -49,6 +49,7 @@ data class RestConfig(val serviceName: String = DEFAULT_SERVICE_NAME,
                       val contact: Contact = DEFAULT_CONTACT,
                       val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
                       internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
+                      val debugMode: Boolean = false,
                       val pathsInit: (Restafarian.(Router) -> Unit) = {}
 ) {
   companion object {
@@ -92,6 +93,9 @@ data class RestConfig(val serviceName: String = DEFAULT_SERVICE_NAME,
 
   @Suppress("unused")
   fun withAuthSchema(authSchema: AuthSchema) = this.copy(authSchema = authSchema)
+
+  @Suppress("unused")
+  fun withDebugMode() = this.copy(debugMode = true)
 }
 
 class Restafarian(
@@ -145,7 +149,7 @@ class Restafarian(
     return DocsHandler(
       serviceName = config.serviceName,
       description = config.description,
-      basePath = config.hostAndPortUri + path,
+      basePath = "${config.hostAndPortUri}/$path/",
       scheme = config.scheme,
       contact = config.contact,
       auth = when (config.authSchema) {
@@ -158,17 +162,18 @@ class Restafarian(
         else -> {
           null
         }
-      }
+      },
+      debugMode = config.debugMode
     )
   }
 
   private fun mount(fn: Restafarian.(Router) -> Unit) {
-    router.mountSubRouter(path, unprotectedRouter)
+    configureSwaggerAndStatic()
+    router.mountSubRouter("$path/", unprotectedRouter)
     configureAuthHandling()
     // pass control to caller to setup rest bindings
     this.fn(router)
     log.info("REST end point bound to ${config.hostAndPortUri}$path")
-    configureSwaggerAndStatic()
   }
 
   private fun configureSwaggerAndStatic() {
@@ -178,10 +183,9 @@ class Restafarian(
 
     // and now for the swagger static
     val sh = StaticHandler.create("swagger")
-    router.get("/swagger/*").last().handler(sh)
-    router.get("$swaggerPath/*").last().handler(sh)
+    router.get("$swaggerPath/*").handler(sh)
 
-    log.info("Swagger UI bound to ${config.hostAndPortUri}$swaggerPath")
+    log.info("Swagger UI bound to ${config.hostAndPortUri}$swaggerPath/")
   }
 
   private fun configureAuthHandling() {
@@ -189,7 +193,7 @@ class Restafarian(
     if (config.authSchema == AuthSchema.None) return
     currentRouter = protectedRouter
 
-    router.mountSubRouter(path, protectedRouter)
+    router.mountSubRouter("$path/", protectedRouter)
     when (config.authSchema) {
       AuthSchema.Basic -> {
         protectedRouter.route().handler(cookieHandler)

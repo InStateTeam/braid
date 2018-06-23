@@ -46,6 +46,7 @@ data class BraidConfig(val port: Int = 8080,
                        val authConstructor: ((Vertx) -> AuthProvider)? = null,
                        val httpServerOptions: HttpServerOptions = defaultServerOptions(),
                        val threadPoolSize : Int = 1,
+                       val vertx: Vertx? = null,
                        val restConfig: RestConfig? = null) {
 
   companion object {
@@ -72,7 +73,13 @@ data class BraidConfig(val port: Int = 8080,
 
   fun withPort(port: Int) = this.copy(port = port)
   @Suppress("unused")
-  fun withRootPath(rootPath: String) = this.copy(rootPath = rootPath)
+  fun withRootPath(rootPath: String): BraidConfig {
+    val canonical = if (!rootPath.endsWith('/'))
+      "$rootPath/"
+    else
+      rootPath
+    return this.copy(rootPath = canonical)
+  }
 
   fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) = this.copy(authConstructor = memoize(authConstructor))
   fun withHttpServerOptions(httpServerOptions: HttpServerOptions) = this.copy(httpServerOptions = httpServerOptions)
@@ -104,6 +111,7 @@ data class BraidConfig(val port: Int = 8080,
     return this.copy(registeredFlows = map)
   }
 
+  fun withVertx(vertx: Vertx) = this.copy(vertx = vertx)
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
   fun bootstrapBraid(serviceHub: AppServiceHub? = null) = BraidServer.bootstrapBraid(serviceHub, this)
