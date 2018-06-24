@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
 
-internal object Paths {
-  val PATH_PARAMS_RE : Regex = """(:([^\/]+))""".toRegex()
+package io.bluebank.braid.corda.rest
+
+enum class AuthSchema {
+  None,
+  Basic,
+  Token
 }
-
-internal fun String.toSwaggerPath() : String {
-  return Paths.PATH_PARAMS_RE.replace(this) { matchResult ->
-    assert(matchResult.groups.size == 3)
-    val match = matchResult.groups[2]!!.value
-    "{$match}"
-  }
-}
-
-internal fun String.vertxPathParams() : List<String> {
-  return Paths.PATH_PARAMS_RE.findAll(this).map {
-    assert(it.groups.size == 3) {
-      "expected 3 groups in match, but got ${it.groups.size}"
-    }
-    it.groups[2]!!.value
-  }.toList()
-}
-

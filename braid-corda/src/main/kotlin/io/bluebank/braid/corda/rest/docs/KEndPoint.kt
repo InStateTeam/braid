@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian.docs
+package io.bluebank.braid.corda.rest.docs
 
-import io.bluebank.braid.corda.restafarian.Paths
+import io.bluebank.braid.corda.rest.Paths
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.ApiParam
 import io.swagger.models.parameters.BodyParameter

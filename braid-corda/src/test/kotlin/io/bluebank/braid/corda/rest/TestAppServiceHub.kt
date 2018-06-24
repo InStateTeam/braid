@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.StateAndRef

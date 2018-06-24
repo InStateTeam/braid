@@ -16,7 +16,7 @@
 package io.bluebank.braid.corda
 
 import com.google.common.io.Resources
-import io.bluebank.braid.corda.restafarian.RestConfig
+import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
