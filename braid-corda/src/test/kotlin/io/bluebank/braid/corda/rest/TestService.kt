@@ -59,6 +59,11 @@ class TestService {
     val name = rc.request().getParam("foo") ?: "Margaret"
     rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode("Hello, $name!"))
   }
+
+  @ApiOperation(value = "return list of strings", response = String::class, responseContainer = "List")
+  fun returnsListOfStuff(context: RoutingContext) {
+    context.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode(listOf("one", "two")))
+  }
 }
 
 class TestServiceApp(port: Int, private val service: TestService) {
@@ -104,6 +109,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
               get("/bytebuffer", service::getByteBuffer)
               post("/doublebuffer", service::doubleBuffer)
               post("/custom", service::somethingCustom)
+              get("/stringlist", service::returnsListOfStuff)
             }
             protected {
               post("/echo", service::echo)

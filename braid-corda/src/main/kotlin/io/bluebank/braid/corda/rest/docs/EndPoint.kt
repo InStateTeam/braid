@@ -25,6 +25,7 @@ import io.swagger.models.parameters.BodyParameter
 import io.swagger.models.parameters.Parameter
 import io.swagger.models.parameters.PathParameter
 import io.swagger.models.parameters.QueryParameter
+import io.swagger.models.properties.ArrayProperty
 import io.swagger.models.properties.BinaryProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.PropertyBuilder
@@ -56,19 +57,24 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   protected abstract val annotations: List<Annotation>
   abstract val parameterTypes: List<Type>
 
-  val operation: ApiOperation? by lazy {
+  private val apiOperation: ApiOperation? by lazy {
     annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
   }
 
+  val responseContainer: String?
+    get() {
+      return apiOperation?.responseContainer
+    }
+
   val description: String
     get() {
-      return operation?.value ?: ""
+      return apiOperation?.value ?: ""
     }
 
   open val produces: String
     get() {
-      return if (operation != null && !operation!!.produces.isBlank()) {
-        operation!!.produces
+      return if (apiOperation != null && !apiOperation!!.produces.isBlank()) {
+        apiOperation!!.produces
       } else {
         returnType.mediaType()
       }
@@ -76,8 +82,8 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
 
   open val consumes: String
     get() {
-      return if (operation != null && !operation!!.consumes.isBlank()) {
-        operation!!.consumes
+      return if (apiOperation != null && !apiOperation!!.consumes.isBlank()) {
+        apiOperation!!.consumes
       } else {
         mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
       }
@@ -159,7 +165,17 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
         .produces(MediaType.TEXT_PLAIN)
         .defaultResponse(Response().description("empty response"))
     } else {
-      val responseSchema = returnType.getSwaggerProperty()
+      val responseSchema = returnType.getSwaggerProperty().let { responseSchema ->
+        when (responseContainer) {
+          "List", "Array", "Set" -> {
+            ArrayProperty(responseSchema)
+          }
+          else -> {
+            responseSchema
+          }
+        }
+
+      }
       operation
         .produces(produces)
         .defaultResponse(Response().schema(responseSchema).description("default response"))
