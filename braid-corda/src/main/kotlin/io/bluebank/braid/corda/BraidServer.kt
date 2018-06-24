@@ -16,7 +16,9 @@
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.vertx.core.AsyncResult
 import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import net.corda.core.node.AppServiceHub
 import net.corda.core.utilities.loggerFor
@@ -32,12 +34,12 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
       BraidCordaJacksonInit.init()
     }
 
-    fun bootstrapBraid(serviceHub: AppServiceHub?, config: BraidConfig = BraidConfig()) : BraidServer {
+    fun bootstrapBraid(serviceHub: AppServiceHub?, config: BraidConfig = BraidConfig(), fn: Handler<AsyncResult<String>>? = null): BraidServer {
       return servers.computeIfAbsent(config.port) {
         serviceHub?.let {
           log.info("starting up braid server for ${serviceHub.myInfo.legalIdentities.first().name.organisation} on port ${config.port}")
         }
-        BraidServer(serviceHub, config).start().apply {
+        BraidServer(serviceHub, config).start(fn).apply {
           serviceHub?.registerUnloadHandler {
             shutdown()
           }
@@ -53,7 +55,7 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
   private val deployId : String?
     get() = fDeployId.result()
 
-  private fun start() : BraidServer {
+  private fun start(fn: Handler<AsyncResult<String>>?): BraidServer {
     vertx = config.vertx ?: Vertx.vertx()
     vertx.deployVerticle(BraidVerticle(services, config)) {
       if (it.failed()) {
@@ -64,6 +66,7 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
         log.info("Braid server started successfully on ${config.port}")
         fDeployId.complete(it.result())
       }
+      fn?.handle(it)
     }
     addShutdownHook(this::shutdown)
     return this

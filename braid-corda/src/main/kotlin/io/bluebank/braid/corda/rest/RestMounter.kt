@@ -31,6 +31,15 @@ import io.vertx.ext.web.handler.*
 import io.vertx.ext.web.sstore.LocalSessionStore
 import kotlin.reflect.KCallable
 
+/**
+ * This class encapsulates a simpler way of setting up a Rest Service (
+ * for those moments that we need one
+ *
+ * An instance of this class provides convenient methods for setting up HTTP methods
+ * bound to method references. It automatically serves a swagger json and UI.
+ *
+ * This class works with Kotlin - work is needed to make it work well with other JVM languages.
+ */
 class RestMounter(
   private val config: RestConfig = RestConfig(),
   private val router: Router,
@@ -148,6 +157,9 @@ class RestMounter(
   }
 
 
+  /**
+   * Define a grouping of method bindings
+   */
   fun group(groupName: String, fn: () -> Unit) {
     this.groupName.let { old ->
       this.groupName = groupName
@@ -159,6 +171,9 @@ class RestMounter(
     }
   }
 
+  /**
+   * bind the enclosed bindings declared in [fn] to the unprotected, publicly accessible, router
+   */
   fun unprotected(fn: () -> Unit) {
     this.currentRouter.let { old ->
       currentRouter = unprotectedRouter
@@ -170,6 +185,9 @@ class RestMounter(
     }
   }
 
+  /**
+   * bind the enclosed bindings declared in [fn] to the protected router
+   */
   fun protected(fn: () -> Unit) {
     this.currentRouter.let { old ->
       if (config.authSchema == AuthSchema.None) {
@@ -183,6 +201,15 @@ class RestMounter(
         currentRouter = old
       }
     }
+  }
+
+  /**
+   * Get access to the raw Vertx router
+   * This method can be used to bind additional behaviours (e.g. serving a static website)
+   */
+  @Suppress("unused")
+  fun router(fn: Router.() -> Unit) {
+    currentRouter.fn()
   }
 
   @JvmName("getFuture")

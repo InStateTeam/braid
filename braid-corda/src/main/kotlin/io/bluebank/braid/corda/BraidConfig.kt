@@ -19,6 +19,8 @@ import com.google.common.io.Resources
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
 import io.bluebank.braid.core.logging.loggerFor
+import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -114,7 +116,7 @@ data class BraidConfig(val port: Int = 8080,
   fun withVertx(vertx: Vertx) = this.copy(vertx = vertx)
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
-  fun bootstrapBraid(serviceHub: AppServiceHub? = null) = BraidServer.bootstrapBraid(serviceHub, this)
+  fun bootstrapBraid(serviceHub: AppServiceHub? = null, fn: Handler<AsyncResult<String>>? = null) = BraidServer.bootstrapBraid(serviceHub, this, fn)
 }
 
 private inline fun <reified T : Any, reified R : Any> memoize(crossinline fn: (T) -> R): (T) -> R {
