@@ -32,7 +32,8 @@ class BrowserURL {
     this.protocol = parser.protocol;
     this.host = parser.hostname + ":" + parser.port;
     this.hostname = parser.hostname;
-    this.port = parser.port
+    this.port = parser.port;
+    this.path = parser.pathname;
   }
 }
 
