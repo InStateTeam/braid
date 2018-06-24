@@ -151,18 +151,18 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   private fun decorateOperationWithResponseType(operation: Operation) {
-    when (returnType.actualType()) {
-      Unit::class.java, Void::class.java -> {
-        operation
-          .produces(MediaType.TEXT_PLAIN)
-          .defaultResponse(Response().description("empty response"))
-      }
-      else -> {
-        val responseSchema = returnType.getSwaggerProperty()
-        operation
-          .produces(produces)
-          .defaultResponse(Response().schema(responseSchema).description("default response"))
-      }
+    val actualReturnType = returnType.actualType()
+    if (actualReturnType == Unit::class.java ||
+      actualReturnType == Void::class.java ||
+      actualReturnType.typeName == "void") {
+      operation
+        .produces(MediaType.TEXT_PLAIN)
+        .defaultResponse(Response().description("empty response"))
+    } else {
+      val responseSchema = returnType.getSwaggerProperty()
+      operation
+        .produces(produces)
+        .defaultResponse(Response().schema(responseSchema).description("default response"))
     }
   }
 

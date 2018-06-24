@@ -42,6 +42,7 @@ class TestService {
   fun sayHelloAsync() = Future.succeededFuture<String>("hello, async!")
   fun quietAsyncVoid(): Future<Void> = Future.succeededFuture()
   fun quietAsyncUnit(): Future<Unit> = Future.succeededFuture()
+  fun quietUnit(): Unit = Unit
   fun echo(msg: String) = "echo: $msg"
   fun getBuffer(): Buffer = Buffer.buffer("hello")
   fun getByteArray(): ByteArray = Buffer.buffer("hello").bytes
@@ -87,12 +88,14 @@ class TestServiceApp(port: Int, private val service: TestService) {
         .withAuthSchema(AuthSchema.Token)
         .withSwaggerPath(SWAGGER_ROOT)
         .withApiPath(REST_API_ROOT)
+        .withDebugMode()
         .withPaths {
           group("General Ledger") {
             unprotected {
               get("/hello-async", service::sayHelloAsync)
               get("/quiet-async-void", service::quietAsyncVoid)
               get("/quiet-async-unit", service::quietAsyncUnit)
+              get("/quiet-unit", service::quietUnit)
               post("/login", thisObj::login)
               get("/hello", service::sayHello)
               get("/buffer", service::getBuffer)
