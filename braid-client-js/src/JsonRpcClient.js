@@ -31,6 +31,10 @@ export default class JsonRPC {
     this.onError = null;
     this.socket = null;
 
+    if (!url.endsWith('/')) {
+      url = url + '/';
+    }
+
     if (typeof options === 'undefined') {
       options = {}
     }
@@ -42,7 +46,7 @@ export default class JsonRPC {
     // -- PRIVATE FUNCTIONS -- oh Javascript
 
     function checkServiceExistsAndBootstrap() {
-      const infoURL = url + "/info";
+      const infoURL = url + "info";
       if (!options.strictSSL) {
         if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
           // NOTE: rather nasty - to be used only in local dev for self-signed certificates
@@ -61,7 +65,7 @@ export default class JsonRPC {
         }
       }, function(err, resp) {
         if (err) {
-          console.log("error!", err);
+          err.url = infoURL;
           initialCheckFailed(err)
         } else if (resp) {
           onInitialCheck(resp);
@@ -77,10 +81,12 @@ export default class JsonRPC {
       console.error("failed: ", e);
       if (that.onError) {
         let error;
-        if (e.currentTarget.status === 0) {
-          error = new ErrorEvent(false, false, "connection refused")
+        if (e.code && e.code === 'ECONNREFUSED') {
+          error = new ErrorEvent(false, false, "connection refused", e.url)
+        } else if (e.currentTarget && e.currentTarget.status && e.currentTarget.status === 0) {
+          error = new ErrorEvent(false, false, "connection refused", e.url)
         } else  {
-          error = new ErrorEvent(false, false, "unknown error")
+          error = new ErrorEvent(false, false, "unknown error", e.url)
         }
         that.onError(error);
       } else {
@@ -311,10 +317,10 @@ class CancellableInvocation {
 }
 
 class ErrorEvent {
-  constructor(serverFound, serviceFound, message, data) {
+  constructor(serverFound, serviceFound, message, url) {
     this.serverFound = serverFound;
     this.serviceFound = serviceFound;
     this.message = message;
-    this.data = data;
+    this.url = url;
   }
 }

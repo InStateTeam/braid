@@ -54,7 +54,8 @@ export class Proxy {
       }
     }
 
-    function failed(e) {
+    function failed(msg, e) {
+      e.message = msg;
       if (onError) {
         onError(e)
       } else {
@@ -88,7 +89,8 @@ export class Proxy {
       }, function(err, resp, body) {
         if (err) {
           clearCredentials();
-          failed("failed to get services descriptor: " + err)
+          err.url = url;
+          failed(`failed to get services descriptor from ${url}`, err)
         } else if (resp) {
           bindServices(body);
         }
