@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
-internal object Paths {
-  val PATH_PARAMS_RE : Regex = """(:([^\/]+))""".toRegex()
-}
+import org.junit.Test
 
-internal fun String.toSwaggerPath() : String {
-  return Paths.PATH_PARAMS_RE.replace(this) { matchResult ->
-    assert(matchResult.groups.size == 3)
-    val match = matchResult.groups[2]!!.value
-    "{$match}"
+class PathsTest {
+  @Test
+  fun `that vertx path can be converted to swagger path`() {
+    val path = "/a/:b/:c/d/:e"
+    val swaggerPath = path.toSwaggerPath()
+    kotlin.test.assertEquals("/a/{b}/{c}/d/{e}", swaggerPath)
   }
 }
-
-internal fun String.vertxPathParams() : List<String> {
-  return Paths.PATH_PARAMS_RE.findAll(this).map {
-    assert(it.groups.size == 3) {
-      "expected 3 groups in match, but got ${it.groups.size}"
-    }
-    it.groups[2]!!.value
-  }.toList()
-}
-

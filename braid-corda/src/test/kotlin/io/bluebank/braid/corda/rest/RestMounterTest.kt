@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.core.socket.findFreePort
 import io.netty.handler.codec.http.HttpHeaderValues
@@ -31,7 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(VertxUnitRunner::class)
-class RestafarianTest {
+class RestMounterTest {
   private val port = findFreePort()
   private val service = TestServiceApp(port, TestService())
 
@@ -41,49 +41,49 @@ class RestafarianTest {
   }
 
   @After
-  fun after(context: TestContext) {
+  fun after() {
     service.shutdown()
   }
 
   @Test
-  fun `test that we can mount restafarian and access via swagger`(context: TestContext) {
+  fun `test that we can mount rest endpoints and access via swagger`(context: TestContext) {
     val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
-    client.get(port, "localhost", "/swagger.json")
-        .exceptionHandler(context::fail)
-        .handler {
-          it.bodyHandler {
-            it.toJsonObject()
-            async1.complete()
-          }
+    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json")
+      .exceptionHandler(context::fail)
+      .handler {
+        it.bodyHandler {
+          it.toJsonObject()
+          async1.complete()
         }
-        .end()
+      }
+      .end()
 
     val async2 = context.async()
-    client.get(port, "localhost", "/")
-        .exceptionHandler(context::fail)
-        .handler {
-          it.bodyHandler {
-            val body = it.toString()
-            context.assertTrue(body.contains("<title>Swagger UI</title>", true))
-            async2.complete()
-          }
+    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/")
+      .exceptionHandler(context::fail)
+      .handler {
+        it.bodyHandler {
+          val body = it.toString()
+          context.assertTrue(body.contains("<title>Swagger UI</title>", true))
+          async2.complete()
         }
-        .end()
+      }
+      .end()
 
     val async3 = context.async()
-    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/hello")
-        .exceptionHandler(context::fail)
-        .handler {
-          it.bodyHandler {
-            context.assertEquals("hello", it.toString())
-            async3.complete()
-          }
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/hello")
+      .exceptionHandler(context::fail)
+      .handler {
+        it.bodyHandler {
+          context.assertEquals("hello", it.toString())
+          async3.complete()
         }
-        .end()
+      }
+      .end()
 
     val async4 = context.async()
-    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/buffer")
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/buffer")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -96,7 +96,7 @@ class RestafarianTest {
 
 
     val async5 = context.async()
-    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytearray")
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytearray")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -109,7 +109,7 @@ class RestafarianTest {
 
 
     val async6 = context.async()
-    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytebuf")
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytebuf")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -121,7 +121,7 @@ class RestafarianTest {
       .end()
 
     val async7 = context.async()
-    client.get(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/bytebuffer")
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytebuffer")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -134,7 +134,7 @@ class RestafarianTest {
 
     val async8 = context.async()
     val bytes = Buffer.buffer("hello")
-    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/doublebuffer")
+    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/doublebuffer")
       .putHeader(CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM)
       .putHeader(CONTENT_LENGTH, bytes.length().toString())
       .exceptionHandler(context::fail)
@@ -150,7 +150,7 @@ class RestafarianTest {
 
     val async9 = context.async()
     var token = ""
-    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/login")
+    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/login")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -164,7 +164,7 @@ class RestafarianTest {
     async9.await()
 
     val async10 = context.async()
-    client.post(port, "localhost", "${RestConfig.DEFAULT_API_PATH}/echo")
+    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/echo")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -174,7 +174,7 @@ class RestafarianTest {
       }
       .putHeader("Authorization", "Bearer $token")
       .setChunked(true)
-      .end("\"hello\"")
+      .end("hello")
   }
 }
 

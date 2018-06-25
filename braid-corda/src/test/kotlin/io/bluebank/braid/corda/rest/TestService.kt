@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.BraidServer
@@ -39,6 +39,10 @@ import javax.ws.rs.core.MediaType
 
 class TestService {
   fun sayHello() = "hello"
+  fun sayHelloAsync() = Future.succeededFuture<String>("hello, async!")
+  fun quietAsyncVoid(): Future<Void> = Future.succeededFuture()
+  fun quietAsyncUnit(): Future<Unit> = Future.succeededFuture()
+  fun quietUnit(): Unit = Unit
   fun echo(msg: String) = "echo: $msg"
   fun getBuffer(): Buffer = Buffer.buffer("hello")
   fun getByteArray(): ByteArray = Buffer.buffer("hello").bytes
@@ -55,10 +59,17 @@ class TestService {
     val name = rc.request().getParam("foo") ?: "Margaret"
     rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode("Hello, $name!"))
   }
+
+  @ApiOperation(value = "return list of strings", response = String::class, responseContainer = "List")
+  fun returnsListOfStuff(context: RoutingContext) {
+    context.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode(listOf("one", "two")))
+  }
 }
 
 class TestServiceApp(port: Int, private val service: TestService) {
   companion object {
+    const val SWAGGER_ROOT = "/rest/swagger"
+    const val REST_API_ROOT = "/rest/api"
     @JvmStatic
     fun main(args: Array<String>) {
       TestServiceApp(8080, TestService())
@@ -80,9 +91,16 @@ class TestServiceApp(port: Int, private val service: TestService) {
       .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
       .withRestConfig(RestConfig(serviceName = "my-service")
         .withAuthSchema(AuthSchema.Token)
+        .withSwaggerPath(SWAGGER_ROOT)
+        .withApiPath(REST_API_ROOT)
+        .withDebugMode()
         .withPaths {
           group("General Ledger") {
             unprotected {
+              get("/hello-async", service::sayHelloAsync)
+              get("/quiet-async-void", service::quietAsyncVoid)
+              get("/quiet-async-unit", service::quietAsyncUnit)
+              get("/quiet-unit", service::quietUnit)
               post("/login", thisObj::login)
               get("/hello", service::sayHello)
               get("/buffer", service::getBuffer)
@@ -91,6 +109,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
               get("/bytebuffer", service::getByteBuffer)
               post("/doublebuffer", service::doubleBuffer)
               post("/custom", service::somethingCustom)
+              get("/stringlist", service::returnsListOfStuff)
             }
             protected {
               post("/echo", service::echo)

@@ -16,9 +16,11 @@
 package io.bluebank.braid.corda
 
 import com.google.common.io.Resources
-import io.bluebank.braid.corda.restafarian.RestConfig
+import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
 import io.bluebank.braid.core.logging.loggerFor
+import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
@@ -46,6 +48,7 @@ data class BraidConfig(val port: Int = 8080,
                        val authConstructor: ((Vertx) -> AuthProvider)? = null,
                        val httpServerOptions: HttpServerOptions = defaultServerOptions(),
                        val threadPoolSize : Int = 1,
+                       val vertx: Vertx? = null,
                        val restConfig: RestConfig? = null) {
 
   companion object {
@@ -72,7 +75,13 @@ data class BraidConfig(val port: Int = 8080,
 
   fun withPort(port: Int) = this.copy(port = port)
   @Suppress("unused")
-  fun withRootPath(rootPath: String) = this.copy(rootPath = rootPath)
+  fun withRootPath(rootPath: String): BraidConfig {
+    val canonical = if (!rootPath.endsWith('/'))
+      "$rootPath/"
+    else
+      rootPath
+    return this.copy(rootPath = canonical)
+  }
 
   fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) = this.copy(authConstructor = memoize(authConstructor))
   fun withHttpServerOptions(httpServerOptions: HttpServerOptions) = this.copy(httpServerOptions = httpServerOptions)
@@ -104,9 +113,10 @@ data class BraidConfig(val port: Int = 8080,
     return this.copy(registeredFlows = map)
   }
 
+  fun withVertx(vertx: Vertx) = this.copy(vertx = vertx)
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
-  fun bootstrapBraid(serviceHub: AppServiceHub? = null) = BraidServer.bootstrapBraid(serviceHub, this)
+  fun bootstrapBraid(serviceHub: AppServiceHub? = null, fn: Handler<AsyncResult<String>>? = null) = BraidServer.bootstrapBraid(serviceHub, this, fn)
 }
 
 private inline fun <reified T : Any, reified R : Any> memoize(crossinline fn: (T) -> R): (T) -> R {

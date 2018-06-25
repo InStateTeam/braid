@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian.docs
+package io.bluebank.braid.corda.rest.docs
 
-import io.bluebank.braid.corda.restafarian.toSwaggerPath
+import io.bluebank.braid.corda.rest.toSwaggerPath
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.models.*
@@ -38,7 +38,8 @@ class DocsHandler(
     .name("")
     .email("")
     .url(""),
-  private val auth: SecuritySchemeDefinition? = null
+  private val auth: SecuritySchemeDefinition? = null,
+  private val debugMode: Boolean = false
 ) : Handler<RoutingContext> {
   companion object {
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
@@ -54,7 +55,7 @@ class DocsHandler(
   override fun handle(context: RoutingContext) {
     val absoluteURI = URL(context.request().absoluteURI())
     swagger.host = absoluteURI.authority
-    val output = Json.pretty().writeValueAsString(swagger)
+    val output = Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
       .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)

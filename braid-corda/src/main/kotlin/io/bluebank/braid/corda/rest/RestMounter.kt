@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
-import io.bluebank.braid.corda.restafarian.docs.DocsHandler
+import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.core.logging.loggerFor
-import io.swagger.models.Contact
-import io.swagger.models.Scheme
 import io.swagger.models.auth.ApiKeyAuthDefinition
 import io.swagger.models.auth.BasicAuthDefinition
 import io.swagger.models.auth.In
@@ -26,85 +24,33 @@ import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
-import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.*
 import io.vertx.ext.web.sstore.LocalSessionStore
-import java.net.URI
 import kotlin.reflect.KCallable
 
-enum class AuthSchema {
-  None,
-  Basic,
-  Token
-}
-
-data class RestConfig(val serviceName: String = DEFAULT_SERVICE_NAME,
-                      val description: String = DEFAULT_DESCRIPTION,
-                      val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
-                      val apiPath: String = DEFAULT_API_PATH,
-                      val swaggerPath: String = DEFAULT_SWAGGER_PATH,
-                      val contact: Contact = DEFAULT_CONTACT,
-                      val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
-                      internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
-                      val pathsInit: (Restafarian.(Router) -> Unit) = {}
-) {
-  companion object {
-    const val DEFAULT_SERVICE_NAME = ""
-    const val DEFAULT_DESCRIPTION = ""
-    const val DEFAULT_HOST_AND_PORT_URI = "http://localhost:8080"
-    const val DEFAULT_API_PATH = "/api/rest"
-    const val DEFAULT_SWAGGER_PATH = "/"
-    val DEFAULT_CONTACT : Contact = Contact().email("").name("").url("")
-    val DEFAULT_AUTH_PROVIDER: AuthProvider? = null
-    val DEFAULT_AUTH_SCHEMA = AuthSchema.None
-  }
-
-  val scheme: Scheme by lazy {
-    when (URI.create(hostAndPortUri).scheme.toLowerCase()) {
-      "https" -> Scheme.HTTPS
-      "http" -> Scheme.HTTP
-      else -> throw RuntimeException("unsupported protocol scheme for $hostAndPortUri")
-    }
-  }
-
-  @Suppress("unused")
-  fun withServiceName(value: String) = this.copy(serviceName = value)
-
-  @Suppress("unused")
-  fun withDescription(value: String) = this.copy(description = value)
-
-  fun withHostAndPortUri(value: String) = this.copy(hostAndPortUri = value)
-  @Suppress("unused")
-  fun withApiPath(value: String) = this.copy(apiPath = value)
-
-  @Suppress("unused")
-  fun withSwaggerPath(value: String) = this.copy(swaggerPath = value)
-
-  @Suppress("unused")
-  fun withContact(value: Contact) = this.copy(contact = value)
-
-  internal fun withAuth(value: AuthProvider?) = this.copy(authProvider = value)
-  @Suppress("unused")
-  fun withPaths(value: Restafarian.(Router) -> Unit) = this.copy(pathsInit = value)
-
-  @Suppress("unused")
-  fun withAuthSchema(authSchema: AuthSchema) = this.copy(authSchema = authSchema)
-}
-
-class Restafarian(
+/**
+ * This class encapsulates a simpler way of setting up a Rest Service (
+ * for those moments that we need one
+ *
+ * An instance of this class provides convenient methods for setting up HTTP methods
+ * bound to method references. It automatically serves a swagger json and UI.
+ *
+ * This class works with Kotlin - work is needed to make it work well with other JVM languages.
+ */
+class RestMounter(
   private val config: RestConfig = RestConfig(),
   private val router: Router,
   private val vertx: Vertx
 ) {
 
   companion object {
-    private val log = loggerFor<Restafarian>()
+    private val log = loggerFor<RestMounter>()
 
     fun mount(config: RestConfig, router: Router, vertx: Vertx) {
-      Restafarian(config, router, vertx)
+      RestMounter(config, router, vertx)
     }
   }
 
@@ -145,7 +91,7 @@ class Restafarian(
     return DocsHandler(
       serviceName = config.serviceName,
       description = config.description,
-      basePath = config.hostAndPortUri + path,
+      basePath = "${config.hostAndPortUri}/$path/",
       scheme = config.scheme,
       contact = config.contact,
       auth = when (config.authSchema) {
@@ -158,17 +104,18 @@ class Restafarian(
         else -> {
           null
         }
-      }
+      },
+      debugMode = config.debugMode
     )
   }
 
-  private fun mount(fn: Restafarian.(Router) -> Unit) {
-    router.mountSubRouter(path, unprotectedRouter)
+  private fun mount(fn: RestMounter.(Router) -> Unit) {
+    configureSwaggerAndStatic()
+    router.mountSubRouter("$path/", unprotectedRouter)
     configureAuthHandling()
     // pass control to caller to setup rest bindings
     this.fn(router)
     log.info("REST end point bound to ${config.hostAndPortUri}$path")
-    configureSwaggerAndStatic()
   }
 
   private fun configureSwaggerAndStatic() {
@@ -178,10 +125,9 @@ class Restafarian(
 
     // and now for the swagger static
     val sh = StaticHandler.create("swagger")
-    router.get("/swagger/*").last().handler(sh)
-    router.get("$swaggerPath/*").last().handler(sh)
+    router.get("$swaggerPath/*").handler(sh)
 
-    log.info("Swagger UI bound to ${config.hostAndPortUri}$swaggerPath")
+    log.info("Swagger UI bound to ${config.hostAndPortUri}$swaggerPath/")
   }
 
   private fun configureAuthHandling() {
@@ -189,7 +135,7 @@ class Restafarian(
     if (config.authSchema == AuthSchema.None) return
     currentRouter = protectedRouter
 
-    router.mountSubRouter(path, protectedRouter)
+    router.mountSubRouter("$path/", protectedRouter)
     when (config.authSchema) {
       AuthSchema.Basic -> {
         protectedRouter.route().handler(cookieHandler)
@@ -211,6 +157,9 @@ class Restafarian(
   }
 
 
+  /**
+   * Define a grouping of method bindings
+   */
   fun group(groupName: String, fn: () -> Unit) {
     this.groupName.let { old ->
       this.groupName = groupName
@@ -222,6 +171,9 @@ class Restafarian(
     }
   }
 
+  /**
+   * bind the enclosed bindings declared in [fn] to the unprotected, publicly accessible, router
+   */
   fun unprotected(fn: () -> Unit) {
     this.currentRouter.let { old ->
       currentRouter = unprotectedRouter
@@ -233,6 +185,9 @@ class Restafarian(
     }
   }
 
+  /**
+   * bind the enclosed bindings declared in [fn] to the protected router
+   */
   fun protected(fn: () -> Unit) {
     this.currentRouter.let { old ->
       if (config.authSchema == AuthSchema.None) {
@@ -246,6 +201,15 @@ class Restafarian(
         currentRouter = old
       }
     }
+  }
+
+  /**
+   * Get access to the raw Vertx router
+   * This method can be used to bind additional behaviours (e.g. serving a static website)
+   */
+  @Suppress("unused")
+  fun router(fn: Router.() -> Unit) {
+    currentRouter.fn()
   }
 
   @JvmName("getFuture")

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
@@ -74,6 +74,9 @@ private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
       }
       type.isSubclassOf(ByteBuffer::class) -> {
         ByteBuffer.wrap(body.bytes)
+      }
+      type == String::class -> {
+        body.toString()
       }
       else -> {
         if (body != null && body.length() > 0) {

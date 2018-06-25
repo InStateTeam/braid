@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian.docs
+package io.bluebank.braid.corda.rest.docs
 
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
@@ -25,6 +25,7 @@ import io.swagger.models.parameters.BodyParameter
 import io.swagger.models.parameters.Parameter
 import io.swagger.models.parameters.PathParameter
 import io.swagger.models.parameters.QueryParameter
+import io.swagger.models.properties.ArrayProperty
 import io.swagger.models.properties.BinaryProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.PropertyBuilder
@@ -56,22 +57,37 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   protected abstract val annotations: List<Annotation>
   abstract val parameterTypes: List<Type>
 
-  val operation : ApiOperation? by lazy {
+  private val apiOperation: ApiOperation? by lazy {
     annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
   }
 
-  val description: String
+  val responseContainer: String?
     get() {
-      return operation?.value ?: ""
+      return apiOperation?.responseContainer
     }
 
-  val produces : String get() {
-    return operation?.produces ?: returnType.mediaType()
-  }
+  val description: String
+    get() {
+      return apiOperation?.value ?: ""
+    }
 
-  val consumes : String get() {
-    return operation?.consumes ?: mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
-  }
+  open val produces: String
+    get() {
+      return if (apiOperation != null && !apiOperation!!.produces.isBlank()) {
+        apiOperation!!.produces
+      } else {
+        returnType.mediaType()
+      }
+    }
+
+  open val consumes: String
+    get() {
+      return if (apiOperation != null && !apiOperation!!.consumes.isBlank()) {
+        apiOperation!!.consumes
+      } else {
+        mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
+      }
+    }
 
   fun addTypes(models: MutableMap<String, Model>) {
     addType(this.returnType, models)
@@ -89,6 +105,8 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
     if (protected) {
       operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
     }
+    operation.addResponse("200", operation.responses["default"])
+    operation.addResponse("500", Response().description("server failure"))
     return operation
   }
 
@@ -130,39 +148,50 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
   }
 
   protected fun Type.getSwaggerProperty(): Property {
-    val actualType = if (this is ParameterizedType && this.rawType == Future::class) this.actualTypeArguments[0]
-    else this
+    val actualType = this.actualType()
     return if (actualType.isBinary()) {
       BinaryProperty()
     } else {
-      ModelConverters.getInstance().readAsProperty(this)
+      ModelConverters.getInstance().readAsProperty(actualType)
     }
   }
 
   private fun decorateOperationWithResponseType(operation: Operation) {
-    when (returnType) {
-      Unit::class.java, Void::class.java -> {
-        // we don't decorate the swagger definition with void types
+    val actualReturnType = returnType.actualType()
+    if (actualReturnType == Unit::class.java ||
+      actualReturnType == Void::class.java ||
+      actualReturnType.typeName == "void") {
+      operation
+        .produces(MediaType.TEXT_PLAIN)
+        .defaultResponse(Response().description("empty response"))
+    } else {
+      val responseSchema = returnType.getSwaggerProperty().let { responseSchema ->
+        when (responseContainer) {
+          "List", "Array", "Set" -> {
+            ArrayProperty(responseSchema)
+          }
+          else -> {
+            responseSchema
+          }
+        }
+
       }
-      else -> {
-        val responseSchema = returnType.getSwaggerProperty()
-        operation
-          .produces(produces)
-          .defaultResponse(Response().schema(responseSchema))
-      }
+      operation
+        .produces(produces)
+        .defaultResponse(Response().schema(responseSchema).description("default response"))
     }
   }
 
   private fun addType(type: Type, models: MutableMap<String, Model>) {
     if (type is ParameterizedType) {
-      if (type.rawType == Future::class) {
+      if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
         this.addType(type.actualTypeArguments[0], models)
       } else {
         type.actualTypeArguments.forEach {
           addType(it, models)
         }
       }
-    } else if (!type.isBinary()) {
+    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
       models += type.createSwaggerModels()
     }
   }
@@ -179,20 +208,30 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
     }
   }
 
-  private fun Type.isBinary() : Boolean {
+  private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,
       ByteArray::class.java,
       ByteBuffer::class.java,
-      ByteBuf::class.java-> true
+      ByteBuf::class.java -> true
       else -> false
     }
   }
 
-  protected fun Type.mediaType() : String {
+  protected fun Type.mediaType(): String {
+    val actualType = this.actualType()
     return when {
-      this.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      actualType.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      actualType == String::class.java -> MediaType.TEXT_PLAIN
       else -> MediaType.APPLICATION_JSON
+    }
+  }
+
+  private fun Type.actualType(): Type {
+    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
+      this.actualTypeArguments[0]
+    } else {
+      this
     }
   }
 }

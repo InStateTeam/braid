@@ -98,7 +98,6 @@ export default class DynamicProxy {
     function retrieveMetadataAndBind() {
       try {
         const url = getMetadataEndpoint(config, serviceName);
-
         xhr({
           method: "get",
           uri: url,
@@ -109,16 +108,18 @@ export default class DynamicProxy {
           }
         }, function (err, resp, body) {
           if (err) {
+            err.url = url;
             failed(err);
           }
           else if (resp.statusCode !== 200) {
-            failed(resp.statusMessage)
+
+            failed(resp.statusMessage, {ur: url})
           } else if (body) {
             bindMetadata(body);
           } else {
             const message = "no error nor response!";
             config.console.error(message, url);
-            failed(message);
+            failed(message, {url: url});
           }
         });
       } catch (err) {
@@ -172,8 +173,10 @@ export default class DynamicProxy {
 
     function getMetadataEndpoint(config, serviceName) {
       const parsed = parseURL(config.url);
-      const result = parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + "/api/" + serviceName;
-      return result;
+      if (!parsed.pathname.endsWith('/')) {
+        parsed.pathname = parsed.pathname + '/'
+      }
+      return parsed.protocol + "//" + parsed.hostname + ":" + parsed.port + parsed.pathname + serviceName;
     }
 
     function parseURL(url) {
@@ -219,4 +222,13 @@ export default class DynamicProxy {
 
     // --- INITIALISATION ---
   }
+}
+
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function (search, this_len) {
+    if (this_len === undefined || this_len > this.length) {
+      this_len = this.length;
+    }
+    return this.substring(this_len - search.length, this_len) === search;
+  };
 }

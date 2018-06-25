@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda
 
-import io.bluebank.braid.corda.restafarian.Restafarian
+import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.router.Routers
 import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
@@ -67,7 +67,7 @@ class BraidVerticle(private val services: AppServiceHub?, private val config: Br
       val updatedHostAndPort = "${config.protocol}://$host:${config.port}"
       val moddedConfig = restConfig.withHostAndPortUri(updatedHostAndPort).withAuth(config.authConstructor?.invoke(vertx))
 
-      Restafarian.mount(moddedConfig, router, vertx)
+      RestMounter.mount(moddedConfig, router, vertx)
     }
     return router
   }

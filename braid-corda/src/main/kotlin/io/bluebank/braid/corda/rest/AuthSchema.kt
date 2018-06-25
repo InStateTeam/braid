@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,29 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.bluebank.braid.corda.rest
 
-"use strict";
-
-function buildURLClass() {
-  if (typeof(document) !== 'undefined' && typeof(window) !== 'undefined') {
-    return BrowserURL;
-  } else {
-    const { URL } =require('url');
-    return URL;
-  }
+enum class AuthSchema {
+  None,
+  Basic,
+  Token
 }
-
-class BrowserURL {
-  constructor(url) {
-    const parser = document.createElement('a');
-    parser.href = url;
-    this.protocol = parser.protocol;
-    this.host = parser.hostname + ":" + parser.port;
-    this.hostname = parser.hostname;
-    this.port = parser.port;
-    this.path = parser.pathname;
-  }
-}
-
-const url = buildURLClass();
-export default url;

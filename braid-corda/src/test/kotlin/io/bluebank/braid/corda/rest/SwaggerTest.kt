@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.restafarian
+package io.bluebank.braid.corda.rest
 
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.ApiModelProperty
