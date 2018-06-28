@@ -86,7 +86,6 @@
     <vertx.version>3.4.2</vertx.version>
     <rxjava.version>1.2.4</rxjava.version>
     <jackson.version>2.9.2</jackson.version>
-    <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <ant.plugin.version>1.8</ant.plugin.version>
     <assembly.plugin.version>2.6</assembly.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
@@ -97,6 +96,7 @@
     <dokka.version>0.9.15</dokka.version>
     <maven.javadoc.skip>true</maven.javadoc.skip><!-- We use Dokka instead. -->
     <slf4j.version>1.7.25</slf4j.version>
+    <nexus-staging.version>1.6.8</nexus-staging.version>
   </properties>
 
   <modules>
@@ -115,15 +115,8 @@
   <distributionManagement>
     <snapshotRepository>
       <id>central</id>
-      <url>${env.MAVEN_REPO_URL}/maven-snapshots/</url>
-      <layout>default</layout>
+      <url>${env.MAVEN_REPO_URL}/content/repositories/snapshots</url>
     </snapshotRepository>
-    <repository>
-      <id>central</id>
-      <name>central</name>
-      <url>${env.MAVEN_REPO_URL}/maven-releases/</url>
-      <layout>default</layout>
-    </repository>
   </distributionManagement>
 
   <repositories>
@@ -270,11 +263,11 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <version>${ant.plugin.version}</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>${deploy.plugin.version}</version>
-        </plugin>
+        <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-deploy-plugin</artifactId>-->
+        <!--<version>${deploy.plugin.version}</version>-->
+        <!--</plugin>-->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
@@ -325,6 +318,11 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>2.9</version>
         </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>${nexus-staging.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -370,6 +368,16 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>central</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -423,7 +431,7 @@
                 <configuration>
                   <executable>${gpg.executable}</executable>
                   <keyname>${env.GPG_KEYNAME}</keyname>
-                  <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                  <passphrasq.qe>${env.GPG_PASSPHRASE}</passphrasq.qe>
                   <gpgArguments>
                   </gpgArguments>
                 </configuration>
