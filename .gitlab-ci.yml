@@ -45,7 +45,7 @@ deploy:
   tags:
     - script-maven
   script:
-    - mvn $MAVEN_CLI_OPTS license:format dokka:javadocJar deploy -DskipTests -P sign,build-extras --batch-mode license:format dokka:javadocJar  deploy -DskipTests -P sign,build-extras,npm-release
+    - mvn $MAVEN_CLI_OPTS license:format dokka:javadocJar deploy -DskipTests -P sign,build-extras --batch-mode license:format dokka:javadocJar  deploy -DskipTests -P sign,build-extras
   only:
     - master
 
