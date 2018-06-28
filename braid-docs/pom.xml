@@ -53,6 +53,24 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <skipLocalStaging>true</skipLocalStaging>
+          <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+          <skipRemoteStaging>true</skipRemoteStaging>
+          <skipStaging>true</skipStaging>
+          <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
+        </configuration>
+        <executions>
+          <execution>
+            <id>execute</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <reporting>
