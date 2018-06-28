@@ -226,7 +226,6 @@
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
