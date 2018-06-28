@@ -85,7 +85,9 @@
           <execution>
             <id>set immutable version</id>
             <phase>generate-resources</phase>
-            <goals><goal>run</goal></goals>
+            <goals>
+              <goal>run</goal>
+            </goals>
             <configuration>
               <target>
                 <exec executable="npm" failonerror="true">
@@ -124,25 +126,6 @@
                 <exec executable="npm" failonerror="true">
                   <arg value="run"/>
                   <arg value="build"/>
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm publish</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="npm" failonerror="true">
-                  <arg value="version"/>
-                  <arg value="${project.version}-${timestamp}"/>
-                  <arg value="--allow-same-version"/>
-                </exec>
-                <exec executable="npm" failonerror="true">
-                  <arg value="publish"/>
                 </exec>
               </target>
             </configuration>
@@ -202,4 +185,38 @@
       </plugin>
     </plugins>
   </reporting>
+  <profiles>
+    <profile>
+      <id>npm-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>npm publish</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <exec executable="npm" failonerror="true">
+                      <arg value="version"/>
+                      <arg value="${project.version}-${timestamp}"/>
+                      <arg value="--allow-same-version"/>
+                    </exec>
+                    <exec executable="npm" failonerror="true">
+                      <arg value="publish"/>
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

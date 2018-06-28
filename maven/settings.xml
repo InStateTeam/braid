@@ -10,14 +10,4 @@
       <password>${env.MAVEN_REPO_PASS}</password>
     </server>
   </servers>
-
-  <mirrors>
-    <mirror>
-      <id>central</id>
-      <name>central</name>
-      <url>${env.MAVEN_REPO_URL}/maven-public/</url>
-      <mirrorOf>central</mirrorOf>
-    </mirror>
-  </mirrors>
-
 </settings>
