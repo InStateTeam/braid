@@ -130,6 +130,10 @@
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
     </repository>
+    <repository>
+      <id>r3</id>
+      <url>https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases</url>
+    </repository>
   </repositories>
 
   <pluginRepositories>
