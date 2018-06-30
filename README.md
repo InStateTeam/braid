@@ -142,6 +142,9 @@ git checkout -b v3.0.2
 7. Push this release branch (ie not the master branch)
 8. In gitlab CI there is a manual job for the branch that you will kick off
 9. Then checkout master and push it
+10. Log into [https://oss.sonatype.org/](https://oss.sonatype.org/)
+11. Go to the `Staging Repositories` tab, and search for `iobluebank`, locating the current staged release.
+12. Close the release and release it.
 
 Obviously the above should be automated with a script - ideally integrated worth maven
 

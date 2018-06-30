@@ -12,7 +12,7 @@ Template that R3 provide.
 
 ### Configure Gradle to be aware of the em-tech nexus repository and Braid
 
-The Braid maven dependencies are stored in the em-tech nexus repo at ```http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/``` 
+The Braid maven dependencies are stored in maven central. 
 so the first thing to do is to add this to the repositories section of your build.gradle file in both the root and the cordapp 
 directories of your CordApp Template.  Note that at the moment you must put this before the corda artifactory:
 
