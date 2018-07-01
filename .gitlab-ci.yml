@@ -38,7 +38,8 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
-    - mvn $MAVEN_CLI_OPTS clean license:check install
+    - mvn $MAVEN_CLI_OPTS clean license:check install cobertura:cobertura
+    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
 deploy:
   stage: snapshot_release
