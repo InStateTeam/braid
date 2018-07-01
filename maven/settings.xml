@@ -5,7 +5,7 @@
 
   <servers>
     <server>
-      <id>central</id>
+      <id>oss</id>
       <username>${env.MAVEN_REPO_USER}</username>
       <password>${env.MAVEN_REPO_PASS}</password>
     </server>
