@@ -46,7 +46,7 @@ deploy:
   tags:
     - script-maven
   script:
-    - mvn $MAVEN_CLI_OPTS license:format dokka:javadocJar deploy -DskipTests -P sign,build-extras --batch-mode license:format dokka:javadocJar  deploy -DskipTests -P sign,build-extras
+    - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
 
@@ -65,4 +65,4 @@ release:
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
     - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS license:format dokka:javadocJar deploy -DskipTests -P sign,build-extras --batch-mode license:format dokka:javadocJar  deploy -DskipTests -P sign,build-extras,npm-release
+    - mvn $MAVEN_CLI_OPTS --batch-mode clean license:format dokka:javadocJar deploy -DskipTests -P release,npm-release
