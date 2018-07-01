@@ -36,6 +36,15 @@ build:
     - script-maven
   only:
     - master
+  script:
+    - mvn $MAVEN_CLI_OPTS clean license:check install cobertura:cobertura
+    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+
+branch:
+  stage: build
+  tags:
+    - script-maven
+  only:
     - /^[0-9]+-.*$/
   script:
     - mvn $MAVEN_CLI_OPTS clean license:check install
