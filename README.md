@@ -23,7 +23,7 @@ _Braid is a high performance reactive rpc library for exposing your services in 
 Easy integration with Corda, from any:
  
 * programming language: currently Javascript. Python, F#, and more planned
-* runtime i.e. you don't need Jython, Nashorn etc.
+* runtime i.e. you don't need Jython, Nashorn etc. 
 * platform: currently browser and NodeJS. iOS and more planned
 
 No fiddling with HTTP REST response codes, content-types, errors etc.
