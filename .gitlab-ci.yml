@@ -15,7 +15,8 @@
 #
 
 variables:
-  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode -T 2C"
+  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
+  MAVEN_PARALLEL: "-T 2C"
 
 before_script:
 - npm set registry $NPM_REPO
@@ -38,7 +39,7 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
-    - mvn $MAVEN_CLI_OPTS clean license:check install
+    - mvn $MAVEN_CLI_OPTS $MAVEN_PARALLEL clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
 deploy:
@@ -65,4 +66,4 @@ release:
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
     - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS --batch-mode clean license:format dokka:javadocJar deploy -DskipTests -P release,npm-release
+    - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release,npm-release
