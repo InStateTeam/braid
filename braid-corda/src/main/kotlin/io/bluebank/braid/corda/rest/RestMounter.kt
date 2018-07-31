@@ -110,9 +110,9 @@ class RestMounter(
   }
 
   private fun mount(fn: RestMounter.(Router) -> Unit) {
-    configureSwaggerAndStatic()
-    router.mountSubRouter("$path/", unprotectedRouter)
+    router.mountSubRouter(path, unprotectedRouter)
     configureAuthHandling()
+    configureSwaggerAndStatic()
     // pass control to caller to setup rest bindings
     this.fn(router)
     log.info("REST end point bound to ${config.hostAndPortUri}$path")
@@ -135,7 +135,7 @@ class RestMounter(
     if (config.authSchema == AuthSchema.None) return
     currentRouter = protectedRouter
 
-    router.mountSubRouter("$path/", protectedRouter)
+    router.mountSubRouter(path, protectedRouter)
     when (config.authSchema) {
       AuthSchema.Basic -> {
         protectedRouter.route().handler(cookieHandler)
