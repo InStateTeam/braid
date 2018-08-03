@@ -33,7 +33,7 @@ class BrowserURL {
     this.host = parser.hostname + ":" + parser.port;
     this.hostname = parser.hostname;
     this.port = parser.port;
-    this.path = parser.pathname;
+    this.pathname = parser.pathname;
   }
 }
 
