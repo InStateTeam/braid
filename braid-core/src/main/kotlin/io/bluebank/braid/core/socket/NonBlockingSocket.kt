@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * Requests are queued in sequence on a separate thread.
  */
 class NonBlockingSocket<R, S>(
-  vertx: Vertx,
+  private val vertx: Vertx,
   threads : Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1), // consume all but one processors
   val ordered: Boolean = false,
   maxExecutionTime : Long = DEFAULT_MAX_EXECUTION_TIME
@@ -60,7 +60,9 @@ class NonBlockingSocket<R, S>(
   }
 
   override fun write(obj: S): Socket<R, S> {
-    socket.write(obj)
+    vertx.runOnContext {
+      socket.write(obj)
+    }
     return this
   }
 
