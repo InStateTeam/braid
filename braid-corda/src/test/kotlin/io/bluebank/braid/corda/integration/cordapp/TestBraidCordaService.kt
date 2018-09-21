@@ -53,6 +53,7 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
         log.info("Starting Braid service for $org on port $port")
         // DOCSTART 1
         BraidConfig()
+            .withThreadPoolSize(1)
             .withFlow("echo", EchoFlow::class)
             .withService(CustomService(serviceHub))
             .withAuthConstructor(this::shiroFactory)

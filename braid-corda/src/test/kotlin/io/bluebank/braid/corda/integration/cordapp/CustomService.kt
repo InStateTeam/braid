@@ -20,6 +20,7 @@ import io.vertx.core.Future
 import net.corda.core.node.AppServiceHub
 import rx.Observable
 import rx.schedulers.Schedulers
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @ServiceDescription("my-service", "A simple service for testing braid")
@@ -47,4 +48,12 @@ class CustomService(private val serviceHub: AppServiceHub) {
   fun streamedResultThatFails() : Observable<Int> {
     return Observable.range(0, 10, Schedulers.computation()).doOnNext { if (it == 5) throw RuntimeException("boom") }
   }
+
+  // function to test https://gitlab.com/bluebank/braid/merge_requests/76
+  fun slowData() : List<SlowDataItem> {
+    Thread.sleep((Math.random() * 1000).toLong())
+    return (1..1000).map { SlowDataItem(Date()) }
+  }
 }
+
+data class SlowDataItem(val date: Date)
