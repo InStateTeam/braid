@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.core.service
 
-import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.createJsonException
@@ -27,6 +26,7 @@ import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.math.BigDecimal
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
@@ -84,14 +84,31 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   private fun findMethod(request: JsonRPCRequest): Method {
-    try {
-      return service.javaClass.methods.single { request.matchesMethod(it) }
-    } catch (err: IllegalArgumentException) {
-      JsonRPCErrorResponse.throwMethodNotFound(request.id, "method ${request.method} has multiple implementations with the same number of parameters")
+    return try {
+      orderByComplexity(service.javaClass.methods
+          .filter(request::matchesName)
+          .filter(this::isPublic)
+      ).first(request::parametersMatch)
     } catch (err: NoSuchElementException) {
       throw MethodDoesNotExist(request.method)
     }
   }
+
+  private fun orderByComplexity(methods: List<Method>): List<Method> {
+    return methods.sortedWith(compareByDescending(this::sumTypes))
+  }
+
+  private fun sumTypes(method: Method) = method.parameterTypes.map {
+    when (it.kotlin) {
+      BigDecimal::class -> 2
+      String::class -> -1
+      Double::class, Long::class -> 1
+      Integer::class, Float::class -> 0
+      else -> 3
+    }
+  }.sum()
+
+  private fun isPublic(method: Method) = Modifier.isPublic(method.modifiers)
 
   override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
