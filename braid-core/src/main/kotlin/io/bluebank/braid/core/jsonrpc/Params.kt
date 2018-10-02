@@ -19,6 +19,7 @@ import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
+import kotlin.reflect.full.isSubclassOf
 
 interface Params {
   companion object {
@@ -40,6 +41,7 @@ interface Params {
   }
   val count: Int
 
+  // match must change
   fun match(method: Method): Boolean
   fun mapParams(method: Method): List<Any?>
   fun mapParams(constructor: Constructor<*>) : List<Any?>
@@ -83,8 +85,17 @@ class NamedParams(val map: Map<String, Any?>) : Params {
 class ListParams(val params: List<Any?>) : Params {
   override val count: Int = params.size
 
-  override fun match(method: Method): Boolean {
-    return (count == method.parameterCount)
+  override fun match(method: Method): Boolean = try {
+    method.parameterTypes.zip(params)
+        .all { (type, value) ->
+          value == null
+              || (value::class.isSubclassOf(type.kotlin)
+              || (value is Int && type.kotlin == Long::class)
+              || (value is Double && type.kotlin == Float::class)
+              || ((value is String || value is Map<*, *>) && Json.mapper.convertValue(value, type) != null))
+        }
+  } catch (e: IllegalArgumentException) {
+    false
   }
 
   override fun mapParams(method: Method): List<Any?> {

@@ -18,6 +18,7 @@ package io.bluebank.braid
 import io.bluebank.braid.client.BraidClientConfig
 import io.bluebank.braid.client.BraidCordaProxyClient
 import io.bluebank.braid.client.BraidProxyClient
+import io.bluebank.braid.server.ComplexObject
 import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.MyService
@@ -26,10 +27,11 @@ import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.math.BigDecimal
 import java.net.ServerSocket
 import java.net.URI
 
@@ -76,11 +78,52 @@ class ProxyTest {
     braidClient.close()
   }
 
+  // can i put the test here? Seems to call the params stuff!
   @Test
   fun `should be able to add two numbers together`() {
     val result = myService.add(1.0, 2.0)
-    Assert.assertEquals(0, braidClient.activeRequestsCount())
-    Assert.assertEquals(3.0, result, 0.0001)
+    assertEquals(0, braidClient.activeRequestsCount())
+    assertEquals(3.0, result, 0.0001)
+  }
+
+  @Test
+  fun `sending a request to a client that has two functions with the same name and number of parameters finds the correct function`() {
+    val functionWithABigDecimalParameterResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "My Netflix account")
+    assertEquals(1, functionWithABigDecimalParameterResult)
+    // have to test a non number string since it will otherwise try and convert it to a big decimal
+    val functionWithAStringParameterResult = myService.functionWithTheSameNameAndNumberOfParameters("not a number", "My Netflix account")
+    assertEquals(2, functionWithAStringParameterResult)
+
+    val functionWithTwoBigDecimalParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
+    assertEquals(3, functionWithTwoBigDecimalParametersResult)
+
+    val functionWithBigDecimalAndStringNumberParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "200.12345")
+    assertEquals(3, functionWithBigDecimalAndStringNumberParametersResult)
+
+    val functionWithLongParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(200L, "100.123")
+    assertEquals(4, functionWithLongParametersResult)
+
+    // long always over takes int
+    val functionWithIntParametersResult = myService.functionWithTheSameNameAndNumberOfParameters("200.12345", 200)
+    assertEquals(5, functionWithIntParametersResult)
+
+    // the double version is always called since it has higher priority
+    val functionWithFloatParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(200.1234F, "100.123")
+    assertEquals(7, functionWithFloatParametersResult)
+
+    val functionWithDoubleParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(200.1234, "100.123")
+    assertEquals(7, functionWithDoubleParametersResult)
+
+    val functionWithComplexObjectParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(ComplexObject("1", 2, 3.0), "100.123")
+    assertEquals(8, functionWithComplexObjectParametersResult)
+
+  }
+
+  @Test
+  fun `abc`() {
+    val result = myService.echoComplexObject(ComplexObject("hi", 0, 1.0))
+    assertEquals(0, braidClient.activeRequestsCount())
+//    assertEquals(3.0, result, 0.0001)
   }
 
   private fun getFreePort(): Int {

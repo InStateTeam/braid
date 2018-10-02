@@ -22,6 +22,7 @@ import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
 import rx.Observable
+import java.math.BigDecimal
 
 interface MyService {
   fun add(lhs: Double, rhs: Double): Double
@@ -34,6 +35,15 @@ interface MyService {
   fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
   fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
+//  fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: String): Boolean
+  fun functionWithTheSameNameAndNumberOfParameters(amount: String, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: BigDecimal): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Long, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: String, accountId: Int): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Float, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject, accountId: String): Int
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
@@ -88,6 +98,21 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
     return md
   }
 
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: String) = 1
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: String, accountId: String) = 2
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: BigDecimal) = 3
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: Long, accountId: String) = 4
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: String, accountId: Int) = 5
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: Float, accountId: String) = 6
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String) = 7
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject, accountId: String) = 8
 }
 
 @JsonTypeInfo(
