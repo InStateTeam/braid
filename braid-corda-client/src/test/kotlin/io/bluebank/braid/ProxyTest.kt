@@ -88,17 +88,18 @@ class ProxyTest {
 
   @Test
   fun `sending a request to a client that has two functions with the same name and number of parameters finds the correct function`() {
+    // calls string version since it is rated higher
     val functionWithABigDecimalParameterResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "My Netflix account")
-    assertEquals(1, functionWithABigDecimalParameterResult)
+    assertEquals(2, functionWithABigDecimalParameterResult)
     // have to test a non number string since it will otherwise try and convert it to a big decimal
     val functionWithAStringParameterResult = myService.functionWithTheSameNameAndNumberOfParameters("not a number", "My Netflix account")
     assertEquals(2, functionWithAStringParameterResult)
 
     val functionWithTwoBigDecimalParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
-    assertEquals(3, functionWithTwoBigDecimalParametersResult)
+    assertEquals(2, functionWithTwoBigDecimalParametersResult)
 
     val functionWithBigDecimalAndStringNumberParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "200.12345")
-    assertEquals(3, functionWithBigDecimalAndStringNumberParametersResult)
+    assertEquals(2, functionWithBigDecimalAndStringNumberParametersResult)
 
     val functionWithLongParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(200L, "100.123")
     assertEquals(4, functionWithLongParametersResult)
@@ -116,6 +117,20 @@ class ProxyTest {
 
     val functionWithComplexObjectParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(ComplexObject("1", 2, 3.0), "100.123")
     assertEquals(8, functionWithComplexObjectParametersResult)
+
+    val functionWithListParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(listOf("a","b","c"), "100.123")
+    assertEquals(9, functionWithListParametersResult)
+
+    val functionWithMapParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(mapOf(
+        "a" to "a",
+        "b" to "b",
+        "c" to "c"
+    ), "100.123")
+    assertEquals(10, functionWithMapParametersResult)
+
+    // returns 9 because list always takes preference over array
+    val functionWithArrayParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(arrayOf("a","b","c"), "100.123")
+    assertEquals(9, functionWithArrayParametersResult)
 
   }
 

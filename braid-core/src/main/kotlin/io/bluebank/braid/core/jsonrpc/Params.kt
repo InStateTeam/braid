@@ -19,6 +19,7 @@ import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
+import java.math.BigDecimal
 import kotlin.reflect.full.isSubclassOf
 
 interface Params {
@@ -90,9 +91,10 @@ class ListParams(val params: List<Any?>) : Params {
         .all { (type, value) ->
           value == null
               || (value::class.isSubclassOf(type.kotlin)
+              || (value is List<*> && type.isArray)
               || (value is Int && type.kotlin == Long::class)
               || (value is Double && type.kotlin == Float::class)
-              || ((value is String || value is Map<*, *>) && Json.mapper.convertValue(value, type) != null))
+              || (((value is String && type.kotlin == BigDecimal::class) || value is Map<*, *>) && Json.mapper.convertValue(value, type) != null))
         }
   } catch (e: IllegalArgumentException) {
     false
