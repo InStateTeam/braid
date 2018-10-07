@@ -98,15 +98,21 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     return methods.sortedWith(compareByDescending(this::sumTypes))
   }
 
-  private fun sumTypes(method: Method) = method.parameterTypes.map {
-    when (it.kotlin) {
-      BigDecimal::class -> 2
-      String::class -> -1
-      Double::class, Long::class -> 1
-      Integer::class, Float::class -> 0
-      else -> 3
+  private fun sumTypes(method: Method) = method.parameterTypes.map(this::typeValue).sum()
+
+  private fun typeValue(clazz: Class<*>) = if (clazz.isArray) {
+    3
+  } else {
+    when (clazz.kotlin) {
+      BigDecimal::class -> -1
+      String::class -> 0
+      Integer::class, Float::class -> 1
+      Double::class, Long::class -> 2
+      List::class -> 4
+      Map::class -> 5
+      else -> 6
     }
-  }.sum()
+  }
 
   private fun isPublic(method: Method) = Modifier.isPublic(method.modifiers)
 

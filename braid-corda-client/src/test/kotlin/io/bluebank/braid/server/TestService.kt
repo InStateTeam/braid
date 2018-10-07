@@ -44,6 +44,9 @@ interface MyService {
   fun functionWithTheSameNameAndNumberOfParameters(amount: Float, accountId: String): Int
   fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String): Int
   fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: List<String>, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String): Int
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Array<String>, accountId: String): Int
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
@@ -113,6 +116,12 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   override fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String) = 7
 
   override fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject, accountId: String) = 8
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: List<String>, accountId: String) = 9
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String) = 10
+
+  override fun functionWithTheSameNameAndNumberOfParameters(amount: Array<String>, accountId: String) = 11
 }
 
 @JsonTypeInfo(
