@@ -24,7 +24,7 @@ import kotlin.reflect.full.isSubclassOf
 
 interface Params {
   companion object {
-    fun build(params: Any?) : Params {
+    fun build(params: Any?): Params {
       if (params == null) {
         return NullParams()
       }
@@ -34,25 +34,40 @@ interface Params {
       if (params is Map<*, *>) {
         @Suppress("UNCHECKED_CAST")
         return NamedParams(params as Map<String, Any?>)
-      }
-      else {
+      } else {
         return SingleValueParam(params)
       }
     }
   }
+
   val count: Int
 
-  // match must change
   fun match(method: Method): Boolean
   fun mapParams(method: Method): List<Any?>
-  fun mapParams(constructor: Constructor<*>) : List<Any?>
+  fun mapParams(constructor: Constructor<*>): List<Any?>
 }
 
-class SingleValueParam(val param: Any) : Params {
+abstract class AbstractParams : Params {
+  protected fun match(method: Method, params: List<Any?>): Boolean = try {
+    method.parameterTypes.zip(params)
+        .all { (type, value) ->
+          value == null
+              || (value::class.isSubclassOf(type.kotlin)
+              || (value is List<*> && type.isArray)
+              || (value is Int && type.kotlin == Long::class)
+              || (value is Double && type.kotlin == Float::class)
+              || (((value is String && type.kotlin == BigDecimal::class) || value is Map<*, *>) && Json.mapper.convertValue(value, type) != null))
+        }
+  } catch (e: IllegalArgumentException) {
+    false
+  }
+}
+
+class SingleValueParam(val param: Any) : AbstractParams() {
   override val count: Int = 1
 
   override fun match(method: Method): Boolean {
-    return method.parameterCount == 1
+    return method.parameterCount == 1 && match(method, listOf(param))
   }
 
   override fun mapParams(method: Method): List<Any?> {
@@ -69,12 +84,14 @@ class NamedParams(val map: Map<String, Any?>) : Params {
   override fun match(method: Method): Boolean {
     return method.parameters.all { map.containsKey(it.name) }
   }
+
   override fun mapParams(method: Method): List<Any?> {
     return method.parameters.map { parameter ->
       val value = map[parameter.name]
       convert(value, parameter)
     }
   }
+
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     return constructor.parameters.map { parameter ->
       val value = map[parameter.name]
@@ -83,22 +100,10 @@ class NamedParams(val map: Map<String, Any?>) : Params {
   }
 }
 
-class ListParams(val params: List<Any?>) : Params {
+class ListParams(val params: List<Any?>) : AbstractParams() {
   override val count: Int = params.size
 
-  override fun match(method: Method): Boolean = try {
-    method.parameterTypes.zip(params)
-        .all { (type, value) ->
-          value == null
-              || (value::class.isSubclassOf(type.kotlin)
-              || (value is List<*> && type.isArray)
-              || (value is Int && type.kotlin == Long::class)
-              || (value is Double && type.kotlin == Float::class)
-              || (((value is String && type.kotlin == BigDecimal::class) || value is Map<*, *>) && Json.mapper.convertValue(value, type) != null))
-        }
-  } catch (e: IllegalArgumentException) {
-    false
-  }
+  override fun match(method: Method): Boolean = match(method, params)
 
   override fun mapParams(method: Method): List<Any?> {
     return method.parameters.zip(params).map { (parameter, value) ->
@@ -131,6 +136,7 @@ class NullParams : Params {
     // assuming client has already checked the method parameters
     return emptyList()
   }
+
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     // assuming client has already checked the method parameters
     return emptyList()
