@@ -42,7 +42,7 @@ interface MyService {
   fun functionWithTheSameNameAndNumberOfParameters(amount: Int, accountId: String): Int = 5
   fun functionWithTheSameNameAndNumberOfParameters(amount: Float, accountId: String): Int = 6
   fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String): Int = 7
-  fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject, accountId: String): Int = 8
+  fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject?, accountId: String): Int = 8
   fun functionWithTheSameNameAndNumberOfParameters(amount: List<String>, accountId: String): Int = 9
   fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String): Int = 10
   fun functionWithTheSameNameAndNumberOfParameters(amount: Array<String>, accountId: String): Int = 11
