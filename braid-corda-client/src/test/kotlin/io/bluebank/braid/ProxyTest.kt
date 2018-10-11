@@ -124,6 +124,12 @@ class ProxyTest {
   }
 
   @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - null complex object input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(null, "account id")
+    assertEquals(8, result)
+  }
+
+  @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - list input`() {
     val result = myService.functionWithTheSameNameAndNumberOfParameters(listOf("a", "b", "c"), "100.123")
     assertEquals(9, result)

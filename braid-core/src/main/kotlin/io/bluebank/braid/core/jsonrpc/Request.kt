@@ -17,15 +17,16 @@ package io.bluebank.braid.core.jsonrpc
 
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
+import kotlin.reflect.KFunction
 
 data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
   private val parameters = Params.build(params)
 
   fun paramCount() : Int = parameters.count
 
-  fun parametersMatch(method: Method): Boolean = parameters.match(method)
+  fun parametersMatch(method: KFunction<*>): Boolean = parameters.match(method)
 
-  fun matchesName(method: Method): Boolean = method.name == this.method
+  fun matchesName(method: KFunction<*>): Boolean = method.name == this.method
 
   fun mapParams(method: Method): Array<Any?> {
     return parameters.mapParams(method).toTypedArray()

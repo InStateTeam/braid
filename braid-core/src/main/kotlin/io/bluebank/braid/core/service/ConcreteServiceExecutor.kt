@@ -27,6 +27,12 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.math.BigDecimal
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.valueParameters
+import kotlin.reflect.jvm.javaMethod
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
@@ -83,43 +89,42 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     subscriber.onError(err)
   }
 
-  private fun findMethod(request: JsonRPCRequest): Method {
-    return try {
-      orderByComplexity(service.javaClass.methods
-          .filter(request::matchesName)
-          .filter(this::isPublic)
-      ).first(request::parametersMatch)
-    } catch (err: NoSuchElementException) {
-      throw MethodDoesNotExist(request.method)
-    }
+  private fun findMethod(request: JsonRPCRequest): Method = try {
+    orderByComplexity(service::class.functions
+        .filter(request::matchesName)
+        .filter(this::isPublic)
+    ).first(request::parametersMatch).javaMethod!!
+  } catch (err: NoSuchElementException) {
+    throw MethodDoesNotExist(request.method)
   }
 
-  private fun orderByComplexity(methods: List<Method>): List<Method> {
+  private fun orderByComplexity(methods: List<KFunction<*>>): List<KFunction<*>> {
     return methods.sortedWith(compareByDescending(this::sumTypes))
   }
 
-  private fun sumTypes(method: Method) = method.parameterTypes.map(this::typeValue).sum()
+  private fun sumTypes(method: KFunction<*>) = method.valueParameters.asSequence().map(this::typeValue).sum()
 
-  private fun typeValue(clazz: Class<*>) = if (clazz.isArray) {
-    3
-  } else {
-    when (clazz.kotlin) {
-      BigDecimal::class -> -1
-      String::class -> 0
-      Integer::class, Float::class -> 1
-      Double::class, Long::class -> 2
-      List::class -> 4
-      Map::class -> 5
-      else -> 6
+  private fun typeValue(parameter: KParameter): Int = when (parameter.type.classifier) {
+    BigDecimal::class -> -1
+    String::class -> 0
+    Int::class, Float::class -> 1
+    Double::class, Long::class -> 2
+    List::class -> 4
+    Map::class -> 5
+    else -> {
+      when {
+        parameter.type.javaClass.isArray -> 3
+        else -> 6
+      }
     }
   }
 
-  private fun isPublic(method: Method) = Modifier.isPublic(method.modifiers)
+  private fun isPublic(method: KFunction<*>) = method.visibility == KVisibility.PUBLIC
 
   override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
         .filter { Modifier.isPublic(it.modifiers) }
-        .filter { !it.name.contains("$")}
+        .filter { !it.name.contains("$") }
         .map { it.toDescriptor() }
   }
 }
