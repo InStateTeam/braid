@@ -17,7 +17,6 @@ package io.bluebank.braid.core.jsonrpc
 
 import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
-import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 import java.math.BigDecimal
 import kotlin.reflect.KFunction
@@ -47,7 +46,7 @@ interface Params {
   val count: Int
 
   fun match(method: KFunction<*>): Boolean
-  fun mapParams(method: Method): List<Any?>
+  fun mapParams(method: KFunction<*>): List<Any?>
   fun mapParams(constructor: Constructor<*>): List<Any?>
 }
 
@@ -67,7 +66,7 @@ abstract class AbstractParams : Params {
             || (value is List<*> && type.javaClass.isArray)
             || (value is Int && type.classifier == Long::class)
             || (value is Double && type.classifier == Float::class)
-            || (((value is String && type.classifier == BigDecimal::class) || value is Map<*, *>) && Json.mapper.convertValue(value, type.jvmErasure.javaObjectType) != null))))
+            || (((value is String && type.classifier == BigDecimal::class) || value is Map<*, *>) && convert(value, parameter) != null))))
   }
 }
 
@@ -75,11 +74,11 @@ class SingleValueParam(val param: Any) : AbstractParams() {
   override val count: Int = 1
 
   override fun match(method: KFunction<*>): Boolean {
-    return method.parameters.size == 1 && match(method, listOf(param))
+    return method.valueParameters.size == 1 && match(method, listOf(param))
   }
 
-  override fun mapParams(method: Method): List<Any?> {
-    return listOf(convert(param, method.parameters[0]))
+  override fun mapParams(method: KFunction<*>): List<Any?> {
+    return listOf(convert(param, method.valueParameters[0]))
   }
 
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
@@ -90,11 +89,11 @@ class SingleValueParam(val param: Any) : AbstractParams() {
 class NamedParams(val map: Map<String, Any?>) : Params {
   override val count: Int = map.size
   override fun match(method: KFunction<*>): Boolean {
-    return method.parameters.all { map.containsKey(it.name) }
+    return method.valueParameters.all { map.containsKey(it.name) }
   }
 
-  override fun mapParams(method: Method): List<Any?> {
-    return method.parameters.map { parameter ->
+  override fun mapParams(method: KFunction<*>): List<Any?> {
+    return method.valueParameters.map { parameter ->
       val value = map[parameter.name]
       convert(value, parameter)
     }
@@ -113,8 +112,8 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
 
   override fun match(method: KFunction<*>): Boolean = match(method, params)
 
-  override fun mapParams(method: Method): List<Any?> {
-    return method.parameters.zip(params).map { (parameter, value) ->
+  override fun mapParams(method: KFunction<*>): List<Any?> {
+    return method.valueParameters.zip(params).map { (parameter, value) ->
       convert(value, parameter)
     }
   }
@@ -126,10 +125,14 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
   }
 }
 
-private fun convert(value: Any?, parameter: Parameter): Any? {
+private fun convert(value: Any?, parameter: KParameter) = convert(value, parameter.type.jvmErasure.javaObjectType)
+
+private fun convert(value: Any?, parameter: Parameter) = convert(value, parameter.type)
+
+private fun convert(value: Any?, clazz: Class<*>): Any? {
   return when (value) {
     null -> null
-    else -> Json.mapper.convertValue(value, parameter.type)
+    else -> Json.mapper.convertValue(value, clazz)
   }
 }
 
@@ -137,10 +140,10 @@ class NullParams : Params {
   override val count: Int = 0
 
   override fun match(method: KFunction<*>): Boolean {
-    return method.parameters.isEmpty()
+    return method.valueParameters.isEmpty()
   }
 
-  override fun mapParams(method: Method): List<Any?> {
+  override fun mapParams(method: KFunction<*>): List<Any?> {
     // assuming client has already checked the method parameters
     return emptyList()
   }
