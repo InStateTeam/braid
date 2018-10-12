@@ -24,7 +24,6 @@ import io.vertx.core.Future
 import rx.Observable
 import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import kotlin.reflect.KFunction
@@ -32,7 +31,6 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.valueParameters
-import kotlin.reflect.jvm.javaMethod
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
@@ -42,7 +40,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       try {
         val method = findMethod(request)
         val castedParameters = request.mapParams(method)
-        val result = method.invoke(service, *castedParameters)
+        val result = method.call(service, *castedParameters)
         handleResult(result, request, subscriber)
       } catch (err: InvocationTargetException) {
         subscriber.onError(err.targetException)
@@ -89,11 +87,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     subscriber.onError(err)
   }
 
-  private fun findMethod(request: JsonRPCRequest): Method = try {
+  private fun findMethod(request: JsonRPCRequest): KFunction<*> = try {
     orderByComplexity(service::class.functions
         .filter(request::matchesName)
         .filter(this::isPublic)
-    ).first(request::parametersMatch).javaMethod!!
+    ).first(request::parametersMatch)
   } catch (err: NoSuchElementException) {
     throw MethodDoesNotExist(request.method)
   }

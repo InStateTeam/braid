@@ -28,7 +28,7 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method:
 
   fun matchesName(method: KFunction<*>): Boolean = method.name == this.method
 
-  fun mapParams(method: Method): Array<Any?> {
+  fun mapParams(method: KFunction<*>): Array<Any?> {
     return parameters.mapParams(method).toTypedArray()
   }
 
