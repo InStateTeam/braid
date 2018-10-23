@@ -56,7 +56,11 @@ class NonBlockingSocket<R, S>(
   }
 
   override fun endHandler(socket: Socket<R, S>) {
-    pool.executeBlocking<Unit>({ onEnd() }, ordered, { })
+    pool.executeBlocking<Unit>({
+      onEnd()
+    }, ordered, {
+      pool.close()
+    })
   }
 
   override fun write(obj: S): Socket<R, S> {
@@ -64,10 +68,5 @@ class NonBlockingSocket<R, S>(
       socket.write(obj)
     }
     return this
-  }
-
-  override fun onEnd(fn: Socket<R, S>.() -> Unit) {
-    pool.close()
-    super<AbstractSocket>.onEnd(fn)
   }
 }
