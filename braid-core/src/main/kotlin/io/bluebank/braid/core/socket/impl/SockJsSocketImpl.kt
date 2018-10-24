@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.socket.impl
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.SockJSSocketWrapper
 import io.vertx.core.buffer.Buffer
@@ -22,7 +23,9 @@ import io.vertx.ext.auth.User
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 
 class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer, Buffer>(), SockJSSocketWrapper {
-
+  companion object {
+    val log = loggerFor<SockJsSocketImpl>()
+  }
   init {
     sockJS.handler { buffer ->
         onData(buffer)
@@ -37,7 +40,11 @@ class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer
   }
 
   override fun write(obj: Buffer) : SockJSSocketWrapper {
-    sockJS.write(obj)
+    try {
+      sockJS.write(obj)
+    } catch(err: Throwable) {
+      log.error("failure to write onto sockjs socket", err)
+    }
     return this
   }
 }

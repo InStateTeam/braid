@@ -17,15 +17,17 @@ package io.bluebank.braid.core.socket
 
 import io.bluebank.braid.core.logging.loggerFor
 
+/**
+ * This class implements a thread-safe lock-free implementation of [Socket] listener notifications
+ */
 abstract class AbstractSocket<R, S> : Socket<R, S> {
   companion object {
     private val logger = loggerFor<AbstractSocket<*, *>>()
   }
 
-  private val listeners = mutableListOf<SocketListener<R, S>>()
-
+  private var listeners = emptyList<SocketListener<R, S>>()
   override fun addListener(listener: SocketListener<R, S>): Socket<R, S> {
-    listeners += listener
+    listeners += listener // deep copy - slow but safe
     listener.onRegister(this)
     return this
   }
@@ -49,5 +51,7 @@ abstract class AbstractSocket<R, S> : Socket<R, S> {
         logger.error("failed to dispatch onEnd", err)
       }
     }
+    // we will only notify the listeners once and release all resources
+    listeners = emptyList()
   }
 }

@@ -15,7 +15,9 @@
  */
 package io.bluebank.braid.core.socket
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
+import io.vertx.core.WorkerExecutor
 import io.vertx.ext.auth.User
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -25,11 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class NonBlockingSocket<R, S>(
   private val vertx: Vertx,
-  threads : Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1), // consume all but one processors
-  val ordered: Boolean = false,
-  maxExecutionTime : Long = DEFAULT_MAX_EXECUTION_TIME
+  private val threads: Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1), // a thread per connection - not ideal
+  private val maxExecutionTime: Long = DEFAULT_MAX_EXECUTION_TIME
 ) : AbstractSocket<R, S>(), SocketProcessor<R, S, R, S> {
   companion object {
+    private val log = loggerFor<NonBlockingSocket<*, *>>()
     const val DEFAULT_MAX_EXECUTION_TIME = 60L * 60 * 1000 * 1000000 // 1 hour max execution time. Too long?
     private val fountain by lazy {
       val atomic = AtomicInteger(0)
@@ -40,32 +42,56 @@ class NonBlockingSocket<R, S>(
      * This is set to the max(1, core_count - 1)
      */
     val DEFAULT_MAX_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
+    const val THREAD_POOL_NAME = "braid-nonblocking-threadpool"
   }
+
+  private val id = fountain()
   private lateinit var socket: Socket<R, S>
-  private val pool = vertx.createSharedWorkerExecutor(fountain(), threads, maxExecutionTime)
+  private lateinit var pool: WorkerExecutor
+
+  init {
+    log.trace("initialising NonBlockingSocket $id")
+  }
 
   override fun onRegister(socket: Socket<R, S>) {
+    pool = vertx.createSharedWorkerExecutor(THREAD_POOL_NAME, threads, maxExecutionTime)
+    log.trace("registered socket for NonBlockingSocket $id")
     this.socket = socket
   }
 
   override fun user(): User? = socket.user()
 
-
   override fun dataHandler(socket: Socket<R, S>, item: R) {
-    pool.executeBlocking<R>({ onData(item) }, ordered, { })
+    try {
+      pool.executeBlocking<R>({ onData(item) }, true, { })
+    } catch (err: IllegalStateException) {
+      log.info("data item processed during vertx shutdown ${item}")
+    } catch (err: Throwable) {
+      log.error("failed to process data item", err)
+    }
   }
 
   override fun endHandler(socket: Socket<R, S>) {
-    pool.executeBlocking<Unit>({
-      onEnd()
-    }, ordered, {
-      pool.close()
-    })
+    log.trace("endHandler for $id")
+    try {
+      pool.executeBlocking<Unit>({
+        onEnd() // notify all listeners
+      }, true, {})
+    } catch (err: IllegalStateException) {
+      // this will happen when a socket is closed during a scheduled vertx.close
+      log.info("socket closed during vertx shutdown")
+    } catch (err: Throwable) {
+      log.error("failed to process end handler", err)
+    }
   }
 
   override fun write(obj: S): Socket<R, S> {
     vertx.runOnContext {
-      socket.write(obj)
+      try {
+        socket.write(obj)
+      } catch (err: Throwable) {
+        log.warn("failed to write to socket", err)
+      }
     }
     return this
   }

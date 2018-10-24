@@ -26,23 +26,14 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * wrap a vertx [SockJSSocket] with a non-blocking [Socket] wrapper
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
-     * @param ordered - true iff requests need to be processed in order
      * @param maxExecutionTime - maximum execution time before the request is killed
      */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int, ordered: Boolean, maxExecutionTime: Long): Socket<Buffer, Buffer> {
-      val nbs = NonBlockingSocket<Buffer, Buffer>(vertx, threads, ordered, maxExecutionTime)
+    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int, maxExecutionTime: Long): Socket<Buffer, Buffer> {
+      val nbs = NonBlockingSocket<Buffer, Buffer>(vertx, threads, maxExecutionTime)
       val sjs = SockJsSocketImpl(socket)
       sjs.addListener(nbs)
       return nbs
     }
-
-    /**
-     * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME]
-     * @param socket - vertx SockJSSocket
-     * @param vertx - vertx instance to be used for scheduling blocking calls
-     * @param ordered - true iff requests need to be processed in order
-     */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int, ordered: Boolean) = create(socket, vertx, threads, ordered, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
 
     /**
      * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME].
@@ -51,7 +42,7 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) = create(socket, vertx, threads, false, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
+    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) = create(socket, vertx, threads, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
 
     /**
      * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME]
@@ -60,7 +51,7 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx) = create(socket, vertx, NonBlockingSocket.DEFAULT_MAX_THREADS, false, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
+    fun create(socket: SockJSSocket, vertx: Vertx) = create(socket, vertx, NonBlockingSocket.DEFAULT_MAX_THREADS, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
 
     /**
      * Factory for creating a blocking socket wrapper.

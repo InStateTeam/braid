@@ -16,9 +16,9 @@
 package io.bluebank.braid.core.jsonrpc
 
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
+import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.NonBlockingSocket
 import io.bluebank.braid.core.socket.Socket
-import io.bluebank.braid.core.socket.SocketListener
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
@@ -62,22 +62,15 @@ class JsonRPCMounterTest {
     service.trigger()
   }
 
-  private class MockSocket : Socket<JsonRPCRequest, JsonRPCResponse> {
-    private val socketListeners = mutableListOf<SocketListener<JsonRPCRequest, JsonRPCResponse>>()
+  private class MockSocket : AbstractSocket<JsonRPCRequest, JsonRPCResponse>() {
     private val responseListeners = mutableListOf<(JsonRPCResponse) -> Unit>()
 
     internal fun process(request: JsonRPCRequest) {
-      socketListeners.forEach { it.dataHandler(this, request) }
+      onData(request)
     }
 
     internal fun addResponseListener(fn: (JsonRPCResponse) -> Unit) {
       responseListeners.add(fn)
-    }
-
-    override fun addListener(listener: SocketListener<JsonRPCRequest, JsonRPCResponse>): Socket<JsonRPCRequest, JsonRPCResponse> {
-      socketListeners.add(listener)
-      listener.onRegister(this)
-      return this
     }
 
     override fun write(obj: JsonRPCResponse): Socket<JsonRPCRequest, JsonRPCResponse> {
