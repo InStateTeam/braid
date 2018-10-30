@@ -27,12 +27,12 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class NonBlockingSocket<R, S>(
   private val vertx: Vertx,
-  private val threads: Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1), // a thread per connection - not ideal
-  private val maxExecutionTime: Long = DEFAULT_MAX_EXECUTION_TIME
+  private val threads: Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1),
+  private val maxExecutionTime: Long = DEFAULT_MAX_EXECUTION_TIME_NANOS
 ) : AbstractSocket<R, S>(), SocketProcessor<R, S, R, S> {
   companion object {
     private val log = loggerFor<NonBlockingSocket<*, *>>()
-    const val DEFAULT_MAX_EXECUTION_TIME = 60L * 60 * 1000 * 1000000 // 1 hour max execution time. Too long?
+    const val DEFAULT_MAX_EXECUTION_TIME_NANOS = 60L * 60 * 1_000 * 1_000_000 // 1 hour max execution time. Too long?
     private val fountain by lazy {
       val atomic = AtomicInteger(0)
       fun() = "nonblocking-socket-${atomic.getAndIncrement()}"
@@ -46,26 +46,28 @@ class NonBlockingSocket<R, S>(
   }
 
   private val id = fountain()
-  private lateinit var socket: Socket<R, S>
-  private lateinit var pool: WorkerExecutor
+  private var socket: Socket<R, S>? = null
+  private val pool: WorkerExecutor get() = vertx.createSharedWorkerExecutor(THREAD_POOL_NAME, threads, maxExecutionTime)
 
   init {
     log.trace("initialising NonBlockingSocket $id")
   }
 
   override fun onRegister(socket: Socket<R, S>) {
-    pool = vertx.createSharedWorkerExecutor(THREAD_POOL_NAME, threads, maxExecutionTime)
     log.trace("registered socket for NonBlockingSocket $id")
+    if (this.socket != null) {
+      log.warn("a socket is already assigned to this object")
+    }
     this.socket = socket
   }
 
-  override fun user(): User? = socket.user()
+  override fun user(): User? = socket?.user()
 
   override fun dataHandler(socket: Socket<R, S>, item: R) {
     try {
       pool.executeBlocking<R>({ onData(item) }, true, { })
     } catch (err: IllegalStateException) {
-      log.info("data item processed during vertx shutdown ${item}")
+      log.info("data item processed during vertx shutdown $item")
     } catch (err: Throwable) {
       log.error("failed to process data item", err)
     }
@@ -76,6 +78,7 @@ class NonBlockingSocket<R, S>(
     try {
       pool.executeBlocking<Unit>({
         onEnd() // notify all listeners
+        this.socket = null // we no longer require this socket
       }, true, {})
     } catch (err: IllegalStateException) {
       // this will happen when a socket is closed during a scheduled vertx.close
@@ -86,9 +89,14 @@ class NonBlockingSocket<R, S>(
   }
 
   override fun write(obj: S): Socket<R, S> {
+    log.info("writing $obj")
     vertx.runOnContext {
       try {
-        socket.write(obj)
+        if (socket != null) {
+          socket?.write(obj)
+        } else {
+          log.warn("during write socket is null")
+        }
       } catch (err: Throwable) {
         log.warn("failed to write to socket", err)
       }

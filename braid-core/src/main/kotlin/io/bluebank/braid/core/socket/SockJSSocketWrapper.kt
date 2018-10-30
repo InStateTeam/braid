@@ -36,22 +36,22 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
     }
 
     /**
-     * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME].
+     * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS].
      * Requests are processed in parallel
      *
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) = create(socket, vertx, threads, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
+    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) = create(socket, vertx, threads, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS)
 
     /**
-     * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME]
+     * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS]
      * Requests are processed in parallel. Total number of threads is set to [NonBlockingSocket.DEFAULT_MAX_THREADS]
      *
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx) = create(socket, vertx, NonBlockingSocket.DEFAULT_MAX_THREADS, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME)
+    fun create(socket: SockJSSocket, vertx: Vertx) = create(socket, vertx, NonBlockingSocket.DEFAULT_MAX_THREADS, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS)
 
     /**
      * Factory for creating a blocking socket wrapper.
