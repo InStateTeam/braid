@@ -23,11 +23,14 @@ import io.bluebank.braid.core.socket.Socket
 import io.bluebank.braid.core.socket.SocketListener
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.core.Vertx
+import io.vertx.rx.java.RxHelper
 import rx.Subscription
 
-class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
+class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
   private lateinit var socket: Socket<JsonRPCRequest, JsonRPCResponse>
   private val activeSubscriptions = mutableMapOf<Long, Subscription>()
+  private val scheduler = RxHelper.scheduler(vertx)
 
   override fun onRegister(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
     this.socket = socket
@@ -57,7 +60,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor) : SocketListener<Jso
         if (activeSubscriptions.containsKey(request.id)) {
           throw RuntimeException("a request with duplicate request id '${request.id}' is in progress for this connection")
         }
-        val subscription = executor.invoke(request).subscribe({ handleDataItem(it, request) }, { err -> handlerError(err, request) }, { handleCompleted(request) })
+        val subscription = executor.invoke(request).observeOn(scheduler).subscribe({ handleDataItem(it, request) }, { err -> handlerError(err, request) }, { handleCompleted(request) })
         activeSubscriptions[request.id] = subscription
       }
     } catch (err: JsonRPCException) {

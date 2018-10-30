@@ -51,7 +51,7 @@ class JsonRPCMounterTest {
     val executor = ConcreteServiceExecutor(service)
     val socket = MockSocket()
     val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply { socket.addListener(this) }
-    JsonRPCMounter(executor).apply { nonBlocking.addListener(this) }
+    JsonRPCMounter(executor, vertx).apply { nonBlocking.addListener(this) }
 
     val async = context.async()
     socket.addResponseListener {

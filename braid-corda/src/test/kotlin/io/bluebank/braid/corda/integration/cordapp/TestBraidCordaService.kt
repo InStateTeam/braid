@@ -44,7 +44,6 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
   }
 
   private val org = serviceHub.myInfo.legalIdentities.first().name.organisation
-  private val vertx = Vertx.vertx()
   init {
     val port = getBraidPort()
     if (port > 0) {
@@ -55,7 +54,7 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
         BraidConfig()
             .withThreadPoolSize(1)
             .withFlow("echo", EchoFlow::class)
-            .withService(CustomService(serviceHub))
+            .withService(CustomService())
             .withAuthConstructor(this::shiroFactory)
             .withPort(port)
             .bootstrapBraid(serviceHub)
