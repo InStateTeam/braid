@@ -84,13 +84,28 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
 
     client.websocket(url.toString(), { socket ->
-      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
-      sockets[clazz] = socket
-      socket.handler(this::handler)
-      socket.exceptionHandler(exceptionHandler)
-      socket.closeHandler(closeHandler)
-      result.complete(proxy)
-    }, { error -> result.fail(error) })
+      try {
+        val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
+        sockets[clazz] = socket
+        socket.handler(this::handler)
+        socket.exceptionHandler(exceptionHandler)
+        socket.closeHandler(closeHandler)
+        result.complete(proxy)
+      } catch (err: Throwable) {
+        log.error("failed to connect socket to the client stack", err)
+        sockets.remove(clazz)
+        socket.handler {  }
+        socket.exceptionHandler {  }
+        socket.closeHandler {  }
+      }
+    }, { error ->
+      log.error("failed to bind to websocket", error)
+      try {
+        result.fail(error)
+      } catch (err: Throwable) {
+        log.error("failed to report error on result future", err)
+      }
+    })
     return result
   }
 
