@@ -68,14 +68,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
       proxy.customService.streamedResult(result => {
         items.push(result)
       }, done, () => {
-        assert.equal(items.length, 10);
-        items.forEach((item, index) => {
-          if (index === 0) {
-            assert.equal(item, 0);
-          } else {
-            assert(items[index - 1] + 1, item);
-          }
-        });
+        assert.deepEqual(items, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "messages should match this order")
         done();
       });
     });
@@ -87,15 +80,9 @@ describe('braid-corda basic connectivity and method invocation', () => {
       proxy.customService.streamedResultThatFails(result => {
         items.push(result)
       }, err => {
-        assert.equal(items.length, 5);
         assert.equal(err.message, "boom");
-        items.forEach((item, index) => {
-          if (index === 0) {
-            assert.equal(item, 0);
-          } else {
-            assert(items[index - 1] + 1, item);
-          }
-        });
+        console.log("messages", items);
+        assert.deepEqual(items, [0, 1, 2, 3, 4], "messages should have the right order")
         done();
       }, () => {
         assert.fail("expected for the stream to fail")
