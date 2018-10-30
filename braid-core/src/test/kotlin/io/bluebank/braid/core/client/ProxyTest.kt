@@ -34,10 +34,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.kotlin.core.http.HttpServerOptions
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import rx.Observable
 import rx.Observable.create
@@ -91,7 +88,7 @@ class ProxyTest {
     sockJSHandler.socketHandler {
       val wrapper = SockJSSocketWrapper.create(it, rule.vertx())
       val typedSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
-      val mounter = JsonRPCMounter(ConcreteServiceExecutor(GreeterService(rule.vertx())))
+      val mounter = JsonRPCMounter(ConcreteServiceExecutor(GreeterService(rule.vertx())), rule.vertx())
 
       wrapper.addListener(typedSocket)
       typedSocket.addListener(mounter)
@@ -107,18 +104,15 @@ class ProxyTest {
 
   @After
   fun after() {
-    val f = this.javaClass.getMethod("foo")
-    val rt = f.returnType
-    val same = (rt.simpleName == "void")
   }
 
   fun foo() {
-
   }
 
+  @Ignore // TODO: Fix this
   @Test fun `that we can create a proxy and invoke a simple RPC request`(context: TestContext) {
-//    val greeter = Greeter::class.braidProxy(ServiceEndpoint(ssl = false, port = port, path = path))
-//    val name = "fred"
-//    greeter.greet(name, 500).setHandler(context.asyncAssertSuccess())
+    val greeter = Greeter::class.braidProxy(ServiceEndpoint(ssl = false, port = port, path = path))
+    val name = "fred"
+    greeter.greet(name, 500).setHandler(context.asyncAssertSuccess())
   }
 }

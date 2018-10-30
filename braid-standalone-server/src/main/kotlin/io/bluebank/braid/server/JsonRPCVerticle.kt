@@ -246,7 +246,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
 
       val rpcSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
       sockWrapper.addListener(rpcSocket)
-      val mount = JsonRPCMounter(service)
+      val mount = JsonRPCMounter(service, vertx)
       rpcSocket.addListener(mount)
     } else {
       socket.write("cannot find service $service")

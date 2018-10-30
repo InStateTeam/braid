@@ -20,6 +20,6 @@ import org.junit.Test
 class HttpServerConfigTest {
   @Test
   fun loadJKSTest() {
-    val default = HttpServerConfig.defaultServerOptions()
+    HttpServerConfig.defaultServerOptions()
   }
 }

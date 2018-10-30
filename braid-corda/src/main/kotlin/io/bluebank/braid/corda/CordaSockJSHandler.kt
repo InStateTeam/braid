@@ -132,7 +132,7 @@ class CordaSockJSHandler private constructor(private val vertx: Vertx, serviceHu
     val sockWrapper = createSocketAdapter(socket, authProvider)
     val rpcSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
     sockWrapper.addListener(rpcSocket)
-    val mount = JsonRPCMounter(service)
+    val mount = JsonRPCMounter(service, vertx)
     rpcSocket.addListener(mount)
   }
 

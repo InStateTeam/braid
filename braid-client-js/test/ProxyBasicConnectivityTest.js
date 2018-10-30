@@ -68,6 +68,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
       proxy.customService.streamedResult(result => {
         items.push(result)
       }, done, () => {
+        console.log("items received", items);
         assert.deepEqual(items, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "messages should match this order")
         done();
       });
@@ -81,7 +82,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
         items.push(result)
       }, err => {
         assert.equal(err.message, "boom");
-        console.log("messages", items);
+        console.log("items received", items);
         assert.deepEqual(items, [0, 1, 2, 3, 4], "messages should have the right order")
         done();
       }, () => {
