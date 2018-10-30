@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.core.service
 
-import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.createJsonException
@@ -25,8 +24,13 @@ import io.vertx.core.Future
 import rx.Observable
 import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.math.BigDecimal
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.valueParameters
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
@@ -36,7 +40,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       try {
         val method = findMethod(request)
         val castedParameters = request.mapParams(method)
-        val result = method.invoke(service, *castedParameters)
+        val result = method.call(service, *castedParameters)
         handleResult(result, request, subscriber)
       } catch (err: InvocationTargetException) {
         subscriber.onError(err.targetException)
@@ -83,20 +87,42 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     subscriber.onError(err)
   }
 
-  private fun findMethod(request: JsonRPCRequest): Method {
-    try {
-      return service.javaClass.methods.single { request.matchesMethod(it) }
-    } catch (err: IllegalArgumentException) {
-      JsonRPCErrorResponse.throwMethodNotFound(request.id, "method ${request.method} has multiple implementations with the same number of parameters")
-    } catch (err: NoSuchElementException) {
-      throw MethodDoesNotExist(request.method)
+  private fun findMethod(request: JsonRPCRequest): KFunction<*> = try {
+    orderByComplexity(service::class.functions
+        .filter(request::matchesName)
+        .filter(this::isPublic)
+    ).first(request::parametersMatch)
+  } catch (err: NoSuchElementException) {
+    throw MethodDoesNotExist(request.method)
+  }
+
+  private fun orderByComplexity(methods: List<KFunction<*>>): List<KFunction<*>> {
+    return methods.sortedWith(compareByDescending(this::sumTypes))
+  }
+
+  private fun sumTypes(method: KFunction<*>) = method.valueParameters.asSequence().map(this::typeValue).sum()
+
+  private fun typeValue(parameter: KParameter): Int = when (parameter.type.classifier) {
+    BigDecimal::class -> -1
+    String::class -> 0
+    Int::class, Float::class -> 1
+    Double::class, Long::class -> 2
+    List::class -> 4
+    Map::class -> 5
+    else -> {
+      when {
+        parameter.type.javaClass.isArray -> 3
+        else -> 6
+      }
     }
   }
+
+  private fun isPublic(method: KFunction<*>) = method.visibility == KVisibility.PUBLIC
 
   override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
         .filter { Modifier.isPublic(it.modifiers) }
-        .filter { !it.name.contains("$")}
+        .filter { !it.name.contains("$") }
         .map { it.toDescriptor() }
   }
 }

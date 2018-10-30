@@ -22,6 +22,7 @@ import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
 import rx.Observable
+import java.math.BigDecimal
 
 interface MyService {
   fun add(lhs: Double, rhs: Double): Double
@@ -34,6 +35,27 @@ interface MyService {
   fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
   fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
+  fun functionWithTheSameNameAndNumberOfParameters(amount: String, accountId: String): Int = 1
+  fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: String): Int = 2
+  fun functionWithTheSameNameAndNumberOfParameters(amount: BigDecimal, accountId: BigDecimal): Int = 3
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Long, accountId: String): Int = 4
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Int, accountId: String): Int = 5
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Float, accountId: String): Int = 6
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String): Int = 7
+  fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject?, accountId: String): Int = 8
+  fun functionWithTheSameNameAndNumberOfParameters(amount: List<String>, accountId: String): Int = 9
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String): Int = 10
+  fun functionWithTheSameNameAndNumberOfParameters(amount: Array<String>, accountId: String): Int = 11
+  fun functionWithTheSameNameAndASingleParameter(amount: String?): Int = 12
+  fun functionWithTheSameNameAndASingleParameter(amount: Long): Int = 13
+  fun functionWithTheSameNameAndASingleParameter(amount: Int): Int = 14
+  fun functionWithTheSameNameAndASingleParameter(amount: Double): Int = 15
+  fun functionWithTheSameNameAndASingleParameter(amount: Float): Int = 16
+  fun functionWithTheSameNameAndASingleParameter(amount: ComplexObject): Int = 17
+  fun functionWithTheSameNameAndASingleParameter(amount: List<String>): Int = 18
+  fun functionWithTheSameNameAndASingleParameter(amount: Map<String, String>): Int = 19
+  fun functionWithTheSameNameAndASingleParameter(amount: Array<String>): Int = 20
+  fun functionWithBigDecimalParameters(amount: BigDecimal, anotherAmount: BigDecimal): Int = 21
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)
@@ -87,7 +109,6 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   override fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData {
     return md
   }
-
 }
 
 @JsonTypeInfo(

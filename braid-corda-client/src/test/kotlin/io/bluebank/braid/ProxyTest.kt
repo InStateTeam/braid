@@ -18,6 +18,7 @@ package io.bluebank.braid
 import io.bluebank.braid.client.BraidClientConfig
 import io.bluebank.braid.client.BraidCordaProxyClient
 import io.bluebank.braid.client.BraidProxyClient
+import io.bluebank.braid.server.ComplexObject
 import io.bluebank.braid.server.JsonRPCServer
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.bluebank.braid.server.MyService
@@ -26,10 +27,11 @@ import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.math.BigDecimal
 import java.net.ServerSocket
 import java.net.URI
 
@@ -38,10 +40,10 @@ class ProxyTest {
   private val vertx = Vertx.vertx()
   private val clientVertx = Vertx.vertx()
   private val port = getFreePort()
-  private lateinit var rpcServer : JsonRPCServer
-  private lateinit var braidClient : BraidProxyClient
+  private lateinit var rpcServer: JsonRPCServer
+  private lateinit var braidClient: BraidProxyClient
 
-  lateinit var myService: MyService
+  private lateinit var myService: MyService
 
   @Before
   fun before(context: TestContext) {
@@ -79,9 +81,162 @@ class ProxyTest {
   @Test
   fun `should be able to add two numbers together`() {
     val result = myService.add(1.0, 2.0)
-    Assert.assertEquals(0, braidClient.activeRequestsCount())
-    Assert.assertEquals(3.0, result, 0.0001)
+    assertEquals(0, braidClient.activeRequestsCount())
+    assertEquals(3.0, result, 0.0001)
   }
+
+  @Test
+  fun `sending a request to a no args function finds the function`() {
+    val result = myService.noArgs()
+    assertEquals(5, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - long input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(200L, "100.123")
+    assertEquals(4, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - int input`() {
+    // long version always chosen over int
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(200, "account id")
+    assertEquals(4, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (double version) - float input`() {
+    // double always chosen over float
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(200.1234F, "100.123")
+    assertEquals(7, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - double input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(200.1234, "100.123")
+    assertEquals(7, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - complex object input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(ComplexObject("1", 2, 3.0), "100.123")
+    assertEquals(8, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - null complex object input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(null, "account id")
+    assertEquals(8, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - list input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(listOf("a", "b", "c"), "100.123")
+    assertEquals(9, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (list version) - array input`() {
+    // list always chosen over array
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(arrayOf("a", "b", "c"), "100.123")
+    assertEquals(9, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - map input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(mapOf(
+        "a" to "a",
+        "b" to "b",
+        "c" to "c"
+    ), "100.123")
+    assertEquals(10, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - string input`() {
+    val result = myService.functionWithTheSameNameAndNumberOfParameters("not a number", "My Netflix account")
+    assertEquals(1, result)
+  }
+
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (string version) - big decimal input`() {
+    // string always chosen over big decimal
+    val functionWithABigDecimalParameterResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "My Netflix account")
+    assertEquals(1, functionWithABigDecimalParameterResult)
+    val functionWithTwoBigDecimalParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
+    assertEquals(1, functionWithTwoBigDecimalParametersResult)
+    val functionWithBigDecimalAndStringNumberParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "200.12345")
+    assertEquals(1, functionWithBigDecimalAndStringNumberParametersResult)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - string input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter("A string")
+    assertEquals(12, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - null string input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(null)
+    assertEquals(12, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - long input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(11L)
+    assertEquals(13, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function (long version) - int input`() {
+    // long version always chosen over int
+    val result = myService.functionWithTheSameNameAndASingleParameter(12)
+    assertEquals(13, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - double input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(12.34)
+    assertEquals(15, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function (double version) - float input`() {
+    // double always chosen over float
+    val result = myService.functionWithTheSameNameAndASingleParameter(12.34F)
+    assertEquals(15, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - complex object input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(ComplexObject("hi", 1, 2.0))
+    assertEquals(17, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - list input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(listOf("i", "am", "a", "string"))
+    assertEquals(18, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - map input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(mapOf("me" to "you", "you" to "me"))
+    assertEquals(19, result)
+  }
+
+  @Test
+  fun `sending a request with a single parameter finds the function - array input`() {
+    val result = myService.functionWithTheSameNameAndASingleParameter(arrayOf("i", "am", "a", "string"))
+    assertEquals(18, result)
+  }
+
+  @Test
+  fun `sending a request to a big decimal function finds the function`() {
+    val result = myService.functionWithBigDecimalParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
+    assertEquals(21, result)
+  }
+
 
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {
