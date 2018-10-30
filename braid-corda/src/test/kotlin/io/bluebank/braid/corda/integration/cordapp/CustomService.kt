@@ -17,14 +17,16 @@ package io.bluebank.braid.corda.integration.cordapp
 
 import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Future
-import net.corda.core.node.AppServiceHub
 import rx.Observable
 import rx.schedulers.Schedulers
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 @ServiceDescription("my-service", "A simple service for testing braid")
-class CustomService(private val serviceHub: AppServiceHub) {
+class CustomService {
+  private val scheduler = Schedulers.from(Executors.newFixedThreadPool(1))
+
   fun add (lhs: Int, rhs: Int)  = lhs + rhs
 
   fun badjuju() : Int {
@@ -38,7 +40,7 @@ class CustomService(private val serviceHub: AppServiceHub) {
   }
 
   fun streamedResult() : Observable<Int> {
-    return Observable.range(0, 10, Schedulers.computation()).delay(1, TimeUnit.MILLISECONDS)
+    return Observable.range(0, 10, scheduler).delay(1, TimeUnit.MILLISECONDS)
   }
 
   fun infiniteStream() : Observable<Long> {
@@ -46,7 +48,7 @@ class CustomService(private val serviceHub: AppServiceHub) {
   }
 
   fun streamedResultThatFails() : Observable<Int> {
-    return Observable.range(0, 10, Schedulers.computation()).doOnNext { if (it == 5) throw RuntimeException("boom") }
+    return Observable.range(0, 10, scheduler).doOnNext { if (it == 5) throw RuntimeException("boom") }
   }
 
   // function to test https://gitlab.com/bluebank/braid/merge_requests/76

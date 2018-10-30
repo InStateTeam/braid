@@ -89,7 +89,7 @@ class NonBlockingSocket<R, S>(
   }
 
   override fun write(obj: S): Socket<R, S> {
-    log.info("writing $obj")
+    log.debug("writing $obj")
     vertx.runOnContext {
       try {
         if (socket != null) {
