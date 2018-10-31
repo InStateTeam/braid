@@ -66,7 +66,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     throw MethodDoesNotExist("failed to find a method that matches ${request.method}(${request.paramsAsString()})")
   }
 
-  fun Sequence<KFunction<*>>.filterMethodsAndConvertedParameters(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
+  private fun Sequence<KFunction<*>>.filterMethodsAndConvertedParameters(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
     // attempt to convert the parameters
     return map { method ->
       method to try {
