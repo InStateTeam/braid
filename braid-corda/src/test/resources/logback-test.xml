@@ -24,13 +24,13 @@
     </encoder>
   </appender>
 
-  <logger name="io.vertx.ext.web.handler" level="TRACE">
+  <logger name="io.vertx.ext.web.handler" level="WARN">
     <appender-ref ref="STDOUT"/>
   </logger>
-  <logger name="io.vertx.ext.web.impl.RouterImpl" level="TRACE"/>
+  <logger name="io.vertx.ext.web.impl.RouterImpl" level="WARN"/>
   <logger name="io.netty" level="WARN"/>
-  <logger name="io.bluebank" level="INFO"/>
-  <root level="INFO">
+  <logger name="io.bluebank" level="TRACE"/>
+  <root level="TRACE">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
