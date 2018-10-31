@@ -15,15 +15,16 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
 import java.lang.reflect.Parameter
-import java.math.BigDecimal
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.jvmErasure
+
+private val log = loggerFor<Params>()
 
 interface Params {
   companion object {
@@ -45,37 +46,14 @@ interface Params {
 
   val count: Int
 
-  fun match(method: KFunction<*>): Boolean
   fun mapParams(method: KFunction<*>): List<Any?>
   fun mapParams(constructor: Constructor<*>): List<Any?>
 }
 
-abstract class AbstractParams : Params {
-  protected fun match(method: KFunction<*>, params: List<Any?>): Boolean = try {
-    method.valueParameters.zip(params).all { (parameter, value) ->
-      matches(parameter, value)
-    }
-  } catch (e: IllegalArgumentException) {
-    false
-  }
-
-  private fun matches(parameter: KParameter, value: Any?): Boolean {
-    val type = parameter.type
-    return (value == null && type.isMarkedNullable) || (value != null &&
-        ((value::class.isSubclassOf(type.jvmErasure)
-            || (value is List<*> && type.javaClass.isArray)
-            || (value is Int && type.classifier == Long::class)
-            || (value is Double && type.classifier == Float::class)
-            || (((value is String && type.classifier == BigDecimal::class) || value is Map<*, *>) && convert(value, parameter) != null))))
-  }
-}
+abstract class AbstractParams : Params
 
 class SingleValueParam(val param: Any) : AbstractParams() {
   override val count: Int = 1
-
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.size == 1 && match(method, listOf(param))
-  }
 
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return listOf(convert(param, method.valueParameters[0]))
@@ -84,14 +62,14 @@ class SingleValueParam(val param: Any) : AbstractParams() {
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     return listOf(convert(param, constructor.parameters[0]))
   }
+
+  override fun toString(): String {
+    return param.toString()
+  }
 }
 
 class NamedParams(val map: Map<String, Any?>) : Params {
   override val count: Int = map.size
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.all { map.containsKey(it.name) }
-  }
-
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.map { parameter ->
       val value = map[parameter.name]
@@ -105,13 +83,14 @@ class NamedParams(val map: Map<String, Any?>) : Params {
       convert(value, parameter)
     }
   }
+
+  override fun toString(): String {
+    return map.map { "${it.key}: ${it.value}" }.joinToString(",")
+  }
 }
 
 class ListParams(val params: List<Any?>) : AbstractParams() {
   override val count: Int = params.size
-
-  override fun match(method: KFunction<*>): Boolean = match(method, params)
-
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.zip(params).map { (parameter, value) ->
       convert(value, parameter)
@@ -123,6 +102,10 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
       convert(value, parameter)
     }
   }
+
+  override fun toString(): String {
+    return params.joinToString(",") { it.toString() }
+  }
 }
 
 private fun convert(value: Any?, parameter: KParameter) = convert(value, parameter.type.jvmErasure.javaObjectType)
@@ -132,16 +115,19 @@ private fun convert(value: Any?, parameter: Parameter) = convert(value, paramete
 private fun convert(value: Any?, clazz: Class<*>): Any? {
   return when (value) {
     null -> null
-    else -> Json.mapper.convertValue(value, clazz)
+    else -> {
+      try {
+        Json.mapper.convertValue(value, clazz)
+      } catch (err: IllegalArgumentException) {
+        log.trace("failed to convert $value to $clazz")
+        null
+      }
+    }
   }
 }
 
 class NullParams : Params {
   override val count: Int = 0
-
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.isEmpty()
-  }
 
   override fun mapParams(method: KFunction<*>): List<Any?> {
     // assuming client has already checked the method parameters
@@ -151,5 +137,9 @@ class NullParams : Params {
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     // assuming client has already checked the method parameters
     return emptyList()
+  }
+
+  override fun toString(): String {
+    return ""
   }
 }

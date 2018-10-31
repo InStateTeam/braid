@@ -19,6 +19,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.createJsonException
 import io.bluebank.braid.core.jsonschema.toDescriptor
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import rx.Observable
@@ -33,21 +34,50 @@ import kotlin.reflect.full.functions
 import kotlin.reflect.full.valueParameters
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
+  companion object {
+    private val log = loggerFor<ConcreteServiceExecutor>()
+  }
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
-    // use unsafe constructor until we switch to rxjava2 and vertx 3.5.0 - currently too new to be confident of stability
     return Observable.create<Any> { subscriber ->
       try {
-        val method = findMethod(request)
-        val castedParameters = request.mapParams(method)
-        val result = method.call(service, *castedParameters)
-        handleResult(result, request, subscriber)
+        orderByComplexity(service::class.functions
+          .filter(request::matchesName)
+          .filter(this::isPublic)
+          .filter { it.parameters.size == request.paramCount() + 1 }
+        )
+          .asSequence() // lazy sequence
+          .filterMethodsAndConvertedParameters(request)
+          .map { (method, params) -> method.call(service, *params) }
+          .firstOrNull()
+          ?.also { result -> handleResult(result, request, subscriber) }
+          ?: throwMethodDoesNotExist(request)
       } catch (err: InvocationTargetException) {
+        log.trace("failed to invoke target for $request", err)
         subscriber.onError(err.targetException)
       } catch (err: Throwable) {
+        log.debug("failed to invoke $request", err)
         subscriber.onError(err)
       }
     }
+  }
+
+  private fun throwMethodDoesNotExist(request: JsonRPCRequest) {
+    throw MethodDoesNotExist("failed to find a method that matches ${request.method}(${request.paramsAsString()})")
+  }
+
+  fun Sequence<KFunction<*>>.filterMethodsAndConvertedParameters(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
+    // attempt to convert the parameters
+    return map { method ->
+      method to try {
+        request.mapParams(method)
+      } catch (err: Throwable) {
+        null
+      }
+    }
+      // filter out parameters that didn't match
+      .filter { (_, params) -> params != null }
+      .map { (method, params) -> method to params!! }
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -61,8 +91,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   private fun handleObservable(result: Observable<Any>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
     result
-        .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
-        .subscribe(subscriber)
+      .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
+      .subscribe(subscriber)
   }
 
   private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
@@ -85,15 +115,6 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   private fun respond(err: Throwable, subscriber: Subscriber<Any>) {
     subscriber.onError(err)
-  }
-
-  private fun findMethod(request: JsonRPCRequest): KFunction<*> = try {
-    orderByComplexity(service::class.functions
-        .filter(request::matchesName)
-        .filter(this::isPublic)
-    ).first(request::parametersMatch)
-  } catch (err: NoSuchElementException) {
-    throw MethodDoesNotExist(request.method)
   }
 
   private fun orderByComplexity(methods: List<KFunction<*>>): List<KFunction<*>> {
@@ -121,8 +142,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
-        .filter { Modifier.isPublic(it.modifiers) }
-        .filter { !it.name.contains("$") }
-        .map { it.toDescriptor() }
+      .filter { Modifier.isPublic(it.modifiers) }
+      .filter { !it.name.contains("$") }
+      .map { it.toDescriptor() }
   }
 }
