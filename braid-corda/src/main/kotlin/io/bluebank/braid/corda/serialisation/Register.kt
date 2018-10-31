@@ -48,7 +48,7 @@ class BraidCordaJacksonInit {
 //          .addSerializer(Party::class.java, JacksonSupport.PartySerializer)
 //          .addDeserializer(Party::class.java, JacksonSupport.PartyDeserializer)
 //          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
-          .addSerializer(BigDecimal::class.java, JacksonSupport.ToStringSerializer)
+          .addSerializer(BigDecimal::class.java, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)
           .addDeserializer(BigDecimal::class.java, NumberDeserializers.BigDecimalDeserializer())
           .addSerializer(SecureHash::class.java, SecureHashSerializer)
           .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
