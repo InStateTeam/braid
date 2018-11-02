@@ -94,21 +94,21 @@ class ProxyTest {
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - long input`() {
     val result = myService.functionWithTheSameNameAndNumberOfParameters(200L, "100.123")
-    assertEquals(4, result)
+    assertEquals(5, result) // will always be a perfect match with the int overload. sorry, that's javascript
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - int input`() {
     // long version always chosen over int
     val result = myService.functionWithTheSameNameAndNumberOfParameters(200, "account id")
-    assertEquals(4, result)
+    assertEquals(5, result)
   }
 
   @Test
-  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (double version) - float input`() {
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (float version) - float input`() {
     // double always chosen over float
     val result = myService.functionWithTheSameNameAndNumberOfParameters(200.1234F, "100.123")
-    assertEquals(7, result)
+    assertEquals(7, result) // float binding is nearer
   }
 
   @Test
@@ -143,30 +143,30 @@ class ProxyTest {
   }
 
   @Test
-  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - map input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(mapOf(
-        "a" to "a",
-        "b" to "b",
-        "c" to "c"
-    ), "100.123")
-    assertEquals(10, result)
-  }
-
-  @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - string input`() {
     val result = myService.functionWithTheSameNameAndNumberOfParameters("not a number", "My Netflix account")
     assertEquals(1, result)
   }
 
   @Test
-  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (string version) - big decimal input`() {
+  fun `eager lazy seq`() {
+    (0..10).toList()
+      .asSequence()
+      .map {
+        println(it)
+        it
+      }.firstOrNull()
+
+  }
+  @Test
+  fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (BigDecimal version) - big decimal input`() {
     // string always chosen over big decimal
     val functionWithABigDecimalParameterResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "My Netflix account")
-    assertEquals(1, functionWithABigDecimalParameterResult)
+    assertEquals(2, functionWithABigDecimalParameterResult)
     val functionWithTwoBigDecimalParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
-    assertEquals(1, functionWithTwoBigDecimalParametersResult)
+    assertEquals(3, functionWithTwoBigDecimalParametersResult)
     val functionWithBigDecimalAndStringNumberParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "200.12345")
-    assertEquals(1, functionWithBigDecimalAndStringNumberParametersResult)
+    assertEquals(3, functionWithBigDecimalAndStringNumberParametersResult)
   }
 
   @Test
@@ -184,14 +184,14 @@ class ProxyTest {
   @Test
   fun `sending a request with a single parameter finds the function - long input`() {
     val result = myService.functionWithTheSameNameAndASingleParameter(11L)
-    assertEquals(13, result)
+    assertEquals(14, result) // perfect match with the int overload - sorry, javascript
   }
 
   @Test
-  fun `sending a request with a single parameter finds the function (long version) - int input`() {
+  fun `sending a request with a single parameter finds the function (int version) - int input`() {
     // long version always chosen over int
     val result = myService.functionWithTheSameNameAndASingleParameter(12)
-    assertEquals(13, result)
+    assertEquals(14, result) // perfect match with the int overload
   }
 
   @Test
@@ -220,12 +220,6 @@ class ProxyTest {
   }
 
   @Test
-  fun `sending a request with a single parameter finds the function - map input`() {
-    val result = myService.functionWithTheSameNameAndASingleParameter(mapOf("me" to "you", "you" to "me"))
-    assertEquals(19, result)
-  }
-
-  @Test
   fun `sending a request with a single parameter finds the function - array input`() {
     val result = myService.functionWithTheSameNameAndASingleParameter(arrayOf("i", "am", "a", "string"))
     assertEquals(18, result)
@@ -237,6 +231,18 @@ class ProxyTest {
     assertEquals(21, result)
   }
 
+
+  @Test
+  fun `sending a complex type to an overloaded method that includes Map should always choose the map`() {
+    val result = myService.functionWithComplexOrDynamicType(ComplexObject("foo", Int.MAX_VALUE, Double.MAX_VALUE))
+    assertEquals(23, result)
+  }
+
+  @Test
+  fun `sending a map type to an overloaded method that includes Map should always choose the map`() {
+    val result = myService.functionWithComplexOrDynamicType(mapOf("name" to "foo", "amount" to Int.MAX_VALUE))
+    assertEquals(23, result)
+  }
 
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {

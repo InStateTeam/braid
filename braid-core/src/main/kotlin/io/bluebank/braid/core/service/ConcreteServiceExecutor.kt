@@ -26,12 +26,12 @@ import rx.Observable
 import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
-import java.math.BigDecimal
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.valueParameters
+import kotlin.reflect.jvm.javaType
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   companion object {
@@ -41,14 +41,19 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     return Observable.create<Any> { subscriber ->
       try {
-        orderByComplexity(service::class.functions
-          .filter(request::matchesName)
-          .filter(this::isPublic)
-          .filter { it.parameters.size == request.paramCount() + 1 }
-        )
+        candidateMethods(request)
           .asSequence() // lazy sequence
-          .filterMethodsAndConvertedParameters(request)
-          .map { (method, params) -> method.call(service, *params) }
+          .convertParametersAndFilter(request)
+          .map { (method, params) ->
+            if (log.isDebugEnabled) {
+              log.debug("invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+            }
+            method.call(service, *params).also {
+              if (log.isDebugEnabled) {
+                log.debug("successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+              }
+            }
+          }
           .firstOrNull()
           ?.also { result -> handleResult(result, request, subscriber) }
           ?: throwMethodDoesNotExist(request)
@@ -62,11 +67,36 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     }
   }
 
+  private fun KFunction<*>.asSimpleString() : String {
+    val params = this.parameters.drop(1).joinToString(",") { "${it.name}: ${it.type.javaType.typeName}"}
+    return "$name($params)"
+  }
+
+  private fun candidateMethods(request: JsonRPCRequest) : List<KFunction<*>> {
+    return service::class.functions
+      .filter(request::matchesName)
+      .filter(this::isPublic)
+      .filter { it.parameters.size == request.paramCount() + 1 }
+      .map { it to request.computeScore(it) }
+      .filter { (_, score) -> score > 0 }
+      .sortedByDescending { (_, score) -> score }
+      .also {
+        if (log.isDebugEnabled) {
+          log.info("scores for candidate methods for $request:")
+          it.forEach {
+            println("${it.second}: ${it.first.asSimpleString()}")
+          }
+        }
+      }
+      .map { (fn, _) -> fn }
+  }
+
+
   private fun throwMethodDoesNotExist(request: JsonRPCRequest) {
     throw MethodDoesNotExist("failed to find a method that matches ${request.method}(${request.paramsAsString()})")
   }
 
-  private fun Sequence<KFunction<*>>.filterMethodsAndConvertedParameters(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
+  private fun Sequence<KFunction<*>>.convertParametersAndFilter(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
     // attempt to convert the parameters
     return map { method ->
       method to try {
@@ -124,7 +154,6 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   private fun sumTypes(method: KFunction<*>) = method.valueParameters.asSequence().map(this::typeValue).sum()
 
   private fun typeValue(parameter: KParameter): Int = when (parameter.type.classifier) {
-    BigDecimal::class -> -1
     String::class -> 0
     Int::class, Float::class -> 1
     Double::class, Long::class -> 2

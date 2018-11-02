@@ -44,7 +44,7 @@ interface MyService {
   fun functionWithTheSameNameAndNumberOfParameters(amount: Double, accountId: String): Int = 7
   fun functionWithTheSameNameAndNumberOfParameters(amount: ComplexObject?, accountId: String): Int = 8
   fun functionWithTheSameNameAndNumberOfParameters(amount: List<String>, accountId: String): Int = 9
-  fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String): Int = 10
+//  fun functionWithTheSameNameAndNumberOfParameters(amount: Map<String, String>, accountId: String): Int = 10
   fun functionWithTheSameNameAndNumberOfParameters(amount: Array<String>, accountId: String): Int = 11
   fun functionWithTheSameNameAndASingleParameter(amount: String?): Int = 12
   fun functionWithTheSameNameAndASingleParameter(amount: Long): Int = 13
@@ -53,9 +53,11 @@ interface MyService {
   fun functionWithTheSameNameAndASingleParameter(amount: Float): Int = 16
   fun functionWithTheSameNameAndASingleParameter(amount: ComplexObject): Int = 17
   fun functionWithTheSameNameAndASingleParameter(amount: List<String>): Int = 18
-  fun functionWithTheSameNameAndASingleParameter(amount: Map<String, String>): Int = 19
+//  fun functionWithTheSameNameAndASingleParameter(amount: Map<String, String>): Int = 19
   fun functionWithTheSameNameAndASingleParameter(amount: Array<String>): Int = 20
   fun functionWithBigDecimalParameters(amount: BigDecimal, anotherAmount: BigDecimal): Int = 21
+  fun functionWithComplexOrDynamicType(value: ComplexObject) = 22
+  fun functionWithComplexOrDynamicType(value: Map<String, Any>) = 23
 }
 
 data class ComplexObject(val a: String, val b: Int, val c: Double)

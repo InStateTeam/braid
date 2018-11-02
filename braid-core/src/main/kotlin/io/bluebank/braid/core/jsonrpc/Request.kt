@@ -34,4 +34,5 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method:
   }
 
   fun paramsAsString() = parameters.toString()
+  fun computeScore(fn: KFunction<*>) = parameters.computeScore(fn)
 }

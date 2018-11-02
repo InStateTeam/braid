@@ -20,6 +20,7 @@ import io.vertx.core.Future
 import net.corda.core.identity.CordaX500Name
 import rx.Observable
 import rx.schedulers.Schedulers
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -59,6 +60,14 @@ class CustomService {
   }
   fun createDao(daoName: String, minimumMemberCount: Int, strictMode: Boolean, notaryName: CordaX500Name): Future<DaoState> {
     return Future.succeededFuture(DaoState(daoName, minimumMemberCount, strictMode, notaryName))
+  }
+
+  fun useInstant(instant: Instant) : String {
+    return instant.toString()
+  }
+
+  fun useDate(date: Date) : String {
+    return date.toString()
   }
 }
 
