@@ -19,35 +19,95 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.createJsonException
 import io.bluebank.braid.core.jsonschema.toDescriptor
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import rx.Observable
 import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
-import java.math.BigDecimal
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.valueParameters
+import kotlin.reflect.jvm.javaType
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
+  companion object {
+    private val log = loggerFor<ConcreteServiceExecutor>()
+  }
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
-    // use unsafe constructor until we switch to rxjava2 and vertx 3.5.0 - currently too new to be confident of stability
     return Observable.create<Any> { subscriber ->
       try {
-        val method = findMethod(request)
-        val castedParameters = request.mapParams(method)
-        val result = method.call(service, *castedParameters)
-        handleResult(result, request, subscriber)
+        candidateMethods(request)
+          .asSequence() // lazy sequence
+          .convertParametersAndFilter(request)
+          .map { (method, params) ->
+            if (log.isDebugEnabled) {
+              log.debug("invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+            }
+            method.call(service, *params).also {
+              if (log.isDebugEnabled) {
+                log.debug("successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+              }
+            }
+          }
+          .firstOrNull()
+          ?.also { result -> handleResult(result, request, subscriber) }
+          ?: throwMethodDoesNotExist(request)
       } catch (err: InvocationTargetException) {
+        log.trace("failed to invoke target for $request", err)
         subscriber.onError(err.targetException)
       } catch (err: Throwable) {
+        log.debug("failed to invoke $request", err)
         subscriber.onError(err)
       }
     }
+  }
+
+  private fun KFunction<*>.asSimpleString() : String {
+    val params = this.parameters.drop(1).joinToString(",") { "${it.name}: ${it.type.javaType.typeName}"}
+    return "$name($params)"
+  }
+
+  private fun candidateMethods(request: JsonRPCRequest) : List<KFunction<*>> {
+    return service::class.functions
+      .filter(request::matchesName)
+      .filter(this::isPublic)
+      .filter { it.parameters.size == request.paramCount() + 1 }
+      .map { it to request.computeScore(it) }
+      .filter { (_, score) -> score > 0 }
+      .sortedByDescending { (_, score) -> score }
+      .also {
+        if (log.isDebugEnabled) {
+          log.info("scores for candidate methods for $request:")
+          it.forEach {
+            println("${it.second}: ${it.first.asSimpleString()}")
+          }
+        }
+      }
+      .map { (fn, _) -> fn }
+  }
+
+
+  private fun throwMethodDoesNotExist(request: JsonRPCRequest) {
+    throw MethodDoesNotExist("failed to find a method that matches ${request.method}(${request.paramsAsString()})")
+  }
+
+  private fun Sequence<KFunction<*>>.convertParametersAndFilter(request: JsonRPCRequest): Sequence<Pair<KFunction<*>, Array<Any?>>> {
+    // attempt to convert the parameters
+    return map { method ->
+      method to try {
+        request.mapParams(method)
+      } catch (err: Throwable) {
+        null
+      }
+    }
+      // filter out parameters that didn't match
+      .filter { (_, params) -> params != null }
+      .map { (method, params) -> method to params!! }
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -61,8 +121,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   private fun handleObservable(result: Observable<Any>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
     result
-        .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
-        .subscribe(subscriber)
+      .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
+      .subscribe(subscriber)
   }
 
   private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
@@ -87,15 +147,6 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     subscriber.onError(err)
   }
 
-  private fun findMethod(request: JsonRPCRequest): KFunction<*> = try {
-    orderByComplexity(service::class.functions
-        .filter(request::matchesName)
-        .filter(this::isPublic)
-    ).first(request::parametersMatch)
-  } catch (err: NoSuchElementException) {
-    throw MethodDoesNotExist(request.method)
-  }
-
   private fun orderByComplexity(methods: List<KFunction<*>>): List<KFunction<*>> {
     return methods.sortedWith(compareByDescending(this::sumTypes))
   }
@@ -103,7 +154,6 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   private fun sumTypes(method: KFunction<*>) = method.valueParameters.asSequence().map(this::typeValue).sum()
 
   private fun typeValue(parameter: KParameter): Int = when (parameter.type.classifier) {
-    BigDecimal::class -> -1
     String::class -> 0
     Int::class, Float::class -> 1
     Double::class, Long::class -> 2
@@ -121,8 +171,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   override fun getStubs(): List<MethodDescriptor> {
     return service.javaClass.declaredMethods
-        .filter { Modifier.isPublic(it.modifiers) }
-        .filter { !it.name.contains("$") }
-        .map { it.toDescriptor() }
+      .filter { Modifier.isPublic(it.modifiers) }
+      .filter { !it.name.contains("$") }
+      .map { it.toDescriptor() }
   }
 }

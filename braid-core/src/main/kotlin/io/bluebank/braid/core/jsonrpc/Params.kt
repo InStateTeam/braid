@@ -15,15 +15,19 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
 import java.lang.reflect.Parameter
-import java.math.BigDecimal
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.jvmErasure
+
+private val log = loggerFor<Params>()
 
 interface Params {
   companion object {
@@ -45,37 +49,102 @@ interface Params {
 
   val count: Int
 
-  fun match(method: KFunction<*>): Boolean
   fun mapParams(method: KFunction<*>): List<Any?>
   fun mapParams(constructor: Constructor<*>): List<Any?>
+  fun computeScore(fn: KFunction<*>): Int
 }
 
 abstract class AbstractParams : Params {
-  protected fun match(method: KFunction<*>, params: List<Any?>): Boolean = try {
-    method.valueParameters.zip(params).all { (parameter, value) ->
-      matches(parameter, value)
+  companion object {
+    @JvmStatic
+    protected fun computeScore(parameters: List<KParameter>, values: List<Any?>): Int {
+      return when {
+        parameters.size != values.size -> 0
+        else -> {
+          if (parameters.isEmpty()) return 100
+          parameters
+            .zip(values)
+            .map { computeScore(it.first, it.second) }
+            .fold(1) { acc, i -> acc * i }
+        }
+      }
     }
-  } catch (e: IllegalArgumentException) {
-    false
-  }
 
-  private fun matches(parameter: KParameter, value: Any?): Boolean {
-    val type = parameter.type
-    return (value == null && type.isMarkedNullable) || (value != null &&
-        ((value::class.isSubclassOf(type.jvmErasure)
-            || (value is List<*> && type.javaClass.isArray)
-            || (value is Int && type.classifier == Long::class)
-            || (value is Double && type.classifier == Float::class)
-            || (((value is String && type.classifier == BigDecimal::class) || value is Map<*, *>) && convert(value, parameter) != null))))
+    private fun computeScore(parameter: KParameter, value: Any?): Int {
+      return when {
+        value == null && parameter.type.isMarkedNullable -> 10
+        value == null && !parameter.type.isMarkedNullable -> 0
+        parameter.type.classifier != null -> {
+          when (parameter.type.classifier) {
+            is KClass<*> -> {
+              val classifier = parameter.type.classifier!! as KClass<*>
+              computeScore(classifier, value!!.javaClass)
+            }
+            else -> {
+              log.warn("attempted to compute score from ${parameter.type.classifier}! This should never happen. Parameter was $parameter value was $value")
+              0
+            }
+          }
+        }
+        else -> 1
+      }
+    }
+
+    // we memoize the heavy reflection stuff that's at the heart of the loops
+    // we could do better in theory, memoizing at the function signatures level as well ... perhaps consider this for a future optimisation
+    private val computeScore = { targetType: KClass<*>, sourceType: Class<*> -> this.computeScoreInternal(targetType, sourceType) }.memoize()
+
+    /**
+     * This class computes the logical score between a value and a target type using pure type analysis
+     * In other words, this is dynamic binding voodoo and part of the course of trying to bind a dynamic language
+     * to something chewy-typed like the JVM (yeah, you heard me, chewy-typed - if you want a better typed VM look look at the CLR)
+     * A different approach to all this dynamic typing is to introduce additional type information payloads in the request
+     * to provide type hints. Until we decide to do that, we'll need some heuristics (i.e. hacky rules) to make overloads work
+     */
+    private fun computeScoreInternal(targetType: KClass<*>, sourceType: Class<*>): Int {
+      return when {
+      // we give preference for parsing of strings rather than direct string to string matching. this is to give a higher
+      // weight to say "200.00" -> BigDecimal
+      // we don't do the same for complex type e.g. Map<*,*> -> ComplexType, because the use-cases are very different
+      // If someone declares a method with Map<*,*> it signals that they don't care about strong types anyhow
+        String::class.assignableFrom(sourceType) && targetType.isSubclassOf(String::class) -> 8
+        Map::class.assignableFrom(sourceType) && targetType.isSubclassOf(Map::class) -> 10
+      // otherwise, when we have a perfect match we use it - this means
+        targetType.javaObjectType == sourceType -> 10
+      // if we are dealing with "list" types that are not a perfect match (e.g. Array <-> List)
+        sourceType.isListType() && targetType.isListType() -> {
+          when {
+          // we give preference to List receivers
+            targetType.isSubclassOf(List::class) -> 9
+            else -> 8
+          }
+        }
+      // this is a subordinate to a perfect match. e.g. a perfect match with Map<*, *> will always trump a complex type
+        sourceType.isParsableType() -> 8
+      // a subtype is always slightly better than a perfect match
+        sourceType.kotlin.isSubclassOf(targetType) -> 9
+      // a common super type (e.g. Numbers) will have lower precedence than a perfect match of a subclass
+        targetType.haveCommonSuperClass(sourceType.kotlin) -> 8
+      // if nothing else matches, we can always convert Any to a string
+        targetType.isSubclassOf(String::class) -> 5
+      // for everything else, we reject it
+        else -> 0
+      }
+    }
+
+    private fun KClass<*>.assignableFrom(clazz: Class<*>) = this.java.isAssignableFrom(clazz)
+    private fun KClass<*>.realSuperClasses() = allSuperclasses.filter { !it.java.isInterface && it != Any::class }
+    private fun KClass<*>.intersectRealSuperClasses(other: KClass<*>) = this.realSuperClasses().intersect(other.realSuperClasses())
+    private fun KClass<*>.haveCommonSuperClass(other: KClass<*>) = this.intersectRealSuperClasses(other).isNotEmpty()
+
+    private fun KClass<*>.isListType() = isSubclassOf(List::class) || java.isArray
+    private fun Class<*>.isListType() = List::class.assignableFrom(this) || this.isArray
+    private fun Class<*>.isParsableType() = Map::class.assignableFrom(this) || String::class.assignableFrom(this)
   }
 }
 
 class SingleValueParam(val param: Any) : AbstractParams() {
   override val count: Int = 1
-
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.size == 1 && match(method, listOf(param))
-  }
 
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return listOf(convert(param, method.valueParameters[0]))
@@ -84,14 +153,18 @@ class SingleValueParam(val param: Any) : AbstractParams() {
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     return listOf(convert(param, constructor.parameters[0]))
   }
-}
 
-class NamedParams(val map: Map<String, Any?>) : Params {
-  override val count: Int = map.size
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.all { map.containsKey(it.name) }
+  override fun toString(): String {
+    return param.toString()
   }
 
+  override fun computeScore(fn: KFunction<*>): Int {
+    return computeScore(fn.parameters.drop(1), listOf(param))
+  }
+}
+
+class NamedParams(val map: Map<String, Any?>) : AbstractParams() {
+  override val count: Int = map.size
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.map { parameter ->
       val value = map[parameter.name]
@@ -105,13 +178,21 @@ class NamedParams(val map: Map<String, Any?>) : Params {
       convert(value, parameter)
     }
   }
+
+  override fun toString(): String {
+    return map.map { "${it.key}: ${it.value}" }.joinToString(",")
+  }
+
+  override fun computeScore(fn: KFunction<*>): Int {
+    if (fn.parameters.size - 1 != map.size) return Int.MAX_VALUE
+
+    val (parameters, values) = fn.parameters.drop(1).map { it.name to it }.filter { (key, _) -> map.containsKey(key) }.map { it.second to map[it.first] }.unzip()
+    return computeScore(parameters, values)
+  }
 }
 
 class ListParams(val params: List<Any?>) : AbstractParams() {
   override val count: Int = params.size
-
-  override fun match(method: KFunction<*>): Boolean = match(method, params)
-
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.zip(params).map { (parameter, value) ->
       convert(value, parameter)
@@ -123,6 +204,14 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
       convert(value, parameter)
     }
   }
+
+  override fun toString(): String {
+    return params.joinToString(",") { it.toString() }
+  }
+
+  override fun computeScore(fn: KFunction<*>): Int {
+    return computeScore(fn.parameters.drop(1), params)
+  }
 }
 
 private fun convert(value: Any?, parameter: KParameter) = convert(value, parameter.type.jvmErasure.javaObjectType)
@@ -132,16 +221,14 @@ private fun convert(value: Any?, parameter: Parameter) = convert(value, paramete
 private fun convert(value: Any?, clazz: Class<*>): Any? {
   return when (value) {
     null -> null
-    else -> Json.mapper.convertValue(value, clazz)
+    else -> {
+      Json.mapper.convertValue(value, clazz)
+    }
   }
 }
 
 class NullParams : Params {
   override val count: Int = 0
-
-  override fun match(method: KFunction<*>): Boolean {
-    return method.valueParameters.isEmpty()
-  }
 
   override fun mapParams(method: KFunction<*>): List<Any?> {
     // assuming client has already checked the method parameters
@@ -151,5 +238,16 @@ class NullParams : Params {
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     // assuming client has already checked the method parameters
     return emptyList()
+  }
+
+  override fun toString(): String {
+    return ""
+  }
+
+  override fun computeScore(fn: KFunction<*>): Int {
+    return when {
+      fn.parameters.size == 1 -> 10
+      else -> Int.MAX_VALUE
+    }
   }
 }

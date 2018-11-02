@@ -90,4 +90,14 @@ describe('braid-corda basic connectivity and method invocation', () => {
       });
     });
   }).timeout(0);
+
+  it('connect to a server and invoke method to create a DaoState', done => {
+    buildProxy({credentials: {username: 'admin', password: 'admin'}}, done, proxy => {
+      proxy.customService.createDao("daoName", 1, false, "O=Notary Service, L=Zurich, C=CH")
+        .then(result => {
+          console.log("dao created", result);
+        })
+        .then(done, done)
+       });
+  }).timeout(0);
 });

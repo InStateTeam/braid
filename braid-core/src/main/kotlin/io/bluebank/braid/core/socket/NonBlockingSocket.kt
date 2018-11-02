@@ -19,6 +19,7 @@ import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
 import io.vertx.core.WorkerExecutor
 import io.vertx.ext.auth.User
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -80,11 +81,12 @@ class NonBlockingSocket<R, S>(
         onEnd() // notify all listeners
         this.socket = null // we no longer require this socket
       }, true, {})
-    } catch (err: IllegalStateException) {
-      // this will happen when a socket is closed during a scheduled vertx.close
-      log.info("socket closed during vertx shutdown")
     } catch (err: Throwable) {
-      log.error("failed to process end handler", err)
+      when (err) {
+        is RejectedExecutionException,
+        is IllegalStateException -> log.info("socket closed during vertx shutdown")
+        else ->  log.error("failed to process end handler", err)
+      }
     }
   }
 

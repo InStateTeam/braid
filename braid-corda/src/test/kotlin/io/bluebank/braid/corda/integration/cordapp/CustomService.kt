@@ -17,8 +17,10 @@ package io.bluebank.braid.corda.integration.cordapp
 
 import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Future
+import net.corda.core.identity.CordaX500Name
 import rx.Observable
 import rx.schedulers.Schedulers
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -56,6 +58,19 @@ class CustomService {
     Thread.sleep((Math.random() * 1000).toLong())
     return (1..1000).map { SlowDataItem(Date()) }
   }
+  fun createDao(daoName: String, minimumMemberCount: Int, strictMode: Boolean, notaryName: CordaX500Name): Future<DaoState> {
+    return Future.succeededFuture(DaoState(daoName, minimumMemberCount, strictMode, notaryName))
+  }
+
+  fun useInstant(instant: Instant) : String {
+    return instant.toString()
+  }
+
+  fun useDate(date: Date) : String {
+    return date.toString()
+  }
 }
 
 data class SlowDataItem(val date: Date)
+
+data class DaoState(val name: String, val minimumMemberCount: Int, val strictMode: Boolean, val notaryName: CordaX500Name)
