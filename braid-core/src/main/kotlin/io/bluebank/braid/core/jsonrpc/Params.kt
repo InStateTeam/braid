@@ -55,92 +55,92 @@ interface Params {
 }
 
 abstract class AbstractParams : Params {
-  protected fun computeScore(parameters: List<KParameter>, values: List<Any?>): Int {
-    return when {
-      parameters.size != values.size -> 0
-      else -> {
-        if (parameters.isEmpty()) return 100
-        parameters
-          .zip(values)
-          .map { computeScore(it.first, it.second) }
-          .fold(1) { acc, i -> acc * i }
-      }
-    }
-  }
-
-  private fun computeScore(parameter: KParameter, value: Any?): Int {
-    return when {
-      value == null && parameter.type.isMarkedNullable -> 10
-      value == null && !parameter.type.isMarkedNullable -> 0
-      parameter.type.classifier != null -> {
-        when (parameter.type.classifier) {
-          is KClass<*> -> {
-            val classifier = parameter.type.classifier!! as KClass<*>
-            computeScore(classifier, value!!.javaClass)
-          }
-          else -> {
-            log.warn("attempted to compute score from ${parameter.type.classifier}! This should never happen. Parameter was $parameter value was $value")
-            0
-          }
+  companion object {
+    @JvmStatic
+    protected fun computeScore(parameters: List<KParameter>, values: List<Any?>): Int {
+      return when {
+        parameters.size != values.size -> 0
+        else -> {
+          if (parameters.isEmpty()) return 100
+          parameters
+            .zip(values)
+            .map { computeScore(it.first, it.second) }
+            .fold(1) { acc, i -> acc * i }
         }
       }
-      else -> 1
     }
-  }
 
-  // we memoize the heavy reflection stuff that's at the heart of the loops
-  // we could do better in theory, memoizing at the function signatures level as well ... perhaps consider this for a future optimisation
-  private val computeScore = { targetType: KClass<*>, sourceType: Class<*> -> this.computeScoreInternal(targetType, sourceType) }.memoize()
+    private fun computeScore(parameter: KParameter, value: Any?): Int {
+      return when {
+        value == null && parameter.type.isMarkedNullable -> 10
+        value == null && !parameter.type.isMarkedNullable -> 0
+        parameter.type.classifier != null -> {
+          when (parameter.type.classifier) {
+            is KClass<*> -> {
+              val classifier = parameter.type.classifier!! as KClass<*>
+              computeScore(classifier, value!!.javaClass)
+            }
+            else -> {
+              log.warn("attempted to compute score from ${parameter.type.classifier}! This should never happen. Parameter was $parameter value was $value")
+              0
+            }
+          }
+        }
+        else -> 1
+      }
+    }
 
-  /**
-   * This class computes the logical score between a value and a target type using pure type analysis
-   * In other words, this is dynamic binding voodoo and part of the course of trying to bind a dynamic language
-   * to something chewy-typed like the JVM (yeah, you heard me, chewy-typed - if you want a better typed VM look look at the CLR)
-   * A different approach to all this dynamic typing is to introduce additional type information payloads in the request
-   * to provide type hints. Until we decide to do that, we'll need some heuristics (i.e. hacky rules) to make overloads work
-   */
-  private fun computeScoreInternal(targetType: KClass<*>, sourceType: Class<*>): Int {
-    return when {
+    // we memoize the heavy reflection stuff that's at the heart of the loops
+    // we could do better in theory, memoizing at the function signatures level as well ... perhaps consider this for a future optimisation
+    private val computeScore = { targetType: KClass<*>, sourceType: Class<*> -> this.computeScoreInternal(targetType, sourceType) }.memoize()
+
+    /**
+     * This class computes the logical score between a value and a target type using pure type analysis
+     * In other words, this is dynamic binding voodoo and part of the course of trying to bind a dynamic language
+     * to something chewy-typed like the JVM (yeah, you heard me, chewy-typed - if you want a better typed VM look look at the CLR)
+     * A different approach to all this dynamic typing is to introduce additional type information payloads in the request
+     * to provide type hints. Until we decide to do that, we'll need some heuristics (i.e. hacky rules) to make overloads work
+     */
+    private fun computeScoreInternal(targetType: KClass<*>, sourceType: Class<*>): Int {
+      return when {
       // we give preference for parsing of strings rather than direct string to string matching. this is to give a higher
       // weight to say "200.00" -> BigDecimal
       // we don't do the same for complex type e.g. Map<*,*> -> ComplexType, because the use-cases are very different
       // If someone declares a method with Map<*,*> it signals that they don't care about strong types anyhow
-      String::class.assignableFrom(sourceType) && targetType.isSubclassOf(String::class) -> 8
-      Map::class.assignableFrom(sourceType) && targetType.isSubclassOf(Map::class) -> 10
+        String::class.assignableFrom(sourceType) && targetType.isSubclassOf(String::class) -> 8
+        Map::class.assignableFrom(sourceType) && targetType.isSubclassOf(Map::class) -> 10
       // otherwise, when we have a perfect match we use it - this means
-      targetType.javaObjectType == sourceType -> 10
+        targetType.javaObjectType == sourceType -> 10
       // if we are dealing with "list" types that are not a perfect match (e.g. Array <-> List)
-      sourceType.isListType() && targetType.isListType() -> {
-        when {
+        sourceType.isListType() && targetType.isListType() -> {
+          when {
           // we give preference to List receivers
-          targetType.isSubclassOf(List::class) -> 9
-          else -> 8
+            targetType.isSubclassOf(List::class) -> 9
+            else -> 8
+          }
         }
-      }
       // this is a subordinate to a perfect match. e.g. a perfect match with Map<*, *> will always trump a complex type
-      sourceType.isParsableType() -> 8
+        sourceType.isParsableType() -> 8
       // a subtype is always slightly better than a perfect match
-      sourceType.kotlin.isSubclassOf(targetType) -> 9
+        sourceType.kotlin.isSubclassOf(targetType) -> 9
       // a common super type (e.g. Numbers) will have lower precedence than a perfect match of a subclass
-      targetType.haveCommonSuperClass(sourceType.kotlin) -> 8
+        targetType.haveCommonSuperClass(sourceType.kotlin) -> 8
       // if nothing else matches, we can always convert Any to a string
-      targetType.isSubclassOf(String::class) -> 5
+        targetType.isSubclassOf(String::class) -> 5
       // for everything else, we reject it
-      else -> 0
+        else -> 0
+      }
     }
-  }
 
-  private fun KClass<*>.assignableFrom(clazz: Class<*>) = this.java.isAssignableFrom(clazz)
-  private fun KClass<*>.realSuperClasses() = allSuperclasses.filter { !it.java.isInterface && it != Any::class }
-  private fun KClass<*>.intersectRealSuperClasses(other: KClass<*>) = this.realSuperClasses().intersect(other.realSuperClasses())
-  private fun KClass<*>.haveCommonSuperClass(other: KClass<*>) = this.intersectRealSuperClasses(other).isNotEmpty()
-  private fun KClass<*>.isComplexType() = !this.java.isPrimitive &&
-    !this.isSubclassOf(Map::class) &&
-    !this.isSubclassOf(String::class) &&
-    !this.isListType()
-  private fun KClass<*>.isListType() = isSubclassOf(List::class) || java.isArray
-  private fun Class<*>.isListType() = List::class.assignableFrom(this) || this.isArray
-  private fun Class<*>.isParsableType() = Map::class.assignableFrom(this) || String::class.assignableFrom(this)
+    private fun KClass<*>.assignableFrom(clazz: Class<*>) = this.java.isAssignableFrom(clazz)
+    private fun KClass<*>.realSuperClasses() = allSuperclasses.filter { !it.java.isInterface && it != Any::class }
+    private fun KClass<*>.intersectRealSuperClasses(other: KClass<*>) = this.realSuperClasses().intersect(other.realSuperClasses())
+    private fun KClass<*>.haveCommonSuperClass(other: KClass<*>) = this.intersectRealSuperClasses(other).isNotEmpty()
+
+    private fun KClass<*>.isListType() = isSubclassOf(List::class) || java.isArray
+    private fun Class<*>.isListType() = List::class.assignableFrom(this) || this.isArray
+    private fun Class<*>.isParsableType() = Map::class.assignableFrom(this) || String::class.assignableFrom(this)
+  }
 }
 
 class SingleValueParam(val param: Any) : AbstractParams() {
