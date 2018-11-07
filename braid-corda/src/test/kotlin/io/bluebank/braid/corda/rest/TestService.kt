@@ -64,6 +64,10 @@ class TestService {
   fun returnsListOfStuff(context: RoutingContext) {
     context.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode(listOf("one", "two")))
   }
+
+  fun willFail() : String {
+    throw RuntimeException("total fail!")
+  }
 }
 
 class TestServiceApp(port: Int, private val service: TestService) {
@@ -110,6 +114,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
               post("/doublebuffer", service::doubleBuffer)
               post("/custom", service::somethingCustom)
               get("/stringlist", service::returnsListOfStuff)
+              get("/willfail", service::willFail)
             }
             protected {
               post("/echo", service::echo)
