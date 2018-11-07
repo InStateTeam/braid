@@ -176,5 +176,26 @@ class RestMounterTest {
       .setChunked(true)
       .end("hello")
   }
+
+  @Test
+  fun testThatMethodThatFailsReturnsAllHeaders(context: TestContext) {
+    val client = service.server.vertx.createHttpClient()
+    val async1 = context.async()
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(500, it.statusCode())
+        context.assertEquals("total fail!", it.statusMessage())
+        val expectedContentType = "text/plain; charset=utf8"
+        context.assertEquals(expectedContentType, it.getHeader(CONTENT_TYPE))
+
+        it.bodyHandler {
+          val body = it.toString("utf8")
+          context.assertEquals("total fail!", body)
+          async1.complete()
+        }
+      }
+      .end()
+  }
 }
 

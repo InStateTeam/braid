@@ -16,10 +16,10 @@
 package io.bluebank.braid.core.http
 
 import io.netty.buffer.ByteBuf
-import io.netty.handler.codec.http.HttpHeaderValues
+import io.netty.handler.codec.http.HttpHeaderValues.*
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
-import io.vertx.core.http.HttpHeaders
+import io.vertx.core.http.HttpHeaders.*
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -44,9 +44,9 @@ fun Router.setupAllowAnyCORS() {
 
 fun Router.setupOptionsMethod() {
   options().handler { it.response()
-      .putHeader(HttpHeaders.ALLOW, "GET, PUT, POST, OPTIONS, CONNECT, HEAD, DELETE, CONNECT, TRACE, PATCH")
-      .putHeader(HttpHeaders.CONTENT_TYPE, "text/*")
-      .putHeader(HttpHeaders.CONTENT_TYPE, "application/*")
+      .putHeader(ALLOW, "GET, PUT, POST, OPTIONS, CONNECT, HEAD, DELETE, CONNECT, TRACE, PATCH")
+      .putHeader(CONTENT_TYPE, "text/*")
+      .putHeader(CONTENT_TYPE, "application/*")
       .end()
   }
 }
@@ -62,10 +62,13 @@ fun RoutingContext.withErrorHandler(callback: RoutingContext.() -> Unit) {
 
 fun HttpServerResponse.end(error: Throwable) {
   val e = if (error is InvocationTargetException) error.targetException else error
-  val message = if (e.message != null) e.message else "Undefined error"
-  this.setStatusMessage(message)
+  val message = e.message ?: "Undefined error"
+  this
+    .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
+    .putHeader(CONTENT_LENGTH, message.length.toString())
+    .setStatusMessage(message)
       .setStatusCode(500)
-      .end()
+      .end(message)
 }
 
 fun <T> HttpServerResponse.end(future: Future<T>) {
@@ -90,22 +93,22 @@ fun <T> HttpServerResponse.end(value: T) {
     else -> {
       val payload = Json.encode(value)
       this
-          .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-          .putHeader(HttpHeaders.CONTENT_TYPE,  HttpHeaderValues.APPLICATION_JSON)
+          .putHeader(CONTENT_LENGTH, payload.length.toString())
+          .putHeader(CONTENT_TYPE,  APPLICATION_JSON)
           .end(payload)
     }
   }
 }
 
 fun HttpServerResponse.endWithString(value: String) {
-  this.putHeader(HttpHeaders.CONTENT_LENGTH, value.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN)
+  this.putHeader(CONTENT_LENGTH, value.length.toString())
+      .putHeader(CONTENT_TYPE, TEXT_PLAIN)
       .end(value)
 }
 
 fun HttpServerResponse.endWithBuffer(value: Buffer) {
-  this.putHeader(HttpHeaders.CONTENT_LENGTH, value.length().toString())
-    .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM)
+  this.putHeader(CONTENT_LENGTH, value.length().toString())
+    .putHeader(CONTENT_TYPE, APPLICATION_OCTET_STREAM)
     .end(value)
 }
 
@@ -125,16 +128,16 @@ fun HttpServerResponse.endWithByteBuf(value: ByteBuf) {
 fun HttpServerResponse.end(value: JsonArray) {
   val payload = value.encode()
   this
-      .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+      .putHeader(CONTENT_LENGTH, payload.length.toString())
+      .putHeader(CONTENT_TYPE, "application/json")
       .end(payload)
 }
 
 fun HttpServerResponse.end(value: JsonObject) {
   val payload = value.encode()
   this
-      .putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
-      .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+      .putHeader(CONTENT_LENGTH, payload.length.toString())
+      .putHeader(CONTENT_TYPE, "application/json")
       .end(payload)
 }
 
