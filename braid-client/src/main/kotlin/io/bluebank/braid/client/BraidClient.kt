@@ -44,11 +44,10 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-@Deprecated("please use BraidClient instead - this will be removed in 4.0.0 - see issue #75")
-open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
+open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler) : Closeable, InvocationHandler {
   private val nextId = AtomicLong(1)
   private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
-  private val sockets = mutableMapOf<Class<*>, WebSocket>()
+  private var sock: WebSocket? = null
 
   private val client = vertx.createHttpClient(HttpClientOptions()
       .setDefaultHost(config.serviceURI.host)
@@ -57,15 +56,52 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
       .setVerifyHost(config.verifyHost)
       .setTrustAll(config.trustAll))
 
+  init {
+    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
+    val result = future<Boolean>()
+    client.websocket(url.toString(), { socket ->
+      try {
+        sock = socket
+        socket.handler(this::handler)
+        socket.exceptionHandler(exceptionHandler)
+        socket.closeHandler(closeHandler)
+        result.complete(true)
+      } catch (err: Throwable) {
+        log.error("failed to connect socket to the client stack", err)
+        sock = null
+        result.fail(err)
+      }
+    }, { error ->
+      log.error("failed to bind to websocket", error)
+      try {
+        sock = null
+        result.fail(error)
+      } catch (err: Throwable) {
+        log.error("failed to report error on result future", err)
+      }
+    })
+    result.getOrThrow()
+  }
+
   companion object {
-    private val log: Logger = loggerFor<BraidProxyClient>()
+    private val log: Logger = loggerFor<BraidClient>()
 
     init {
       BraidJacksonInit.init()
     }
 
-    fun createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
-      return BraidProxyClient(config, vertx)
+    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
+      return BraidClient(config, vertx)
+    }
+
+    private fun closeHandler() {
+      log.info("closing...")
+    }
+
+    private fun exceptionHandler(error: Throwable) {
+      log.error("exception from socket", error)
+      // TODO: handle retries?
+      // TODO: handle error!
     }
   }
 
@@ -73,40 +109,9 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     return invocations.size
   }
 
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): ServiceType {
-    return bindAsync(clazz, exceptionHandler, closeHandler).getOrThrow()
-  }
-
-  // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bindAsync(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
-    val result = future<ServiceType>()
-    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
-
-    client.websocket(url.toString(), { socket ->
-      try {
-        val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
-        sockets[clazz] = socket
-        socket.handler(this::handler)
-        socket.exceptionHandler(exceptionHandler)
-        socket.closeHandler(closeHandler)
-        result.complete(proxy)
-      } catch (err: Throwable) {
-        log.error("failed to connect socket to the client stack", err)
-        sockets.remove(clazz)
-        socket.handler {  }
-        socket.exceptionHandler {  }
-        socket.closeHandler {  }
-      }
-    }, { error ->
-      log.error("failed to bind to websocket", error)
-      try {
-        result.fail(error)
-      } catch (err: Throwable) {
-        log.error("failed to report error on result future", err)
-      }
-    })
-    return result
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>): ServiceType {
+    return Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
   }
 
   override fun close() {
@@ -118,9 +123,8 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-    val socket = sockets[method.declaringClass]
-    if (socket != null) {
-      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
+    if (sock != null) {
+      return jsonRPC(sock!!, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
     }
     throw IllegalStateException("no socket for proxy")
   }
@@ -147,16 +151,16 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     }
   }
 
-
-  private fun closeHandler() {
-      log.info("closing...")
-  }
-
-  private fun exceptionHandler(error: Throwable) {
-    log.error("exception from socket", error)
-    // TODO: handle retries?
-    // TODO: handle error!
-  }
+//
+//  private fun closeHandler() {
+//    log.info("closing...")
+//  }
+//
+//  private fun exceptionHandler(error: Throwable) {
+//    log.error("exception from socket", error)
+//    // TODO: handle retries?
+//    // TODO: handle error!
+//  }
 
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.incrementAndGet()
@@ -241,8 +245,3 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   }
 }
 
-fun WebSocket.closeHandler(fn: () -> Unit) {
-    this.closeHandler {
-        fn()
-    }
-}

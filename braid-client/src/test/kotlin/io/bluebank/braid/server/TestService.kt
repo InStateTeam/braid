@@ -36,6 +36,10 @@ interface MyService {
   fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
 }
 
+interface MyExtendedService: MyService {
+  fun extendedMethod(): String
+}
+
 data class ComplexObject(val a: String, val b: Int, val c: Double)
 
 data class JsonStuffedObject(val a: String) {
@@ -88,6 +92,13 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
     return md
   }
 
+}
+
+@ServiceDescription("my-extended-service", "a simple extended service")
+class MyExtendedServiceImpl(private val vertx: Vertx): MyExtendedService, MyService by MyServiceImpl(vertx) {
+  override fun extendedMethod(): String {
+    return "yay"
+  }
 }
 
 @JsonTypeInfo(
