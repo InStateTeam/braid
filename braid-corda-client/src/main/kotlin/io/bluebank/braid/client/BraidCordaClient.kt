@@ -16,14 +16,26 @@
 package io.bluebank.braid.client
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
+import org.slf4j.Logger
 
-@Deprecated("deprecated in favour of BraidCordaClient - will be removed in 4.0.0 - see #75 for details")
-class BraidCordaProxyClient(config: BraidClientConfig, vertx: Vertx) : BraidProxyClient(config, vertx)  {
+class BraidCordaClient(config: BraidClientConfig, vertx: Vertx, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler) : BraidClient(config, vertx)  {
 
   companion object {
+
+    private val log: Logger = loggerFor<BraidCordaClient>()
+
     init {
       BraidCordaJacksonInit.init()
+    }
+
+    fun closeHandler() {
+      log.info("closing...")
+    }
+
+    fun exceptionHandler(error: Throwable) {
+      log.error("exception from socket", error)
     }
   }
 

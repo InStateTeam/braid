@@ -44,11 +44,10 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-@Deprecated("please use BraidClient instead - this will be removed in 4.0.0 - see issue #75")
-open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
+open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler) : Closeable, InvocationHandler {
   private val nextId = AtomicLong(1)
   private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
-  private val sockets = mutableMapOf<Class<*>, WebSocket>()
+  private var sock: WebSocket? = null
 
   private val client = vertx.createHttpClient(HttpClientOptions()
       .setDefaultHost(config.serviceURI.host)
@@ -58,55 +57,62 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
       .setTrustAll(config.trustAll))
 
   companion object {
-    private val log: Logger = loggerFor<BraidProxyClient>()
+    private val log: Logger = loggerFor<BraidClient>()
 
     init {
       BraidJacksonInit.init()
     }
 
-    fun createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
-      return BraidProxyClient(config, vertx)
+    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
+      return BraidClient(config, vertx)
     }
+
+    private fun closeHandler() {
+      log.info("closing...")
+    }
+
+    private fun exceptionHandler(error: Throwable) {
+      log.error("exception from socket", error)
+      // TODO: handle retries?
+      // TODO: handle error!
+    }
+  }
+
+  init {
+    val protocol = if (config.tls) "https" else "http"
+    val url = URL(protocol, config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
+    val result = future<Boolean>()
+    client.websocket(url.toString(), { socket ->
+      try {
+        sock = socket
+        socket.handler(this::handler)
+        socket.exceptionHandler(exceptionHandler)
+        socket.closeHandler(closeHandler)
+        result.complete(true)
+      } catch (err: Throwable) {
+        log.error("failed to connect socket to the client stack", err)
+        sock = null
+        result.fail(err)
+      }
+    }, { error ->
+      log.error("failed to bind to websocket", error)
+      try {
+        sock = null
+        result.fail(error)
+      } catch (err: Throwable) {
+        log.error("failed to report error on result future", err)
+      }
+    })
+    result.getOrThrow()
   }
 
   fun activeRequestsCount(): Int {
     return invocations.size
   }
 
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): ServiceType {
-    return bindAsync(clazz, exceptionHandler, closeHandler).getOrThrow()
-  }
-
-  // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bindAsync(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
-    val result = future<ServiceType>()
-    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
-
-    client.websocket(url.toString(), { socket ->
-      try {
-        val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
-        sockets[clazz] = socket
-        socket.handler(this::handler)
-        socket.exceptionHandler(exceptionHandler)
-        socket.closeHandler(closeHandler)
-        result.complete(proxy)
-      } catch (err: Throwable) {
-        log.error("failed to connect socket to the client stack", err)
-        sockets.remove(clazz)
-        socket.handler {  }
-        socket.exceptionHandler {  }
-        socket.closeHandler {  }
-      }
-    }, { error ->
-      log.error("failed to bind to websocket", error)
-      try {
-        result.fail(error)
-      } catch (err: Throwable) {
-        log.error("failed to report error on result future", err)
-      }
-    })
-    return result
+  fun <ServiceType : Any> bind(clazz: Class<ServiceType>): ServiceType {
+    return Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
   }
 
   override fun close() {
@@ -118,7 +124,7 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-    val socket = sockets[method.declaringClass]
+    val socket = sock
     if (socket != null) {
       return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
     }
@@ -147,17 +153,6 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     }
   }
 
-
-  private fun closeHandler() {
-      log.info("closing...")
-  }
-
-  private fun exceptionHandler(error: Throwable) {
-    log.error("exception from socket", error)
-    // TODO: handle retries?
-    // TODO: handle error!
-  }
-
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.incrementAndGet()
     val proxyInvocation = ProxyInvocation(returnType)
@@ -165,7 +160,11 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     try {
       val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
       vertx.runOnContext {
-        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+        try {
+          socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+        } catch (e: IllegalStateException) {
+          onRequestError(id, e)
+        }
       }
     } catch (err: Throwable) {
       onRequestError(id, err)
@@ -186,7 +185,6 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   private inner class ProxyInvocation(private val returnType: Type) {
 
     private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
-
     private val resultStream = PublishSubject.create<Any>()
 
     fun awaitResult(): Any {
@@ -204,6 +202,11 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     }
 
     fun handle(jo: JsonObject) {
+      if (!jo.containsKey("id")) {
+        log.error("response object does not contain id key: $jo")
+        return
+      }
+
       val responseId = jo.getLong("id")
       when {
         jo.containsKey("result") -> {
@@ -241,8 +244,3 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
   }
 }
 
-fun WebSocket.closeHandler(fn: () -> Unit) {
-    this.closeHandler {
-        fn()
-    }
-}
