@@ -204,6 +204,7 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     fun handle(jo: JsonObject) {
       if (!jo.containsKey("id")) {
         log.error("response object does not contain id key: $jo")
+        return
       }
 
       val responseId = jo.getLong("id")
