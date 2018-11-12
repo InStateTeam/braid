@@ -56,8 +56,31 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
       .setVerifyHost(config.verifyHost)
       .setTrustAll(config.trustAll))
 
+  companion object {
+    private val log: Logger = loggerFor<BraidClient>()
+
+    init {
+      BraidJacksonInit.init()
+    }
+
+    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
+      return BraidClient(config, vertx)
+    }
+
+    private fun closeHandler() {
+      log.info("closing...")
+    }
+
+    private fun exceptionHandler(error: Throwable) {
+      log.error("exception from socket", error)
+      // TODO: handle retries?
+      // TODO: handle error!
+    }
+  }
+
   init {
-    val url = URL("https", config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
+    val protocol = if (config.tls) "https" else "http"
+    val url = URL(protocol, config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
     val result = future<Boolean>()
     client.websocket(url.toString(), { socket ->
       try {
@@ -83,28 +106,6 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     result.getOrThrow()
   }
 
-  companion object {
-    private val log: Logger = loggerFor<BraidClient>()
-
-    init {
-      BraidJacksonInit.init()
-    }
-
-    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
-      return BraidClient(config, vertx)
-    }
-
-    private fun closeHandler() {
-      log.info("closing...")
-    }
-
-    private fun exceptionHandler(error: Throwable) {
-      log.error("exception from socket", error)
-      // TODO: handle retries?
-      // TODO: handle error!
-    }
-  }
-
   fun activeRequestsCount(): Int {
     return invocations.size
   }
@@ -123,8 +124,9 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-    if (sock != null) {
-      return jsonRPC(sock!!, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
+    val socket = sock
+    if (socket != null) {
+      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
     }
     throw IllegalStateException("no socket for proxy")
   }
@@ -151,17 +153,6 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     }
   }
 
-//
-//  private fun closeHandler() {
-//    log.info("closing...")
-//  }
-//
-//  private fun exceptionHandler(error: Throwable) {
-//    log.error("exception from socket", error)
-//    // TODO: handle retries?
-//    // TODO: handle error!
-//  }
-
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.incrementAndGet()
     val proxyInvocation = ProxyInvocation(returnType)
@@ -169,7 +160,11 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     try {
       val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
       vertx.runOnContext {
-        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+        try {
+          socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+        } catch (e: IllegalStateException) {
+          onRequestError(id, e)
+        }
       }
     } catch (err: Throwable) {
       onRequestError(id, err)
@@ -190,7 +185,6 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   private inner class ProxyInvocation(private val returnType: Type) {
 
     private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
-
     private val resultStream = PublishSubject.create<Any>()
 
     fun awaitResult(): Any {
@@ -208,6 +202,10 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     }
 
     fun handle(jo: JsonObject) {
+      if (!jo.containsKey("id")) {
+        log.error("response object does not contain id key: $jo")
+      }
+
       val responseId = jo.getLong("id")
       when {
         jo.containsKey("result") -> {
