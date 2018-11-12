@@ -16,7 +16,7 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>braid-docs</artifactId>
-  <version>3.2.5-SNAPSHOT</version>
+  <version>3.2.6-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>braid docs</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
@@ -25,7 +25,7 @@
   <parent>
     <groupId>io.bluebank.braid</groupId>
     <artifactId>braid</artifactId>
-    <version>3.2.5-SNAPSHOT</version>
+    <version>3.2.6-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <licenses>
