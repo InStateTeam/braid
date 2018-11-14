@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.integration
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.meta.DEFAULT_API_MOUNT
 import org.junit.Test
+import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -28,6 +29,7 @@ import kotlin.test.assertTrue
 class JavascriptIntegrationTests {
   companion object {
     private val log = loggerFor<JavascriptIntegrationTests>()
+    private val javascriptLogger = LoggerFactory.getLogger("javascript-logger")
   }
 
   private val cordaNet = CordaNet.createCordaNet()
@@ -45,7 +47,9 @@ class JavascriptIntegrationTests {
       Thread {
         try {
           BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
-            reader.lines().forEach { log.error(it) }
+            reader.lines().forEach {
+              javascriptLogger.error(it)
+            }
           }
         } catch (e: Exception) {
         }
@@ -53,7 +57,9 @@ class JavascriptIntegrationTests {
       Thread {
         try {
           BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-            reader.lines().forEach { log.info(it) }
+            reader.lines().forEach {
+              javascriptLogger.info(it)
+            }
           }
         } catch (e: Exception) {
         }

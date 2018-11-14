@@ -41,6 +41,10 @@ build:
   script:
     - mvn $MAVEN_CLI_OPTS $MAVEN_PARALLEL clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+  artifacts:
+    name: "javascript-logs-$CI_JOB_NAME"
+    paths:
+    - braid-corda/target/logs/js.log
 
 deploy:
   stage: snapshot_release

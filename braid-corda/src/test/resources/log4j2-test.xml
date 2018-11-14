@@ -18,6 +18,9 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
+    <File name="JavascriptOutput" fileName="target/logs/js.log" bufferedIO="false">
+      <PatternLayout pattern="%msg%n"/>
+    </File>
   </Appenders>
   <Loggers>
     <Root level="error">
@@ -28,6 +31,10 @@
     </Logger>
     <Logger name="io.bluebank.braid.core.jsonrpc" level="trace">
       <AppenderRef ref="Console"/>
+    </Logger>
+    <Logger name="javascript-logger" level="info">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="JavascriptOutput"/>
     </Logger>
   </Loggers>
 </Configuration>
