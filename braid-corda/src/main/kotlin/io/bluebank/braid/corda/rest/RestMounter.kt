@@ -55,16 +55,20 @@ class RestMounter(
   }
 
 
-  private val path: String = if (config.apiPath.endsWith("/")) {
-    config.apiPath.dropLast(1)
-  } else {
-    config.apiPath
+  private val path: String = config.apiPath.trim().let {
+    if (it != "/" && it.endsWith("/")) {
+      it.dropLast(1)
+    } else {
+      it
+    }
   }
 
-  private val swaggerPath: String = if (config.swaggerPath.endsWith("/")) {
-    config.swaggerPath.dropLast(1)
-  } else {
-    config.swaggerPath
+  private val swaggerPath: String = config.swaggerPath.trim().let {
+    if (it != "/" && it.endsWith("/")) {
+      it.dropLast(1)
+    } else {
+      it
+    }
   }
 
   private val docsHandler: DocsHandler
