@@ -22,6 +22,8 @@ import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
 import rx.Observable
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 interface MyService {
   fun add(lhs: Double, rhs: Double): Double
@@ -34,6 +36,7 @@ interface MyService {
   fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
   fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
+  fun ticks() : Observable<Instant>
 }
 
 interface MyExtendedService: MyService {
@@ -90,6 +93,10 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
 
   override fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData {
     return md
+  }
+
+  override fun ticks(): Observable<Instant> {
+    return Observable.interval(200, TimeUnit.MILLISECONDS).map { Instant.now() }
   }
 
 }

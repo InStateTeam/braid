@@ -16,6 +16,7 @@
 package io.bluebank.braid.core.json
 
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
@@ -24,20 +25,16 @@ import io.vertx.core.json.Json
 class BraidJacksonInit {
   companion object {
     init {
-      with(KotlinModule()) {
-//        this.addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
-//        this.addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
-        Json.mapper.registerModule(this)
-        Json.prettyMapper.registerModule(this)
+      listOf(
+        KotlinModule(),
+        JavaTimeModule(),
+        SimpleModule()
+          .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
+          .addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
+      ).forEach {
+        Json.mapper.registerModule(it)
+        Json.prettyMapper.registerModule(it)
       }
-
-      val sm = SimpleModule()
-        .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
-        .addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
-
-      Json.mapper.registerModule(sm)
-      Json.prettyMapper.registerModule(sm)
-
     }
     fun init() {
       // automatically init during class load
