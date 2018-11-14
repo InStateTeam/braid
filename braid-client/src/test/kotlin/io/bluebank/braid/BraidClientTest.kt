@@ -157,6 +157,28 @@ class BraidClientTest {
     Assert.assertEquals("yay", result)
   }
 
+  @Test
+  fun `that we can receive a stream of Instances`(context: TestContext) {
+    var count = 10
+    var exception : Throwable? = null
+    val async = context.async()
+
+    val subscription = myService.ticks()
+      .subscribe({
+        if (--count <= 0) async.complete()
+      }, {
+        exception = it
+        async.complete()
+      }, {
+        println("stream completed")
+      })
+    async.await()
+    if (!subscription.isUnsubscribed) {
+      subscription.unsubscribe()
+    }
+    exception?.apply { context.fail(exception) }
+  }
+
   private fun getFreePort(): Int {
     return (ServerSocket(0)).use {
       it.localPort
