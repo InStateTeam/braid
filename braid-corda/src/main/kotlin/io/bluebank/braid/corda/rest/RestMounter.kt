@@ -20,6 +20,7 @@ import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.models.auth.ApiKeyAuthDefinition
 import io.swagger.models.auth.BasicAuthDefinition
 import io.swagger.models.auth.In
+import io.swagger.models.auth.SecuritySchemeDefinition
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
@@ -29,6 +30,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.*
 import io.vertx.ext.web.sstore.LocalSessionStore
+import javax.ws.rs.core.Response.Status.TEMPORARY_REDIRECT
 import kotlin.reflect.KCallable
 
 /**
@@ -54,21 +56,17 @@ class RestMounter(
     }
   }
 
-
-  private val path: String = config.apiPath.trim().let {
-    if (it != "/" && it.endsWith("/")) {
-      it.dropLast(1)
-    } else {
-      it
-    }
+  private val path = config.apiPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
+  private val swaggerPath = config.swaggerPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
+  private val swaggerJsonPath = if (swaggerPath.isBlank()) {
+    "swagger.json"
+  } else {
+    "$swaggerPath/swagger.json"
   }
-
-  private val swaggerPath: String = config.swaggerPath.trim().let {
-    if (it != "/" && it.endsWith("/")) {
-      it.dropLast(1)
-    } else {
-      it
-    }
+  private val swaggerStaticPath = if (swaggerPath.isBlank()) {
+    "*"
+  } else {
+    "$swaggerPath/*"
   }
 
   private val docsHandler: DocsHandler
@@ -98,48 +96,62 @@ class RestMounter(
       basePath = "${config.hostAndPortUri}/$path/",
       scheme = config.scheme,
       contact = config.contact,
-      auth = when (config.authSchema) {
-        AuthSchema.Basic -> {
-          BasicAuthDefinition()
-        }
-        AuthSchema.Token -> {
-          ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
-        }
-        else -> {
-          null
-        }
-      },
+      auth = getSecuritySchemeDefinition(),
       debugMode = config.debugMode
     )
   }
 
+  private fun getSecuritySchemeDefinition() : SecuritySchemeDefinition? {
+    return when (config.authSchema) {
+      AuthSchema.Basic -> {
+        BasicAuthDefinition()
+      }
+      AuthSchema.Token -> {
+        ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
+      }
+      else -> {
+        null
+      }
+    }
+  }
+
   private fun mount(fn: RestMounter.(Router) -> Unit) {
-    router.mountSubRouter(path, unprotectedRouter)
-    configureAuthHandling()
     configureSwaggerAndStatic()
+    mountUnprotectedRouter()
+    mountProtectedRouter()
     // pass control to caller to setup rest bindings
     this.fn(router)
-    log.info("REST end point bound to ${config.hostAndPortUri}$path")
+    log.info("REST end point bound to ${config.hostAndPortUri}/$path")
+  }
+
+  private fun mountUnprotectedRouter() {
+    router.mountSubRouter("/$path", unprotectedRouter)
   }
 
   private fun configureSwaggerAndStatic() {
     // configure the swagger json
-    router.get("$swaggerPath/swagger.json").handler(docsHandler)
-    log.info("swagger json bound to ${config.hostAndPortUri}$swaggerPath/swagger.json")
+    router.get("/$swaggerJsonPath").handler(docsHandler)
+    log.info("swagger json bound to ${config.hostAndPortUri}/$swaggerJsonPath")
 
     // and now for the swagger static
     val sh = StaticHandler.create("swagger")
-    router.get("$swaggerPath/*").handler(sh)
-
-    log.info("Swagger UI bound to ${config.hostAndPortUri}$swaggerPath/")
+    router.getWithRegex("/$swaggerPath").handler {
+      if (it.request().path().endsWith("/")) {
+        sh.handle(it)
+      } else {
+        it.response().putHeader("Location", "/$swaggerPath/").setStatusCode(TEMPORARY_REDIRECT.statusCode).end()
+      }
+    }
+    router.get("/$swaggerStaticPath").handler(sh)
+    log.info("Swagger UI bound to ${config.hostAndPortUri}/$swaggerPath")
   }
 
-  private fun configureAuthHandling() {
+  private fun mountProtectedRouter() {
     validateAuthSchemaAndProvider()
     if (config.authSchema == AuthSchema.None) return
     currentRouter = protectedRouter
 
-    router.mountSubRouter(path, protectedRouter)
+    router.mountSubRouter("/$path", protectedRouter)
     when (config.authSchema) {
       AuthSchema.Basic -> {
         protectedRouter.route().handler(cookieHandler)

@@ -25,6 +25,8 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.LoggerFormat
+import io.vertx.ext.web.handler.LoggerHandler
 import net.corda.core.node.AppServiceHub
 import net.corda.node.internal.Node
 import java.net.URL
@@ -56,6 +58,7 @@ class BraidVerticle(private val services: AppServiceHub?, private val config: Br
 
   private fun setupRouter(): Router {
     val router = Routers.create(vertx, config.port)
+    router.route().handler(LoggerHandler.create(LoggerFormat.SHORT))
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
     router.setupOptionsMethod()

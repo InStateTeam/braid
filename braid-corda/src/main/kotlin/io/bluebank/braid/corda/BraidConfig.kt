@@ -54,6 +54,10 @@ data class BraidConfig(val port: Int = 8080,
   companion object {
     private val log = loggerFor<BraidConfig>()
 
+    init {
+      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+    }
+
     @Suppress("unused")
     @JvmStatic
     fun fromResource(resourcePath: String): BraidConfig? {

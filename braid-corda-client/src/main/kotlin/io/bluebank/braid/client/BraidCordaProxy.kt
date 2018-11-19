@@ -18,7 +18,10 @@ package io.bluebank.braid.client
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.vertx.core.Vertx
 
-@Deprecated("deprecated in favour of BraidCordaClient - will be removed in 4.0.0 - see #75 for details")
+/**
+ * Deprecated. Use
+ */
+@Deprecated("deprecated in favour of BraidCordaClient - will be removed in 4.0.0 - see #75 for details", replaceWith = ReplaceWith("BraidCordaClient"))
 class BraidCordaProxyClient(config: BraidClientConfig, vertx: Vertx) : BraidProxyClient(config, vertx)  {
 
   companion object {

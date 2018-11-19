@@ -72,8 +72,8 @@ class TestService {
 
 class TestServiceApp(port: Int, private val service: TestService) {
   companion object {
-    const val SWAGGER_ROOT = "/rest/swagger"
-    const val REST_API_ROOT = "/rest/api"
+    const val SWAGGER_ROOT = "/swagger"
+    const val REST_API_ROOT = "/"
     @JvmStatic
     fun main(args: Array<String>) {
       TestServiceApp(8080, TestService())
