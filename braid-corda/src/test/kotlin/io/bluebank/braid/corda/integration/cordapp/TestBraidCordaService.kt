@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.integration.cordapp
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.BraidServer
+import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future.failedFuture
@@ -44,20 +45,25 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
   }
 
   private val org = serviceHub.myInfo.legalIdentities.first().name.organisation
+
   init {
     val port = getBraidPort()
     if (port > 0) {
       val key = org to port
+      val service = CustomService()
       cache.computeIfAbsent(key) {
         log.info("Starting Braid service for $org on port $port")
         // DOCSTART 1
         BraidConfig()
-            .withThreadPoolSize(1)
-            .withFlow("echo", EchoFlow::class)
-            .withService(CustomService())
-            .withAuthConstructor(this::shiroFactory)
-            .withPort(port)
-            .bootstrapBraid(serviceHub)
+          .withThreadPoolSize(1)
+          .withFlow("echo", EchoFlow::class)
+          .withService(service)
+          .withAuthConstructor(this::shiroFactory)
+          .withPort(port)
+          .withRestConfig(RestConfig().withPaths {
+            get("/add", service::add)
+          })
+          .bootstrapBraid(serviceHub)
         // DOCEND 1
       }
     } else {
@@ -65,9 +71,9 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
     }
   }
 
-  private fun getBraidPort() : Int {
+  private fun getBraidPort(): Int {
     val property = "braid.$org.port"
-    return System.getProperty(property)?.toInt() ?: when(org) {
+    return System.getProperty(property)?.toInt() ?: when (org) {
       "PartyA" -> 8080
       "PartyB" -> 8081
       else -> 0
@@ -95,7 +101,7 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
     }
   }
 
-  class MyAuthUser(username: String): AbstractUser() {
+  class MyAuthUser(username: String) : AbstractUser() {
     private val principal = JsonObject().put("username", username)
 
     override fun doIsPermitted(permission: String, resultHandler: Handler<AsyncResult<Boolean>>) {

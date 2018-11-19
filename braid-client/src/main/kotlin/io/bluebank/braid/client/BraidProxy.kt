@@ -44,7 +44,10 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-@Deprecated("please use BraidClient instead - this will be removed in 4.0.0 - see issue #75")
+/**
+ * Deprecated. Used [BraidClient]
+ */
+@Deprecated("please use BraidClient instead - this will be removed in 4.0.0 - see issue #75", replaceWith = ReplaceWith("BraidClient"))
 open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler  {
   private val nextId = AtomicLong(1)
   private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
