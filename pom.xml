@@ -80,7 +80,7 @@
 
   <properties>
     <kotlin.version>1.1.60</kotlin.version>
-    <corda.version>3.2-corda</corda.version>
+    <corda.version>3.3-corda</corda.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.12</junit.version>
     <vertx.version>3.4.2</vertx.version>
