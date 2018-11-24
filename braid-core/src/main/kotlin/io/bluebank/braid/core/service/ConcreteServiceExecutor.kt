@@ -41,16 +41,17 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     return Observable.create<Any> { subscriber ->
       try {
+        log.trace("{} - binding to method for {}", request.id, request)
         candidateMethods(request)
           .asSequence() // lazy sequence
           .convertParametersAndFilter(request)
           .map { (method, params) ->
-            if (log.isDebugEnabled) {
-              log.debug("invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+            if (log.isTraceEnabled) {
+              log.trace("${request.id} - invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
             }
             method.call(service, *params).also {
-              if (log.isDebugEnabled) {
-                log.debug("successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+              if (log.isTraceEnabled) {
+                log.trace("${request.id} - successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
               }
             }
           }
@@ -58,10 +59,10 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
           ?.also { result -> handleResult(result, request, subscriber) }
           ?: throwMethodDoesNotExist(request)
       } catch (err: InvocationTargetException) {
-        log.trace("failed to invoke target for $request", err)
+        log.error("${request.id} - failed to invoke target for $request", err)
         subscriber.onError(err.targetException)
       } catch (err: Throwable) {
-        log.debug("failed to invoke $request", err)
+        log.error("${request.id} - failed to invoke $request", err)
         subscriber.onError(err)
       }
     }
@@ -81,8 +82,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .filter { (_, score) -> score > 0 }
       .sortedByDescending { (_, score) -> score }
       .also {
-        if (log.isDebugEnabled) {
-          log.info("scores for candidate methods for $request:")
+        if (log.isTraceEnabled) {
+          log.trace("{} scores for candidate methods for {}:", request.id, request)
           it.forEach {
             println("${it.second}: ${it.first.asSimpleString()}")
           }
@@ -112,38 +113,60 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   @Suppress("UNCHECKED_CAST")
   private fun handleResult(result: Any?, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+    log.trace("{} - handling result {}", request.id, result)
     when (result) {
       is Future<*> -> handleFuture(result as Future<Any>, request, subscriber)
       is Observable<*> -> handleObservable(result as Observable<Any>, request, subscriber)
-      else -> respond(result, subscriber)
+      else -> respond(request.id, result, subscriber)
     }
   }
 
   private fun handleObservable(result: Observable<Any>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+    log.trace("{} - handling observable result", request.id)
     result
       .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
+      .let { // insert logger if trace is enabled
+        if (log.isTraceEnabled) {
+          it
+            .doOnNext {
+            log.trace("{} - sending item {}", request.id, it)
+          }
+            .doOnError {
+              log.trace("{} - sending error {}", request.id, it)
+            }
+            .doOnCompleted {
+              log.trace("{} - completing stream", request.id)
+            }
+        } else {
+          it
+        }
+      }
       .subscribe(subscriber)
   }
 
   private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
+    log.trace("{} - handling future result", request.id)
     future.setHandler(JsonRPCMounter.FutureHandler {
       handleAsyncResult(it, request, callback)
     })
   }
 
   private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+    log.trace("{} - handling async result of invocation", request.id)
     when (response.succeeded()) {
-      true -> respond(response.result(), subscriber)
-      else -> respond(response.cause().createJsonException(request), subscriber)
+      true -> respond(request.id, response.result(), subscriber)
+      else -> respond(request.id, response.cause().createJsonException(request), subscriber)
     }
   }
 
-  private fun respond(result: Any?, subscriber: Subscriber<Any>) {
+  private fun respond(id: Long, result: Any?, subscriber: Subscriber<Any>) {
+    log.trace("{} - sending result and completing {}", id, result)
     subscriber.onNext(result)
     subscriber.onCompleted()
   }
 
-  private fun respond(err: Throwable, subscriber: Subscriber<Any>) {
+  private fun respond(id: Long, err: Throwable, subscriber: Subscriber<Any>) {
+    log.trace("{} - sending error {}", id, err)
     subscriber.onError(err)
   }
 
