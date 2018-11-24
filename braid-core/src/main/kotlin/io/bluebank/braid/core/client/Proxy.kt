@@ -45,7 +45,7 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   private val vertx = Vertx.vertx()
   private val client: HttpClient
   private lateinit var socket: WebSocket
-  private val nextId = AtomicLong()
+  private val nextId = AtomicLong(1)
   private val activeRequests = mutableMapOf<Long, InvocationClosure>()
 
   init {
