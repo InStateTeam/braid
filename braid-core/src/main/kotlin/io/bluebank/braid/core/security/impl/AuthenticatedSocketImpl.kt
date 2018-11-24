@@ -19,6 +19,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.invalidParams
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.Socket
@@ -29,7 +30,9 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
 
 class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : AbstractSocket<Buffer, Buffer>(), AuthenticatedSocket {
-
+  companion object {
+    private val log = loggerFor<AuthenticatedSocketImpl>()
+  }
   private var user: User? = null
   private lateinit var socket: Socket<Buffer, Buffer>
 
@@ -44,22 +47,27 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   }
 
   override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
+    log.trace("decoding potential auth payload")
     val op = Json.decodeValue(item, JsonRPCRequest::class.java)
-    when (op.method) {
-      "login" -> {
-        handleAuthRequest(op)
-      }
-      "logout" -> {
-        user = null
-        sendOk(op)
-      }
-      else -> {
-        // this isn't an auth op, so if we're logged in, then pass it on
-        if (user != null) {
-          onData(item)
-        } else {
-          val msg = JsonRPCErrorResponse.serverError(id = op.id, message = "not authenticated")
-          write(Json.encodeToBuffer(msg))
+    op.asMDC {
+      log.trace("decoded {}", op)
+      when (op.method) {
+        "login" -> {
+          handleAuthRequest(op)
+        }
+        "logout" -> {
+          log.trace("logout received - un-authenticating this connection")
+          user = null
+          sendOk(op)
+        }
+        else -> {
+          // this isn't an auth op, so if we're logged in, then pass it on
+          if (user != null) {
+            onData(item)
+          } else {
+            val msg = JsonRPCErrorResponse.serverError(id = op.id, message = "not authenticated")
+            write(Json.encodeToBuffer(msg))
+          }
         }
       }
     }
@@ -76,25 +84,33 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
 
   @Suppress("UNCHECKED_CAST")
   private fun handleAuthRequest(op: JsonRPCRequest) {
+    log.trace("handling login auth request")
     if (op.params == null || op.params !is List<*> || op.params.size != 1 || op.params.first() !is Map<*, *>) {
       sendParameterError(op)
     } else {
       val m = op.params.first() as Map<String, Any>
       authProvider.authenticate(JsonObject(m)) {
-        if (it.succeeded()) {
-          user = it.result()
-          sendOk(op)
-        } else {
-          user = null
-          sendFailed(op, "failed to authenticate")
+        op.asMDC {
+          if (it.succeeded()) {
+            user = it.result()
+            sendOk(op)
+          } else {
+            user = null
+            sendFailed(op, "failed to authenticate")
+          }
         }
       }
     }
   }
 
   private fun sendParameterError(op: JsonRPCRequest) {
-    val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object")
-    write(Json.encodeToBuffer(msg))
+    try {
+      val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object")
+      log.error(msg.error.message)
+      write(Json.encodeToBuffer(msg))
+    } catch (err: Throwable) {
+      log.error("failed to write to socket during sendParameterError")
+    }
   }
 
   private fun sendOk(op: JsonRPCRequest) {

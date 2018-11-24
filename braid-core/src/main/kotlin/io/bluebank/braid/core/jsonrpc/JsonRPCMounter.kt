@@ -43,7 +43,9 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   override fun dataHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>, item: JsonRPCRequest) {
-    handleRequest(item)
+    item.asMDC {
+      handleRequest(item)
+    }
   }
 
   override fun endHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
@@ -58,99 +60,108 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun handleRequest(request: JsonRPCRequest) {
-    log.trace("{} - handling request {}", request.id, request)
-
-    try {
-      checkVersion(request)
-      if (request.method == "_cancelStream") {
-        stopStream(request)
-      } else {
-        if (activeSubscriptions.containsKey(request.id)) {
-          val msg = "${request.id} - a request with duplicate request id is in progress for this connection"
-          log.warn(msg)
-          throw RuntimeException(msg)
+    request.asMDC {
+      log.trace("handling request {}", request)
+      try {
+        checkVersion(request)
+        if (request.method == "_cancelStream") {
+          stopStream(request)
+        } else {
+          if (activeSubscriptions.containsKey(request.id)) {
+            val msg = "a request with duplicate request id is in progress for this connection"
+            log.warn(msg)
+            throw RuntimeException(msg)
+          }
+          val subscription = executor.invoke(request)
+            .observeOn(scheduler, true)
+            .subscribe(
+              { data -> handleDataItem(data, request) },
+              { err -> handlerError(err, request) },
+              { handleCompleted(request) }
+            )
+          activeSubscriptions[request.id] = subscription
         }
-        val subscription = executor.invoke(request)
-          .observeOn(scheduler, true)
-          .subscribe(
-            { data -> handleDataItem(data, request) },
-            { err -> handlerError(err, request) },
-            { handleCompleted(request) }
-          )
-        activeSubscriptions[request.id] = subscription
+      } catch (err: JsonRPCException) {
+        log.error("failed to handle request $request", err)
+        err.response.send()
       }
-    } catch (err: JsonRPCException) {
-      log.error("${request.id} - failed to handle request $request", err)
-      err.response.send()
     }
   }
 
   private fun stopStream(request: JsonRPCRequest) {
-    log.trace("{} - cancelling stream", request.id)
-    activeSubscriptions[request.id]?.apply {
-      if (!this.isUnsubscribed) {
-        this.unsubscribe()
-      } else {
-        log.trace("${request.id} - cannot cancel because subscription already unsubscribed")
+    request.asMDC {
+      log.trace("cancelling stream")
+      activeSubscriptions[request.id]?.apply {
+        if (!this.isUnsubscribed) {
+          this.unsubscribe()
+        } else {
+          log.trace("cannot cancel because subscription already unsubscribed")
+        }
+        activeSubscriptions.remove(request.id)
+      } ?: run {
+        log.trace("cannot cancel stream because no active subscription found")
       }
-      activeSubscriptions.remove(request.id)
-    } ?: run {
-      log.trace("${request.id} - cannot cancel stream because no active subscription found")
     }
   }
 
   private fun handleCompleted(request: JsonRPCRequest) {
-    try {
-      if (request.streamed) {
-        log.trace("{} - sending completion message", request.id)
-        val payload = JsonRPCCompletedResponse(id = request.id)
-        socket.write(payload)
-      } else {
-        log.trace("{} - handling completion. not streamed, therefore not sending anything", request.id)
+    request.asMDC {
+      try {
+        if (request.streamed) {
+          log.trace("sending completion message")
+          val payload = JsonRPCCompletedResponse(id = request.id)
+          socket.write(payload)
+        } else {
+          log.trace("handling completion. not streamed, therefore not sending anything")
+        }
+      } catch (err: Throwable) {
+        log.error("failed to handle completion", err)
+      } finally {
+        activeSubscriptions.remove(request.id)
       }
-    } catch (err: Throwable) {
-      log.error("${request.id} - failed to handle completion", err)
-    } finally {
-      activeSubscriptions.remove(request.id)
     }
   }
 
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
-    try {
-      log.trace("{} - handling error result {}", request.id, err)
-      when (err) {
-        is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
-        is JsonRPCException -> err.response.send()
-        else -> serverError(request.id, err.message).send()
+    request.asMDC {
+      try {
+        log.trace("handling error result {}", err)
+        when (err) {
+          is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
+          is JsonRPCException -> err.response.send()
+          else -> serverError(request.id, err.message).send()
+        }
+      } catch (err: Throwable) {
+        log.error("failed to handle error", err)
+      } finally {
+        activeSubscriptions.remove(request.id)
       }
-    } catch (err: Throwable) {
-      log.error("${request.id} - failed to handle error", err)
-    } finally {
-      activeSubscriptions.remove(request.id)
     }
   }
 
   private fun handleDataItem(result: Any?, request: JsonRPCRequest) {
-    try {
-      log.trace("{} - sending data item back {}", request.id, result)
-      val payload = JsonRPCResultResponse(result = result, id = request.id)
-      socket.write(payload)
-      if (!request.streamed) {
-        log.trace("{} - closing subscription", request.id, result)
-        activeSubscriptions[request.id]?.apply {
-          if (isUnsubscribed) {
-            log.trace("{} - subscription is already unsubscribed!", request.id)
-          } else {
-            unsubscribe()
+    request.asMDC {
+      try {
+        log.trace("sending data item back {}", result)
+        val payload = JsonRPCResultResponse(result = result, id = request.id)
+        socket.write(payload)
+        if (!request.streamed) {
+          log.trace("closing subscription", result)
+          activeSubscriptions[request.id]?.apply {
+            if (isUnsubscribed) {
+              log.trace("subscription is already unsubscribed!")
+            } else {
+              unsubscribe()
+            }
+          } ?: run {
+            log.trace("could not find active subscription")
           }
-        } ?: run {
-          log.trace("{} - could not find active subscription", request.id)
+          log.trace("removing active subscription")
+          activeSubscriptions.remove(request.id)
         }
-        log.trace("{} - removing active subscription", request.id)
-        activeSubscriptions.remove(request.id)
+      } catch (err: Throwable) {
+        log.error("failed to handle data item $result", err)
       }
-    } catch (err: Throwable) {
-      log.error("${request.id} - failed to handle data item $result", err)
     }
   }
 
@@ -159,21 +170,21 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
     try {
       val version = request.jsonrpc.toDouble()
       if (version < MIN_VERSION) {
-        log.error("{} - version $version is less than minimum version $MIN_VERSION")
+        log.error("version $version is less than minimum version $MIN_VERSION")
         throwInvalidRequest(request.id, message)
       }
     } catch (err: NumberFormatException) {
-      log.error("{} - version ${request.jsonrpc} is not parsable to a double")
+      log.error("version ${request.jsonrpc} is not parsable to a double")
       throwInvalidRequest(request.id, message)
     }
   }
 
   private fun JsonRPCErrorResponse.send() {
     try {
-      log.trace("{} - sending error response: {}", this.id, this.error)
+      log.trace("sending error response: {}", this.error)
       socket.write(this)
     } catch (err: Throwable) {
-      log.error("${this.id} - failed to send error response", err)
+      log.error("failed to send error response", err)
     }
   }
 }

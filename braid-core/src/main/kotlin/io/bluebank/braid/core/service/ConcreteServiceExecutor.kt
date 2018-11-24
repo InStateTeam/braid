@@ -27,10 +27,8 @@ import rx.Subscriber
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
 import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.functions
-import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.javaType
 
 class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
@@ -40,40 +38,42 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     return Observable.create<Any> { subscriber ->
-      try {
-        log.trace("{} - binding to method for {}", request.id, request)
-        candidateMethods(request)
-          .asSequence() // lazy sequence
-          .convertParametersAndFilter(request)
-          .map { (method, params) ->
-            if (log.isTraceEnabled) {
-              log.trace("${request.id} - invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
-            }
-            method.call(service, *params).also {
+      request.asMDC {
+        try {
+          log.trace("binding to method for {}", request)
+          candidateMethods(request)
+            .asSequence() // lazy sequence
+            .convertParametersAndFilter(request)
+            .map { (method, params) ->
               if (log.isTraceEnabled) {
-                log.trace("${request.id} - successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+                log.trace("invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+              }
+              method.call(service, *params).also {
+                if (log.isTraceEnabled) {
+                  log.trace("successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+                }
               }
             }
-          }
-          .firstOrNull()
-          ?.also { result -> handleResult(result, request, subscriber) }
-          ?: throwMethodDoesNotExist(request)
-      } catch (err: InvocationTargetException) {
-        log.error("${request.id} - failed to invoke target for $request", err)
-        subscriber.onError(err.targetException)
-      } catch (err: Throwable) {
-        log.error("${request.id} - failed to invoke $request", err)
-        subscriber.onError(err)
+            .firstOrNull()
+            ?.also { result -> handleResult(result, request, subscriber) }
+            ?: throwMethodDoesNotExist(request)
+        } catch (err: InvocationTargetException) {
+          log.error("failed to invoke target for $request", err)
+          subscriber.onError(err.targetException)
+        } catch (err: Throwable) {
+          log.error("failed to invoke $request", err)
+          subscriber.onError(err)
+        }
       }
     }
   }
 
-  private fun KFunction<*>.asSimpleString() : String {
-    val params = this.parameters.drop(1).joinToString(",") { "${it.name}: ${it.type.javaType.typeName}"}
+  private fun KFunction<*>.asSimpleString(): String {
+    val params = this.parameters.drop(1).joinToString(",") { "${it.name}: ${it.type.javaType.typeName}" }
     return "$name($params)"
   }
 
-  private fun candidateMethods(request: JsonRPCRequest) : List<KFunction<*>> {
+  private fun candidateMethods(request: JsonRPCRequest): List<KFunction<*>> {
     return service::class.functions
       .filter(request::matchesName)
       .filter(this::isPublic)
@@ -83,7 +83,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .sortedByDescending { (_, score) -> score }
       .also {
         if (log.isTraceEnabled) {
-          log.trace("{} scores for candidate methods for {}:", request.id, request)
+          log.trace("scores for candidate methods for {}:", request)
           it.forEach {
             println("${it.second}: ${it.first.asSimpleString()}")
           }
@@ -113,11 +113,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   @Suppress("UNCHECKED_CAST")
   private fun handleResult(result: Any?, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
-    log.trace("{} - handling result {}", request.id, result)
+    log.trace("handling result {}", request.id, result)
     when (result) {
       is Future<*> -> handleFuture(result as Future<Any>, request, subscriber)
       is Observable<*> -> handleObservable(result as Observable<Any>, request, subscriber)
-      else -> respond(request.id, result, subscriber)
+      else -> respond(result, subscriber)
     }
   }
 
@@ -125,69 +125,56 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     log.trace("{} - handling observable result", request.id)
     result
       .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
-      .let { // insert logger if trace is enabled
-        if (log.isTraceEnabled) {
-          it
-            .doOnNext {
-            log.trace("{} - sending item {}", request.id, it)
+      .let {
+        // insert logger if trace is enabled
+        request.asMDC {
+          if (log.isTraceEnabled) {
+            it
+              .doOnNext {
+                log.trace("sending item {}", it)
+              }
+              .doOnError {
+                log.trace("sending error {}", it)
+              }
+              .doOnCompleted {
+                log.trace("completing stream")
+              }
+          } else {
+            it
           }
-            .doOnError {
-              log.trace("{} - sending error {}", request.id, it)
-            }
-            .doOnCompleted {
-              log.trace("{} - completing stream", request.id)
-            }
-        } else {
-          it
         }
       }
       .subscribe(subscriber)
   }
 
   private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
-    log.trace("{} - handling future result", request.id)
-    future.setHandler(JsonRPCMounter.FutureHandler {
-      handleAsyncResult(it, request, callback)
-    })
-  }
-
-  private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
-    log.trace("{} - handling async result of invocation", request.id)
-    when (response.succeeded()) {
-      true -> respond(request.id, response.result(), subscriber)
-      else -> respond(request.id, response.cause().createJsonException(request), subscriber)
+    request.asMDC {
+      log.trace("{} - handling future result", request.id)
+      future.setHandler(JsonRPCMounter.FutureHandler {
+        handleAsyncResult(it, request, callback)
+      })
     }
   }
 
-  private fun respond(id: Long, result: Any?, subscriber: Subscriber<Any>) {
-    log.trace("{} - sending result and completing {}", id, result)
+  private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+    request.asMDC {
+      log.trace("{} - handling async result of invocation", request.id)
+      when (response.succeeded()) {
+        true -> respond(response.result(), subscriber)
+        else -> respond(response.cause().createJsonException(request), subscriber)
+      }
+    }
+  }
+
+  private fun respond(result: Any?, subscriber: Subscriber<Any>) {
+    log.trace("sending result and completing {}", result)
     subscriber.onNext(result)
     subscriber.onCompleted()
   }
 
-  private fun respond(id: Long, err: Throwable, subscriber: Subscriber<Any>) {
-    log.trace("{} - sending error {}", id, err)
+  private fun respond(err: Throwable, subscriber: Subscriber<Any>) {
+    log.trace("sending error {}", err)
     subscriber.onError(err)
-  }
-
-  private fun orderByComplexity(methods: List<KFunction<*>>): List<KFunction<*>> {
-    return methods.sortedWith(compareByDescending(this::sumTypes))
-  }
-
-  private fun sumTypes(method: KFunction<*>) = method.valueParameters.asSequence().map(this::typeValue).sum()
-
-  private fun typeValue(parameter: KParameter): Int = when (parameter.type.classifier) {
-    String::class -> 0
-    Int::class, Float::class -> 1
-    Double::class, Long::class -> 2
-    List::class -> 4
-    Map::class -> 5
-    else -> {
-      when {
-        parameter.type.javaClass.isArray -> 3
-        else -> 6
-      }
-    }
   }
 
   private fun isPublic(method: KFunction<*>) = method.visibility == KVisibility.PUBLIC

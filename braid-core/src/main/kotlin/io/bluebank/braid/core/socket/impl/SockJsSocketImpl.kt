@@ -26,11 +26,14 @@ class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer
   companion object {
     val log = loggerFor<SockJsSocketImpl>()
   }
+
   init {
     sockJS.handler { buffer ->
-        onData(buffer)
+      log.trace("received buffer {}", buffer)
+      onData(buffer)
     }
     sockJS.endHandler {
+      log.trace("socket closed")
       onEnd()
     }
   }
@@ -39,10 +42,11 @@ class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer
     return null // the socket itself doesn't know the user
   }
 
-  override fun write(obj: Buffer) : SockJSSocketWrapper {
+  override fun write(obj: Buffer): SockJSSocketWrapper {
     try {
+      log.trace("writing {}", obj)
       sockJS.write(obj)
-    } catch(err: Throwable) {
+    } catch (err: Throwable) {
       log.error("failure to write onto sockjs socket", err)
     }
     return this

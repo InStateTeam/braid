@@ -16,23 +16,20 @@
 
 <configuration debug="false">
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
     <!-- encoders are  by default assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [braid-id:%X{braid-id}] - %msg%n</pattern>
     </encoder>
   </appender>
 
-  <logger name="io.vertx.ext.web.handler" level="TRACE" additivity="false">
-    <appender-ref ref="STDOUT"/>
+  <logger name="io.vertx.ext.web.handler" level="trace" additivity="false">
+    <appender-ref ref="console"/>
   </logger>
-  <logger name="io.netty" level="WARN"/>
-  <logger name="io.bluebank" level="INFO"/>
-  <logger name="io.bluebank.braid.client" level="TRACE"/>
-  <logger name="io.bluebank.braid.core.jsonrpc" level="TRACE"/>
-  <logger name="io.bluebank.braid.core.service" level="TRACE"/>
-  <root level="WARN">
-    <appender-ref ref="STDOUT" />
+  <logger name="io.netty" level="warn"/>
+  <logger name="io.bluebank.braid" level="trace"/>
+  <root level="info">
+    <appender-ref ref="console" />
   </root>
 </configuration>

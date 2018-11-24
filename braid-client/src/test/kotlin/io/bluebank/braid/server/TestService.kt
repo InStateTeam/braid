@@ -18,6 +18,7 @@ package io.bluebank.braid.server
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.bluebank.braid.core.annotation.ServiceDescription
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
@@ -52,18 +53,26 @@ data class JsonStuffedObject(val a: String) {
 
 @ServiceDescription("my-service", "a simple service")
 class MyServiceImpl(private val vertx: Vertx) : MyService {
+  companion object {
+    private val log = loggerFor<MyServiceImpl>()
+  }
+
   override fun add(lhs: Double, rhs: Double): Double {
+    log.info("adding $lhs to $rhs")
     return lhs + rhs
   }
 
   override fun noArgs(): Int {
+    log.info("given no args, returning a number")
     return 5
   }
 
   override fun noResult() {
+    log.info("returning no result")
   }
 
   override fun longRunning(): Future<Int> {
+    log.info("running long running job")
     val result = future<Int>()
     vertx.setTimer(100) {
       result.complete(5)
@@ -72,22 +81,27 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   }
 
   override fun stream(): Observable<Int> {
+    log.info("streaming")
     return Observable.from(0 .. 10)
   }
 
   override fun largelyNotStream(): Observable<Int> {
+    log.info("returning a stream error")
     return Observable.error(RuntimeException("stream error"))
   }
 
   override fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject {
+    log.info("echoing ...")
     return inComplexObject
   }
 
   override fun blowUp() {
+    log.info("about to blow up on purpose")
     throw RuntimeException("expected exception")
   }
 
   override fun stuffedJsonObject(): JsonStuffedObject {
+    log.info("returning stuffed json object")
     return JsonStuffedObject("this is hosed")
   }
 
