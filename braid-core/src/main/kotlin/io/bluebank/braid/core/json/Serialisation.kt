@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.json
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -35,6 +36,8 @@ class BraidJacksonInit {
         Json.mapper.registerModule(it)
         Json.prettyMapper.registerModule(it)
       }
+      Json.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+      Json.prettyMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
     fun init() {
       // automatically init during class load
