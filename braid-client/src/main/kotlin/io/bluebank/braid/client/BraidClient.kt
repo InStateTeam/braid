@@ -19,6 +19,7 @@ import io.bluebank.braid.core.async.getOrThrow
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
+import io.bluebank.braid.core.jsonrpc.asMDC
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.reflection.actualType
 import io.bluebank.braid.core.reflection.isStreaming
@@ -126,13 +127,21 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
     val socket = sock
     if (socket != null) {
-      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).awaitResult()
+      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).let {
+        asMDC(it.invocationId) {
+          it.awaitResult()
+        }
+      }
     }
     throw IllegalStateException("no socket for proxy")
   }
 
   private fun handler(buffer: Buffer) {
     val jo = JsonObject(buffer)
+    if (!jo.containsKey("id")) {
+      log.warn("received message without 'id' field from ${config.serviceURI}")
+      return
+    }
     val responseId = jo.getLong("id")
     try {
       when {
@@ -146,16 +155,30 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   }
 
   private fun handleInvocationWithResponse(responseId: Long, jo: JsonObject) {
-    try {
-      invocations[responseId]!!.handle(jo)
-    } catch (err: Throwable) {
-      invocations[responseId]!!.onError(err)
+    asMDC(responseId) {
+      val proxy = invocations[responseId]
+      when (proxy) {
+        null -> log.error("failed to find invocation proxy")
+        else -> {
+          try {
+            proxy.handle(jo)
+          } catch (err: Throwable) {
+            log.error("failed to handle message. sending to error handler {}", jo.encode())
+            try {
+              proxy.onError(err)
+            } catch (err: Throwable) {
+              log.error("$responseId - failed to send handler exception to subject", err)
+            }
+            invocations.remove(responseId)
+          }
+        }
+      }
     }
   }
 
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
     val id = nextId.getAndIncrement()
-    val proxyInvocation = ProxyInvocation(returnType)
+    val proxyInvocation = ProxyInvocation(id, returnType)
     invocations[id] = proxyInvocation
     try {
       val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
@@ -182,32 +205,33 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
     }
   }
 
-  private inner class ProxyInvocation(private val returnType: Type) {
+  private inner class ProxyInvocation(internal val invocationId: Long, private val returnType: Type) {
 
     private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
-    private val resultStream = PublishSubject.create<Any>()
+    private val resultBuffer = PublishSubject.create<Any>()
 
     fun awaitResult(): Any {
       return when (returnType.actualType()) {
         Future::class.java -> {
-          resultStream.toSingle().toFuture()
+          resultBuffer
+            .doOnNext { log.trace("received {}", it) }
+            .doOnError { log.trace("received error", it)}
+            .doOnCompleted { log.trace("received completion")}
+            .toFuture()
         }
         Observable::class.java -> {
-          resultStream
+          resultBuffer
         }
         else -> {
-          resultStream.toBlocking().first()
+          resultBuffer.toBlocking().first()
         }
       }
     }
 
     fun handle(jo: JsonObject) {
-      if (!jo.containsKey("id")) {
-        log.error("response object does not contain id key: $jo")
-        return
+      if (log.isTraceEnabled) {
+        log.trace("handling received message {}", jo.encode())
       }
-
-      val responseId = jo.getLong("id")
       when {
         jo.containsKey("result") -> {
           val raw = jo.getValue("result")
@@ -215,31 +239,35 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
 
           // TODO: this is moderately horrific - otherwise it's hard to make assertions about the number of handlers
           if (returnType.isStreaming()) {
-            resultStream.onNext(result)
+            log.trace("pushing message to streaming subject: {}", result)
+            resultBuffer.onNext(result)
           } else {
-            invocations.remove(responseId)
-            resultStream.onNext(result)
-            resultStream.onCompleted()
+            log.trace("pushing message to non-streaming subject and completing the subject: {}", result)
+            invocations.remove(invocationId)
+            resultBuffer.onNext(result)
+            resultBuffer.onCompleted()
           }
         }
         jo.containsKey("error") -> {
-          val error= jo.getJsonObject("error")
-          invocations.remove(responseId)
+          log.trace("message is an error response. terminating the subject")
+          val error = jo.getJsonObject("error")
+          invocations.remove(invocationId)
           onError(RuntimeException(error.getString("message")))
         }
         jo.containsKey("completed") -> {
+          log.trace("message is a completion response")
           if (!returnType.isStreaming()) {
             log.error("Not expecting completed messages for anything other than Observables")
           }
 
-          invocations.remove(responseId)
-          resultStream.onCompleted()
+          invocations.remove(invocationId)
+          resultBuffer.onCompleted()
         }
       }
     }
 
     fun onError(err: Throwable) {
-      resultStream.onError(err)
+      resultBuffer.onError(err)
     }
   }
 }

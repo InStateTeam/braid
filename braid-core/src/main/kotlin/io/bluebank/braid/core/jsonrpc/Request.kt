@@ -44,13 +44,17 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method
    * to the MDC during the execution of [fn]
    */
   fun <R> asMDC(fn: () -> R) : R {
-    val key = id.toString()
-    val currentValue = MDC.get(MDC_REQUEST_ID)
-    return when {
-      currentValue != null && currentValue == key-> fn()
-      else -> MDC.putCloseable(MDC_REQUEST_ID, key).use {
-        fn()
-      }
+    return asMDC(id, fn)
+  }
+}
+
+fun <R> asMDC(id: Long, fn: () -> R) : R {
+  val idString = id.toString()
+  val currentValue = MDC.get(JsonRPCRequest.MDC_REQUEST_ID)
+  return when {
+    currentValue != null && currentValue == idString-> fn()
+    else -> MDC.putCloseable(JsonRPCRequest.MDC_REQUEST_ID, idString).use {
+      fn()
     }
   }
 }
