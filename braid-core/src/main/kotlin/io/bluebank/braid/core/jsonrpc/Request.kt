@@ -45,8 +45,9 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method
    */
   fun <R> asMDC(fn: () -> R) : R {
     val key = id.toString()
+    val currentValue = MDC.get(MDC_REQUEST_ID)
     return when {
-      MDC.get(key) != null -> fn()
+      currentValue != null && currentValue == key-> fn()
       else -> MDC.putCloseable(MDC_REQUEST_ID, key).use {
         fn()
       }
