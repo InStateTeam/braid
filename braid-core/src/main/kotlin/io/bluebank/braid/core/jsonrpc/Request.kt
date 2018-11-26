@@ -15,10 +15,14 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import org.slf4j.MDC
 import java.lang.reflect.Constructor
 import kotlin.reflect.KFunction
 
-data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
+data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
+  companion object {
+    const val MDC_REQUEST_ID = "braid-id"
+  }
   private val parameters = Params.build(params)
 
   fun paramCount() : Int = parameters.count
@@ -35,4 +39,17 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val id: Long, val method:
 
   fun paramsAsString() = parameters.toString()
   fun computeScore(fn: KFunction<*>) = parameters.computeScore(fn)
+  /**
+   * SLF4J MDC logging context for this request object. Adds a [MDC_REQUEST_ID] value
+   * to the MDC during the execution of [fn]
+   */
+  fun <R> asMDC(fn: () -> R) : R {
+    val key = id.toString()
+    return when {
+      MDC.get(key) != null -> fn()
+      else -> MDC.putCloseable(MDC_REQUEST_ID, key).use {
+        fn()
+      }
+    }
+  }
 }

@@ -154,7 +154,7 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   }
 
   private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
-    val id = nextId.incrementAndGet()
+    val id = nextId.getAndIncrement()
     val proxyInvocation = ProxyInvocation(returnType)
     invocations[id] = proxyInvocation
     try {

@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.socket.impl
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.Socket
 import io.bluebank.braid.core.socket.SocketProcessor
@@ -23,6 +24,9 @@ import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
 class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(), SocketProcessor<R, K, Buffer, Buffer> {
+  companion object {
+    private val log = loggerFor<TypedSocketImpl<*, *>>()
+  }
 
   private lateinit var socket: Socket<Buffer, Buffer>
 
@@ -33,16 +37,20 @@ class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket
   override fun user(): User? = socket.user()
 
   override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
+    log.trace("decoding item {}", item)
     val decoded = Json.decodeValue(item, receiveClass)
+    log.trace("decode to {}", decoded)
     onData(decoded)
   }
 
   override fun endHandler(socket: Socket<Buffer, Buffer>) {
+    log.trace("socket closed")
     onEnd()
   }
 
   override fun write(obj: K): Socket<R, K> {
     val s = Json.encodeToBuffer(obj)
+    log.trace("writing {} as {}", obj, s)
     socket.write(s)
     return this
   }

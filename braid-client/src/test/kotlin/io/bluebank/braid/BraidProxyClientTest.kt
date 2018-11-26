@@ -35,7 +35,7 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(VertxUnitRunner::class)
-class ProxyTest {
+class BraidProxyClientTest {
   private val vertx = Vertx.vertx()
   private val clientVertx = Vertx.vertx()
   private val port = getFreePort()

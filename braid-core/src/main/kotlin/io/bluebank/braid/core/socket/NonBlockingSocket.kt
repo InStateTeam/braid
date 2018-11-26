@@ -90,18 +90,19 @@ class NonBlockingSocket<R, S>(
     }
   }
 
+  /**
+   * Please note: we expect the calling thread to be on a vertx context
+   */
   override fun write(obj: S): Socket<R, S> {
-    log.debug("writing $obj")
-    vertx.runOnContext {
-      try {
-        if (socket != null) {
-          socket?.write(obj)
-        } else {
-          log.warn("during write socket is null")
-        }
-      } catch (err: Throwable) {
-        log.warn("failed to write to socket", err)
+    log.trace("writing {}", obj)
+    try {
+      if (socket != null) {
+        socket?.write(obj)
+      } else {
+        log.warn("socket was null when writing {}", obj)
       }
+    } catch (err: Throwable) {
+      log.warn("failed to write $obj to socket", err)
     }
     return this
   }
