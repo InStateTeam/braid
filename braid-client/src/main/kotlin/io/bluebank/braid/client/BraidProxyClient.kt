@@ -221,7 +221,11 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
     fun awaitResult(): Any {
       return when (returnType.actualType()) {
         Future::class.java -> {
-          resultBuffer.toSingle().toFuture()
+          resultBuffer
+            .doOnNext { log.trace("received {}", it) }
+            .doOnError { log.trace("received error", it)}
+            .doOnCompleted { log.trace("received completion")}
+            .toSingle().toFuture()
         }
         Observable::class.java -> {
           resultBuffer
@@ -243,10 +247,10 @@ open class BraidProxyClient(private val config: BraidClientConfig, val vertx: Ve
 
           // TODO: this is moderately horrific - otherwise it's hard to make assertions about the number of handlers
           if (returnType.isStreaming()) {
-            log.trace("{} - pushing message to streaming subject", invocationId, result)
+            log.trace("{} - pushing message to streaming subject: {}", invocationId, result)
             resultBuffer.onNext(result)
           } else {
-            log.trace("{} - pushing message to non-streaming subject and completing the subject", invocationId, result)
+            log.trace("{} - pushing message to non-streaming subject and completing the subject: {}", invocationId, result)
             invocations.remove(invocationId)
             resultBuffer.onNext(result)
             resultBuffer.onCompleted()
