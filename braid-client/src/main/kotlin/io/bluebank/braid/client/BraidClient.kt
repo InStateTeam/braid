@@ -117,11 +117,7 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
   }
 
   override fun close() {
-    try {
-      client.close()
-    } finally {
-      vertx.close()
-    }
+    client.close()
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
