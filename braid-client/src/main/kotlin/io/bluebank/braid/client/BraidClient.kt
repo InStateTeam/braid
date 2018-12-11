@@ -45,12 +45,17 @@ import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler) : Closeable, InvocationHandler {
+open class BraidClient(private val config: BraidClientConfig, 
+                       val vertx: Vertx, 
+                       exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, 
+                       closeHandler: (() -> Unit) = this::closeHandler,
+                       clientOptions : HttpClientOptions = defaultClientHttpOptions
+                       ) : Closeable, InvocationHandler {
   private val nextId = AtomicLong(1)
   private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
   private var sock: WebSocket? = null
 
-  private val client = vertx.createHttpClient(HttpClientOptions()
+  private val client = vertx.createHttpClient(clientOptions
       .setDefaultHost(config.serviceURI.host)
       .setDefaultPort(config.serviceURI.port)
       .setSsl(config.tls)
@@ -59,6 +64,7 @@ open class BraidClient(private val config: BraidClientConfig, val vertx: Vertx, 
 
   companion object {
     private val log: Logger = loggerFor<BraidClient>()
+    val defaultClientHttpOptions = HttpClientOptions()
 
     init {
       BraidJacksonInit.init()
