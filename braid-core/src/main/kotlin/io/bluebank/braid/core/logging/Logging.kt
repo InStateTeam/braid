@@ -15,9 +15,22 @@
  */
 package io.bluebank.braid.core.logging
 
+import io.vertx.core.logging.SLF4JLogDelegateFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 inline fun <reified T: Any> loggerFor() : Logger {
   return LoggerFactory.getLogger(T::class.java)
 }
+
+
+object LogInitialiser {
+  init {
+    System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory::class.qualifiedName)
+  }
+
+  fun init() {
+    // will cause init to be called once and once only
+  }
+}
+

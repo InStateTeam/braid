@@ -18,6 +18,7 @@ package io.bluebank.braid.corda
 import com.google.common.io.Resources
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
+import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -55,7 +56,7 @@ data class BraidConfig(val port: Int = 8080,
     private val log = loggerFor<BraidConfig>()
 
     init {
-      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+      LogInitialiser.init()
     }
 
     @Suppress("unused")
