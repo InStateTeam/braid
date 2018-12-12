@@ -52,8 +52,7 @@ class BraidClientTest {
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-extended-service/braid")
-      braidClient = BraidClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
-
+      braidClient = BraidClient.createClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
       myService = braidClient.bind(MyExtendedService::class.java)
       async.complete()
     }

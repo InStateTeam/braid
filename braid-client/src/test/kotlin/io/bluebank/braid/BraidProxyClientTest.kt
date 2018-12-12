@@ -55,7 +55,7 @@ class BraidProxyClientTest {
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
+      braidClient = BraidProxyClient.createProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
 
       braidClient.bindAsync(MyService::class.java).map {
         myService = it

@@ -52,7 +52,7 @@ class SyncProxyTest {
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
+      braidClient = BraidProxyClient.createProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
 
       myService = braidClient.bind(MyService::class.java)
       async.complete()
@@ -93,9 +93,9 @@ class SyncProxyTest {
   fun `should be able to get a future back from the proxy`(context: TestContext) {
     myService.longRunning().map{
       context.assertEquals(5, it)
-    }.setHandler(context.asyncAssertSuccess({
+    }.setHandler(context.asyncAssertSuccess {
       context.assertEquals(0, braidClient.activeRequestsCount())
-    }))
+    })
   }
 
   @Test

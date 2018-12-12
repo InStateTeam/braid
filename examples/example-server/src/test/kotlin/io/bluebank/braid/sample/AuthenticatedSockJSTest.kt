@@ -19,6 +19,7 @@ import io.bluebank.braid.core.json.BraidJacksonInit
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
+import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
@@ -48,7 +49,7 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
-      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+      LogInitialiser.init()
       BraidJacksonInit.init()
       Vertx.vertx().deployVerticle(AuthenticatedSockJSTest())
     }
