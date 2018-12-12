@@ -18,10 +18,18 @@ package io.bluebank.braid.client
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpClientOptions
 import org.slf4j.Logger
 
-class BraidCordaClient(config: BraidClientConfig, vertx: Vertx, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler) : BraidClient(config, vertx)  {
-
+class BraidCordaClient(config: BraidClientConfig, 
+                      vertx: Vertx, 
+                      exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, 
+                      closeHandler: (() -> Unit) = this::closeHandler,
+                      clientOptions : HttpClientOptions = HttpClientOptions()) : BraidClient(config = config,
+                                                                                             vertx = vertx,
+                                                                                             exceptionHandler = exceptionHandler,
+                                                                                             closeHandler = closeHandler,
+                                                                                             clientOptions = clientOptions)  {
   companion object {
 
     private val log: Logger = loggerFor<BraidCordaClient>()
@@ -38,5 +46,4 @@ class BraidCordaClient(config: BraidClientConfig, vertx: Vertx, exceptionHandler
       log.error("exception from socket", error)
     }
   }
-
 }
