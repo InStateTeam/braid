@@ -48,9 +48,9 @@ class Invocations(
     }
 
     fun defaultSocketExceptionHandler() = { error: Throwable ->
+      // this implementation is nominal for logging the socket error
+      // TODO: consider connection retry
       log.error("exception from socket", error)
-      // TODO: handle retries?
-      // TODO: handle error!
     }
 
     init {
