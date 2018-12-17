@@ -15,23 +15,21 @@
  */
 
 'use strict';
-import { Proxy } from 'braid-client';
+import {Proxy} from 'braid-client';
 
 console.log('demo started');
 
 export const corda = new Proxy({
-    url: 'https://localhost:8080/api/',
-    credentials: {
-        username: 'banka',
-        password: 'password'
-    }
-}, onOpen, onClose, onError, { strictSSL: false });
+  url: 'https://localhost:8080/api/', credentials: {
+    username: 'banka', password: 'password'
+  }
+}, onOpen, onClose, onError, {strictSSL: false});
 
 let notary;
 
 function onOpen() {
-    console.log('opened')
-    printMyInfo(corda)
+  console.log('opened')
+  printMyInfo(corda)
     .then(() => getNotaries())
     .then(() => registerForCashNotifications())
     .then(() => issueCash('$100', 'ref01'))
@@ -39,13 +37,12 @@ function onOpen() {
     .then(() => console.log('finished'), err => console.error('failed', err));
 }
 
-
 function onClose() {
-    console.log('closed');
+  console.log('closed');
 }
 
 function onError(e) {
-    console.error('failed with error;', e);
+  console.error('failed with error;', e);
 }
 
 function printMyInfo() {

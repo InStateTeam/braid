@@ -27,50 +27,70 @@ import java.util.concurrent.TimeUnit
 
 @ServiceDescription("my-service", "A simple service for testing braid")
 class CustomService {
+
   private val scheduler = Schedulers.from(Executors.newFixedThreadPool(1))
 
-  fun add (lhs: Int, rhs: Int)  = lhs + rhs
+  fun add(lhs: Int, rhs: Int) = lhs + rhs
 
-  fun badjuju() : Int {
+  fun badjuju(): Int {
     throw RuntimeException("I threw an exception")
   }
 
-  fun asyncResult() : Future<String> {
+  fun asyncResult(): Future<String> {
     val result = Future.future<String>()
     streamedResult().first().single().subscribe { result.complete(it.toString()) }
     return result
   }
 
-  fun streamedResult() : Observable<Int> {
+  fun streamedResult(): Observable<Int> {
     return Observable.range(0, 10, scheduler).delay(1, TimeUnit.MILLISECONDS)
   }
 
-  fun infiniteStream() : Observable<Long> {
+  fun infiniteStream(): Observable<Long> {
     return Observable.interval(1, TimeUnit.SECONDS)
   }
 
-  fun streamedResultThatFails() : Observable<Int> {
-    return Observable.range(0, 10, scheduler).doOnNext { if (it == 5) throw RuntimeException("boom") }
+  fun streamedResultThatFails(): Observable<Int> {
+    return Observable.range(0, 10, scheduler)
+      .doOnNext { if (it == 5) throw RuntimeException("boom") }
   }
 
   // function to test https://gitlab.com/bluebank/braid/merge_requests/76
-  fun slowData() : List<SlowDataItem> {
+  fun slowData(): List<SlowDataItem> {
     Thread.sleep((Math.random() * 1000).toLong())
     return (1..1000).map { SlowDataItem(Date()) }
   }
-  fun createDao(daoName: String, minimumMemberCount: Int, strictMode: Boolean, notaryName: CordaX500Name): Future<DaoState> {
-    return Future.succeededFuture(DaoState(daoName, minimumMemberCount, strictMode, notaryName))
+
+  fun createDao(
+    daoName: String,
+    minimumMemberCount: Int,
+    strictMode: Boolean,
+    notaryName: CordaX500Name
+  ): Future<DaoState> {
+    return Future.succeededFuture(
+      DaoState(
+        daoName,
+        minimumMemberCount,
+        strictMode,
+        notaryName
+      )
+    )
   }
 
-  fun useInstant(instant: Instant) : String {
+  fun useInstant(instant: Instant): String {
     return instant.toString()
   }
 
-  fun useDate(date: Date) : String {
+  fun useDate(date: Date): String {
     return date.toString()
   }
 }
 
 data class SlowDataItem(val date: Date)
 
-data class DaoState(val name: String, val minimumMemberCount: Int, val strictMode: Boolean, val notaryName: CordaX500Name)
+data class DaoState(
+  val name: String,
+  val minimumMemberCount: Int,
+  val strictMode: Boolean,
+  val notaryName: CordaX500Name
+)

@@ -32,6 +32,7 @@ internal class ObservableInvocationStrategy(
   returnType: Type,
   params: Array<out Any?>
 ) : InvocationStrategy<Observable<Any>>(parent, method, returnType, params) {
+
   companion object {
     private val log = loggerFor<ObservableInvocationStrategy>()
   }
@@ -93,7 +94,10 @@ internal class ObservableInvocationStrategy(
         cancelStream(requestId)
       }
     } catch (err: Throwable) {
-      log.error(requestId, err) { "calling onNext failed because subscriber had an exception in both onNext and onError!" }
+      log.error(
+        requestId,
+        err
+      ) { "calling onNext failed because subscriber had an exception in both onNext and onError!" }
       cancelStream(requestId)
     }
   }
@@ -116,7 +120,11 @@ internal class ObservableInvocationStrategy(
     subscriber.onCompleted()
   }
 
-  private fun errorOnSubscribed(subscriber: Subscriber<Any>, error: Throwable, requestId: Long) {
+  private fun errorOnSubscribed(
+    subscriber: Subscriber<Any>,
+    error: Throwable,
+    requestId: Long
+  ) {
     endInvoke(requestId)
     subscriber.onError(error)
   }
@@ -139,8 +147,11 @@ internal class ObservableInvocationStrategy(
 
   internal val subscriberCount: Int get() = subscribers.size
 
-  private fun getSubscriber(requestId: Long) : Subscriber<Any> {
-    return subscribers[requestId] ?: error(requestId, "failed to locate subscriber for request id $requestId")
+  private fun getSubscriber(requestId: Long): Subscriber<Any> {
+    return subscribers[requestId] ?: error(
+      requestId,
+      "failed to locate subscriber for request id $requestId"
+    )
   }
 
   private fun error(requestId: Long, message: String): Nothing {

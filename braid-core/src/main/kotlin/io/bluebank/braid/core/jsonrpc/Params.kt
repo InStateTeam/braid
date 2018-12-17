@@ -92,7 +92,12 @@ abstract class AbstractParams : Params {
 
     // we memoize the heavy reflection stuff that's at the heart of the loops
     // we could do better in theory, memoizing at the function signatures level as well ... perhaps consider this for a future optimisation
-    private val computeScore = { targetType: KClass<*>, sourceType: Class<*> -> this.computeScoreInternal(targetType, sourceType) }.memoize()
+    private val computeScore = { targetType: KClass<*>, sourceType: Class<*> ->
+      this.computeScoreInternal(
+        targetType,
+        sourceType
+      )
+    }.memoize()
 
     /**
      * This class computes the logical score between a value and a target type using pure type analysis
@@ -103,43 +108,51 @@ abstract class AbstractParams : Params {
      */
     private fun computeScoreInternal(targetType: KClass<*>, sourceType: Class<*>): Int {
       return when {
-      // we give preference for parsing of strings rather than direct string to string matching. this is to give a higher
-      // weight to say "200.00" -> BigDecimal
-      // we don't do the same for complex type e.g. Map<*,*> -> ComplexType, because the use-cases are very different
-      // If someone declares a method with Map<*,*> it signals that they don't care about strong types anyhow
+        // we give preference for parsing of strings rather than direct string to string matching. this is to give a higher
+        // weight to say "200.00" -> BigDecimal
+        // we don't do the same for complex type e.g. Map<*,*> -> ComplexType, because the use-cases are very different
+        // If someone declares a method with Map<*,*> it signals that they don't care about strong types anyhow
         String::class.assignableFrom(sourceType) && targetType.isSubclassOf(String::class) -> 8
         Map::class.assignableFrom(sourceType) && targetType.isSubclassOf(Map::class) -> 10
-      // otherwise, when we have a perfect match we use it - this means
+        // otherwise, when we have a perfect match we use it - this means
         targetType.javaObjectType == sourceType -> 10
-      // if we are dealing with "list" types that are not a perfect match (e.g. Array <-> List)
+        // if we are dealing with "list" types that are not a perfect match (e.g. Array <-> List)
         sourceType.isListType() && targetType.isListType() -> {
           when {
-          // we give preference to List receivers
+            // we give preference to List receivers
             targetType.isSubclassOf(List::class) -> 9
             else -> 8
           }
         }
-      // this is a subordinate to a perfect match. e.g. a perfect match with Map<*, *> will always trump a complex type
+        // this is a subordinate to a perfect match. e.g. a perfect match with Map<*, *> will always trump a complex type
         sourceType.isParsableType() -> 8
-      // a subtype is always slightly better than a perfect match
+        // a subtype is always slightly better than a perfect match
         sourceType.kotlin.isSubclassOf(targetType) -> 9
-      // a common super type (e.g. Numbers) will have lower precedence than a perfect match of a subclass
+        // a common super type (e.g. Numbers) will have lower precedence than a perfect match of a subclass
         targetType.haveCommonSuperClass(sourceType.kotlin) -> 8
-      // if nothing else matches, we can always convert Any to a string
+        // if nothing else matches, we can always convert Any to a string
         targetType.isSubclassOf(String::class) -> 5
-      // for everything else, we reject it
+        // for everything else, we reject it
         else -> 0
       }
     }
 
-    private fun KClass<*>.assignableFrom(clazz: Class<*>) = this.java.isAssignableFrom(clazz)
-    private fun KClass<*>.realSuperClasses() = allSuperclasses.filter { !it.java.isInterface && it != Any::class }
-    private fun KClass<*>.intersectRealSuperClasses(other: KClass<*>) = this.realSuperClasses().intersect(other.realSuperClasses())
-    private fun KClass<*>.haveCommonSuperClass(other: KClass<*>) = this.intersectRealSuperClasses(other).isNotEmpty()
+    private fun KClass<*>.assignableFrom(clazz: Class<*>) =
+      this.java.isAssignableFrom(clazz)
+
+    private fun KClass<*>.realSuperClasses() =
+      allSuperclasses.filter { !it.java.isInterface && it != Any::class }
+
+    private fun KClass<*>.intersectRealSuperClasses(other: KClass<*>) =
+      this.realSuperClasses().intersect(other.realSuperClasses())
+
+    private fun KClass<*>.haveCommonSuperClass(other: KClass<*>) =
+      this.intersectRealSuperClasses(other).isNotEmpty()
 
     private fun KClass<*>.isListType() = isSubclassOf(List::class) || java.isArray
     private fun Class<*>.isListType() = List::class.assignableFrom(this) || this.isArray
-    private fun Class<*>.isParsableType() = Map::class.assignableFrom(this) || String::class.assignableFrom(this)
+    private fun Class<*>.isParsableType() =
+      Map::class.assignableFrom(this) || String::class.assignableFrom(this)
   }
 }
 
@@ -186,7 +199,11 @@ class NamedParams(val map: Map<String, Any?>) : AbstractParams() {
   override fun computeScore(fn: KFunction<*>): Int {
     if (fn.parameters.size - 1 != map.size) return Int.MAX_VALUE
 
-    val (parameters, values) = fn.parameters.drop(1).map { it.name to it }.filter { (key, _) -> map.containsKey(key) }.map { it.second to map[it.first] }.unzip()
+    val (parameters, values) = fn.parameters.drop(1).map { it.name to it }.filter { (key, _) ->
+      map.containsKey(
+        key
+      )
+    }.map { it.second to map[it.first] }.unzip()
     return computeScore(parameters, values)
   }
 }
@@ -214,7 +231,8 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
   }
 }
 
-private fun convert(value: Any?, parameter: KParameter) = convert(value, parameter.type.jvmErasure.javaObjectType)
+private fun convert(value: Any?, parameter: KParameter) =
+  convert(value, parameter.type.jvmErasure.javaObjectType)
 
 private fun convert(value: Any?, parameter: Parameter) = convert(value, parameter.type)
 

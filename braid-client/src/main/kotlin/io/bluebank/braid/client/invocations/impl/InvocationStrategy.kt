@@ -48,7 +48,8 @@ internal abstract class InvocationStrategy<T : Any?>(
   private val parent: InvocationsInternal,
   protected val method: String,
   private val returnType: Type,
-  private val params: Array<out Any?>) {
+  private val params: Array<out Any?>
+) {
 
   companion object {
     private val log = loggerFor<InvocationStrategy<*>>()
@@ -57,10 +58,20 @@ internal abstract class InvocationStrategy<T : Any?>(
      * factory method to create the appropriate strategy and to request its result, potentially causing the execution
      * of the invocation (note: not in the case of methods returning [Observable]
      */
-    fun invoke(parent: InvocationsInternal, method: String, returnType: Type, params: Array<out Any?>): Any? {
+    fun invoke(
+      parent: InvocationsInternal,
+      method: String,
+      returnType: Type,
+      params: Array<out Any?>
+    ): Any? {
       return when (returnType.actualType()) {
         Future::class.java -> FutureInvocationStrategy(parent, method, returnType, params)
-        Observable::class.java -> ObservableInvocationStrategy(parent, method, returnType, params)
+        Observable::class.java -> ObservableInvocationStrategy(
+          parent,
+          method,
+          returnType,
+          params
+        )
         else -> BlockingInvocationStrategy(parent, method, returnType, params)
       }.getResult()
     }
@@ -69,7 +80,8 @@ internal abstract class InvocationStrategy<T : Any?>(
   /**
    * a [com.fasterxml.jackson.databind.JavaType] for the return type, used by Jackson for deserialisation
    */
-  private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
+  private val payloadType =
+    Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
 
   /**
    * method provided by all concrete implementations to retrieve the result of the invocation
@@ -116,7 +128,12 @@ internal abstract class InvocationStrategy<T : Any?>(
   internal fun beginInvoke(requestId: Long) {
     log.trace(requestId) { "beginning invocation" }
     parent.setStrategy(requestId, this)
-    val request = JsonRPCRequest(id = requestId, method = method, params = params.toList(), streamed = returnType.isStreaming())
+    val request = JsonRPCRequest(
+      id = requestId,
+      method = method,
+      params = params.toList(),
+      streamed = returnType.isStreaming()
+    )
     parent.send(request).catch { onError(requestId, it) }
   }
 
@@ -140,10 +157,10 @@ internal abstract class InvocationStrategy<T : Any?>(
     }
   }
 
-
   private fun onError(requestId: Long, payload: JsonObject) {
     val error = try {
-      payload.getJsonObject("error")?.getString("message") ?: throw RuntimeException("failed to parse error message")
+      payload.getJsonObject("error")?.getString("message")
+        ?: throw RuntimeException("failed to parse error message")
     } catch (err: Throwable) {
       onError(requestId, err)
       throw err

@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ${package}
+package $
 
-import io.bluebank.braid.core.annotation.MethodDescription
-import io.bluebank.braid.core.annotation.ServiceDescription
+{ package }
+
+import io.bluebank.braid.core.annotation .MethodDescription
+import io.bluebank.braid.core.annotation .ServiceDescription
 import io.vertx.core.Vertx
 import rx.Observable
 import rx.Subscriber
@@ -30,6 +32,7 @@ import java.util.*
  */
 @ServiceDescription("time", "a simple time service")
 class TimeService(private val vertx: Vertx) {
+
   companion object {
     private val timeFormat = SimpleDateFormat("HH:mm:ss")
   }
@@ -42,7 +45,10 @@ class TimeService(private val vertx: Vertx) {
   }
 
   // N.B. how we can document the return type of a stream
-  @MethodDescription(returnType = String::class, description = "return a stream of time updates")
+  @MethodDescription(
+    returnType = String::class,
+    description = "return a stream of time updates"
+  )
   fun time(): Observable<String> {
     return Observable.create { subscriber ->
       val consumer = vertx.eventBus().consumer<String>("time")

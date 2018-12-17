@@ -31,7 +31,9 @@ import javax.script.Invocable
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
-class JavascriptExecutor(private val vertx: Vertx, private val name: String) : ServiceExecutor {
+class JavascriptExecutor(private val vertx: Vertx, private val name: String) :
+  ServiceExecutor {
+
   companion object {
     private val logger = loggerFor<JavascriptExecutor>()
     private const val SCRIPTS_PATH = "service-scripts"
@@ -42,8 +44,8 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
 
       vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future.completer())
       return future
-          .map { Unit }
-          .otherwise { Unit }
+        .map { Unit }
+        .otherwise { Unit }
     }
 
     fun makeScriptsFolder(vertx: Vertx) {
@@ -55,15 +57,15 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) : S
     fun queryServiceNames(vertx: Vertx): List<String> {
       makeScriptsFolder(vertx)
       return vertx.fileSystem().readDirBlocking(SCRIPTS_PATH)
-          .map {
-            Paths.get(it).fileName.toString()
-          }
-          .filter {
-            it.endsWith(".js")
-          }
-          .map {
-            it.dropLast(3)
-          }
+        .map {
+          Paths.get(it).fileName.toString()
+        }
+        .filter {
+          it.endsWith(".js")
+        }
+        .map {
+          it.dropLast(3)
+        }
     }
   }
 

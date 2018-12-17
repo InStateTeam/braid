@@ -24,8 +24,14 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 // so only need to support a list and a map i think...
 // certainly we're only calling this using a list for parameters at the mo...
 // will come back to map once we've figured out the structure - presumably Map<String, Any>
-class JsonRPCReqestSerializer : StdSerializer<JsonRPCRequest>(JsonRPCRequest::class.java) {
-  override fun serialize(value: JsonRPCRequest, generator: JsonGenerator, provider: SerializerProvider) {
+class JsonRPCReqestSerializer :
+  StdSerializer<JsonRPCRequest>(JsonRPCRequest::class.java) {
+
+  override fun serialize(
+    value: JsonRPCRequest,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
     generator.writeStartObject()
     generator.writeStringField("jsonrpc", value.jsonrpc)
     generator.writeNumberField("id", value.id)

@@ -37,6 +37,7 @@ import java.net.URI
 
 @RunWith(VertxUnitRunner::class)
 class ProxyTest {
+
   private val vertx = Vertx.vertx()
   private val clientVertx = Vertx.vertx()
   private val port = getFreePort()
@@ -49,14 +50,20 @@ class ProxyTest {
   fun before(context: TestContext) {
     val async = context.async()
     rpcServer = createServerBuilder()
-        .withVertx(vertx)
-        .withService(MyServiceImpl(vertx))
-        .withPort(port)
-        .build()
+      .withVertx(vertx)
+      .withService(MyServiceImpl(vertx))
+      .withPort(port)
+      .build()
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidCordaProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
+      braidClient = BraidCordaProxyClient(
+        BraidClientConfig(
+          serviceURI = serviceURI,
+          trustAll = true,
+          verifyHost = false
+        ), clientVertx
+      )
 
       braidClient.bindAsync(MyService::class.java).map {
         myService = it
@@ -94,7 +101,10 @@ class ProxyTest {
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - long input`() {
     val result = myService.functionWithTheSameNameAndNumberOfParameters(200L, "100.123")
-    assertEquals(5, result) // will always be a perfect match with the int overload. sorry, that's javascript
+    assertEquals(
+      5,
+      result
+    ) // will always be a perfect match with the int overload. sorry, that's javascript
   }
 
   @Test
@@ -107,44 +117,59 @@ class ProxyTest {
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (float version) - float input`() {
     // double always chosen over float
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(200.1234F, "100.123")
+    val result =
+      myService.functionWithTheSameNameAndNumberOfParameters(200.1234F, "100.123")
     assertEquals(7, result) // float binding is nearer
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - double input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(200.1234, "100.123")
+    val result =
+      myService.functionWithTheSameNameAndNumberOfParameters(200.1234, "100.123")
     assertEquals(7, result)
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - complex object input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(ComplexObject("1", 2, 3.0), "100.123")
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(
+      ComplexObject("1", 2, 3.0),
+      "100.123"
+    )
     assertEquals(8, result)
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - null complex object input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(null, "account id")
+    val result =
+      myService.functionWithTheSameNameAndNumberOfParameters(null, "account id")
     assertEquals(8, result)
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - list input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(listOf("a", "b", "c"), "100.123")
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(
+      listOf("a", "b", "c"),
+      "100.123"
+    )
     assertEquals(9, result)
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (list version) - array input`() {
     // list always chosen over array
-    val result = myService.functionWithTheSameNameAndNumberOfParameters(arrayOf("a", "b", "c"), "100.123")
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(
+      arrayOf("a", "b", "c"),
+      "100.123"
+    )
     assertEquals(9, result)
   }
 
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function - string input`() {
-    val result = myService.functionWithTheSameNameAndNumberOfParameters("not a number", "My Netflix account")
+    val result = myService.functionWithTheSameNameAndNumberOfParameters(
+      "not a number",
+      "My Netflix account"
+    )
     assertEquals(1, result)
   }
 
@@ -158,14 +183,27 @@ class ProxyTest {
       }.firstOrNull()
 
   }
+
   @Test
   fun `sending a request to a client with multiple functions with the same name and number of parameters finds the correct function (BigDecimal version) - big decimal input`() {
     // string always chosen over big decimal
-    val functionWithABigDecimalParameterResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "My Netflix account")
+    val functionWithABigDecimalParameterResult =
+      myService.functionWithTheSameNameAndNumberOfParameters(
+        BigDecimal("200.12345"),
+        "My Netflix account"
+      )
     assertEquals(2, functionWithABigDecimalParameterResult)
-    val functionWithTwoBigDecimalParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
+    val functionWithTwoBigDecimalParametersResult =
+      myService.functionWithTheSameNameAndNumberOfParameters(
+        BigDecimal("200.12345"),
+        BigDecimal("200.12345")
+      )
     assertEquals(3, functionWithTwoBigDecimalParametersResult)
-    val functionWithBigDecimalAndStringNumberParametersResult = myService.functionWithTheSameNameAndNumberOfParameters(BigDecimal("200.12345"), "200.12345")
+    val functionWithBigDecimalAndStringNumberParametersResult =
+      myService.functionWithTheSameNameAndNumberOfParameters(
+        BigDecimal("200.12345"),
+        "200.12345"
+      )
     assertEquals(3, functionWithBigDecimalAndStringNumberParametersResult)
   }
 
@@ -209,38 +247,66 @@ class ProxyTest {
 
   @Test
   fun `sending a request with a single parameter finds the function - complex object input`() {
-    val result = myService.functionWithTheSameNameAndASingleParameter(ComplexObject("hi", 1, 2.0))
+    val result =
+      myService.functionWithTheSameNameAndASingleParameter(ComplexObject("hi", 1, 2.0))
     assertEquals(17, result)
   }
 
   @Test
   fun `sending a request with a single parameter finds the function - list input`() {
-    val result = myService.functionWithTheSameNameAndASingleParameter(listOf("i", "am", "a", "string"))
+    val result = myService.functionWithTheSameNameAndASingleParameter(
+      listOf(
+        "i",
+        "am",
+        "a",
+        "string"
+      )
+    )
     assertEquals(18, result)
   }
 
   @Test
   fun `sending a request with a single parameter finds the function - array input`() {
-    val result = myService.functionWithTheSameNameAndASingleParameter(arrayOf("i", "am", "a", "string"))
+    val result = myService.functionWithTheSameNameAndASingleParameter(
+      arrayOf(
+        "i",
+        "am",
+        "a",
+        "string"
+      )
+    )
     assertEquals(18, result)
   }
 
   @Test
   fun `sending a request to a big decimal function finds the function`() {
-    val result = myService.functionWithBigDecimalParameters(BigDecimal("200.12345"), BigDecimal("200.12345"))
+    val result = myService.functionWithBigDecimalParameters(
+      BigDecimal("200.12345"),
+      BigDecimal("200.12345")
+    )
     assertEquals(21, result)
   }
 
-
   @Test
   fun `sending a complex type to an overloaded method that includes Map should always choose the map`() {
-    val result = myService.functionWithComplexOrDynamicType(ComplexObject("foo", Int.MAX_VALUE, Double.MAX_VALUE))
+    val result = myService.functionWithComplexOrDynamicType(
+      ComplexObject(
+        "foo",
+        Int.MAX_VALUE,
+        Double.MAX_VALUE
+      )
+    )
     assertEquals(23, result)
   }
 
   @Test
   fun `sending a map type to an overloaded method that includes Map should always choose the map`() {
-    val result = myService.functionWithComplexOrDynamicType(mapOf("name" to "foo", "amount" to Int.MAX_VALUE))
+    val result = myService.functionWithComplexOrDynamicType(
+      mapOf(
+        "name" to "foo",
+        "amount" to Int.MAX_VALUE
+      )
+    )
     assertEquals(23, result)
   }
 

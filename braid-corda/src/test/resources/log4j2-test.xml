@@ -18,7 +18,8 @@
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
-    <File name="JavascriptOutput" fileName="target/logs/js.log" bufferedIO="true" immediateFlush="true">
+    <File name="JavascriptOutput" fileName="target/logs/js.log" bufferedIO="true"
+          immediateFlush="true">
       <PatternLayout pattern="%msg%n"/>
     </File>
   </Appenders>
@@ -26,7 +27,8 @@
     <Root level="warn">
       <AppenderRef ref="Console"/>
     </Root>
-    <Logger name="io.vertx.ext.web.handler.impl.LoggerHandlerImpl" level="info" additivity="false">
+    <Logger name="io.vertx.ext.web.handler.impl.LoggerHandlerImpl" level="info"
+            additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Logger name="io.bluebank.braid" level="info" additivity="false">

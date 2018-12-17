@@ -23,6 +23,7 @@ import io.vertx.core.Future
  * Internal interface for [InvocationsImpl] used by all [InvocationStrategy] concrete classes
  */
 internal interface InvocationsInternal : Invocations {
+
   fun nextRequestId(): Long
 
   /**

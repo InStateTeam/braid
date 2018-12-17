@@ -44,16 +44,20 @@ import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 
-class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val port: Int,
-                      private val authProvider: AuthProvider?,
-                      private val httpServerOptions: HttpServerOptions) : AbstractVerticle() {
+class JsonRPCVerticle(
+  private val rootPath: String, val services: List<Any>, val port: Int,
+  private val authProvider: AuthProvider?,
+  private val httpServerOptions: HttpServerOptions
+) : AbstractVerticle() {
+
   companion object {
     val logger = loggerFor<JsonRPCVerticle>()
   }
 
   val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
     val serviceNames = services.map { getServiceName(it) }
-    val jsOnlyServices = JavascriptExecutor.queryServiceNames(vertx).filter { !serviceNames.contains(it) }
+    val jsOnlyServices =
+      JavascriptExecutor.queryServiceNames(vertx).filter { !serviceNames.contains(it) }
     val mutableServiceMap = mutableMapOf<String, ServiceExecutor>()
     services.map { getServiceName(it) to wrapConcreteService(it) }.forEach {
       mutableServiceMap[it.first] = it.second
@@ -65,7 +69,7 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   }
 
   private lateinit var router: Router
-  private lateinit var sockJSHandler : SockJSHandler
+  private lateinit var sockJSHandler: SockJSHandler
 
   override fun start(startFuture: Future<Void>) {
     router = setupRouter()
@@ -73,17 +77,19 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   }
 
   private fun wrapConcreteService(service: Any): ServiceExecutor {
-    return CompositeExecutor(JavascriptExecutor(vertx, getServiceName(service)), ConcreteServiceExecutor(service))
+    return CompositeExecutor(
+      JavascriptExecutor(vertx, getServiceName(service)),
+      ConcreteServiceExecutor(service)
+    )
   }
-
 
   private fun ServiceExecutor.getJavascriptExecutor(): JavascriptExecutor {
     return when (this) {
       is CompositeExecutor -> {
         executors
-            .filter { it is JavascriptExecutor }
-            .map { it as JavascriptExecutor }
-            .firstOrNull() ?: throw RuntimeException("cannot find javascript executor")
+          .filter { it is JavascriptExecutor }
+          .map { it as JavascriptExecutor }
+          .firstOrNull() ?: throw RuntimeException("cannot find javascript executor")
       }
       is JavascriptExecutor -> this
       else -> throw RuntimeException("found executor is not a ${JavascriptExecutor::class.simpleName} or doesn't contain one")
@@ -94,8 +100,8 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     return when (this) {
       is CompositeExecutor -> {
         executors.filter { it is ConcreteServiceExecutor }
-            .map { it as ConcreteServiceExecutor }
-            .firstOrNull()
+          .map { it as ConcreteServiceExecutor }
+          .firstOrNull()
       }
       is ConcreteServiceExecutor -> this
       else -> null
@@ -116,16 +122,16 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
 
   private fun setupWebserver(router: Router, startFuture: Future<Void>) {
     vertx.createHttpServer(httpServerOptions.withCompatibleWebsockets())
-        .requestHandler(router::accept)
-        .listen(port) {
-          if (it.succeeded()) {
-            logger.info("started on port $port")
-            startFuture.complete()
-          } else {
-            logger.error("failed to start because", it.cause())
-            startFuture.fail(it.cause())
-          }
+      .requestHandler(router::accept)
+      .listen(port) {
+        if (it.succeeded()) {
+          logger.info("started on port $port")
+          startFuture.complete()
+        } else {
+          logger.error("failed to start because", it.cause())
+          startFuture.fail(it.cause())
         }
+      }
   }
 
   private fun HttpServerOptions.withCompatibleWebsockets(): HttpServerOptions {
@@ -142,23 +148,26 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     setupSockJS()
     servicesRouter.post().handler(BodyHandler.create())
     servicesRouter.get("/").handler { it.getServiceList() }
-    servicesRouter.get("/:serviceId").handler { it.getService(it.pathParam("serviceId"))}
-    servicesRouter.get("/:serviceId/script").handler { it.getServiceScript(it.pathParam("serviceId")) }
-    servicesRouter.post("/:serviceId/script").handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
-    servicesRouter.delete("/:serviceId").handler { it.deleteService(it.pathParam("serviceId")) }
-    servicesRouter.get("/:serviceId/java").handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
+    servicesRouter.get("/:serviceId").handler { it.getService(it.pathParam("serviceId")) }
+    servicesRouter.get("/:serviceId/script")
+      .handler { it.getServiceScript(it.pathParam("serviceId")) }
+    servicesRouter.post("/:serviceId/script")
+      .handler { it.saveServiceScript(it.pathParam("serviceId"), it.bodyAsString) }
+    servicesRouter.delete("/:serviceId")
+      .handler { it.deleteService(it.pathParam("serviceId")) }
+    servicesRouter.get("/:serviceId/java")
+      .handler { it.getJavaImplementationHeaders(it.pathParam("serviceId")) }
     router.mountSubRouter(rootPath, servicesRouter)
     router.get()
-        .last()
-        .handler(
+      .last()
+      .handler(
         StaticHandler.create("editor-web", JsonRPCVerticle::class.java.classLoader)
-            .setCachingEnabled(false)
-            .setMaxCacheSize(1)
-            .setCacheEntryTimeout(1)
-    )
+          .setCachingEnabled(false)
+          .setMaxCacheSize(1)
+          .setCacheEntryTimeout(1)
+      )
     return router
   }
-
 
   private fun RoutingContext.getServiceList() {
     val sm = ServiceDescriptor.createServiceDescriptors(rootPath, serviceMap.keys)
@@ -166,8 +175,17 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
   }
 
   private fun RoutingContext.getService(serviceName: String) {
-    data class ServiceDocumentation(val java: String, val script: String, val endpoint: String)
-    val docs = ServiceDocumentation("$rootPath$serviceName/java", "$rootPath$serviceName/script", defaultServiceEndpoint(rootPath, serviceName))
+    data class ServiceDocumentation(
+      val java: String,
+      val script: String,
+      val endpoint: String
+    )
+
+    val docs = ServiceDocumentation(
+      "$rootPath$serviceName/java",
+      "$rootPath$serviceName/script",
+      defaultServiceEndpoint(rootPath, serviceName)
+    )
     write(docs)
   }
 
@@ -175,9 +193,9 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     val script = getJavascriptExecutorForService(serviceName).getScript()
 
     response()
-        .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
-        .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
-        .end(script)
+      .putHeader(HttpHeaders.CONTENT_TYPE, "text/javascript")
+      .putHeader(HttpHeaders.CONTENT_LENGTH, script.length().toString())
+      .end(script)
   }
 
   private fun RoutingContext.deleteService(serviceName: String) {
@@ -189,13 +207,13 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
     getJavascriptExecutorForService(serviceName).deleteScript()
     if (service is CompositeExecutor) {
       response()
-          .setStatusMessage("cannot delete java service $serviceName, but have deleted JS extension script")
-          .end()
+        .setStatusMessage("cannot delete java service $serviceName, but have deleted JS extension script")
+        .end()
       return
     }
     serviceMap.remove(serviceName)
     val searchPath = sockPath(serviceName).dropLast(1) // remove the *
-    router.routes.filter { it.path == searchPath}.forEach {
+    router.routes.filter { it.path == searchPath }.forEach {
       logger.info("remove route $it")
       it.remove()
     }
@@ -268,7 +286,8 @@ class JsonRPCVerticle(private val rootPath: String, val services: List<Any>, val
       if (serviceMap.contains(serviceId)) {
         it.next()
       } else {
-        it.response().setStatusMessage("""Braid: Service '$serviceId' does not exist. Click here to create it http://localhost:8080""".trimMargin())
+        it.response()
+          .setStatusMessage("""Braid: Service '$serviceId' does not exist. Click here to create it http://localhost:8080""".trimMargin())
           .setStatusCode(404)
           .end()
       }

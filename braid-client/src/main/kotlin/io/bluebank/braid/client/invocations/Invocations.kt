@@ -34,6 +34,7 @@ import java.lang.reflect.Type
  * To initialise requires a [vertx] instance, the [config], and optional connection [exceptionHandler] and [closeHandler]
  */
 interface Invocations : Closeable {
+
   companion object {
     private val log = loggerFor<Invocations>()
     private val defaultClientHttpOptions = HttpClientOptions()

@@ -29,6 +29,7 @@ internal class BlockingInvocationStrategy(
   returnType: Type,
   params: Array<out Any?>
 ) : InvocationStrategy<Any?>(parent, method, returnType, params) {
+
   private val result = Future.future<Any?>()
   private val latch = CountDownLatch(1)
   private var requestId = -1L

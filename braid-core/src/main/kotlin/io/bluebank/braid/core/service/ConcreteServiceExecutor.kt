@@ -46,11 +46,19 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
             .convertParametersAndFilter(request)
             .map { (method, params) ->
               if (log.isTraceEnabled) {
-                log.trace("invoking ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+                log.trace(
+                  "invoking ${method.asSimpleString()} with ${params.joinToString(
+                    ","
+                  ) { it.toString() }}"
+                )
               }
               method.call(service, *params).also {
                 if (log.isTraceEnabled) {
-                  log.trace("successfully invoked ${method.asSimpleString()} with ${params.joinToString(",") { it.toString() }}")
+                  log.trace(
+                    "successfully invoked ${method.asSimpleString()} with ${params.joinToString(
+                      ","
+                    ) { it.toString() }}"
+                  )
                 }
               }
             }
@@ -69,7 +77,8 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   private fun KFunction<*>.asSimpleString(): String {
-    val params = this.parameters.drop(1).joinToString(",") { "${it.name}: ${it.type.javaType.typeName}" }
+    val params = this.parameters.drop(1)
+      .joinToString(",") { "${it.name}: ${it.type.javaType.typeName}" }
     return "$name($params)"
   }
 
@@ -92,7 +101,6 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .map { (fn, _) -> fn }
   }
 
-
   private fun throwMethodDoesNotExist(request: JsonRPCRequest) {
     throw MethodDoesNotExist("failed to find a method that matches ${request.method}(${request.paramsAsString()})")
   }
@@ -112,7 +120,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   @Suppress("UNCHECKED_CAST")
-  private fun handleResult(result: Any?, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+  private fun handleResult(
+    result: Any?,
+    request: JsonRPCRequest,
+    subscriber: Subscriber<Any>
+  ) {
     log.trace("handling result {}", request.id, result)
     when (result) {
       is Future<*> -> handleFuture(result as Future<Any>, request, subscriber)
@@ -121,7 +133,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     }
   }
 
-  private fun handleObservable(result: Observable<Any>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+  private fun handleObservable(
+    result: Observable<Any>,
+    request: JsonRPCRequest,
+    subscriber: Subscriber<Any>
+  ) {
     log.trace("{} - handling observable result", request.id)
     result
       .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
@@ -147,7 +163,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .subscribe(subscriber)
   }
 
-  private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
+  private fun handleFuture(
+    future: Future<Any>,
+    request: JsonRPCRequest,
+    callback: Subscriber<Any>
+  ) {
     request.withMDC {
       log.trace("{} - handling future result", request.id)
       future.setHandler(JsonRPCMounter.FutureHandler {
@@ -156,7 +176,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
     }
   }
 
-  private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
+  private fun handleAsyncResult(
+    response: AsyncResult<*>,
+    request: JsonRPCRequest,
+    subscriber: Subscriber<Any>
+  ) {
     request.withMDC {
       log.trace("{} - handling async result of invocation", request.id)
       when (response.succeeded()) {

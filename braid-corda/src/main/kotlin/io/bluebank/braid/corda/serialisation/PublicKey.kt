@@ -25,15 +25,21 @@ import net.corda.core.utilities.parsePublicKeyBase58
 import net.corda.core.utilities.toBase58String
 import java.security.PublicKey
 
-
 class PublicKeySerializer : StdSerializer<PublicKey>(PublicKey::class.java) {
-  override fun serialize(key: PublicKey, generator: JsonGenerator, provider: SerializerProvider) {
+  override fun serialize(
+    key: PublicKey,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
     generator.writeString(key.toBase58String())
   }
 }
 
 class PublicKeyDeserializer : StdDeserializer<PublicKey>(PublicKey::class.java) {
-  override fun deserialize(parser: JsonParser, context: DeserializationContext): PublicKey {
+  override fun deserialize(
+    parser: JsonParser,
+    context: DeserializationContext
+  ): PublicKey {
     return parsePublicKeyBase58(parser.text)
   }
 }

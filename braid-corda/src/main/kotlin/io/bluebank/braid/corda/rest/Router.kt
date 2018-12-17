@@ -58,7 +58,6 @@ private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?
   return this.parameters.map { it.parseParameter(context) }.toTypedArray()
 }
 
-
 private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
   return context.body.let { body ->
     val type = this.getType()
@@ -115,7 +114,8 @@ private fun KParameter.getType(): KClass<*> {
 }
 
 private fun KParameter.parseParameter(context: RoutingContext): Any? {
-  return this.parsePathParameter(context) ?: this.parseQueryParameter(context) ?: this.parseBodyParameter(context)
+  return this.parsePathParameter(context) ?: this.parseQueryParameter(context)
+  ?: this.parseBodyParameter(context)
 }
 
 private fun KParameter.parseQueryParameter(context: RoutingContext): Any? {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-def deployDirectory = new File(request.outputDirectory, request.getArtifactId() + "/deploy")
+def deployDirectory = new File(request.outputDirectory, request.getArtifactId() +
+  "/deploy")
 deployDirectory.eachFile { file ->
-    file.setExecutable(true, true)
+  file.setExecutable(true, true)
 }

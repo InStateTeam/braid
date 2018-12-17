@@ -31,15 +31,25 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Deprecated. Used [BraidClient]
  */
-@Deprecated("please use BraidClient instead - this will be removed in 4.0.0 - see issue #75", replaceWith = ReplaceWith("BraidClient"))
-open class BraidProxyClient protected constructor (private val config: BraidClientConfig, val vertx: Vertx) : Closeable, InvocationHandler {
+@Deprecated(
+  "please use BraidClient instead - this will be removed in 4.0.0 - see issue #75",
+  replaceWith = ReplaceWith("BraidClient")
+)
+open class BraidProxyClient protected constructor(
+  private val config: BraidClientConfig,
+  val vertx: Vertx
+) : Closeable, InvocationHandler {
+
   private val nextId = AtomicLong(1)
-  private lateinit var invokes : Invocations
+  private lateinit var invokes: Invocations
 
   companion object {
     private val log: Logger = loggerFor<BraidProxyClient>()
 
-    fun createProxyClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidProxyClient {
+    fun createProxyClient(
+      config: BraidClientConfig,
+      vertx: Vertx = Vertx.vertx()
+    ): BraidProxyClient {
       return BraidProxyClient(config, vertx)
     }
   }
@@ -48,17 +58,26 @@ open class BraidProxyClient protected constructor (private val config: BraidClie
     return invokes.activeRequestsCount
   }
 
-  fun <ServiceType : Any> bind(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): ServiceType {
+  fun <ServiceType : Any> bind(
+    clazz: Class<ServiceType>,
+    exceptionHandler: (Throwable) -> Unit = this::exceptionHandler,
+    closeHandler: (() -> Unit) = this::closeHandler
+  ): ServiceType {
     return bindAsync(clazz, exceptionHandler, closeHandler).getOrThrow()
   }
 
   // TODO: fix the obvious lunacy of only having one handler per socket...
   @Suppress("UNCHECKED_CAST")
-  fun <ServiceType : Any> bindAsync(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
+  fun <ServiceType : Any> bindAsync(
+    clazz: Class<ServiceType>,
+    exceptionHandler: (Throwable) -> Unit = this::exceptionHandler,
+    closeHandler: (() -> Unit) = this::closeHandler
+  ): Future<ServiceType> {
     val result = future<ServiceType>()
     try {
       invokes = Invocations.create(vertx, config, exceptionHandler, closeHandler)
-      val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
+      val proxy =
+        Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
       result.complete(proxy)
     } catch (err: Throwable) {
       log.error("failed during connection", err)
@@ -72,7 +91,11 @@ open class BraidProxyClient protected constructor (private val config: BraidClie
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? {
-    return invokes.invoke(method.name, method.genericReturnType, args ?: arrayOfNulls<Any>(0))
+    return invokes.invoke(
+      method.name,
+      method.genericReturnType,
+      args ?: arrayOfNulls<Any>(0)
+    )
   }
 
   private fun closeHandler() {

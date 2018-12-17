@@ -42,13 +42,43 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 
-abstract class EndPoint(private val groupName: String, val protected: Boolean, val method: HttpMethod, val path: String) {
+abstract class EndPoint(
+  private val groupName: String,
+  val protected: Boolean,
+  val method: HttpMethod,
+  val path: String
+) {
+
   companion object {
-    fun create(groupName: String, protected: Boolean, method: HttpMethod, path: String, name: String, parameters: List<KParameter>, returnType: KType, annotations: List<Annotation>): EndPoint {
-      return KEndPoint(groupName, protected, method, path, name, parameters, returnType.javaType, annotations)
+    fun create(
+      groupName: String,
+      protected: Boolean,
+      method: HttpMethod,
+      path: String,
+      name: String,
+      parameters: List<KParameter>,
+      returnType: KType,
+      annotations: List<Annotation>
+    ): EndPoint {
+      return KEndPoint(
+        groupName,
+        protected,
+        method,
+        path,
+        name,
+        parameters,
+        returnType.javaType,
+        annotations
+      )
     }
 
-    fun create(groupName: String, protected: Boolean, method: HttpMethod, path: String, fn: RoutingContext.() -> Unit): EndPoint {
+    fun create(
+      groupName: String,
+      protected: Boolean,
+      method: HttpMethod,
+      path: String,
+      fn: RoutingContext.() -> Unit
+    ): EndPoint {
       return ImplicitParamsEndPoint(groupName, protected, method, path, fn)
     }
   }
@@ -160,7 +190,8 @@ abstract class EndPoint(private val groupName: String, val protected: Boolean, v
     val actualReturnType = returnType.actualType()
     if (actualReturnType == Unit::class.java ||
       actualReturnType == Void::class.java ||
-      actualReturnType.typeName == "void") {
+      actualReturnType.typeName == "void"
+    ) {
       operation
         .produces(MediaType.TEXT_PLAIN)
         .defaultResponse(Response().description("empty response"))

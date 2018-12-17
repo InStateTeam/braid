@@ -28,7 +28,12 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * @param vertx - vertx instance to be used for scheduling blocking calls
      * @param maxExecutionTime - maximum execution time before the request is killed
      */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int, maxExecutionTime: Long): Socket<Buffer, Buffer> {
+    fun create(
+      socket: SockJSSocket,
+      vertx: Vertx,
+      threads: Int,
+      maxExecutionTime: Long
+    ): Socket<Buffer, Buffer> {
       val nbs = NonBlockingSocket<Buffer, Buffer>(vertx, threads, maxExecutionTime)
       val sjs = SockJsSocketImpl(socket)
       sjs.addListener(nbs)
@@ -42,7 +47,8 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) = create(socket, vertx, threads, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS)
+    fun create(socket: SockJSSocket, vertx: Vertx, threads: Int) =
+      create(socket, vertx, threads, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS)
 
     /**
      * Create a non-blocking [Socket] wrapper with the maximum execution time set to [NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS]
@@ -51,13 +57,18 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
      * @param socket - vertx SockJSSocket
      * @param vertx - vertx instance to be used for scheduling blocking calls
      */
-    fun create(socket: SockJSSocket, vertx: Vertx) = create(socket, vertx, NonBlockingSocket.DEFAULT_MAX_THREADS, NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS)
+    fun create(socket: SockJSSocket, vertx: Vertx) = create(
+      socket,
+      vertx,
+      NonBlockingSocket.DEFAULT_MAX_THREADS,
+      NonBlockingSocket.DEFAULT_MAX_EXECUTION_TIME_NANOS
+    )
 
     /**
      * Factory for creating a blocking socket wrapper.
      * WARNING: Beware that handlers on this socket should not be long running. Handler will block the event loop!
      */
-    fun create(socket: SockJSSocket) : Socket<Buffer, Buffer> {
+    fun create(socket: SockJSSocket): Socket<Buffer, Buffer> {
       return SockJsSocketImpl(socket)
     }
   }

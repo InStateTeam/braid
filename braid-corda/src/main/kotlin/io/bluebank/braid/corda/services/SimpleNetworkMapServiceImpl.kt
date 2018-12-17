@@ -25,12 +25,16 @@ import net.corda.core.utilities.NetworkHostAndPort
 import rx.Observable
 import rx.Subscription
 
-class SimpleNetworkMapServiceImpl(private val services: AppServiceHub, private val config: BraidConfig) : SimpleNetworkMapService {
+class SimpleNetworkMapServiceImpl(
+  private val services: AppServiceHub,
+  private val config: BraidConfig
+) : SimpleNetworkMapService {
 
   data class SimpleNodeInfo(
-      val addresses: List<NetworkHostAndPort>,
-      val legalIdentities: List<Party>
+    val addresses: List<NetworkHostAndPort>,
+    val legalIdentities: List<Party>
   ) {
+
     // we map to work around the serialisation of
     constructor(nodeInfo: NodeInfo) : this(nodeInfo.addresses, nodeInfo.legalIdentities)
   }
@@ -41,23 +45,28 @@ class SimpleNetworkMapServiceImpl(private val services: AppServiceHub, private v
     MODIFIED
   }
 
-  data class MapChange(val type: MapChangeType, val node: SimpleNodeInfo, val previousNode: SimpleNodeInfo? = null) {
+  data class MapChange(
+    val type: MapChangeType,
+    val node: SimpleNodeInfo,
+    val previousNode: SimpleNodeInfo? = null
+  ) {
+
     constructor(change: NetworkMapCache.MapChange) : this(
-        when (change) {
-          is NetworkMapCache.MapChange.Added -> MapChangeType.ADDED
-          is NetworkMapCache.MapChange.Removed -> MapChangeType.REMOVED
-          is NetworkMapCache.MapChange.Modified -> MapChangeType.MODIFIED
-          else -> throw RuntimeException("unknown map change type ${change.javaClass}")
-        },
-        change.node.asSimple(),
-        when (change) {
-          is NetworkMapCache.MapChange.Modified -> change.previousNode.asSimple()
-          else -> null
-        }
+      when (change) {
+        is NetworkMapCache.MapChange.Added -> MapChangeType.ADDED
+        is NetworkMapCache.MapChange.Removed -> MapChangeType.REMOVED
+        is NetworkMapCache.MapChange.Modified -> MapChangeType.MODIFIED
+        else -> throw RuntimeException("unknown map change type ${change.javaClass}")
+      },
+      change.node.asSimple(),
+      when (change) {
+        is NetworkMapCache.MapChange.Modified -> change.previousNode.asSimple()
+        else -> null
+      }
     )
   }
 
-  override fun myNodeInfo() : SimpleNodeInfo {
+  override fun myNodeInfo(): SimpleNodeInfo {
     return services.myInfo.asSimple()
   }
 
@@ -102,7 +111,8 @@ class SimpleNetworkMapServiceImpl(private val services: AppServiceHub, private v
 
   override fun getNodeByAddress(hostAndPort: String): SimpleNodeInfo? {
     return services.transaction {
-      services.networkMapCache.getNodeByAddress(NetworkHostAndPort.parse(hostAndPort))?.asSimple()
+      services.networkMapCache.getNodeByAddress(NetworkHostAndPort.parse(hostAndPort))
+        ?.asSimple()
     }
   }
 
@@ -121,6 +131,6 @@ private fun NodeInfo.asSimple(): SimpleNetworkMapServiceImpl.SimpleNodeInfo {
   return SimpleNetworkMapServiceImpl.SimpleNodeInfo(this)
 }
 
-fun <T> AppServiceHub.transaction(fn: () -> T) : T {
+fun <T> AppServiceHub.transaction(fn: () -> T): T {
   return fn()
 }

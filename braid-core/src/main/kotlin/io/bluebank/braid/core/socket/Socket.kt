@@ -22,6 +22,7 @@ import io.vertx.ext.auth.User
  * A client of this socket will receive objects of type [R] and send objects of type [S]
  */
 interface Socket<R, S> {
+
   /**
    * called to register a listener on a socket
    * @return this socket
@@ -33,7 +34,6 @@ interface Socket<R, S> {
    * @return this socket
    */
   fun write(obj: S): Socket<R, S>
-
 
   /**
    * A socket can have a [User] associated with it. This function returns the user

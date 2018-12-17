@@ -21,6 +21,7 @@ import io.bluebank.braid.core.logging.loggerFor
  * This class implements a thread-safe lock-free implementation of [Socket] listener notifications
  */
 abstract class AbstractSocket<R, S> : Socket<R, S> {
+
   companion object {
     private val logger = loggerFor<AbstractSocket<*, *>>()
   }

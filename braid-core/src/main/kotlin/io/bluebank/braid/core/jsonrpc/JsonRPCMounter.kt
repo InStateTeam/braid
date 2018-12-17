@@ -28,7 +28,9 @@ import io.vertx.core.Vertx
 import io.vertx.rx.java.RxHelper
 import rx.Subscription
 
-class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : SocketListener<JsonRPCRequest, JsonRPCResponse> {
+class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
+  SocketListener<JsonRPCRequest, JsonRPCResponse> {
+
   companion object {
     private val log = loggerFor<JsonRPCMounter>()
     const val MIN_VERSION = 2.0
@@ -42,7 +44,10 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
     this.socket = socket
   }
 
-  override fun dataHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>, item: JsonRPCRequest) {
+  override fun dataHandler(
+    socket: Socket<JsonRPCRequest, JsonRPCResponse>,
+    item: JsonRPCRequest
+  ) {
     item.withMDC {
       handleRequest(item)
     }
@@ -53,7 +58,9 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
     activeSubscriptions.clear()
   }
 
-  class FutureHandler(val callback: (AsyncResult<Any?>) -> Unit) : Handler<AsyncResult<Any?>> {
+  class FutureHandler(val callback: (AsyncResult<Any?>) -> Unit) :
+    Handler<AsyncResult<Any?>> {
+
     override fun handle(event: AsyncResult<Any?>) {
       callback(event)
     }
@@ -68,7 +75,8 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
           stopStream(request)
         } else {
           if (activeSubscriptions.containsKey(request.id)) {
-            val msg = "a request with duplicate request id is in progress for this connection"
+            val msg =
+              "a request with duplicate request id is in progress for this connection"
             log.warn(msg)
             throw RuntimeException(msg)
           }
@@ -127,7 +135,10 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
       try {
         log.trace("handling error result {}", err)
         when (err) {
-          is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(request.id, "method ${request.method} not implemented").send()
+          is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(
+            request.id,
+            "method ${request.method} not implemented"
+          ).send()
           is JsonRPCException -> err.response.send()
           else -> serverError(request.id, err.message).send()
         }

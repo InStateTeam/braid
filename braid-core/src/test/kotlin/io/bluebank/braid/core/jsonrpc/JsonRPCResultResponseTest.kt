@@ -31,18 +31,19 @@ class JsonRPCResultResponseTest {
 
   @Test
   fun shouldBeAbleToPreserveTypeInformationDuringSerialisation() {
-    val expected = "{\"result\":{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"},\"id\":1,\"jsonrpc\":\"2.0\"}"
+    val expected =
+      "{\"result\":{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"},\"id\":1,\"jsonrpc\":\"2.0\"}"
     val jsonResponse = JsonRPCResultResponse(id = 1, result = MeteringModelData("wobble"))
     Assert.assertEquals(expected, Json.encode(jsonResponse))
   }
 
   @JsonTypeInfo(
-      use = JsonTypeInfo.Id.NAME,
-      include = JsonTypeInfo.As.PROPERTY,
-      property = "type"
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
   )
   @JsonSubTypes(
-      JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
+    JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
   )
   interface ModelData
 

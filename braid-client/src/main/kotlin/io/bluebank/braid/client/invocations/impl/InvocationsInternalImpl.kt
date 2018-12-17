@@ -25,7 +25,9 @@ import java.lang.reflect.Type
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-internal abstract class InvocationsInternalImpl(private val destinationName: String = "") : InvocationsInternal {
+internal abstract class InvocationsInternalImpl(private val destinationName: String = "") :
+  InvocationsInternal {
+
   companion object {
     private val log = loggerFor<InvocationsInternalImpl>()
   }
@@ -118,7 +120,10 @@ internal abstract class InvocationsInternalImpl(private val destinationName: Str
       }
       val requestId = jo.getLong("id")
       when {
-        requestId == null -> log.error("received response without id {}", buffer.toString())
+        requestId == null -> log.error(
+          "received response without id {}",
+          buffer.toString()
+        )
         !isInvocationLive(requestId) -> log.error(requestId) { "no subscriber found for response id $requestId" }
         else -> receive(requestId, jo)
       }

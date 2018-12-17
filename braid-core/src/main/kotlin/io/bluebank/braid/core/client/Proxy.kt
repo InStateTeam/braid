@@ -33,11 +33,13 @@ import java.lang.reflect.Proxy
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
-data class ServiceEndpoint(val host: String = "localhost",
-                           val ssl: Boolean = false,
-                           val path: String = "/api/",
-                           val port: Int = 8080,
-                           val credentials: JsonObject? = null)
+data class ServiceEndpoint(
+  val host: String = "localhost",
+  val ssl: Boolean = false,
+  val path: String = "/api/",
+  val port: Int = 8080,
+  val credentials: JsonObject? = null
+)
 
 private class InvocationClosure(val subscriber: Subscriber<*>, returnType: Class<*>)
 
@@ -87,14 +89,22 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
     invokeForObservable(proxy, method, args).subscribe()
   }
 
-  private fun invokeForFuture(proxy: Any, method: Method, args: Array<out Any>): Future<*> {
+  private fun invokeForFuture(
+    proxy: Any,
+    method: Method,
+    args: Array<out Any>
+  ): Future<*> {
     val result = Future.future<Any>()
     invokeForObservable(proxy, method, args)
       .subscribe(result::complete, result::fail)
     return result
   }
 
-  private fun invokeForObservable(proxy: Any, method: Method, args: Array<out Any>): Observable<*> {
+  private fun invokeForObservable(
+    proxy: Any,
+    method: Method,
+    args: Array<out Any>
+  ): Observable<*> {
     val md = method.getAnnotation<MethodDescription>(MethodDescription::class.java)
     return Observable.create<Any> {
 
@@ -106,7 +116,8 @@ class BraidInvocationHandler(endpoint: ServiceEndpoint) : InvocationHandler {
   }
 }
 
-inline fun <reified T : Any> KClass<T>.braidProxy(endpoint: ServiceEndpoint) = braidProxy(T::class.java, endpoint)
+inline fun <reified T : Any> KClass<T>.braidProxy(endpoint: ServiceEndpoint) =
+  braidProxy(T::class.java, endpoint)
 
 fun <T : Any> braidProxy(clazz: Class<T>, endpoint: ServiceEndpoint): T {
   val loader = clazz.classLoader

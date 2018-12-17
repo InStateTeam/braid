@@ -33,6 +33,7 @@ import kotlin.test.assertFailsWith
 
 @RunWith(VertxUnitRunner::class)
 class InvocationsImplTest {
+
   private val port = findFreePort()
   private val vertx = Vertx.vertx()
   private var server: HttpServer? = null
@@ -57,7 +58,14 @@ class InvocationsImplTest {
       .websocketHandler { socket ->
         socket.handler {
           socket.writeFinalTextFrame("&&&&&&&&&&")
-          socket.writeFinalTextFrame(Json.encode(JsonRPCResultResponse(id = 1, result = "hello")))
+          socket.writeFinalTextFrame(
+            Json.encode(
+              JsonRPCResultResponse(
+                id = 1,
+                result = "hello"
+              )
+            )
+          )
         }
       }.listen(port)
     invocations = Invocations.create(vertx = vertx,

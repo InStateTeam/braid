@@ -29,7 +29,8 @@ class ImplicitParamsEndPoint(
   protected: Boolean,
   method: HttpMethod,
   path: String,
-  fn: (RoutingContext) -> Unit) : EndPoint(groupName, protected, method, path) {
+  fn: (RoutingContext) -> Unit
+) : EndPoint(groupName, protected, method, path) {
 
   private val annotated = (fn as KAnnotatedElement)
   override val annotations: List<Annotation> = annotated.annotations

@@ -19,14 +19,16 @@ import io.vertx.core.logging.SLF4JLogDelegateFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-inline fun <reified T: Any> loggerFor() : Logger {
+inline fun <reified T : Any> loggerFor(): Logger {
   return LoggerFactory.getLogger(T::class.java)
 }
 
-
 object LogInitialiser {
   init {
-    System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory::class.qualifiedName)
+    System.setProperty(
+      "vertx.logger-delegate-factory-class-name",
+      SLF4JLogDelegateFactory::class.qualifiedName
+    )
   }
 
   fun init() {

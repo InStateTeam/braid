@@ -19,6 +19,7 @@ package io.bluebank.braid.core.socket
  * Implemented by a listener to a socket
  */
 interface SocketListener<R, S> {
+
   /**
    * Called by [AbstractSocket] to inform this listener that it will be receiving events from [socket]
    * Following this call, this listener is allowed to call [Socket] methods such as [Socket.write]

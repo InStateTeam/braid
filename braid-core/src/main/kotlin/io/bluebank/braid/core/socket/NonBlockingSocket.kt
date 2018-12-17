@@ -31,9 +31,11 @@ class NonBlockingSocket<R, S>(
   private val threads: Int = Math.max(1, Runtime.getRuntime().availableProcessors() - 1),
   private val maxExecutionTime: Long = DEFAULT_MAX_EXECUTION_TIME_NANOS
 ) : AbstractSocket<R, S>(), SocketProcessor<R, S, R, S> {
+
   companion object {
     private val log = loggerFor<NonBlockingSocket<*, *>>()
-    const val DEFAULT_MAX_EXECUTION_TIME_NANOS = 60L * 60 * 1_000 * 1_000_000 // 1 hour max execution time. Too long?
+    const val DEFAULT_MAX_EXECUTION_TIME_NANOS =
+      60L * 60 * 1_000 * 1_000_000 // 1 hour max execution time. Too long?
     private val fountain by lazy {
       val atomic = AtomicInteger(0)
       fun() = "nonblocking-socket-${atomic.getAndIncrement()}"
@@ -48,7 +50,12 @@ class NonBlockingSocket<R, S>(
 
   private val id = fountain()
   private var socket: Socket<R, S>? = null
-  private val pool: WorkerExecutor get() = vertx.createSharedWorkerExecutor(THREAD_POOL_NAME, threads, maxExecutionTime)
+  private val pool: WorkerExecutor
+    get() = vertx.createSharedWorkerExecutor(
+      THREAD_POOL_NAME,
+      threads,
+      maxExecutionTime
+    )
 
   init {
     log.trace("initialising NonBlockingSocket $id")
@@ -85,7 +92,7 @@ class NonBlockingSocket<R, S>(
       when (err) {
         is RejectedExecutionException,
         is IllegalStateException -> log.info("socket closed during vertx shutdown")
-        else ->  log.error("failed to process end handler", err)
+        else -> log.error("failed to process end handler", err)
       }
     }
   }

@@ -17,7 +17,7 @@ package io.bluebank.braid.core.http
 
 import io.vertx.core.MultiMap
 
-fun String.parseQueryParams() : MultiMap {
+fun String.parseQueryParams(): MultiMap {
   val mm = MultiMap.caseInsensitiveMultiMap()
   this.split('&').map { it.split('=') }.forEach { mm.add(it[0], it[1]) }
   return mm

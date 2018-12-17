@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 private val log = LoggerFactory.getLogger("Async.kt")
 
-fun <T: Any> Single<T>.toFuture() : Future<T> {
+fun <T : Any> Single<T>.toFuture(): Future<T> {
   val result = future<T>()
   this.subscribe(result::complete, result::fail)
   return result
@@ -49,9 +49,9 @@ fun <T: Any> Single<T>.toFuture() : Future<T> {
 /**
  * because we think there's a race condition in [Observable.toSingle]
  */
-fun <T: Any> Observable<T>.toFuture() : Future<T> {
+fun <T : Any> Observable<T>.toFuture(): Future<T> {
   val result = future<T>()
-  var onlyItem : T? = null
+  var onlyItem: T? = null
 
   this.subscribe({ item ->
     try {
@@ -62,16 +62,18 @@ fun <T: Any> Observable<T>.toFuture() : Future<T> {
     } catch (err: Throwable) {
       log.error("failed during handling of item in toFuture", err)
     }
-  }, { err -> // on error
+  }, { err ->
+    // on error
     try {
       when {
         result.isComplete -> log.warn("received error from observable but future has already been completed")
         else -> result.fail(err)
       }
-    } catch(err: Throwable) {
+    } catch (err: Throwable) {
       log.error("failed during handling of error in toFuture", err)
     }
-  }, { // on completed
+  }, {
+    // on completed
     try {
       when {
         result.failed() -> {
@@ -79,7 +81,10 @@ fun <T: Any> Observable<T>.toFuture() : Future<T> {
         }
         result.succeeded() -> {
           // this is very bad. we've completed successfully but we've received a second completion message
-          log.warn("received message for request that has already been completed with {}", onlyItem)
+          log.warn(
+            "received message for request that has already been completed with {}",
+            onlyItem
+          )
         }
         else -> {
           // we should have a result now
@@ -96,13 +101,12 @@ fun <T: Any> Observable<T>.toFuture() : Future<T> {
           }
         }
       }
-    } catch(err: Throwable) {
+    } catch (err: Throwable) {
       log.error("failed in handling observable completion in toFuture", err)
     }
   })
   return result
 }
-
 
 fun <T : Any> Future<T>.getOrThrow(): T {
   val latch = CountDownLatch(1)
@@ -119,8 +123,8 @@ fun <T : Any> Future<T>.getOrThrow(): T {
 }
 
 private object BraidAsync
-private val logger = loggerFor<BraidAsync>()
 
+private val logger = loggerFor<BraidAsync>()
 
 fun RoutingContext.end(text: String) {
   val length = text.length
@@ -280,7 +284,7 @@ fun <T> List<Future<T>>.all(): Future<List<T>> {
   return fResult
 }
 
-fun <T> Future<T>.mapUnit() : Future<Unit> {
+fun <T> Future<T>.mapUnit(): Future<Unit> {
   return this.map { Unit }
 }
 

@@ -34,7 +34,11 @@ object JWTUtils {
     }
   }
 
-  private fun KeyStore.addSecretKey(algorithm: String, alias: String, password: CharArray) {
+  private fun KeyStore.addSecretKey(
+    algorithm: String,
+    alias: String,
+    password: CharArray
+  ) {
     val keyGen = KeyGenerator.getInstance(algorithm)
     keyGen.init(2048)
     val secretKey = keyGen.generateKey()

@@ -40,7 +40,7 @@ class BraidCordaJacksonInit {
       // we reuse the jackson support from corda, replacing those that are not flexible enough for
       // dynamic languages
       val sm = SimpleModule()
-          .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
+        .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
 
 // we won't use the party serliazers due to the way they require a specialised ObjectMapper!
 //          .addSerializer(AnonymousParty::class.java, JacksonSupport.AnonymousPartySerializer)
@@ -48,46 +48,61 @@ class BraidCordaJacksonInit {
 //          .addSerializer(Party::class.java, JacksonSupport.PartySerializer)
 //          .addDeserializer(Party::class.java, JacksonSupport.PartyDeserializer)
 //          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
-          .addSerializer(BigDecimal::class.java, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)
-          .addDeserializer(BigDecimal::class.java, NumberDeserializers.BigDecimalDeserializer())
-          .addSerializer(SecureHash::class.java, SecureHashSerializer)
-          .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
-          .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
-          .addDeserializer(SecureHash.SHA256::class.java, SecureHashDeserializer())
+        .addSerializer(
+          BigDecimal::class.java,
+          com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance
+        )
+        .addDeserializer(
+          BigDecimal::class.java,
+          NumberDeserializers.BigDecimalDeserializer()
+        )
+        .addSerializer(SecureHash::class.java, SecureHashSerializer)
+        .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
+        .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
+        .addDeserializer(SecureHash.SHA256::class.java, SecureHashDeserializer())
 
-          // For ed25519 pubkeys
-          // TODO: Fix these
+        // For ed25519 pubkeys
+        // TODO: Fix these
 //          .addSerializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeySerializer)
 //          .addDeserializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeyDeserializer)
 
-          // For NodeInfo
-          // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.
-          .addSerializer(NodeInfo::class.java, JacksonSupport.NodeInfoSerializer)
-          .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
+        // For NodeInfo
+        // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.
+        .addSerializer(NodeInfo::class.java, JacksonSupport.NodeInfoSerializer)
+        .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
 
-          // For Amount
-          // we do not use the Corda amount serialisers
+        // For Amount
+        // we do not use the Corda amount serialisers
 //          .addSerializer(Amount::class.java, JacksonSupport.AmountSerializer)
 //          .addDeserializer(Amount::class.java, JacksonSupport.AmountDeserializer)
 
-          // For OpaqueBytes
-          .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
-          .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
+        // For OpaqueBytes
+        .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
+        .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
 
-          // For X.500 distinguished names
-          .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
-          .addSerializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameSerializer)
+        // For X.500 distinguished names
+        .addDeserializer(
+          CordaX500Name::class.java,
+          JacksonSupport.CordaX500NameDeserializer
+        )
+        .addSerializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameSerializer)
 
-          // Mixins for transaction types to prevent some properties from being serialized
-          .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
-          .setMixInAnnotation(WireTransaction::class.java, JacksonSupport.WireTransactionMixin::class.java)
+        // Mixins for transaction types to prevent some properties from being serialized
+        .setMixInAnnotation(
+          SignedTransaction::class.java,
+          JacksonSupport.SignedTransactionMixin::class.java
+        )
+        .setMixInAnnotation(
+          WireTransaction::class.java,
+          JacksonSupport.WireTransactionMixin::class.java
+        )
 
-          .addSerializer(PublicKey::class.java, PublicKeySerializer())
-          .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
-          .addSerializer(Amount::class.java, AmountSerializer())
-          .addDeserializer(Amount::class.java, AmountDeserializer())
-          .addSerializer(Issued::class.java, IssuedSerializer())
-          .addDeserializer(Issued::class.java, IssuedDeserializer())
+        .addSerializer(PublicKey::class.java, PublicKeySerializer())
+        .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
+        .addSerializer(Amount::class.java, AmountSerializer())
+        .addDeserializer(Amount::class.java, AmountDeserializer())
+        .addSerializer(Issued::class.java, IssuedSerializer())
+        .addDeserializer(Issued::class.java, IssuedDeserializer())
 
 
       Json.mapper.registerModule(sm)

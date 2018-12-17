@@ -39,9 +39,11 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CordaService
 class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
+
   companion object {
     private val log = loggerFor<TestBraidCordaService>()
-    private val cache = ConcurrentHashMap<Pair<String, Int>, BraidServer>() // to work around a problem with Corda 3.1. See https://github.com/corda/corda/issues/2898
+    private val cache =
+      ConcurrentHashMap<Pair<String, Int>, BraidServer>() // to work around a problem with Corda 3.1. See https://github.com/corda/corda/issues/2898
   }
 
   private val org = serviceHub.myInfo.legalIdentities.first().name.organisation
@@ -90,7 +92,10 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
   }
 
   class MyAuthService : AuthProvider {
-    override fun authenticate(authInfo: JsonObject, resultHandler: Handler<AsyncResult<User>>) {
+    override fun authenticate(
+      authInfo: JsonObject,
+      resultHandler: Handler<AsyncResult<User>>
+    ) {
       val username = authInfo.getString("username", "")
       val password = authInfo.getString("password", "")
       if (username == "admin" && password == "admin") {
@@ -104,7 +109,10 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
   class MyAuthUser(username: String) : AbstractUser() {
     private val principal = JsonObject().put("username", username)
 
-    override fun doIsPermitted(permission: String, resultHandler: Handler<AsyncResult<Boolean>>) {
+    override fun doIsPermitted(
+      permission: String,
+      resultHandler: Handler<AsyncResult<Boolean>>
+    ) {
       // all is permitted
       resultHandler.handle(succeededFuture(true))
     }

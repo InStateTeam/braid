@@ -20,8 +20,8 @@ import {Proxy} from 'braid-client';
 let output;
 let corda;
 
-document.onreadystatechange = function() {
-  if (document.readyState === 'complete') {
+document.onreadystatechange = function () {
+  if(document.readyState === 'complete') {
     onLoaded()
   }
 }

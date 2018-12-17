@@ -51,18 +51,25 @@ internal class InvocationsImpl internal constructor(
    * */
   private var socket: WebSocket? = null
 
-  private val client = vertx.createHttpClient(clientOptions
-    .setDefaultHost(config.serviceURI.host)
-    .setDefaultPort(config.serviceURI.port)
-    .setSsl(config.tls)
-    .setVerifyHost(config.verifyHost)
-    .setTrustAll(config.trustAll))
+  private val client = vertx.createHttpClient(
+    clientOptions
+      .setDefaultHost(config.serviceURI.host)
+      .setDefaultPort(config.serviceURI.port)
+      .setSsl(config.tls)
+      .setVerifyHost(config.verifyHost)
+      .setTrustAll(config.trustAll)
+  )
 
   init {
     // set up the websocket with all the required handlers
 
     val protocol = if (config.tls) "https" else "http"
-    val url = URL(protocol, config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
+    val url = URL(
+      protocol,
+      config.serviceURI.host,
+      config.serviceURI.port,
+      "${config.serviceURI.path}/websocket"
+    )
     val result = Future.future<Boolean>()
     client.websocket(url.toString(), { sock ->
       socket = sock

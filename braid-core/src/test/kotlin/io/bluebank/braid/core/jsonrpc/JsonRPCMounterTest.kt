@@ -40,9 +40,9 @@ class ControlledService {
   }
 }
 
-
 @RunWith(VertxUnitRunner::class)
 class JsonRPCMounterTest {
+
   private val vertx = Vertx.vertx()
 
   @Test
@@ -50,7 +50,9 @@ class JsonRPCMounterTest {
     val service = ControlledService()
     val executor = ConcreteServiceExecutor(service)
     val socket = MockSocket()
-    val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply { socket.addListener(this) }
+    val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
+      socket.addListener(this)
+    }
     JsonRPCMounter(executor, vertx).apply { nonBlocking.addListener(this) }
 
     val async = context.async()

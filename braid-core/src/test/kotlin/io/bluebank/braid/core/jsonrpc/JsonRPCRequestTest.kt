@@ -38,20 +38,22 @@ class JsonRPCRequestTest {
 
   @Test
   fun shouldBeAbleToPreserveTypeInformationInMultipleParameterMethodsWithoutMethod() {
-    val expected = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"fish\",\"params\":[\"wibble\",{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"}],\"streamed\":false}"
+    val expected =
+      "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"fish\",\"params\":[\"wibble\",{\"type\":\"MeteringModelData\",\"someString\":\"wobble\"}],\"streamed\":false}"
     val params = listOf<Any?>("wibble", MeteringModelData("wobble"))
-    val jsonRequest = JsonRPCRequest(id = 1, method = "fish", params = params, streamed = false)
+    val jsonRequest =
+      JsonRPCRequest(id = 1, method = "fish", params = params, streamed = false)
     val actual = Json.encode(jsonRequest)
     assertEquals(expected, actual)
   }
 
   @JsonTypeInfo(
-      use = JsonTypeInfo.Id.NAME,
-      include = JsonTypeInfo.As.PROPERTY,
-      property = "type"
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
   )
   @JsonSubTypes(
-      JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
+    JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
   )
   interface ModelData
 

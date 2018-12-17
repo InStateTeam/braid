@@ -33,7 +33,11 @@ import net.corda.node.services.api.StartedNodeServices
 import rx.Observable
 import java.lang.reflect.Constructor
 
-class CordaFlowServiceExecutor(private val services: AppServiceHub, val config: BraidConfig) : ServiceExecutor {
+class CordaFlowServiceExecutor(
+  private val services: AppServiceHub,
+  val config: BraidConfig
+) : ServiceExecutor {
+
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     val flow = config.registeredFlows[request.method]
     return if (flow != null) {
@@ -53,12 +57,16 @@ class CordaFlowServiceExecutor(private val services: AppServiceHub, val config: 
         !it.parameterTypes.contains(ProgressTracker::class.java)
       }.map {
         val returnType = flow.value.getMethod("call").returnType
-        it.toDescriptor().copy(name = flow.key, returnType = returnType.toSimpleJavascriptType())
+        it.toDescriptor()
+          .copy(name = flow.key, returnType = returnType.toSimpleJavascriptType())
       }
     }
   }
 
-  private fun invoke(request: JsonRPCRequest, clazz: Class<out FlowLogic<*>>) : Observable<Any> {
+  private fun invoke(
+    request: JsonRPCRequest,
+    clazz: Class<out FlowLogic<*>>
+  ): Observable<Any> {
     val constructor = clazz.constructors.firstOrNull { it.matches(request) }
     return if (constructor == null) {
       Observable.error(MethodDoesNotExist(request.method))
@@ -71,13 +79,13 @@ class CordaFlowServiceExecutor(private val services: AppServiceHub, val config: 
 
 
           services.startFlow(flow).returnValue
-              .toObservable().subscribe({item ->
-            subscriber.onNext(item)
-          }, {err ->
-            subscriber.onError(err)
-          }, {
-            subscriber.onCompleted()
-          })
+            .toObservable().subscribe({ item ->
+              subscriber.onNext(item)
+            }, { err ->
+              subscriber.onError(err)
+            }, {
+              subscriber.onCompleted()
+            })
         } catch (err: Throwable) {
           subscriber.onError(err)
         }
@@ -86,8 +94,11 @@ class CordaFlowServiceExecutor(private val services: AppServiceHub, val config: 
   }
 }
 
-private fun Constructor<*>.matches(request: JsonRPCRequest)  = this.parameterCount == request.paramCount()
+private fun Constructor<*>.matches(request: JsonRPCRequest) =
+  this.parameterCount == request.paramCount()
+
 private fun <T> StartedNodeServices.startFlow(flow: FlowLogic<T>): CordaFuture<FlowStateMachine<T>> {
-  val context = InvocationContext.service(this.javaClass.name, myInfo.legalIdentities[0].name)
-  return  this.startFlow(flow, context)
+  val context =
+    InvocationContext.service(this.javaClass.name, myInfo.legalIdentities[0].name)
+  return this.startFlow(flow, context)
 }

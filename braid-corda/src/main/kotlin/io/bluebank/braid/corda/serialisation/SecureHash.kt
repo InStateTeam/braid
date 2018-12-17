@@ -29,7 +29,11 @@ import net.corda.core.internal.uncheckedCast
 import net.corda.core.utilities.toBase58
 
 object SecureHashSerializer : JsonSerializer<SecureHash>() {
-  override fun serialize(obj: SecureHash, generator: JsonGenerator, provider: SerializerProvider) {
+  override fun serialize(
+    obj: SecureHash,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
     generator.writeString(obj.bytes.toBase58())
   }
 }

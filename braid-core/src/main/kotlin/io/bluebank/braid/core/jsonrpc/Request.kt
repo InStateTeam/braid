@@ -20,15 +20,28 @@ import org.slf4j.MDC
 import java.lang.reflect.Constructor
 import kotlin.reflect.KFunction
 
-data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
+data class JsonRPCRequest(
+  val jsonrpc: String = "2.0",
+  val id: Long,
+  val method: String,
+  val params: Any?,
+  val streamed: Boolean = false
+) {
+
   companion object {
     const val MDC_REQUEST_ID = "braid-id"
     const val CANCEL_STREAM_METHOD = "_cancelStream"
-    fun cancelRequest(id: Long) = JsonRPCRequest(id = id, method = CANCEL_STREAM_METHOD, params = null, streamed = false)
+    fun cancelRequest(id: Long) = JsonRPCRequest(
+      id = id,
+      method = CANCEL_STREAM_METHOD,
+      params = null,
+      streamed = false
+    )
   }
+
   private val parameters = Params.build(params)
 
-  fun paramCount() : Int = parameters.count
+  fun paramCount(): Int = parameters.count
 
   fun matchesName(method: KFunction<*>): Boolean = method.name == this.method
 
@@ -36,7 +49,7 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method
     return parameters.mapParams(method).toTypedArray()
   }
 
-  fun mapParams(constructor: Constructor<*>) : Array<Any?> {
+  fun mapParams(constructor: Constructor<*>): Array<Any?> {
     return parameters.mapParams(constructor).toTypedArray()
   }
 
@@ -57,7 +70,7 @@ fun <R> withMDC(id: Long, fn: () -> R): R {
   val idString = id.toString()
   val currentValue = MDC.get(JsonRPCRequest.MDC_REQUEST_ID)
   return when {
-    currentValue != null && currentValue == idString-> fn()
+    currentValue != null && currentValue == idString -> fn()
     else -> MDC.putCloseable(JsonRPCRequest.MDC_REQUEST_ID, idString).use {
       fn()
     }

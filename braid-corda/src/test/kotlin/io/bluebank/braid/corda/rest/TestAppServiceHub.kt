@@ -41,6 +41,7 @@ import java.time.Clock
  * Technically braid-corda's core could be moved to core
  */
 class TestAppServiceHub : AppServiceHub {
+
   override val attachments: AttachmentStorage
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
   override val clock: Clock
@@ -54,7 +55,12 @@ class TestAppServiceHub : AppServiceHub {
   override val keyManagementService: KeyManagementService
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
   override val myInfo: NodeInfo
-    get() = NodeInfo(listOf(NetworkHostAndPort("localhost", 10001)), listOf(TestIdentity(DUMMY_BANK_A_NAME, 40).identity), 3, 1)
+    get() = NodeInfo(
+      listOf(NetworkHostAndPort("localhost", 10001)),
+      listOf(TestIdentity(DUMMY_BANK_A_NAME, 40).identity),
+      3,
+      1
+    )
   override val networkMapCache: NetworkMapCache
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
   override val networkParameters: NetworkParameters
@@ -82,7 +88,10 @@ class TestAppServiceHub : AppServiceHub {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun recordTransactions(statesToRecord: StatesToRecord, txs: Iterable<SignedTransaction>) {
+  override fun recordTransactions(
+    statesToRecord: StatesToRecord,
+    txs: Iterable<SignedTransaction>
+  ) {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

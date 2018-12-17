@@ -53,19 +53,45 @@ class TestService {
       .appendBytes(bytes.bytes)
       .appendBytes(bytes.bytes)
 
-  @ApiOperation(value = "do something custom", response = String::class, consumes = MediaType.TEXT_PLAIN, produces = MediaType.TEXT_PLAIN)
-  @ApiImplicitParams(ApiImplicitParam(name = "name", value = "name parameter", dataTypeClass = String::class, paramType = "path", defaultValue = "Margaret", required = true, examples = Example(ExampleProperty("Satoshi"), ExampleProperty("Margaret"), ExampleProperty("Alan"))))
+  @ApiOperation(
+    value = "do something custom",
+    response = String::class,
+    consumes = MediaType.TEXT_PLAIN,
+    produces = MediaType.TEXT_PLAIN
+  )
+  @ApiImplicitParams(
+    ApiImplicitParam(
+      name = "name",
+      value = "name parameter",
+      dataTypeClass = String::class,
+      paramType = "path",
+      defaultValue = "Margaret",
+      required = true,
+      examples = Example(
+        ExampleProperty("Satoshi"),
+        ExampleProperty("Margaret"),
+        ExampleProperty("Alan")
+      )
+    )
+  )
   fun somethingCustom(rc: RoutingContext) {
     val name = rc.request().getParam("foo") ?: "Margaret"
-    rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode("Hello, $name!"))
+    rc.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+      .setChunked(true).end(Json.encode("Hello, $name!"))
   }
 
-  @ApiOperation(value = "return list of strings", response = String::class, responseContainer = "List")
+  @ApiOperation(
+    value = "return list of strings",
+    response = String::class,
+    responseContainer = "List"
+  )
   fun returnsListOfStuff(context: RoutingContext) {
-    context.response().putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON).setChunked(true).end(Json.encode(listOf("one", "two")))
+    context.response()
+      .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON)
+      .setChunked(true).end(Json.encode(listOf("one", "two")))
   }
 
-  fun willFail() : String {
+  fun willFail(): String {
     throw RuntimeException("total fail!")
   }
 }
@@ -130,7 +156,10 @@ class TestServiceApp(port: Int, private val service: TestService) {
   @Suppress("MemberVisibilityCanBePrivate")
   fun login(request: LoginRequest): String {
     if (request == LoginRequest("sa", "admin")) {
-      return jwtAuth.generateToken(JsonObject().put("user", request.user), JWTOptions().setExpiresInMinutes(24 * 60))
+      return jwtAuth.generateToken(
+        JsonObject().put("user", request.user),
+        JWTOptions().setExpiresInMinutes(24 * 60)
+      )
     } else {
       throw RuntimeException("failed to authenticate")
     }
@@ -138,10 +167,14 @@ class TestServiceApp(port: Int, private val service: TestService) {
 
   private fun createAuthProvider(vertx: Vertx): AuthProvider {
     ensureJWTKeyStoreExists()
-    return JWTAuth.create(vertx, JsonObject().put("keyStore", JsonObject()
-      .put("path", tempJKS.absolutePath)
-      .put("type", "jceks")
-      .put("password", jwtSecret))).apply {
+    return JWTAuth.create(
+      vertx, JsonObject().put(
+        "keyStore", JsonObject()
+          .put("path", tempJKS.absolutePath)
+          .put("type", "jceks")
+          .put("password", jwtSecret)
+      )
+    ).apply {
       jwtAuth = this
     }
   }
@@ -155,5 +188,13 @@ class TestServiceApp(port: Int, private val service: TestService) {
   }
 }
 
-data class LoginRequest(@ApiModelProperty(value = "user name", example = "sa") val user: String, @ApiModelProperty(value = "password", example = "admin") val password: String)
+data class LoginRequest(
+  @ApiModelProperty(
+    value = "user name",
+    example = "sa"
+  ) val user: String, @ApiModelProperty(
+    value = "password",
+    example = "admin"
+  ) val password: String
+)
 

@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ${package}
+package $
+
+{ package }
 
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
 import io.vertx.core.Vertx
@@ -27,11 +29,11 @@ import io.vertx.kotlin.core.json.obj
 fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
   val server = createServerBuilder()
-      .withVertx(vertx)
-      .withService(CalculatorService())
-      .withService(TimeService(vertx))
-      .withAuthProvider(getAuthProvider(vertx))
-      .build()
+    .withVertx(vertx)
+    .withService(CalculatorService())
+    .withService(TimeService(vertx))
+    .withAuthProvider(getAuthProvider(vertx))
+    .build()
 
   server.start()
 }
@@ -43,5 +45,8 @@ private fun getAuthProvider(vertx: Vertx): ShiroAuth {
   val config = json {
     obj("properties_path" to "classpath:auth/shiro.properties")
   }
-  return ShiroAuth.create(vertx, ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES))
+  return ShiroAuth.create(
+    vertx,
+    ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES)
+  )
 }

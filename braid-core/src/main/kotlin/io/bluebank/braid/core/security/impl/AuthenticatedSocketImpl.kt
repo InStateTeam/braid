@@ -29,13 +29,15 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
 
-class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : AbstractSocket<Buffer, Buffer>(), AuthenticatedSocket {
+class AuthenticatedSocketImpl(private val authProvider: AuthProvider) :
+  AbstractSocket<Buffer, Buffer>(), AuthenticatedSocket {
+
   companion object {
     private val log = loggerFor<AuthenticatedSocketImpl>()
   }
+
   private var user: User? = null
   private lateinit var socket: Socket<Buffer, Buffer>
-
 
   override fun user(): User? {
     return user
@@ -65,7 +67,8 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
           if (user != null) {
             onData(item)
           } else {
-            val msg = JsonRPCErrorResponse.serverError(id = op.id, message = "not authenticated")
+            val msg =
+              JsonRPCErrorResponse.serverError(id = op.id, message = "not authenticated")
             write(Json.encodeToBuffer(msg))
           }
         }
@@ -105,7 +108,10 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
 
   private fun sendParameterError(op: JsonRPCRequest) {
     try {
-      val msg = invalidParams(id = op.id, message = "invalid parameter count for login - expected a single object")
+      val msg = invalidParams(
+        id = op.id,
+        message = "invalid parameter count for login - expected a single object"
+      )
       log.error(msg.error.message)
       write(Json.encodeToBuffer(msg))
     } catch (err: Throwable) {

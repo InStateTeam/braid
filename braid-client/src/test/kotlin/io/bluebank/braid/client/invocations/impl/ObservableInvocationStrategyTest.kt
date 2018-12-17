@@ -38,9 +38,18 @@ class ObservableInvocationStrategyTest {
       Future.succeededFuture()
     }
 
-    val strategy = ObservableInvocationStrategy(invocations, TestInterface::testObservable.name, TestInterface::testObservable.javaMethod?.genericReturnType!!, arrayOf())
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
     val observable = strategy.getResult()
-    assertEquals(0, invocations.activeRequestsCount, "that there are zero invocations so far")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
     assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
 
     // kick off an invocation
@@ -50,7 +59,12 @@ class ObservableInvocationStrategyTest {
     assertEquals(strategy, invocations.getInvocationStrategy(1))
 
     assertFailsWith<IllegalStateException> { strategy.onNext(2, "hello") }
-    assertFailsWith<IllegalStateException> { strategy.onError(2, RuntimeException("failed!")) }
+    assertFailsWith<IllegalStateException> {
+      strategy.onError(
+        2,
+        RuntimeException("failed!")
+      )
+    }
     assertFailsWith<IllegalStateException> { strategy.onCompleted(2) }
     assertFailsWith<IllegalArgumentException> { strategy.onNext(1, null) }
 
@@ -70,9 +84,18 @@ class ObservableInvocationStrategyTest {
       Future.succeededFuture()
     }
 
-    val strategy = ObservableInvocationStrategy(invocations, TestInterface::testObservable.name, TestInterface::testObservable.javaMethod?.genericReturnType!!, arrayOf())
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
     val observable = strategy.getResult()
-    assertEquals(0, invocations.activeRequestsCount, "that there are zero invocations so far")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
     assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
 
     val counter = AtomicInteger(0)
@@ -92,15 +115,31 @@ class ObservableInvocationStrategyTest {
 
     // now 'receive' a result
     invocations.receive(JsonRPCResultResponse(id = 1, result = "hello"))
-    assertEquals(0, invocations.activeRequestsCount, "exception in subscriber should've cleared the subscription in the invocations map")
-    assertEquals(0, strategy.subscriberCount, "exception should have cleared the subscription in the strategy's subscriptions map")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "exception in subscriber should've cleared the subscription in the invocations map"
+    )
+    assertEquals(
+      0,
+      strategy.subscriberCount,
+      "exception should have cleared the subscription in the strategy's subscriptions map"
+    )
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
 
     // receiving a second result should have no effect because the subscription has been torn down
     invocations.receive(JsonRPCCompletedResponse(id = 1))
     assertEquals(0, invocations.activeRequestsCount, "that there is an invocation")
     assertEquals(0, strategy.subscriberCount, "that there are zero invocations so far")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
   }
 
   @Test
@@ -110,9 +149,18 @@ class ObservableInvocationStrategyTest {
       Future.succeededFuture()
     }
 
-    val strategy = ObservableInvocationStrategy(invocations, TestInterface::testObservable.name, TestInterface::testObservable.javaMethod?.genericReturnType!!, arrayOf())
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
     val observable = strategy.getResult()
-    assertEquals(0, invocations.activeRequestsCount, "that there are zero invocations so far")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
     assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
 
     val counter = AtomicInteger(0)
@@ -133,15 +181,31 @@ class ObservableInvocationStrategyTest {
 
     // now 'receive' a result
     invocations.receive(JsonRPCResultResponse(id = 1, result = "hello"))
-    assertEquals(0, invocations.activeRequestsCount, "exception in subscriber should've cleared the subscription in the invocations map")
-    assertEquals(0, strategy.subscriberCount, "exception should have cleared the subscription in the strategy's subscriptions map")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "exception in subscriber should've cleared the subscription in the invocations map"
+    )
+    assertEquals(
+      0,
+      strategy.subscriberCount,
+      "exception should have cleared the subscription in the strategy's subscriptions map"
+    )
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
 
     // receiving a second result should have no effect because the subscription has been torn down
     invocations.receive(JsonRPCCompletedResponse(id = 1))
     assertEquals(0, invocations.activeRequestsCount, "that there is an invocation")
     assertEquals(0, strategy.subscriberCount, "that there are zero invocations so far")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
   }
 
   @Test
@@ -151,9 +215,18 @@ class ObservableInvocationStrategyTest {
       Future.succeededFuture()
     }
 
-    val strategy = ObservableInvocationStrategy(invocations, TestInterface::testObservable.name, TestInterface::testObservable.javaMethod?.genericReturnType!!, arrayOf())
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
     val observable = strategy.getResult()
-    assertEquals(0, invocations.activeRequestsCount, "that there are zero invocations so far")
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
     assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
 
     val counter = AtomicInteger(0)
@@ -173,15 +246,36 @@ class ObservableInvocationStrategyTest {
 
     // now 'receive' a result
     invocations.receive(JsonRPCResultResponse(id = 1, result = "result"))
-    invocations.receive(JsonRPCErrorResponse.serverError(id = 1, message = "we send an error"))
-    assertEquals(0, invocations.activeRequestsCount, "exception in subscriber should've cleared the subscription in the invocations map")
-    assertEquals(0, strategy.subscriberCount, "exception should have cleared the subscription in the strategy's subscriptions map")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    invocations.receive(
+      JsonRPCErrorResponse.serverError(
+        id = 1,
+        message = "we send an error"
+      )
+    )
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "exception in subscriber should've cleared the subscription in the invocations map"
+    )
+    assertEquals(
+      0,
+      strategy.subscriberCount,
+      "exception should have cleared the subscription in the strategy's subscriptions map"
+    )
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
 
     // receiving a second result should have no effect because the subscription has been torn down
     invocations.receive(JsonRPCErrorResponse.internalError(id = 1, message = "failed"))
     assertEquals(0, invocations.activeRequestsCount, "that there is an invocation")
     assertEquals(0, strategy.subscriberCount, "that there are zero invocations so far")
-    assertEquals(2, counter.get(), "subscriber should have been called twice: once for onNext and once onError")
+    assertEquals(
+      2,
+      counter.get(),
+      "subscriber should have been called twice: once for onNext and once onError"
+    )
   }
 }

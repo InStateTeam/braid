@@ -17,13 +17,10 @@
 const Proxy = require('braid-client').Proxy;
 
 let corda = new Proxy({
-  url: "https://localhost:8080/api/",
-  credentials: {
-    username: 'banka',
-    password: 'password'
+  url: "https://localhost:8080/api/", credentials: {
+    username: 'banka', password: 'password'
   }
 }, onOpen, onClose, onError, {strictSSL: false});
-
 
 function onOpen() {
   // console.log(corda.network.getNodeByLegalName.docs());

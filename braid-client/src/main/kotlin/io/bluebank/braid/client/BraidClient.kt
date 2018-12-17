@@ -24,13 +24,16 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
-open class BraidClient protected constructor(config: BraidClientConfig,
-                                             vertx: Vertx,
-                                             exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
-                                             closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
-                                             clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
-                       ) : Closeable, InvocationHandler {
-  private val invocations = Invocations.create(vertx, config, exceptionHandler, closeHandler, clientOptions)
+open class BraidClient protected constructor(
+  config: BraidClientConfig,
+  vertx: Vertx,
+  exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
+  closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
+  clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
+) : Closeable, InvocationHandler {
+
+  private val invocations =
+    Invocations.create(vertx, config, exceptionHandler, closeHandler, clientOptions)
 
   companion object {
     fun createClient(
@@ -58,6 +61,10 @@ open class BraidClient protected constructor(config: BraidClientConfig,
   }
 
   override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? {
-    return invocations.invoke(method.name, method.genericReturnType, args ?: arrayOfNulls<Any>(0))
+    return invocations.invoke(
+      method.name,
+      method.genericReturnType,
+      args ?: arrayOfNulls<Any>(0)
+    )
   }
 }

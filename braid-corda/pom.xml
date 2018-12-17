@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>braid</artifactId>
@@ -116,16 +117,16 @@
           <artifactId>cordform-common</artifactId>
         </exclusion>
         <!--<exclusion>-->
-          <!--<groupId>com.github.corda.crash</groupId>-->
-          <!--<artifactId>crash.shell</artifactId>-->
+        <!--<groupId>com.github.corda.crash</groupId>-->
+        <!--<artifactId>crash.shell</artifactId>-->
         <!--</exclusion>-->
         <!--<exclusion>-->
-          <!--<groupId>com.github.corda.crash</groupId>-->
-          <!--<artifactId>crash.connectors.ssh</artifactId>-->
+        <!--<groupId>com.github.corda.crash</groupId>-->
+        <!--<artifactId>crash.connectors.ssh</artifactId>-->
         <!--</exclusion>-->
         <!--<exclusion>-->
-          <!--<groupId>com.github.bft-smart</groupId>-->
-          <!--<artifactId>library</artifactId>-->
+        <!--<groupId>com.github.bft-smart</groupId>-->
+        <!--<artifactId>library</artifactId>-->
         <!--</exclusion>-->
       </exclusions>
       <scope>provided</scope>
@@ -216,48 +217,48 @@
         </configuration>
       </plugin>
       <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-shade-plugin</artifactId>-->
-        <!--<version>3.1.0</version>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-              <!--<goal>shade</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<relocations>-->
-                <!--<relocation>-->
-                  <!--<pattern>io.netty</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.io.netty</shadedPattern>-->
-                <!--</relocation>-->
-                <!--<relocation>-->
-                  <!--<pattern>com.fasterxml</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.com.fasterxml</shadedPattern>-->
-                <!--</relocation>-->
-                <!--<relocation>-->
-                  <!--<pattern>io.swagger</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>-->
-                <!--</relocation>-->
-                <!--<relocation>-->
-                  <!--<pattern>rx</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>-->
-                <!--</relocation>-->
-                <!--<relocation>-->
-                  <!--<pattern>io.vertx</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.io.vertx</shadedPattern>-->
-                <!--</relocation>-->
-                <!--<relocation>-->
-                  <!--<pattern>org.apache</pattern>-->
-                  <!--<shadedPattern>io.bluebank.braid.shaded.org.apache</shadedPattern>-->
-                <!--</relocation>-->
-              <!--</relocations>-->
-              <!--<transformers>-->
-                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
-              <!--</transformers>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        <!--</executions>-->
+      <!--<groupId>org.apache.maven.plugins</groupId>-->
+      <!--<artifactId>maven-shade-plugin</artifactId>-->
+      <!--<version>3.1.0</version>-->
+      <!--<executions>-->
+      <!--<execution>-->
+      <!--<phase>package</phase>-->
+      <!--<goals>-->
+      <!--<goal>shade</goal>-->
+      <!--</goals>-->
+      <!--<configuration>-->
+      <!--<relocations>-->
+      <!--<relocation>-->
+      <!--<pattern>io.netty</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.io.netty</shadedPattern>-->
+      <!--</relocation>-->
+      <!--<relocation>-->
+      <!--<pattern>com.fasterxml</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.com.fasterxml</shadedPattern>-->
+      <!--</relocation>-->
+      <!--<relocation>-->
+      <!--<pattern>io.swagger</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>-->
+      <!--</relocation>-->
+      <!--<relocation>-->
+      <!--<pattern>rx</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>-->
+      <!--</relocation>-->
+      <!--<relocation>-->
+      <!--<pattern>io.vertx</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.io.vertx</shadedPattern>-->
+      <!--</relocation>-->
+      <!--<relocation>-->
+      <!--<pattern>org.apache</pattern>-->
+      <!--<shadedPattern>io.bluebank.braid.shaded.org.apache</shadedPattern>-->
+      <!--</relocation>-->
+      <!--</relocations>-->
+      <!--<transformers>-->
+      <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
+      <!--</transformers>-->
+      <!--</configuration>-->
+      <!--</execution>-->
+      <!--</executions>-->
       <!--</plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

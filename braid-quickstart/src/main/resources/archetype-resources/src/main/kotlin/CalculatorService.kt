@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ${package}
+package $
 
-import io.bluebank.braid.core.annotation.MethodDescription
-import io.bluebank.braid.core.annotation.ServiceDescription
+{ package }
+
+import io.bluebank.braid.core.annotation .MethodDescription
+import io.bluebank.braid.core.annotation .ServiceDescription
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
 
@@ -30,7 +32,10 @@ class CalculatorService {
   }
 
   // N.B. how to document the return type on an async function
-  @MethodDescription(description = "subtract the second int from the first", returnType = Int::class)
+  @MethodDescription(
+    description = "subtract the second int from the first",
+    returnType = Int::class
+  )
   fun subtract(lhs: Int, rhs: Int): Future<Int> {
     return succeededFuture(lhs - rhs)
   }

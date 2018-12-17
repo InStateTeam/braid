@@ -41,7 +41,8 @@ import rx.Observable.create
 
 interface Greeter {
   @MethodDescription(returnType = String::class)
-  fun greet(name: String, delay: Long) : Future<String>
+  fun greet(name: String, delay: Long): Future<String>
+
   @MethodDescription(returnType = String::class)
   fun greetRepeat(name: String, delay: Long): Observable<String>
 }
@@ -88,7 +89,10 @@ class ProxyTest {
     sockJSHandler.socketHandler {
       val wrapper = SockJSSocketWrapper.create(it, rule.vertx())
       val typedSocket = TypedSocket.create<JsonRPCRequest, JsonRPCResponse>()
-      val mounter = JsonRPCMounter(ConcreteServiceExecutor(GreeterService(rule.vertx())), rule.vertx())
+      val mounter = JsonRPCMounter(
+        ConcreteServiceExecutor(GreeterService(rule.vertx())),
+        rule.vertx()
+      )
 
       wrapper.addListener(typedSocket)
       typedSocket.addListener(mounter)
@@ -97,9 +101,9 @@ class ProxyTest {
 
     val serverOptions = HttpServerOptions().setWebsocketSubProtocols("undefined")
     rule.vertx()
-        .createHttpServer(serverOptions)
-        .requestHandler(router::accept)
-        .listen(port)
+      .createHttpServer(serverOptions)
+      .requestHandler(router::accept)
+      .listen(port)
   }
 
   @After
@@ -110,8 +114,10 @@ class ProxyTest {
   }
 
   @Ignore // TODO: Fix this
-  @Test fun `that we can create a proxy and invoke a simple RPC request`(context: TestContext) {
-    val greeter = Greeter::class.braidProxy(ServiceEndpoint(ssl = false, port = port, path = path))
+  @Test
+  fun `that we can create a proxy and invoke a simple RPC request`(context: TestContext) {
+    val greeter =
+      Greeter::class.braidProxy(ServiceEndpoint(ssl = false, port = port, path = path))
     val name = "fred"
     greeter.greet(name, 500).setHandler(context.asyncAssertSuccess())
   }

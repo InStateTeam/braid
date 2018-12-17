@@ -41,6 +41,7 @@ class ParameterTests {
     val decoded = Json.decodeValue(encoded, Receiver::class.java)
     assertTrue(decoded.params is List<*>)
   }
+
   @Test
   fun deserialiseMap() {
     val encoded = Json.encode(SenderObject(Params("Fred", 40)))

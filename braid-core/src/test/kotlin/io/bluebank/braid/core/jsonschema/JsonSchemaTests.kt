@@ -23,8 +23,10 @@ class TestJacksonSchemas {
   fun test() {
     assertEquals("integer", describeClass(Int::class.java))
     assertEquals("string", describeClass(String::class.java))
-    assertEquals("{name:string,address:{houseNumber:string,postcode:string}}",
-        describeClass(Customer::class.java))
+    assertEquals(
+      "{name:string,address:{houseNumber:string,postcode:string}}",
+      describeClass(Customer::class.java)
+    )
   }
 }
 

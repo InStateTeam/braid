@@ -27,12 +27,13 @@ internal class FutureInvocationStrategy(
   returnType: Type,
   params: Array<out Any?>
 ) : InvocationStrategy<Future<Any?>>(parent, method, returnType, params) {
+
   companion object {
     private val log = loggerFor<FutureInvocationStrategy>()
   }
 
   private val result = Future.future<Any?>()
-  private var requestId : Long = -1
+  private var requestId: Long = -1
   private var receivedCompletion = false
 
   override fun getResult(): Future<Any?> {
