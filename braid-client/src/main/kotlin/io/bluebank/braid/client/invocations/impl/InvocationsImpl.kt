@@ -106,29 +106,28 @@ internal class InvocationsImpl internal constructor(
 
     val result = Future.future<Unit>()
     try {
-      vertx.runOnContext {
-        try {
-          socket
-            ?.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-            ?: throw java.lang.IllegalStateException("socket was not created or was closed")
-        } catch (err: Throwable) {
-          log.error(request.id, err) { "failed to send packet to socket" }
-          result.fail(err)
-        }
-        try {
-          if (!result.isComplete) {
-            result.complete()
-          }
-        } catch (err: Throwable) {
-          log.error(request.id, err) { "failed to send completion notification to handler" }
-          result.fail(err)
-        }
-      }
+      vertx.runOnContext { sendDirectOnThisContext(request, result) }
     } catch (err: Throwable) {
       log.error(request.id, err) { "failed to schedule send operation to context" }
       result.fail(err)
     }
     return result
+  }
+
+  private fun sendDirectOnThisContext(request: JsonRPCRequest, result: Future<Unit>) {
+    try {
+      socket
+        ?.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
+        ?: throw IllegalStateException("socket was not created or was closed")
+      try {
+        result.complete()
+      } catch (err: Throwable) {
+        log.error(request.id, err) { "failed to send completion notification to handler" }
+      }
+    } catch (err: Throwable) {
+      log.error(request.id, err) { "failed to send packet to socket" }
+      result.fail(err)
+    }
   }
 
   /**
