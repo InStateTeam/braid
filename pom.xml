@@ -311,7 +311,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <vdersion>2.20.1</vdersion>
+          <version>2.20.1</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>
