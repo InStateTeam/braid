@@ -41,13 +41,13 @@ The principle classes are:
 * **[Invocations](Invocations.kt)** - this is the public class, responsible for:
   * managing socket connections
   * tracking invocations
-  * dispatching the meat of the invocation and response handling logic to [InvocationStrategy](InvocationStrategy.kt)
+  * dispatching the meat of the invocation and response handling logic to [InvocationStrategy](impl/InvocationStrategy.kt)
   * provides capabilities for InvocationStrategy: 
     * a number requestId number fountain
     * assign an invocation strategy for a requestId
     * remove an invocation strategy for a requestId
   
-* **[InvocationStrategy](InvocationStrategy.kt)** - an invocation strategy ('strategy' for short) is an abstraction
+* **[InvocationStrategy](impl/InvocationStrategy.kt)** - an invocation strategy ('strategy' for short) is an abstraction
 to handle different function call semantics outlined in [section 1](#1-design-considerations). It's job is to:
   * provide a factory to determine which concrete strategy it should use
   * a constructor to carry the parameters for the invocation

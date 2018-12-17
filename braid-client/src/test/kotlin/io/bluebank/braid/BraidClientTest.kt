@@ -62,8 +62,16 @@ class BraidClientTest {
 
   @After
   fun after(context: TestContext) {
-    vertx.close(context.asyncAssertSuccess())
-    braidClient.close()
+    val async = context.async()
+    rpcServer.stop {
+      braidClient.close()
+      vertx.runOnContext {
+        // force vertx to process remaining messages, leaving this as the final poison pill to shut it down
+        vertx.close {
+          async.complete()
+        }
+      }
+    }
   }
 
   @Test

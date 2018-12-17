@@ -113,7 +113,7 @@ fun <T : Any> Future<T>.getOrThrow(): T {
 
   latch.await()
   if (this.failed()) {
-    throw RuntimeException(this.cause())
+    throw this.cause()
   }
   return this.result()
 }

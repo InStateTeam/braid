@@ -16,6 +16,7 @@
 package io.bluebank.braid.client
 
 import io.bluebank.braid.client.invocations.Invocations
+import io.bluebank.braid.client.invocations.impl.InvocationsImpl
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
 import java.io.Closeable
@@ -27,13 +28,19 @@ open class BraidClient protected constructor(config: BraidClientConfig,
                                              vertx: Vertx,
                                              exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
                                              closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
-                                             clientOptions : HttpClientOptions = Invocations.defaultClientHttpOptions
+                                             clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
                        ) : Closeable, InvocationHandler {
-  private val invocations = Invocations(vertx, config, exceptionHandler, closeHandler, clientOptions)
+  private val invocations = Invocations.create(vertx, config, exceptionHandler, closeHandler, clientOptions)
 
   companion object {
-    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
-      return BraidClient(config, vertx)
+    fun createClient(
+      config: BraidClientConfig,
+      vertx: Vertx = Vertx.vertx(),
+      exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
+      closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
+      clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
+    ): BraidClient {
+      return BraidClient(config, vertx, exceptionHandler, closeHandler, clientOptions)
     }
   }
 
@@ -54,4 +61,3 @@ open class BraidClient protected constructor(config: BraidClientConfig,
     return invocations.invoke(method.name, method.genericReturnType, args ?: arrayOfNulls<Any>(0))
   }
 }
-

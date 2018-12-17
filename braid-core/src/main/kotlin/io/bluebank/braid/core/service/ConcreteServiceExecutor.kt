@@ -38,7 +38,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
     return Observable.create<Any> { subscriber ->
-      request.asMDC {
+      request.withMDC {
         try {
           log.trace("binding to method for {}", request)
           candidateMethods(request)
@@ -127,7 +127,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .onErrorResumeNext { err -> Observable.error(err.createJsonException(request)) }
       .let {
         // insert logger if trace is enabled
-        request.asMDC {
+        request.withMDC {
           if (log.isTraceEnabled) {
             it
               .doOnNext {
@@ -148,7 +148,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   private fun handleFuture(future: Future<Any>, request: JsonRPCRequest, callback: Subscriber<Any>) {
-    request.asMDC {
+    request.withMDC {
       log.trace("{} - handling future result", request.id)
       future.setHandler(JsonRPCMounter.FutureHandler {
         handleAsyncResult(it, request, callback)
@@ -157,7 +157,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   private fun handleAsyncResult(response: AsyncResult<*>, request: JsonRPCRequest, subscriber: Subscriber<Any>) {
-    request.asMDC {
+    request.withMDC {
       log.trace("{} - handling async result of invocation", request.id)
       when (response.succeeded()) {
         true -> respond(response.result(), subscriber)

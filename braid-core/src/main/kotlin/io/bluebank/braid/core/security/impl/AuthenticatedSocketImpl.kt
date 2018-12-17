@@ -49,7 +49,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
   override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
     log.trace("decoding potential auth payload")
     val op = Json.decodeValue(item, JsonRPCRequest::class.java)
-    op.asMDC {
+    op.withMDC {
       log.trace("decoded {}", op)
       when (op.method) {
         "login" -> {
@@ -90,7 +90,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) : Abstract
     } else {
       val m = op.params.first() as Map<String, Any>
       authProvider.authenticate(JsonObject(m)) {
-        op.asMDC {
+        op.withMDC {
           if (it.succeeded()) {
             user = it.result()
             sendOk(op)

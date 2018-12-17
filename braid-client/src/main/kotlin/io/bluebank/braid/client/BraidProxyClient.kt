@@ -57,7 +57,7 @@ open class BraidProxyClient protected constructor (private val config: BraidClie
   fun <ServiceType : Any> bindAsync(clazz: Class<ServiceType>, exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, closeHandler: (() -> Unit) = this::closeHandler): Future<ServiceType> {
     val result = future<ServiceType>()
     try {
-      invokes = Invocations(vertx, config, exceptionHandler, closeHandler)
+      invokes = Invocations.create(vertx, config, exceptionHandler, closeHandler)
       val proxy = Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz), this) as ServiceType
       result.complete(proxy)
     } catch (err: Throwable) {

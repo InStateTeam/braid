@@ -43,7 +43,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   override fun dataHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>, item: JsonRPCRequest) {
-    item.asMDC {
+    item.withMDC {
       handleRequest(item)
     }
   }
@@ -60,11 +60,11 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun handleRequest(request: JsonRPCRequest) {
-    request.asMDC {
+    request.withMDC {
       log.trace("handling request {}", request)
       try {
         checkVersion(request)
-        if (request.method == "_cancelStream") {
+        if (request.isStreamCancelRequest()) {
           stopStream(request)
         } else {
           if (activeSubscriptions.containsKey(request.id)) {
@@ -89,7 +89,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun stopStream(request: JsonRPCRequest) {
-    request.asMDC {
+    request.withMDC {
       log.trace("cancelling stream")
       activeSubscriptions[request.id]?.apply {
         if (!this.isUnsubscribed) {
@@ -105,7 +105,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun handleCompleted(request: JsonRPCRequest) {
-    request.asMDC {
+    request.withMDC {
       try {
         if (request.streamed) {
           log.trace("sending completion message")
@@ -123,7 +123,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
-    request.asMDC {
+    request.withMDC {
       try {
         log.trace("handling error result {}", err)
         when (err) {
@@ -140,7 +140,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) : Sock
   }
 
   private fun handleDataItem(result: Any?, request: JsonRPCRequest) {
-    request.asMDC {
+    request.withMDC {
       try {
         log.trace("sending data item back {}", result)
         val payload = JsonRPCResultResponse(result = result, id = request.id)

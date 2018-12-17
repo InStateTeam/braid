@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.client.invocations
+package io.bluebank.braid.client.invocations.impl
 
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
-import io.bluebank.braid.core.jsonrpc.asMDC
+import io.bluebank.braid.core.jsonrpc.error
+import io.bluebank.braid.core.jsonrpc.trace
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.reflection.actualType
 import io.bluebank.braid.core.reflection.isStreaming
@@ -38,14 +39,14 @@ import java.lang.reflect.Type
  *  - protected methods for concrete implementations to perform the actual invocation
  *  - abstract methods for concrete implementations to be notified of messages for results, errors, and completion.
  *
- *  This class holds a reference to a parent [Invocations] context. This provides its concrete implementations to access
+ *  This class holds a reference to a parent [InvocationsImpl] context. This provides its concrete implementations to access
  *  requestId generation (which is important for invocations that return [Observable] using the [ObservableInvocationStrategy]
  *
  *  This class also holds the parameters necessary for the invocation: [method] [returnType] [params]
  */
 internal abstract class InvocationStrategy<T : Any?>(
-  private val parent: Invocations,
-  private val method: String,
+  private val parent: InvocationsInternal,
+  protected val method: String,
   private val returnType: Type,
   private val params: Array<out Any?>) {
 
@@ -56,23 +57,17 @@ internal abstract class InvocationStrategy<T : Any?>(
      * factory method to create the appropriate strategy and to request its result, potentially causing the execution
      * of the invocation (note: not in the case of methods returning [Observable]
      */
-    fun invoke(parent: Invocations, method: String, returnType: Type, params: Array<out Any?>): Any? {
+    fun invoke(parent: InvocationsInternal, method: String, returnType: Type, params: Array<out Any?>): Any? {
       return when (returnType.actualType()) {
-        Future::class.java -> {
-          FutureInvocationStrategy(parent, method, returnType, params)
-        }
-        Observable::class.java -> {
-          ObservableInvocationStrategy(parent, method, returnType, params)
-        }
-        else -> {
-          BlockingInvocationStrategy(parent, method, returnType, params)
-        }
+        Future::class.java -> FutureInvocationStrategy(parent, method, returnType, params)
+        Observable::class.java -> ObservableInvocationStrategy(parent, method, returnType, params)
+        else -> BlockingInvocationStrategy(parent, method, returnType, params)
       }.getResult()
     }
   }
 
   /**
-   * a [JavaType] for the return type, used by Jackson for deserialisation
+   * a [com.fasterxml.jackson.databind.JavaType] for the return type, used by Jackson for deserialisation
    */
   private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
 
@@ -81,51 +76,53 @@ internal abstract class InvocationStrategy<T : Any?>(
    * please note: in the case of methods returning [Observable], nothing is actually invoked until the
    * returned [Observable] is subscribed.
    */
-  protected abstract fun getResult(): T
+  internal abstract fun getResult(): T
 
   /**
    * called when we have a new [item] from the response stream for a given [requestId]
    * each implementation will have its own strategy for dealing with this
    */
-  protected abstract fun onNext(requestId: Long, item: Any?)
+  internal abstract fun onNext(requestId: Long, item: Any?)
 
   /**
    * called when we have an [error] from the response stream for a given [requestId]
    * each implementation will have its own strategy for dealing with this
    */
-  protected abstract fun onError(requestId: Long, error: Throwable)
+  internal abstract fun onError(requestId: Long, error: Throwable)
 
   /**
    * called when we have completed response stream for a given [requestId]
    * each implementation will have its own strategy for dealing with this
    */
-  protected abstract fun onCompleted(requestId: Long)
+  internal abstract fun onCompleted(requestId: Long)
 
-  protected fun nextRequestId() = parent.nextRequestId()
+  internal fun nextRequestId(): Long {
+    return parent.nextRequestId().also {
+      log.trace(it) { "generated request id" }
+    }
+  }
 
-  /**
-   * called by concrete implementations of this class to commence the actual network execution
-   * the requestId for the invocation is generated at this point only
-   * this is generalised like this so that we can handle repeated subscriptions to [Observable] for [ObservableInvocationStrategy]
-   */
-  protected fun invoke(): Long {
-    val requestId = nextRequestId()
-    invoke(requestId)
-    return requestId
+  internal fun send(request: JsonRPCRequest): Future<Unit> {
+    log.trace(request.id) { "sending payload ${Json.encode(request)}" }
+    return parent.send(request)
   }
 
   /**
    * called by concrete implementations of this class to commence the actual network execution
-   * the [requestId] is pre-generated by a call to [Invocations.nextRequestId]
+   * the [requestId] is pre-generated by a call to [InvocationsImpl.nextRequestId]
    * This is required by the [ObservableInvocationStrategy] notably to allow for multiple subscriptions
    * (we try our best to honour the rx-java semantics
    */
-  protected fun invoke(requestId: Long) {
-    asMDC(requestId) {
-      parent.assignInvocationStrategyForRequest(requestId, this)
-      val request = JsonRPCRequest(id = requestId, method = method, params = params.toList(), streamed = returnType.isStreaming())
-      parent.write(request).catch { onError(requestId, it) }
-    }
+  internal fun beginInvoke(requestId: Long) {
+    log.trace(requestId) { "beginning invocation" }
+    parent.setStrategy(requestId, this)
+    val request = JsonRPCRequest(id = requestId, method = method, params = params.toList(), streamed = returnType.isStreaming())
+    parent.send(request).catch { onError(requestId, it) }
+  }
+
+  internal open fun endInvoke(requestId: Long) {
+    log.trace(requestId) { "ending invocation. removing strategy" }
+    parent.removeStrategy(requestId)
   }
 
   /**
@@ -137,35 +134,37 @@ internal abstract class InvocationStrategy<T : Any?>(
       log.trace("handling received message {}", payload.encode())
     }
     when {
-      payload.containsKey("result") -> {
-        val raw = payload.getValue("result")
-        val result = try {
-          Json.mapper.convertValue<Any>(raw, payloadType)
-        } catch (err: Throwable) {
-          onError(requestId, err)
-          throw err
-        }
-        if (!returnType.isStreaming()) {
-          parent.removeInvocationStrategyForRequest(requestId)
-          onNext(requestId, result)
-          onCompleted(requestId)
-        } else {
-          onNext(requestId, result)
-        }
-      }
-      payload.containsKey("error") -> {
-        val error = payload.getJsonObject("error")
-        parent.removeInvocationStrategyForRequest(requestId)
-        onError(requestId, RuntimeException(error.getString("message")))
-      }
+      payload.containsKey("result") -> onNext(requestId, payload)
+      payload.containsKey("error") -> onError(requestId, payload)
+      payload.containsKey("completed") -> onCompleted(requestId)
+    }
+  }
 
-      payload.containsKey("completed") -> {
-        if (!returnType.isStreaming()) {
-          log.error("Not expecting completed messages for anything other than Observables")
-        }
-        parent.removeInvocationStrategyForRequest(requestId)
-        onCompleted(requestId)
+
+  private fun onError(requestId: Long, payload: JsonObject) {
+    val error = try {
+      payload.getJsonObject("error")?.getString("message") ?: throw RuntimeException("failed to parse error message")
+    } catch (err: Throwable) {
+      onError(requestId, err)
+      throw err
+    }
+    onError(requestId, RuntimeException(error))
+  }
+
+  private fun onNext(requestId: Long, payload: JsonObject) {
+    val raw = payload.getValue("result")
+    val result = try {
+      Json.mapper.convertValue<Any>(raw, payloadType)
+    } catch (err: Throwable) {
+      log.error(requestId) { "failed to parse payload" }
+      try {
+        onError(requestId, err)
+      } catch (err: Throwable) {
+        log.error(requestId) { "observer of request failed to handle parse exception" }
+      } finally {
+        throw err
       }
     }
+    onNext(requestId, result)
   }
 }

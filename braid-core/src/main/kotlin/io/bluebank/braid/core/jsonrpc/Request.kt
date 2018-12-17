@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import org.slf4j.Logger
 import org.slf4j.MDC
 import java.lang.reflect.Constructor
 import kotlin.reflect.KFunction
@@ -22,6 +23,8 @@ import kotlin.reflect.KFunction
 data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method: String, val params: Any?, val streamed: Boolean = false) {
   companion object {
     const val MDC_REQUEST_ID = "braid-id"
+    const val CANCEL_STREAM_METHOD = "_cancelStream"
+    fun cancelRequest(id: Long) = JsonRPCRequest(id = id, method = CANCEL_STREAM_METHOD, params = null, streamed = false)
   }
   private val parameters = Params.build(params)
 
@@ -43,12 +46,14 @@ data class JsonRPCRequest(val jsonrpc: String = "2.0", val  id: Long, val method
    * SLF4J MDC logging context for this request object. Adds a [MDC_REQUEST_ID] value
    * to the MDC during the execution of [fn]
    */
-  fun <R> asMDC(fn: () -> R) : R {
-    return asMDC(id, fn)
+  fun <R> withMDC(fn: () -> R): R {
+    return withMDC(id, fn)
   }
+
+  fun isStreamCancelRequest() = method == CANCEL_STREAM_METHOD
 }
 
-fun <R> asMDC(id: Long, fn: () -> R) : R {
+fun <R> withMDC(id: Long, fn: () -> R): R {
   val idString = id.toString()
   val currentValue = MDC.get(JsonRPCRequest.MDC_REQUEST_ID)
   return when {
@@ -58,3 +63,68 @@ fun <R> asMDC(id: Long, fn: () -> R) : R {
     }
   }
 }
+
+inline fun Logger.trace(requestId: Long, crossinline fn: () -> Any?) {
+  if (isTraceEnabled) {
+    withMDC(requestId) {
+      trace(fn().toString())
+    }
+  }
+}
+
+inline fun Logger.trace(requestId: Long, err: Throwable, crossinline fn: () -> Any?) {
+  if (isTraceEnabled) {
+    withMDC(requestId) {
+      trace(fn().toString(), err)
+    }
+  }
+}
+
+inline fun Logger.warn(requestId: Long, crossinline fn: () -> Any?) {
+  if (isWarnEnabled) {
+    withMDC(requestId) {
+      warn(fn().toString())
+    }
+  }
+}
+
+inline fun Logger.warn(requestId: Long, err: Throwable, crossinline fn: () -> Any?) {
+  if (isWarnEnabled) {
+    withMDC(requestId) {
+      warn(fn().toString(), err)
+    }
+  }
+}
+
+inline fun Logger.error(requestId: Long, crossinline fn: () -> Any?) {
+  if (isErrorEnabled) {
+    withMDC(requestId) {
+      error(fn().toString())
+    }
+  }
+}
+
+inline fun Logger.error(requestId: Long, err: Throwable, crossinline fn: () -> Any?) {
+  if (isErrorEnabled) {
+    withMDC(requestId) {
+      error(fn().toString(), err)
+    }
+  }
+}
+
+inline fun Logger.info(requestId: Long, crossinline fn: () -> Any?) {
+  if (isInfoEnabled) {
+    withMDC(requestId) {
+      info(fn().toString())
+    }
+  }
+}
+
+inline fun Logger.info(requestId: Long, err: Throwable, crossinline fn: () -> Any?) {
+  if (isInfoEnabled) {
+    withMDC(requestId) {
+      info(fn().toString(), err)
+    }
+  }
+}
+
