@@ -73,7 +73,7 @@ internal class FutureInvocationStrategy(
   }
 
   private fun checkIdIsSet(requestId: Long) {
-    if (this.requestId < 0) throw IllegalStateException("computation appears not to have been invoked but I received a message for request $requestId")
-    if (requestId != this.requestId) throw IllegalStateException("computation was invoked with request ${this.requestId} but I've received a message for request $requestId")
+    if (this.requestId < 0) error("computation appears not to have been invoked but I received a message for request $requestId")
+    if (requestId != this.requestId) error("computation was invoked with request ${this.requestId} but I've received a message for request $requestId")
   }
 }

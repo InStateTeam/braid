@@ -48,7 +48,7 @@ internal class BlockingInvocationStrategy(
       latch.await()
       log.trace(requestId) { "processing result" }
       return when {
-        !result.isComplete -> throw IllegalStateException("I should have a result or error for you but but neither condition was met!")
+        !result.isComplete -> error("I should have a result or error for you but but neither condition was met!")
         result.failed() -> throw result.cause()
         else -> result.result()
       }
@@ -111,10 +111,10 @@ internal class BlockingInvocationStrategy(
   }
 
   private fun checkComputationIsNotComplete() {
-    if (result.isComplete) throw IllegalStateException("I received a message for request $requestId but computation is already complete!")
+    if (result.isComplete) error("I received a message for request $requestId but computation is already complete!")
   }
 
   private fun checkComputationIsComplete() {
-    if (!result.isComplete) throw IllegalStateException("I received a message for completion for request $requestId but I haven't received a result!")
+    if (!result.isComplete) error("I received a message for completion for request $requestId but I haven't received a result!")
   }
 }

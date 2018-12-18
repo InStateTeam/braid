@@ -125,7 +125,7 @@ internal class InvocationsImpl internal constructor(
     try {
       socket
         ?.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-        ?: throw IllegalStateException("socket was not created or was closed")
+        ?: error("socket was not created or was closed")
       try {
         result.complete()
       } catch (err: Throwable) {
