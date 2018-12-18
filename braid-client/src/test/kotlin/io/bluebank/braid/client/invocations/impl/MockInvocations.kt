@@ -20,7 +20,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.vertx.core.Future
 import io.vertx.core.json.Json
 
-internal class MockInvocations(private val writeCallback: (JsonRPCRequest) -> Future<Unit>) :
+internal class MockInvocations(private val writeCallback: MockInvocations.(JsonRPCRequest) -> Future<Unit>) :
   InvocationsInternalImpl() {
 
   /**

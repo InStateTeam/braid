@@ -23,7 +23,9 @@
   <packaging>pom</packaging>
   <name>braid parent</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
-  <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
+  <description>a library to make it easy to write new services and apps with fewer
+    configuration headaches
+  </description>
 
   <licenses>
     <license>
@@ -325,7 +327,7 @@
             </execution>
             <execution>
               <id>report</id>
-              <phase>test</phase>
+              <phase>prepare-package</phase>
               <goals>
                 <goal>report</goal>
               </goals>
@@ -352,7 +354,8 @@
         <configuration>
           <header>LICENSE</header>
           <excludes>
-            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
+            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*
+            </exclude>
             <exclude>**/monaco-editor/**/*</exclude>
             <exclude>**/*.txt</exclude>
             <exclude>**/pom.xml.versionsBackup</exclude>
@@ -387,6 +390,11 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.1</version>
       </plugin>
     </plugins>
   </build>

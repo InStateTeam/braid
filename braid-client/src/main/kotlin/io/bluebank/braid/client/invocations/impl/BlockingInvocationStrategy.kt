@@ -62,38 +62,26 @@ internal class BlockingInvocationStrategy(
     log.trace(requestId) { "processing item $item" }
     checkIdIsSet(requestId)
     endInvoke(requestId)
-    try {
-      checkComputationIsNotComplete()
-      result.complete(item)
-      log.trace(requestId) { "signalling to the blocked client" }
-      latch.countDown()
-    } catch (err: Throwable) {
-      log.error(requestId, err) { "failed during onNext" }
-    }
+    checkComputationIsNotComplete()
+    result.complete(item)
+    log.trace(requestId) { "signalling to the blocked client" }
+    latch.countDown()
   }
 
   override fun onError(requestId: Long, error: Throwable) {
     log.trace(requestId) { "processing error ${error.message}" }
     endInvoke(requestId)
     checkIdIsSet(requestId)
-    try {
-      checkComputationIsNotComplete()
-      result.fail(error)
-      latch.countDown()
-    } catch (err: Throwable) {
-      log.error(requestId, err) { "failed during on Error" }
-    }
+    checkComputationIsNotComplete()
+    result.fail(error)
+    latch.countDown()
   }
 
   override fun onCompleted(requestId: Long) {
     log.warn(requestId) { "processing onCompleted message - unexpected for a blocking synchronous call" }
     checkIdIsSet(requestId)
     endInvoke(requestId)
-    try {
-      checkComputationIsComplete()
-    } catch (err: Throwable) {
-      log.error(requestId, err) { err.message!! }
-    }
+    checkComputationIsComplete()
     // NO OP
   }
 
