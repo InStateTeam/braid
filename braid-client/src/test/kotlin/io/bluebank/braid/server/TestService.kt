@@ -30,17 +30,17 @@ interface MyService {
   fun add(lhs: Double, rhs: Double): Double
   fun noArgs(): Int
   fun noResult()
-  fun longRunning() : Future<Int>
-  fun stream() : Observable<Int>
+  fun longRunning(): Future<Int>
+  fun stream(): Observable<Int>
   fun largelyNotStream(): Observable<Int>
   fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject
   fun stuffedJsonObject(): JsonStuffedObject
   fun blowUp()
   fun exposeParameterListTypeIssue(str: String, md: ModelData): ModelData
-  fun ticks() : Observable<Instant>
+  fun ticks(): Observable<Instant>
 }
 
-interface MyExtendedService: MyService {
+interface MyExtendedService : MyService {
   fun extendedMethod(): String
 }
 
@@ -53,6 +53,7 @@ data class JsonStuffedObject(val a: String) {
 
 @ServiceDescription("my-service", "a simple service")
 class MyServiceImpl(private val vertx: Vertx) : MyService {
+
   companion object {
     private val log = loggerFor<MyServiceImpl>()
   }
@@ -82,7 +83,7 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
 
   override fun stream(): Observable<Int> {
     log.info("streaming")
-    return Observable.from(0 .. 10)
+    return Observable.from(0..10)
   }
 
   override fun largelyNotStream(): Observable<Int> {
@@ -116,19 +117,21 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
 }
 
 @ServiceDescription("my-extended-service", "a simple extended service")
-class MyExtendedServiceImpl(private val vertx: Vertx): MyExtendedService, MyService by MyServiceImpl(vertx) {
+class MyExtendedServiceImpl(private val vertx: Vertx) : MyExtendedService,
+                                                        MyService by MyServiceImpl(vertx) {
+
   override fun extendedMethod(): String {
     return "yay"
   }
 }
 
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type"
+  use = JsonTypeInfo.Id.NAME,
+  include = JsonTypeInfo.As.PROPERTY,
+  property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
+  JsonSubTypes.Type(value = MeteringModelData::class, name = "MeteringModelData")
 )
 interface ModelData
 

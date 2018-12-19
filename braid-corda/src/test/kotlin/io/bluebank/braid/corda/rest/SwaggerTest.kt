@@ -34,16 +34,22 @@ import kotlin.reflect.KClass
 data class Tag(val category: String, val value: String)
 
 data class CreateAccountRequest(
-    @ApiModelProperty(example = "my-account-1")
-    val accountId: String,
-    @ApiModelProperty(example = "GBP")
-    val currency: Currency,
-    val functionalUnitId: UUID,
-    val aliases: Set<Tag> = emptySet(),
-    @ApiModelProperty(example = "0")
-    val minimumBalance : BigDecimal = BigDecimal.ZERO)
+  @ApiModelProperty(example = "my-account-1")
+  val accountId: String,
+  @ApiModelProperty(example = "GBP")
+  val currency: Currency,
+  val functionalUnitId: UUID,
+  val aliases: Set<Tag> = emptySet(),
+  @ApiModelProperty(example = "0")
+  val minimumBalance: BigDecimal = BigDecimal.ZERO
+)
 
-data class AccountAddress(val accountId: String, val functionalUnit: UUID, val organisation: String) {
+data class AccountAddress(
+  val accountId: String,
+  val functionalUnit: UUID,
+  val organisation: String
+) {
+
   companion object {
     private val RE = Regex("^([^:]+):([^:]+):([^:]+)$")
     private val ACCOUNT_ID_RE = Regex("^[^:\\s]+$")
@@ -54,7 +60,11 @@ data class AccountAddress(val accountId: String, val functionalUnit: UUID, val o
       return AccountAddress(accountId, functionalUnitId, party)
     }
 
-    fun create(accountId: String, organisation: String, functionalUnitId: UUID): AccountAddress {
+    fun create(
+      accountId: String,
+      organisation: String,
+      functionalUnitId: UUID
+    ): AccountAddress {
       validateAccountId(accountId)
       return AccountAddress(accountId, functionalUnitId, organisation)
     }
@@ -78,49 +88,52 @@ interface Account {
   val currency: Currency
   val minimumBalance: BigDecimal
   val aliases: Set<Tag>
-  fun getAllAliases() : Set<Tag>
+  fun getAllAliases(): Set<Tag>
 }
-
 
 class SwaggerTest {
 
   @Test
   fun swaggerBuildTest() {
     val models = mutableMapOf<String, Model>()
-        .readType(CreateAccountRequest::class)
-        .readType(Account::class)
+      .readType(CreateAccountRequest::class)
+      .readType(Account::class)
     val info = Info()
-        .version("1.0.0")
-        .title("Swagger Petstore")
+      .version("1.0.0")
+      .title("Swagger Petstore")
 
     info.contact = Contact()
-        .name("Em Tech")
-        .email("support@bluebank.io")
-        .url("http://bluebank.io")
+      .name("Em Tech")
+      .email("support@bluebank.io")
+      .url("http://bluebank.io")
 
     val swagger = Swagger()
-        .info(info)
-        .host("localhost:8080")
-        .securityDefinition("api-key", ApiKeyAuthDefinition("key", In.HEADER))
-        .scheme(Scheme.HTTP)
-        .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
-        .produces(HttpHeaderValues.APPLICATION_JSON.toString())
-        .addAllModels(models)
+      .info(info)
+      .host("localhost:8080")
+      .securityDefinition("api-key", ApiKeyAuthDefinition("key", In.HEADER))
+      .scheme(Scheme.HTTP)
+      .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
+      .produces(HttpHeaderValues.APPLICATION_JSON.toString())
+      .addAllModels(models)
 
     val bodyParam = BodyParameter()
-        .schema(RefModel(CreateAccountRequest::class.simpleName))
-        .name(CreateAccountRequest::class.simpleName)
+      .schema(RefModel(CreateAccountRequest::class.simpleName))
+      .name(CreateAccountRequest::class.simpleName)
     bodyParam.required = true
 
-    swagger.path("/api/accounts", Path().post(
+    swagger.path(
+      "/api/accounts", Path().post(
         Operation()
-            .produces(HttpHeaderValues.APPLICATION_JSON.toString())
-            .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
-            .parameter(bodyParam)
-            .defaultResponse(Response()
-                .description("response")
-                .schema(RefProperty(Account::class.simpleName)))
-    ))
+          .produces(HttpHeaderValues.APPLICATION_JSON.toString())
+          .consumes(HttpHeaderValues.APPLICATION_JSON.toString())
+          .parameter(bodyParam)
+          .defaultResponse(
+            Response()
+              .description("response")
+              .schema(RefProperty(Account::class.simpleName))
+          )
+      )
+    )
 
     Yaml.pretty().writeValueAsString(swagger)
   }

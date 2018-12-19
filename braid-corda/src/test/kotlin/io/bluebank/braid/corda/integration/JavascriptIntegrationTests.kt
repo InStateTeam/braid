@@ -41,7 +41,8 @@ class JavascriptIntegrationTests {
       val testDir = getProjectDirectory().resolve("../braid-client-js")
       assertTrue { testDir.exists() }
       val pb = ProcessBuilder("npm", "run", "test:integration")
-      pb.environment()["braidService"] = "https://localhost:${cordaNet.braidStartingPort}$DEFAULT_API_MOUNT"
+      pb.environment()["braidService"] =
+        "https://localhost:${cordaNet.braidStartingPort}$DEFAULT_API_MOUNT"
       pb.directory(testDir)
       val process = pb.start()
       Thread {

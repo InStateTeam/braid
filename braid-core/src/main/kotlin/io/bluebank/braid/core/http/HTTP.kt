@@ -37,7 +37,6 @@ fun RoutingContext.write(err: Throwable) {
     .end()
 }
 
-
 fun RoutingContext.write(str: String) {
   response()
     .setStatusCode(200)

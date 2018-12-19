@@ -63,7 +63,8 @@ class SerialisationTests {
 
   @Test
   fun `that Amount of Issued Currency can be serialised and deserialised`() {
-    val expected = Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
+    val expected =
+      Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
     val encoded = Json.encode(expected)
     val actual = Json.decodeValue(encoded, Amount::class.java)
     assertEquals(expected, actual)

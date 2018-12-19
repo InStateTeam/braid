@@ -32,10 +32,10 @@ class Server(private val serviceHub: AppServiceHub) : SingletonSerializeAsToken(
 
   private fun BraidConfig.bootstrap() {
     this.withFlow(EchoFlow::class)
-        .withFlow("issueCash", CashIssueFlow::class)
-        .withService("myService", MyService(serviceHub as ServiceHubInternal))
-        .withAuthConstructor({ MySimpleAuthProvider() })
-        .bootstrapBraid(serviceHub)
+      .withFlow("issueCash", CashIssueFlow::class)
+      .withService("myService", MyService(serviceHub as ServiceHubInternal))
+      .withAuthConstructor({ MySimpleAuthProvider() })
+      .bootstrapBraid(serviceHub)
   }
 
   /**

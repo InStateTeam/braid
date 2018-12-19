@@ -18,6 +18,7 @@ package io.bluebank.braid.corda
 import com.google.common.io.Resources
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
+import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -41,21 +42,23 @@ import kotlin.reflect.KClass
  * @param httpServerOptions - these options control all HTTP transport concerns e.g. TLS
  * @param threadPoolSize - the number of executor threads available for each connected client
  */
-data class BraidConfig(val port: Int = 8080,
-                       val rootPath: String = "/api/",
-                       val registeredFlows: Map<String, Class<out FlowLogic<*>>> = emptyMap(),
-                       val services: Map<String, Any> = emptyMap(),
-                       val authConstructor: ((Vertx) -> AuthProvider)? = null,
-                       val httpServerOptions: HttpServerOptions = defaultServerOptions(),
-                       val threadPoolSize : Int = 1,
-                       val vertx: Vertx? = null,
-                       val restConfig: RestConfig? = null) {
+data class BraidConfig(
+  val port: Int = 8080,
+  val rootPath: String = "/api/",
+  val registeredFlows: Map<String, Class<out FlowLogic<*>>> = emptyMap(),
+  val services: Map<String, Any> = emptyMap(),
+  val authConstructor: ((Vertx) -> AuthProvider)? = null,
+  val httpServerOptions: HttpServerOptions = defaultServerOptions(),
+  val threadPoolSize: Int = 1,
+  val vertx: Vertx? = null,
+  val restConfig: RestConfig? = null
+) {
 
   companion object {
     private val log = loggerFor<BraidConfig>()
 
     init {
-      System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+      LogInitialiser.init()
     }
 
     @Suppress("unused")
@@ -87,29 +90,40 @@ data class BraidConfig(val port: Int = 8080,
     return this.copy(rootPath = canonical)
   }
 
-  fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) = this.copy(authConstructor = memoize(authConstructor))
-  fun withHttpServerOptions(httpServerOptions: HttpServerOptions) = this.copy(httpServerOptions = httpServerOptions)
-  fun withService(service: Any) = withService(service.javaClass.simpleName.decapitalize(), service)
+  fun withAuthConstructor(authConstructor: ((Vertx) -> AuthProvider)) =
+    this.copy(authConstructor = memoize(authConstructor))
+
+  fun withHttpServerOptions(httpServerOptions: HttpServerOptions) =
+    this.copy(httpServerOptions = httpServerOptions)
+
+  fun withService(service: Any) =
+    withService(service.javaClass.simpleName.decapitalize(), service)
+
   @Suppress("MemberVisibilityCanBePrivate")
-  fun withService(name: String, service: Any) : BraidConfig {
+  fun withService(name: String, service: Any): BraidConfig {
     val map = services.toMutableMap()
     map[name] = service
     return this.copy(services = map)
   }
 
   @Suppress("unused")
-  fun withThreadPoolSize(threadCount: Int) : BraidConfig {
+  fun withThreadPoolSize(threadCount: Int): BraidConfig {
     return this.copy(threadPoolSize = threadCount)
   }
-  fun withRestConfig(restConfig: RestConfig) : BraidConfig {
+
+  fun withRestConfig(restConfig: RestConfig): BraidConfig {
     return this.copy(restConfig = restConfig)
   }
-  inline fun <reified T : FlowLogic<*>> withFlow(name: String, flowClass: KClass<T>) = withFlow(name, flowClass.java)
+
+  inline fun <reified T : FlowLogic<*>> withFlow(name: String, flowClass: KClass<T>) =
+    withFlow(name, flowClass.java)
+
   @Suppress("unused")
-  inline fun <reified T : FlowLogic<*>> withFlow(flowClass: KClass<T>) = withFlow(flowClass.java)
+  inline fun <reified T : FlowLogic<*>> withFlow(flowClass: KClass<T>) =
+    withFlow(flowClass.java)
 
   fun <T : FlowLogic<*>> withFlow(flowClass: Class<T>) =
-      withFlow(flowClass.simpleName.decapitalize(), flowClass)
+    withFlow(flowClass.simpleName.decapitalize(), flowClass)
 
   fun <T : FlowLogic<*>> withFlow(name: String, flowClass: Class<T>): BraidConfig {
     val map = registeredFlows.toMutableMap()
@@ -120,7 +134,10 @@ data class BraidConfig(val port: Int = 8080,
   fun withVertx(vertx: Vertx) = this.copy(vertx = vertx)
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 
-  fun bootstrapBraid(serviceHub: AppServiceHub? = null, fn: Handler<AsyncResult<String>>? = null) = BraidServer.bootstrapBraid(serviceHub, this, fn)
+  fun bootstrapBraid(
+    serviceHub: AppServiceHub? = null,
+    fn: Handler<AsyncResult<String>>? = null
+  ) = BraidServer.bootstrapBraid(serviceHub, this, fn)
 }
 
 private inline fun <reified T : Any, reified R : Any> memoize(crossinline fn: (T) -> R): (T) -> R {

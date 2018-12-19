@@ -25,6 +25,7 @@ import net.corda.core.flows.StartableByService
 @StartableByRPC
 @StartableByService
 class EchoFlow(private val text: String) : FlowLogic<String>() {
+
   @Suspendable
   override fun call(): String {
     return "Echo: $text"

@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  (function() {
+  (function () {
     class AppIssueCurrency extends SimpleComponent {
       constructor() {
         super('app-issue-currency-template');
@@ -48,7 +48,9 @@
         const logger = document.querySelector('#console');
         const bt = this.$('#btn_issue');
         let nextRef = 1;
-        bt.onclick = () => { issue() }
+        bt.onclick = () => {
+          issue()
+        }
 
         function issue() {
           const proxy = thisObj._proxy;
@@ -84,7 +86,7 @@
       setConnection(proxy) {
         window.proxy = proxy;
         this._proxy = proxy;
-        if (proxy !== null) {
+        if(proxy !== null) {
           this.$('.widget').classList.remove('hidden');
         } else {
           this.$('.widget').classList.add('hidden');

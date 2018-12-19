@@ -15,106 +15,40 @@
  */
 package io.bluebank.braid.client
 
-import io.bluebank.braid.core.async.getOrThrow
-import io.bluebank.braid.core.async.toFuture
-import io.bluebank.braid.core.json.BraidJacksonInit
-import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
-import io.bluebank.braid.core.jsonrpc.asMDC
-import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.reflection.actualType
-import io.bluebank.braid.core.reflection.isStreaming
-import io.bluebank.braid.core.reflection.underlyingGenericType
-import io.vertx.core.Future
-import io.vertx.core.Future.future
+import io.bluebank.braid.client.invocations.Invocations
+import io.bluebank.braid.client.invocations.impl.InvocationsImpl
 import io.vertx.core.Vertx
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
-import io.vertx.core.http.WebSocket
-import io.vertx.core.http.WebSocketFrame
-import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
-import org.slf4j.Logger
-import rx.Observable
-import rx.subjects.PublishSubject
 import java.io.Closeable
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
-import java.lang.reflect.Type
-import java.net.URL
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
-open class BraidClient(private val config: BraidClientConfig, 
-                       val vertx: Vertx, 
-                       exceptionHandler: (Throwable) -> Unit = this::exceptionHandler, 
-                       closeHandler: (() -> Unit) = this::closeHandler,
-                       clientOptions : HttpClientOptions = defaultClientHttpOptions
-                       ) : Closeable, InvocationHandler {
-  private val nextId = AtomicLong(1)
-  private val invocations = ConcurrentHashMap<Long, ProxyInvocation>()
-  private var sock: WebSocket? = null
+open class BraidClient protected constructor(
+  config: BraidClientConfig,
+  vertx: Vertx,
+  exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
+  closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
+  clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
+) : Closeable, InvocationHandler {
 
-  private val client = vertx.createHttpClient(clientOptions
-      .setDefaultHost(config.serviceURI.host)
-      .setDefaultPort(config.serviceURI.port)
-      .setSsl(config.tls)
-      .setVerifyHost(config.verifyHost)
-      .setTrustAll(config.trustAll))
+  private val invocations =
+    Invocations.create(vertx, config, exceptionHandler, closeHandler, clientOptions)
 
   companion object {
-    private val log: Logger = loggerFor<BraidClient>()
-    val defaultClientHttpOptions = HttpClientOptions()
-
-    init {
-      BraidJacksonInit.init()
+    fun createClient(
+      config: BraidClientConfig,
+      vertx: Vertx = Vertx.vertx(),
+      exceptionHandler: (Throwable) -> Unit = Invocations.defaultSocketExceptionHandler(),
+      closeHandler: (() -> Unit) = Invocations.defaultSocketCloseHandler(),
+      clientOptions: HttpClientOptions = InvocationsImpl.defaultClientHttpOptions
+    ): BraidClient {
+      return BraidClient(config, vertx, exceptionHandler, closeHandler, clientOptions)
     }
-
-    fun createClient(config: BraidClientConfig, vertx: Vertx = Vertx.vertx()): BraidClient {
-      return BraidClient(config, vertx)
-    }
-
-    private fun closeHandler() {
-      log.info("closing...")
-    }
-
-    private fun exceptionHandler(error: Throwable) {
-      log.error("exception from socket", error)
-      // TODO: handle retries?
-      // TODO: handle error!
-    }
-  }
-
-  init {
-    val protocol = if (config.tls) "https" else "http"
-    val url = URL(protocol, config.serviceURI.host, config.serviceURI.port, "${config.serviceURI.path}/websocket")
-    val result = future<Boolean>()
-    client.websocket(url.toString(), { socket ->
-      try {
-        sock = socket
-        socket.handler(this::handler)
-        socket.exceptionHandler(exceptionHandler)
-        socket.closeHandler(closeHandler)
-        result.complete(true)
-      } catch (err: Throwable) {
-        log.error("failed to connect socket to the client stack", err)
-        sock = null
-        result.fail(err)
-      }
-    }, { error ->
-      log.error("failed to bind to websocket", error)
-      try {
-        sock = null
-        result.fail(error)
-      } catch (err: Throwable) {
-        log.error("failed to report error on result future", err)
-      }
-    })
-    result.getOrThrow()
   }
 
   fun activeRequestsCount(): Int {
-    return invocations.size
+    return invocations.activeRequestsCount
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -123,154 +57,14 @@ open class BraidClient(private val config: BraidClientConfig,
   }
 
   override fun close() {
-    client.close()
+    invocations.close()
   }
 
-  override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
-    val socket = sock
-    if (socket != null) {
-      return jsonRPC(socket, method.name, method.genericReturnType, *(args ?: arrayOfNulls<Any>(0))).let {
-        asMDC(it.invocationId) {
-          it.awaitResult()
-        }
-      }
-    }
-    throw IllegalStateException("no socket for proxy")
-  }
-
-  private fun handler(buffer: Buffer) {
-    val jo = JsonObject(buffer)
-    if (!jo.containsKey("id")) {
-      log.warn("received message without 'id' field from ${config.serviceURI}")
-      return
-    }
-    val responseId = jo.getLong("id")
-    try {
-      when {
-        responseId == null -> log.error("received response without id {}", buffer.toString())
-        !invocations.containsKey(responseId) -> log.error("no subscriber found for response id {}", responseId)
-        else -> handleInvocationWithResponse(responseId, jo)
-      }
-    } catch (err: Throwable) {
-      log.error("failed to handle response message", err)
-    }
-  }
-
-  private fun handleInvocationWithResponse(responseId: Long, jo: JsonObject) {
-    asMDC(responseId) {
-      val proxy = invocations[responseId]
-      when (proxy) {
-        null -> log.error("failed to find invocation proxy")
-        else -> {
-          try {
-            proxy.handle(jo)
-          } catch (err: Throwable) {
-            log.error("failed to handle message. sending to error handler {}", jo.encode())
-            try {
-              proxy.onError(err)
-            } catch (err: Throwable) {
-              log.error("$responseId - failed to send handler exception to subject", err)
-            }
-            invocations.remove(responseId)
-          }
-        }
-      }
-    }
-  }
-
-  private fun jsonRPC(socket: WebSocket, method: String, returnType: Type, vararg params: Any?): ProxyInvocation {
-    val id = nextId.getAndIncrement()
-    val proxyInvocation = ProxyInvocation(id, returnType)
-    invocations[id] = proxyInvocation
-    try {
-      val request = JsonRPCRequest(id = id, method = method, params = params.toList(), streamed = returnType.isStreaming())
-      vertx.runOnContext {
-        try {
-          socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-        } catch (e: IllegalStateException) {
-          onRequestError(id, e)
-        }
-      }
-    } catch (err: Throwable) {
-      onRequestError(id, err)
-    }
-    return proxyInvocation
-  }
-
-  private fun onRequestError(id: Long, err: Throwable) {
-    val proxyInvocation = invocations[id]
-    if (proxyInvocation != null) {
-      proxyInvocation.onError(err)
-      invocations.remove(id)
-    } else {
-      log.warn("could not find invocation object $id to report exception", err)
-    }
-  }
-
-  private inner class ProxyInvocation(internal val invocationId: Long, private val returnType: Type) {
-
-    private val payloadType = Json.mapper.typeFactory.constructType(returnType.underlyingGenericType())
-    private val resultBuffer = PublishSubject.create<Any>()
-
-    fun awaitResult(): Any {
-      return when (returnType.actualType()) {
-        Future::class.java -> {
-          resultBuffer
-            .doOnNext { log.trace("received {}", it) }
-            .doOnError { log.trace("received error", it)}
-            .doOnCompleted { log.trace("received completion")}
-            .toFuture()
-        }
-        Observable::class.java -> {
-          resultBuffer
-        }
-        else -> {
-          resultBuffer.toBlocking().first()
-        }
-      }
-    }
-
-    fun handle(jo: JsonObject) {
-      if (log.isTraceEnabled) {
-        log.trace("handling received message {}", jo.encode())
-      }
-      when {
-        jo.containsKey("result") -> {
-          val raw = jo.getValue("result")
-          val result = Json.mapper.convertValue<Any>(raw, payloadType)
-
-          // TODO: this is moderately horrific - otherwise it's hard to make assertions about the number of handlers
-          if (returnType.isStreaming()) {
-            log.trace("pushing message to streaming subject: {}", result)
-            resultBuffer.onNext(result)
-          } else {
-            log.trace("pushing message to non-streaming subject and completing the subject: {}", result)
-            invocations.remove(invocationId)
-            resultBuffer.onNext(result)
-            resultBuffer.onCompleted()
-          }
-        }
-        jo.containsKey("error") -> {
-          log.trace("message is an error response. terminating the subject")
-          val error = jo.getJsonObject("error")
-          invocations.remove(invocationId)
-          onError(RuntimeException(error.getString("message")))
-        }
-        jo.containsKey("completed") -> {
-          log.trace("message is a completion response")
-          if (!returnType.isStreaming()) {
-            log.error("Not expecting completed messages for anything other than Observables")
-          }
-
-          invocations.remove(invocationId)
-          resultBuffer.onCompleted()
-        }
-      }
-    }
-
-    fun onError(err: Throwable) {
-      resultBuffer.onError(err)
-    }
+  override fun invoke(proxy: Any, method: Method, args: Array<out Any?>?): Any? {
+    return invocations.invoke(
+      method.name,
+      method.genericReturnType,
+      args ?: arrayOfNulls<Any>(0)
+    )
   }
 }
-

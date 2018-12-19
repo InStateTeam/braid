@@ -35,19 +35,28 @@ import net.corda.testing.node.User
  * 5. Run the "Debug CorDapp" remote debug run configuration.
  */
 fun main(args: Array<String>) {
-    // No permissions required as we are not invoking flows.
-    val user = User("user1", "test", permissions = setOf())
-    driver(DriverParameters(
-        isDebug = true,
-        startNodesInProcess = true,
-        waitForAllNodesToFinish = true,
-        extraCordappPackagesToScan = listOf("com.template")
-    )) {
-        val (partyA, partyB) = listOf(
-            startNode(providedName = CordaX500Name("PartyA", "London", "GB"), rpcUsers = listOf(user)),
-            startNode(providedName = CordaX500Name("PartyB", "New York", "US"), rpcUsers = listOf(user))).map { it.getOrThrow() }
+  // No permissions required as we are not invoking flows.
+  val user = User("user1", "test", permissions = setOf())
+  driver(
+    DriverParameters(
+      isDebug = true,
+      startNodesInProcess = true,
+      waitForAllNodesToFinish = true,
+      extraCordappPackagesToScan = listOf("com.template")
+    )
+  ) {
+    val (partyA, partyB) = listOf(
+      startNode(
+        providedName = CordaX500Name("PartyA", "London", "GB"),
+        rpcUsers = listOf(user)
+      ),
+      startNode(
+        providedName = CordaX500Name("PartyB", "New York", "US"),
+        rpcUsers = listOf(user)
+      )
+    ).map { it.getOrThrow() }
 
-        startWebserver(partyA)
-        startWebserver(partyB)
-    }
+    startWebserver(partyA)
+    startWebserver(partyB)
+  }
 }

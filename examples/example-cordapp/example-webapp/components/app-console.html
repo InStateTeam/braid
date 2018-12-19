@@ -41,7 +41,7 @@
   const WARN = '[WARN ]';
   const ERROR = '[ERROR]';
 
-  (function() {
+  (function () {
     class AppConsole extends SimpleComponent {
       constructor() {
         super('app-console-template');
@@ -90,9 +90,9 @@
 
       _foldArguments(args) {
         let arr = [];
-        for (let idx in args) {
+        for(let idx in args) {
           let arg = args[idx];
-          if (typeof arg === 'object') {
+          if(typeof arg === 'object') {
             arg = JSON.stringify(arg, null, ' ');
           }
           arr[idx] = "" + arg;
@@ -102,7 +102,6 @@
         return line;
       }
     }
-
 
     window.customElements.define('app-console', AppConsole);
   })();

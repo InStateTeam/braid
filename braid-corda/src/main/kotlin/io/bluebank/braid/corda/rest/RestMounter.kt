@@ -56,8 +56,10 @@ class RestMounter(
     }
   }
 
-  private val path = config.apiPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
-  private val swaggerPath = config.swaggerPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
+  private val path =
+    config.apiPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
+  private val swaggerPath =
+    config.swaggerPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
   private val swaggerJsonPath = if (swaggerPath.isBlank()) {
     "swagger.json"
   } else {
@@ -71,7 +73,13 @@ class RestMounter(
 
   private val docsHandler: DocsHandler
   private val cookieHandler by lazy { CookieHandler.create() }
-  private val sessionHandler by lazy { SessionHandler.create(LocalSessionStore.create(vertx)) }
+  private val sessionHandler by lazy {
+    SessionHandler.create(
+      LocalSessionStore.create(
+        vertx
+      )
+    )
+  }
   private val userSessionHandler by lazy { UserSessionHandler.create(config.authProvider) }
   private val basicAuthHandler by lazy { BasicAuthHandler.create(config.authProvider) }
   private val unprotectedRouter = Router.router(vertx)
@@ -101,7 +109,7 @@ class RestMounter(
     )
   }
 
-  private fun getSecuritySchemeDefinition() : SecuritySchemeDefinition? {
+  private fun getSecuritySchemeDefinition(): SecuritySchemeDefinition? {
     return when (config.authSchema) {
       AuthSchema.Basic -> {
         BasicAuthDefinition()
@@ -139,7 +147,8 @@ class RestMounter(
       if (it.request().path().endsWith("/")) {
         sh.handle(it)
       } else {
-        it.response().putHeader("Location", "/$swaggerPath/").setStatusCode(TEMPORARY_REDIRECT.statusCode).end()
+        it.response().putHeader("Location", "/$swaggerPath/")
+          .setStatusCode(TEMPORARY_REDIRECT.statusCode).end()
       }
     }
     router.get("/$swaggerStaticPath").handler(sh)
@@ -160,7 +169,8 @@ class RestMounter(
         protectedRouter.route().handler(basicAuthHandler)
       }
       AuthSchema.Token -> {
-        protectedRouter.route().handler(JWTAuthHandler.create(config.authProvider as JWTAuth))
+        protectedRouter.route()
+          .handler(JWTAuthHandler.create(config.authProvider as JWTAuth))
       }
       else -> {
         // don't add any auth provider
@@ -169,9 +179,10 @@ class RestMounter(
   }
 
   private fun validateAuthSchemaAndProvider() {
-    if (config.authSchema != AuthSchema.None && config.authProvider == null) throw RuntimeException("authprovider cannot be null for ${config.authSchema}")
+    if (config.authSchema != AuthSchema.None && config.authProvider == null) throw RuntimeException(
+      "authprovider cannot be null for ${config.authSchema}"
+    )
   }
-
 
   /**
    * Define a grouping of method bindings
@@ -289,7 +300,11 @@ class RestMounter(
     docsHandler.add(groupName, protected, method, path, fn)
   }
 
-  private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Future<Response>>) {
+  private fun <Response> bind(
+    method: HttpMethod,
+    path: String,
+    fn: KCallable<Future<Response>>
+  ) {
     currentRouter.route(method, path).bind(fn)
     docsHandler.add(groupName, protected, method, path, fn)
   }

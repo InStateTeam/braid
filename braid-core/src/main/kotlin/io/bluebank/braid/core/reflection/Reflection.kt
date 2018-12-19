@@ -22,18 +22,19 @@ import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-fun <T: Any> Class<T>.serviceName() : String {
-  return getDeclaredAnnotation(ServiceDescription::class.java)?.name ?: simpleName.toLowerCase()
+fun <T : Any> Class<T>.serviceName(): String {
+  return getDeclaredAnnotation(ServiceDescription::class.java)?.name
+    ?: simpleName.toLowerCase()
 }
 
-fun Method.underlyingGenericType() : Type {
+fun Method.underlyingGenericType(): Type {
   return when {
     isAsyncResponse() -> genericReturnType.getGenericParameterType(0)
     else -> genericReturnType
   }
 }
 
-fun Method.isAsyncResponse() : Boolean {
+fun Method.isAsyncResponse(): Boolean {
   return returnType.isAsyncResponse()
 }
 
@@ -55,19 +56,19 @@ fun Type.actualType() = (this as? ParameterizedType)?.rawType ?: this
  * The slight subtlety here is that anything with underlying types is passed around
  * as a ParametrizedType.
  */
-fun Type.underlyingGenericType() : Type {
-    return when(this) {
-      is ParameterizedType -> {
-        when {
-          this.isAsynResponse() -> getGenericParameterType(0)
-          else -> this
-        }
+fun Type.underlyingGenericType(): Type {
+  return when (this) {
+    is ParameterizedType -> {
+      when {
+        this.isAsynResponse() -> getGenericParameterType(0)
+        else -> this
       }
-      else -> this
     }
+    else -> this
+  }
 }
 
-fun Type.isAsynResponse() : Boolean {
+fun Type.isAsynResponse(): Boolean {
   return when (this) {
     is Class<*> -> this.isAsyncResponse()
     is ParameterizedType -> this.rawType.isAsynResponse()
@@ -75,13 +76,13 @@ fun Type.isAsynResponse() : Boolean {
   }
 }
 
-fun <T: Any> Class<T>.isAsyncResponse() : Boolean {
+fun <T : Any> Class<T>.isAsyncResponse(): Boolean {
   return when (this) {
     Future::class.java, Observable::class.java -> true
     else -> false
   }
 }
 
-private fun Type.getGenericParameterType(index: Int) : Type {
+private fun Type.getGenericParameterType(index: Int): Type {
   return (this as ParameterizedType).actualTypeArguments[index]
 }

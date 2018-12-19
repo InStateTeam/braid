@@ -22,7 +22,9 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.ext.auth.User
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 
-class SockJsSocketImpl(private val sockJS: SockJSSocket) : AbstractSocket<Buffer, Buffer>(), SockJSSocketWrapper {
+class SockJsSocketImpl(private val sockJS: SockJSSocket) :
+  AbstractSocket<Buffer, Buffer>(), SockJSSocketWrapper {
+
   companion object {
     val log = loggerFor<SockJsSocketImpl>()
   }

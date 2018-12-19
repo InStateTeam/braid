@@ -32,6 +32,7 @@ import org.junit.runner.RunWith
 
 @RunWith(VertxUnitRunner::class)
 class RestMounterTest {
+
   private val port = findFreePort()
   private val service = TestServiceApp(port, TestService())
 
@@ -87,33 +88,40 @@ class RestMounterTest {
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
-          context.assertEquals(APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals(
+            APPLICATION_OCTET_STREAM.toString(),
+            response.getHeader(HttpHeaders.CONTENT_TYPE)
+          )
           context.assertEquals("hello", body.toString())
           async4.complete()
         }
       }
       .end()
 
-
     val async5 = context.async()
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytearray")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
-          context.assertEquals(APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals(
+            APPLICATION_OCTET_STREAM.toString(),
+            response.getHeader(HttpHeaders.CONTENT_TYPE)
+          )
           context.assertEquals("hello", body.toString())
           async5.complete()
         }
       }
       .end()
 
-
     val async6 = context.async()
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytebuf")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
-          context.assertEquals(APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals(
+            APPLICATION_OCTET_STREAM.toString(),
+            response.getHeader(HttpHeaders.CONTENT_TYPE)
+          )
           context.assertEquals("hello", body.toString())
           async6.complete()
         }
@@ -125,7 +133,10 @@ class RestMounterTest {
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
-          context.assertEquals(APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals(
+            APPLICATION_OCTET_STREAM.toString(),
+            response.getHeader(HttpHeaders.CONTENT_TYPE)
+          )
           context.assertEquals("hello", body.toString())
           async7.complete()
         }
@@ -141,7 +152,10 @@ class RestMounterTest {
       .handler { response ->
         context.assertEquals(2, response.statusCode() / 100)
         response.bodyHandler { body ->
-          context.assertEquals(APPLICATION_OCTET_STREAM.toString(), response.getHeader(HttpHeaders.CONTENT_TYPE))
+          context.assertEquals(
+            APPLICATION_OCTET_STREAM.toString(),
+            response.getHeader(HttpHeaders.CONTENT_TYPE)
+          )
           context.assertEquals("hellohello", body.toString())
           async8.complete()
         }

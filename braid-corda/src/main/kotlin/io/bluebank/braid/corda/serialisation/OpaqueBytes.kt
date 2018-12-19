@@ -26,13 +26,25 @@ import net.corda.core.utilities.parseAsHex
 import net.corda.core.utilities.toHexString
 
 class OpaqueBytesSerializer : StdSerializer<OpaqueBytes>(OpaqueBytes::class.java) {
-  override fun serialize(value: OpaqueBytes, generator: JsonGenerator, provider: SerializerProvider) {
-    generator.writeString(value.bytes.copyOfRange(value.offset, value.offset + value.size).toHexString())
+  override fun serialize(
+    value: OpaqueBytes,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
+    generator.writeString(
+      value.bytes.copyOfRange(
+        value.offset,
+        value.offset + value.size
+      ).toHexString()
+    )
   }
 }
 
 class OpaqueBytesDeserializer : StdDeserializer<OpaqueBytes>(OpaqueBytes::class.java) {
-  override fun deserialize(parser: JsonParser, context: DeserializationContext): OpaqueBytes {
+  override fun deserialize(
+    parser: JsonParser,
+    context: DeserializationContext
+  ): OpaqueBytes {
     return try {
       // try converting as hex
       OpaqueBytes(parser.text.parseAsHex())

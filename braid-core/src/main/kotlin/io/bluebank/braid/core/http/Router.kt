@@ -36,21 +36,27 @@ fun Router.setupAllowAnyCORS() {
     if (origin != null) {
       it.response().putHeader("Access-Control-Allow-Origin", origin)
       it.response().putHeader("Access-Control-Allow-Credentials", "true")
-      it.response().putHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+      it.response().putHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+      )
     }
     it.next()
   }
 }
 
 fun Router.setupOptionsMethod() {
-  options().handler { it.response()
-      .putHeader(ALLOW, "GET, PUT, POST, OPTIONS, CONNECT, HEAD, DELETE, CONNECT, TRACE, PATCH")
+  options().handler {
+    it.response()
+      .putHeader(
+        ALLOW,
+        "GET, PUT, POST, OPTIONS, CONNECT, HEAD, DELETE, CONNECT, TRACE, PATCH"
+      )
       .putHeader(CONTENT_TYPE, "text/*")
       .putHeader(CONTENT_TYPE, "application/*")
       .end()
   }
 }
-
 
 fun RoutingContext.withErrorHandler(callback: RoutingContext.() -> Unit) {
   try {
@@ -67,8 +73,8 @@ fun HttpServerResponse.end(error: Throwable) {
     .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
     .putHeader(CONTENT_LENGTH, message.length.toString())
     .setStatusMessage(message)
-      .setStatusCode(500)
-      .end(message)
+    .setStatusCode(500)
+    .end(message)
 }
 
 fun <T> HttpServerResponse.end(future: Future<T>) {
@@ -93,17 +99,17 @@ fun <T> HttpServerResponse.end(value: T) {
     else -> {
       val payload = Json.encode(value)
       this
-          .putHeader(CONTENT_LENGTH, payload.length.toString())
-          .putHeader(CONTENT_TYPE,  APPLICATION_JSON)
-          .end(payload)
+        .putHeader(CONTENT_LENGTH, payload.length.toString())
+        .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .end(payload)
     }
   }
 }
 
 fun HttpServerResponse.endWithString(value: String) {
   this.putHeader(CONTENT_LENGTH, value.length.toString())
-      .putHeader(CONTENT_TYPE, TEXT_PLAIN)
-      .end(value)
+    .putHeader(CONTENT_TYPE, TEXT_PLAIN)
+    .end(value)
 }
 
 fun HttpServerResponse.endWithBuffer(value: Buffer) {
@@ -120,7 +126,6 @@ fun HttpServerResponse.endWithByteArray(value: ByteArray) {
   endWithBuffer(Buffer.buffer(value))
 }
 
-
 fun HttpServerResponse.endWithByteBuf(value: ByteBuf) {
   endWithBuffer(Buffer.buffer(value))
 }
@@ -128,16 +133,16 @@ fun HttpServerResponse.endWithByteBuf(value: ByteBuf) {
 fun HttpServerResponse.end(value: JsonArray) {
   val payload = value.encode()
   this
-      .putHeader(CONTENT_LENGTH, payload.length.toString())
-      .putHeader(CONTENT_TYPE, "application/json")
-      .end(payload)
+    .putHeader(CONTENT_LENGTH, payload.length.toString())
+    .putHeader(CONTENT_TYPE, "application/json")
+    .end(payload)
 }
 
 fun HttpServerResponse.end(value: JsonObject) {
   val payload = value.encode()
   this
-      .putHeader(CONTENT_LENGTH, payload.length.toString())
-      .putHeader(CONTENT_TYPE, "application/json")
-      .end(payload)
+    .putHeader(CONTENT_LENGTH, payload.length.toString())
+    .putHeader(CONTENT_TYPE, "application/json")
+    .end(payload)
 }
 

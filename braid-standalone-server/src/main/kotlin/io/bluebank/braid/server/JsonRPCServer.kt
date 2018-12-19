@@ -27,12 +27,15 @@ import io.vertx.ext.auth.AuthProvider
  * configuration options for JsonRPCServer
  */
 class JsonRPCServerBuilder {
+
   internal var vertx: Vertx? = null
   internal var rootPath: String = "/api/"
   internal var port: Int = 8080
   internal var services: MutableList<Any> = mutableListOf()
   internal var authProvider: AuthProvider? = null
-  internal var httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()
+  internal var httpServerOptions: HttpServerOptions =
+    HttpServerConfig.defaultServerOptions()
+
   companion object {
     /**
      * main entry point to setup a builder
@@ -101,7 +104,7 @@ class JsonRPCServerBuilder {
     return this
   }
 
-  fun withHttpServerOptions(httpServerOptions: HttpServerOptions) : JsonRPCServerBuilder {
+  fun withHttpServerOptions(httpServerOptions: HttpServerOptions): JsonRPCServerBuilder {
     this.httpServerOptions = httpServerOptions
     return this
   }
@@ -110,11 +113,10 @@ class JsonRPCServerBuilder {
    * build the server
    * don't forget to start the server using [JsonRPCServerBuilder.build]
    */
-  fun build() : JsonRPCServer {
+  fun build(): JsonRPCServer {
     return JsonRPCServer.createJsonRpcServer(this)
   }
 }
-
 
 class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilder) {
   companion object {
@@ -151,7 +153,15 @@ class JsonRPCServer private constructor(private val builder: JsonRPCServerBuilde
   fun start(callback: (AsyncResult<Void>) -> Unit) {
     if (deploymentId == null) {
       with(builder) {
-        vertx!!.deployVerticle(JsonRPCVerticle(rootPath, services, port, authProvider, httpServerOptions)) {
+        vertx!!.deployVerticle(
+          JsonRPCVerticle(
+            rootPath,
+            services,
+            port,
+            authProvider,
+            httpServerOptions
+          )
+        ) {
           if (it.failed()) {
             println("failed to deploy: ${it.cause().message}")
             callback(failedFuture(it.cause()))

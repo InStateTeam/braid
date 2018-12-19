@@ -40,12 +40,12 @@ class CompositeExecutor(vararg predefinedExecutors: ServiceExecutor) : ServiceEx
 
   private fun invoke(executorIndex: Int, rpcRequest: JsonRPCRequest): Observable<Any> {
     return executors[executorIndex].invoke(rpcRequest)
-        .onErrorResumeNext({ err ->
-          when {
-            err is MethodDoesNotExist && executorIndex < executors.size - 1 ->
-              invoke(executorIndex + 1, rpcRequest)
-            else -> Observable.error(err)
-          }
-        })
+      .onErrorResumeNext({ err ->
+        when {
+          err is MethodDoesNotExist && executorIndex < executors.size - 1 ->
+            invoke(executorIndex + 1, rpcRequest)
+          else -> Observable.error(err)
+        }
+      })
   }
 }

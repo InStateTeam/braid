@@ -21,17 +21,19 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import java.net.URI
 
-data class RestConfig(val serviceName: String = DEFAULT_SERVICE_NAME,
-                      val description: String = DEFAULT_DESCRIPTION,
-                      val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
-                      val apiPath: String = DEFAULT_API_PATH,
-                      val swaggerPath: String = DEFAULT_SWAGGER_PATH,
-                      val contact: Contact = DEFAULT_CONTACT,
-                      val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
-                      internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
-                      val debugMode: Boolean = false,
-                      val pathsInit: (RestMounter.(Router) -> Unit) = {}
+data class RestConfig(
+  val serviceName: String = DEFAULT_SERVICE_NAME,
+  val description: String = DEFAULT_DESCRIPTION,
+  val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
+  val apiPath: String = DEFAULT_API_PATH,
+  val swaggerPath: String = DEFAULT_SWAGGER_PATH,
+  val contact: Contact = DEFAULT_CONTACT,
+  val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
+  internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
+  val debugMode: Boolean = false,
+  val pathsInit: (RestMounter.(Router) -> Unit) = {}
 ) {
+
   companion object {
     const val DEFAULT_SERVICE_NAME = ""
     const val DEFAULT_DESCRIPTION = ""

@@ -19,10 +19,9 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import java.util.concurrent.ConcurrentHashMap
 
-
 object Routers {
   private val routers = ConcurrentHashMap<Pair<Vertx, Int>, Router>()
-  fun create(vertx: Vertx, port: Int) : Router {
+  fun create(vertx: Vertx, port: Int): Router {
     val key = vertx to port
     return routers.computeIfAbsent(key) {
       Router.router(vertx)

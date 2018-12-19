@@ -32,7 +32,11 @@ private const val ISSUER_FIELD = "issuer"
 private const val PRODUCT_FIELD = "product"
 
 class IssuedSerializer : StdSerializer<Issued<Any>>(Issued::class.java) {
-  override fun serialize(value: Issued<Any>, generator: JsonGenerator, provider: SerializerProvider) {
+  override fun serialize(
+    value: Issued<Any>,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
     generator.writeStartObject()
     generator.writeObjectField(ISSUER_FIELD, value.issuer)
     val product = value.product
@@ -49,7 +53,10 @@ class IssuedSerializer : StdSerializer<Issued<Any>>(Issued::class.java) {
 }
 
 class IssuedDeserializer : StdDeserializer<Issued<Any>>(Issued::class.java) {
-  override fun deserialize(parser: JsonParser, context: DeserializationContext): Issued<Any> {
+  override fun deserialize(
+    parser: JsonParser,
+    context: DeserializationContext
+  ): Issued<Any> {
     val node = parseNode(parser)
     checkNode(node, parser)
     val partyAndRef = parserPartyAndRef(node)
@@ -90,6 +97,7 @@ class IssuedDeserializer : StdDeserializer<Issued<Any>>(Issued::class.java) {
   }
 
   private fun parserPartyAndRef(node: JsonNode): PartyAndReference {
-    return Json.mapper.readerFor(PartyAndReference::class.java).readValue<PartyAndReference>(node[ISSUER_FIELD])
+    return Json.mapper.readerFor(PartyAndReference::class.java)
+      .readValue<PartyAndReference>(node[ISSUER_FIELD])
   }
 }

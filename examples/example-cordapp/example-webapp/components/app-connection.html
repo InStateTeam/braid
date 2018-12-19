@@ -35,7 +35,7 @@
 </template>
 
 <script>
-  (function() {
+  (function () {
     class AppConnection extends SimpleComponent {
       constructor() {
         super('app-connection-template');
@@ -44,7 +44,9 @@
       connectedCallback() {
         const thisObj = this;
         const bt = super.$('#endpoint-connect');
-        bt.onclick = () => { thisObj._onConnect() }
+        bt.onclick = () => {
+          thisObj._onConnect()
+        }
       }
 
       disconnectedCallback() {
@@ -61,11 +63,8 @@
         const password = "password";
         this.dispatchEvent(new CustomEvent('connect', {
           detail: {
-            url: url,
-            name: name,
-            credentials: {
-              username: username,
-              password: password
+            url: url, name: name, credentials: {
+              username: username, password: password
             }
           }
         }));

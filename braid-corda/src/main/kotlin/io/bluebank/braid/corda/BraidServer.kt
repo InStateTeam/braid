@@ -34,7 +34,11 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
       BraidCordaJacksonInit.init()
     }
 
-    fun bootstrapBraid(serviceHub: AppServiceHub?, config: BraidConfig = BraidConfig(), fn: Handler<AsyncResult<String>>? = null): BraidServer {
+    fun bootstrapBraid(
+      serviceHub: AppServiceHub?,
+      config: BraidConfig = BraidConfig(),
+      fn: Handler<AsyncResult<String>>? = null
+    ): BraidServer {
       return servers.computeIfAbsent(config.port) {
         serviceHub?.let {
           log.info("starting up braid server for ${serviceHub.myInfo.legalIdentities.first().name.organisation} on port ${config.port}")
@@ -49,10 +53,10 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
   }
 
   lateinit var vertx: Vertx
-  private set
+    private set
 
   private val fDeployId = Future.future<String>()
-  private val deployId : String?
+  private val deployId: String?
     get() = fDeployId.result()
 
   private fun start(fn: Handler<AsyncResult<String>>?): BraidServer {

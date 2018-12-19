@@ -32,7 +32,11 @@ private const val TOKEN_FIELD = "token"
 private const val TOKEN_TYPE_FIELD = "_tokenType"
 
 class AmountSerializer : StdSerializer<Amount<*>>(Amount::class.java) {
-  override fun serialize(amount: Amount<*>, generator: JsonGenerator, provider: SerializerProvider) {
+  override fun serialize(
+    amount: Amount<*>,
+    generator: JsonGenerator,
+    provider: SerializerProvider
+  ) {
     generator.writeStartObject()
 
     try {
@@ -55,7 +59,10 @@ class AmountSerializer : StdSerializer<Amount<*>>(Amount::class.java) {
 }
 
 class AmountDeserializer : StdDeserializer<Amount<Any>>(Amount::class.java) {
-  override fun deserialize(parser: JsonParser, context: DeserializationContext): Amount<Any> {
+  override fun deserialize(
+    parser: JsonParser,
+    context: DeserializationContext
+  ): Amount<Any> {
     val node = parseNode(parser)
     checkNode(node, parser)
     return when {

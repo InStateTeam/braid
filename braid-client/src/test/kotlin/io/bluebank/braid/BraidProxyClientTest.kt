@@ -36,11 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(VertxUnitRunner::class)
 class BraidProxyClientTest {
+
   private val vertx = Vertx.vertx()
   private val clientVertx = Vertx.vertx()
   private val port = getFreePort()
-  private lateinit var rpcServer : JsonRPCServer
-  private lateinit var braidClient : BraidProxyClient
+  private lateinit var rpcServer: JsonRPCServer
+  private lateinit var braidClient: BraidProxyClient
 
   lateinit var myService: MyService
 
@@ -48,14 +49,20 @@ class BraidProxyClientTest {
   fun before(context: TestContext) {
     val async = context.async()
     rpcServer = createServerBuilder()
-        .withVertx(vertx)
-        .withService(MyServiceImpl(vertx))
-        .withPort(port)
-        .build()
+      .withVertx(vertx)
+      .withService(MyServiceImpl(vertx))
+      .withPort(port)
+      .build()
 
     rpcServer.start {
       val serviceURI = URI("https://localhost:$port${rpcServer.rootPath}my-service/braid")
-      braidClient = BraidProxyClient(BraidClientConfig(serviceURI = serviceURI, trustAll = true, verifyHost = false), clientVertx)
+      braidClient = BraidProxyClient.createProxyClient(
+        BraidClientConfig(
+          serviceURI = serviceURI,
+          trustAll = true,
+          verifyHost = false
+        ), clientVertx
+      )
 
       braidClient.bindAsync(MyService::class.java).map {
         myService = it
@@ -101,7 +108,7 @@ class BraidProxyClientTest {
 
   @Test
   fun `should be able to get a future back from the proxy`(context: TestContext) {
-    myService.longRunning().map{
+    myService.longRunning().map {
       context.assertEquals(5, it)
     }.setHandler(context.asyncAssertSuccess({
       context.assertEquals(0, braidClient.activeRequestsCount())
@@ -126,11 +133,11 @@ class BraidProxyClientTest {
 
   @Test
   fun `should blow up and report runtime exception`(context: TestContext) {
-      try {
-          myService.blowUp()
-      } catch (e: RuntimeException) {
-          context.assertEquals("expected exception", e.message)
-      }
+    try {
+      myService.blowUp()
+    } catch (e: RuntimeException) {
+      context.assertEquals("expected exception", e.message)
+    }
   }
 
   @Test

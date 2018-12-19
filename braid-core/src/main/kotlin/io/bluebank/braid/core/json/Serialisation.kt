@@ -31,7 +31,10 @@ class BraidJacksonInit {
         JavaTimeModule(),
         SimpleModule()
           .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
-          .addSerializer(JsonRPCResultResponse::class.java, JsonRPCResultResponseSerializer())
+          .addSerializer(
+            JsonRPCResultResponse::class.java,
+            JsonRPCResultResponseSerializer()
+          )
       ).forEach {
         Json.mapper.registerModule(it)
         Json.prettyMapper.registerModule(it)
@@ -39,6 +42,7 @@ class BraidJacksonInit {
       Json.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
       Json.prettyMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
+
     fun init() {
       // automatically init during class load
     }

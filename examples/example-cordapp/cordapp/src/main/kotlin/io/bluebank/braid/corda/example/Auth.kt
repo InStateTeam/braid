@@ -26,16 +26,20 @@ import io.vertx.ext.auth.User
 class MySimpleAuthProvider : AuthProvider {
   override fun authenticate(authInfo: JsonObject, callback: Handler<AsyncResult<User>>) {
     try {
-      val username = authInfo.getString("username") ?: throw RuntimeException("no username found")
+      val username =
+        authInfo.getString("username") ?: throw RuntimeException("no username found")
       callback.handle(Future.succeededFuture(MySimpleUser(username)))
-    } catch(err: Throwable) {
+    } catch (err: Throwable) {
       callback.handle(Future.failedFuture(err))
     }
   }
 }
 
-class MySimpleUser(private val userName: String): AbstractUser() {
-  override fun doIsPermitted(permission: String, callback: Handler<AsyncResult<Boolean>>) {
+class MySimpleUser(private val userName: String) : AbstractUser() {
+  override fun doIsPermitted(
+    permission: String,
+    callback: Handler<AsyncResult<Boolean>>
+  ) {
     callback.handle(Future.succeededFuture(true))
   }
 

@@ -33,11 +33,12 @@ fun Method.toDescriptor(): MethodDescriptor {
   val name = this.name
   val params = parameters.map { it.name to it.type.toJavascriptType() }.toMap()
 
-  val returnDescription = if (serviceAnnotation != null && serviceAnnotation.returnType != Any::class) {
-    serviceAnnotation.returnType.javaObjectType.toJavascriptType()
-  } else {
-    returnType.toJavascriptType()
-  }
+  val returnDescription =
+    if (serviceAnnotation != null && serviceAnnotation.returnType != Any::class) {
+      serviceAnnotation.returnType.javaObjectType.toJavascriptType()
+    } else {
+      returnType.toJavascriptType()
+    }
   val returnPrefix = if (returnType == Observable::class.java) {
     "stream-of "
   } else {
@@ -47,25 +48,32 @@ fun Method.toDescriptor(): MethodDescriptor {
   return MethodDescriptor(name, description, params, returnPrefix + returnDescription)
 }
 
-fun <T: Any> Constructor<T>.toDescriptor() : MethodDescriptor {
-  val serviceAnnotation = getAnnotation<MethodDescription>(io.bluebank.braid.core.annotation.MethodDescription::class.java)
+fun <T : Any> Constructor<T>.toDescriptor(): MethodDescriptor {
+  val serviceAnnotation =
+    getAnnotation<MethodDescription>(io.bluebank.braid.core.annotation.MethodDescription::class.java)
   val name = this.name
   val params = parameters.map { it.name to it.type.toJavascriptType() }.toMap()
 
-  val returnDescription = if (serviceAnnotation != null && serviceAnnotation.returnType != kotlin.Any::class) {
-    serviceAnnotation.returnType.javaObjectType.toJavascriptType()
-  } else {
-    this.declaringClass.toJavascriptType()
-  }
+  val returnDescription =
+    if (serviceAnnotation != null && serviceAnnotation.returnType != kotlin.Any::class) {
+      serviceAnnotation.returnType.javaObjectType.toJavascriptType()
+    } else {
+      this.declaringClass.toJavascriptType()
+    }
   val description = serviceAnnotation?.description ?: ""
-  return io.bluebank.braid.core.service.MethodDescriptor(name, description, params, returnDescription)
+  return io.bluebank.braid.core.service.MethodDescriptor(
+    name,
+    description,
+    params,
+    returnDescription
+  )
 }
 
 fun Class<*>.toJavascriptType(): String = describeClass(this)
 
-fun Class<*>.toSimpleJavascriptType() : String = describeClassSimple(this)
+fun Class<*>.toSimpleJavascriptType(): String = describeClassSimple(this)
 
-fun describeClassSimple(clazz: Class<*>) : String {
+fun describeClassSimple(clazz: Class<*>): String {
   return if (clazz.isPrimitive || clazz == String::class.java) {
     describeClass(clazz)
   } else if (clazz.isArray) {
@@ -75,15 +83,14 @@ fun describeClassSimple(clazz: Class<*>) : String {
   }
 }
 
-fun describeClass(clazz: Class<*>) : String {
+fun describeClass(clazz: Class<*>): String {
   val mapper = ObjectMapper()
   val visitor = SchemaFactoryWrapper()
   mapper.acceptJsonFormatVisitor(clazz, visitor)
   return describe(visitor.finalSchema()).replace("\"", "")
 }
 
-private fun describe(value: JsonSchema) : String = describeAsObject(value).toString()
-
+private fun describe(value: JsonSchema): String = describeAsObject(value).toString()
 
 private fun describeAsObject(value: JsonSchema): Any {
   return if (value is ObjectSchema) {
@@ -93,11 +100,13 @@ private fun describeAsObject(value: JsonSchema): Any {
   }
 }
 
-private fun describeProperties(value: ObjectSchema) : JsonObject {
-  return json { obj {
-    val jo = this
-    value.properties.forEach {
-      jo.put(it.key, describeAsObject(it.value))
+private fun describeProperties(value: ObjectSchema): JsonObject {
+  return json {
+    obj {
+      val jo = this
+      value.properties.forEach {
+        jo.put(it.key, describeAsObject(it.value))
+      }
     }
-  }}
+  }
 }

@@ -16,10 +16,10 @@
 package io.bluebank.braid.corda.rest
 
 internal object Paths {
-  val PATH_PARAMS_RE : Regex = """(:([^\/]+))""".toRegex()
+  val PATH_PARAMS_RE: Regex = """(:([^\/]+))""".toRegex()
 }
 
-internal fun String.toSwaggerPath() : String {
+internal fun String.toSwaggerPath(): String {
   return Paths.PATH_PARAMS_RE.replace(this) { matchResult ->
     assert(matchResult.groups.size == 3)
     val match = matchResult.groups[2]!!.value
@@ -27,7 +27,7 @@ internal fun String.toSwaggerPath() : String {
   }
 }
 
-internal fun String.vertxPathParams() : List<String> {
+internal fun String.vertxPathParams(): List<String> {
   return Paths.PATH_PARAMS_RE.findAll(this).map {
     assert(it.groups.size == 3) {
       "expected 3 groups in match, but got ${it.groups.size}"

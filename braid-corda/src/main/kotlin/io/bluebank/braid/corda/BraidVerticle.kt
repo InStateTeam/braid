@@ -31,30 +31,37 @@ import net.corda.core.node.AppServiceHub
 import net.corda.node.internal.Node
 import java.net.URL
 
-class BraidVerticle(private val services: AppServiceHub?, private val config: BraidConfig) : AbstractVerticle() {
+class BraidVerticle(
+  private val services: AppServiceHub?,
+  private val config: BraidConfig
+) : AbstractVerticle() {
+
   companion object {
     private val log = loggerFor<BraidVerticle>()
   }
+
   override fun start(startFuture: Future<Void>) {
     log.info("starting with ", config)
     val router = setupRouter()
     setupWebserver(router, startFuture)
-    Node.printBasicNodeInfo("Braid server started on", "http://localhost:${config.port}${config.rootPath}")
+    Node.printBasicNodeInfo(
+      "Braid server started on",
+      "http://localhost:${config.port}${config.rootPath}"
+    )
   }
 
   private fun setupWebserver(router: Router, startFuture: Future<Void>) {
     vertx.createHttpServer(config.httpServerOptions.withCompatibleWebsockets())
-        .requestHandler(router::accept)
-        .listen(config.port) {
-          if (it.succeeded()) {
-            log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
-          } else {
-            log.error("failed to start server: ${it.cause().message}")
-          }
-          startFuture.completer().handle(it.mapEmpty())
+      .requestHandler(router::accept)
+      .listen(config.port) {
+        if (it.succeeded()) {
+          log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
+        } else {
+          log.error("failed to start server: ${it.cause().message}")
         }
+        startFuture.completer().handle(it.mapEmpty())
+      }
   }
-
 
   private fun setupRouter(): Router {
     val router = Routers.create(vertx, config.port)
@@ -68,7 +75,8 @@ class BraidVerticle(private val services: AppServiceHub?, private val config: Br
     config.restConfig?.let { restConfig ->
       val host = URL(restConfig.hostAndPortUri).host
       val updatedHostAndPort = "${config.protocol}://$host:${config.port}"
-      val moddedConfig = restConfig.withHostAndPortUri(updatedHostAndPort).withAuth(config.authConstructor?.invoke(vertx))
+      val moddedConfig = restConfig.withHostAndPortUri(updatedHostAndPort)
+        .withAuth(config.authConstructor?.invoke(vertx))
 
       RestMounter.mount(moddedConfig, router, vertx)
     }

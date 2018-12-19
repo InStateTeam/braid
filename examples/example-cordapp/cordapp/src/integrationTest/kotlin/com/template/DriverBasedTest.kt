@@ -33,16 +33,22 @@ class DriverBasedTest {
       // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
       // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
       val (partyAHandle, partyBHandle) = listOf(
-          startNode(providedName = bankA.name),
-          startNode(providedName = bankB.name)
+        startNode(providedName = bankA.name),
+        startNode(providedName = bankB.name)
       ).map { it.getOrThrow() }
 
       // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
       // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
       // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
       // working as intended.
-      assertEquals(partyAHandle.rpc.wellKnownPartyFromX500Name(bankB.name)!!.name, bankB.name)
-      assertEquals(partyBHandle.rpc.wellKnownPartyFromX500Name(bankA.name)!!.name, bankA.name)
+      assertEquals(
+        partyAHandle.rpc.wellKnownPartyFromX500Name(bankB.name)!!.name,
+        bankB.name
+      )
+      assertEquals(
+        partyBHandle.rpc.wellKnownPartyFromX500Name(bankA.name)!!.name,
+        bankA.name
+      )
     }
   }
 }

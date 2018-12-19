@@ -20,7 +20,6 @@ import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
 
-
 @ServiceDescription("calculator", "a simple calculator")
 class CalculatorService {
 
@@ -30,7 +29,10 @@ class CalculatorService {
   }
 
   // N.B. how to document the return type on an async function
-  @MethodDescription(description = "subtract the second int from the first", returnType = Int::class)
+  @MethodDescription(
+    description = "subtract the second int from the first",
+    returnType = Int::class
+  )
   fun subtract(lhs: Int, rhs: Int): Future<Int> {
     return succeededFuture(lhs - rhs)
   }

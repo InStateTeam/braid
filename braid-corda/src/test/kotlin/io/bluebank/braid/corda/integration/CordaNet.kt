@@ -24,8 +24,11 @@ import net.corda.testing.driver.NodeHandle
 import net.corda.testing.driver.PortAllocation.Incremental
 import net.corda.testing.driver.driver
 
+class CordaNet(
+  private val cordaStartingPort: Int = 5005,
+  internal val braidStartingPort: Int = 8080
+) {
 
-class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStartingPort: Int = 8080) {
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
@@ -48,13 +51,18 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
 
     println("Starting cluster with Corda base port $cordaStartingPort and Braid base port $braidStartingPort")
 
-    driver(DriverParameters(
+    driver(
+      DriverParameters(
         isDebug = false,
         startNodesInProcess = true,
         portAllocation = Incremental(cordaStartingPort),
         systemProperties = systemProperties,
-        extraCordappPackagesToScan = listOf("net.corda.finance", "io.bluebank.braid.corda.integration.cordapp")
-    )) {
+        extraCordappPackagesToScan = listOf(
+          "net.corda.finance",
+          "io.bluebank.braid.corda.integration.cordapp"
+        )
+      )
+    ) {
       // start up the controller and all the parties
       val nodeHandles = startupNodes(parties)
 
@@ -73,11 +81,14 @@ class CordaNet(private val cordaStartingPort: Int = 5005, internal val braidStar
     }
   }
 
-  private fun setupBraidPortsPerParty(parties: List<String>, braidStartingPort: Int): Map<String, String> {
+  private fun setupBraidPortsPerParty(
+    parties: List<String>,
+    braidStartingPort: Int
+  ): Map<String, String> {
     val result = with(System.getProperties()) {
       parties
-          .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
-          .toMap()
+        .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
+        .toMap()
     }
     result.forEach {
       System.setProperty(it.key, it.value)

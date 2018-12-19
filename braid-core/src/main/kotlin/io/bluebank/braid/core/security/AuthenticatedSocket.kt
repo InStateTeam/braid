@@ -22,6 +22,6 @@ import io.vertx.ext.auth.AuthProvider
 
 interface AuthenticatedSocket : SocketProcessor<Buffer, Buffer, Buffer, Buffer> {
   companion object {
-    fun create(authProvider: AuthProvider)  = AuthenticatedSocketImpl(authProvider)
+    fun create(authProvider: AuthProvider) = AuthenticatedSocketImpl(authProvider)
   }
 }
