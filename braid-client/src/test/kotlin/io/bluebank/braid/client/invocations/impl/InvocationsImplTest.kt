@@ -54,6 +54,7 @@ class InvocationsImplTest {
 
   @Test
   fun `that sending a malformed request does not break the flow`(context: TestContext) {
+    val async = context.async()
     server = vertx.createHttpServer()
       .websocketHandler { socket ->
         socket.handler {
@@ -67,11 +68,14 @@ class InvocationsImplTest {
             )
           )
         }
-      }.listen(port)
+      }.listen(port) {
+        async.complete()
+      }
+    async.await()
     invocations = Invocations.create(vertx = vertx,
       config = BraidClientConfig(URI("http://localhost:$port/api"), tls = false),
-      exceptionHandler = {
-        context.fail(it)
+      exceptionHandler = { err ->
+        context.fail(err)
       },
       closeHandler = {
       })
