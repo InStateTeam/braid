@@ -19,14 +19,33 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.vertx.core.Future
 import io.vertx.core.json.Json
+import java.util.concurrent.atomic.AtomicInteger
 
-internal class MockInvocations(private val writeCallback: MockInvocations.(JsonRPCRequest) -> Future<Unit>) :
+internal class MockInvocations(private val writeCallback: MockInvocations.(JsonRPCRequest) -> Future<Unit> = {
+  Future.succeededFuture(Unit)
+}) :
   InvocationsInternalImpl() {
+
+  private val invocationsCounter = AtomicInteger(0)
+  private val cancellationsCounter = AtomicInteger(0)
+  private val requestsList = mutableListOf<JsonRPCRequest>()
+  var lastRequestId : Long = -1
+    private set
+
+  val invocationsCount get() = invocationsCounter.get()
+  val cancellationsCount get() = cancellationsCounter.get()
+  val requests get() = requestsList.toList()
 
   /**
    * send a request to the network
    */
   override fun send(request: JsonRPCRequest): Future<Unit> {
+    requestsList.add(request)
+    lastRequestId = request.id
+    when {
+      request.method == JsonRPCRequest.CANCEL_STREAM_METHOD -> cancellationsCounter.incrementAndGet()
+      else -> invocationsCounter.incrementAndGet()
+    }
     return writeCallback(request)
   }
 

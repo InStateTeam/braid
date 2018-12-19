@@ -37,16 +37,16 @@ internal class FutureInvocationStrategy(
   private var receivedCompletion = false
 
   override fun getResult(): Future<Any?> {
-    requestId = nextRequestId()
-    log.trace(requestId) { "invocation of $method initiated" }
-    beginInvoke(requestId)
     try {
-      return result
+      requestId = nextRequestId()
+      log.trace(requestId) { "invocation of $method initiated" }
+      beginInvoke(requestId)
     } catch (err: Throwable) {
       log.error(requestId, err) { "failure in issuing invocation request" }
       endInvoke(requestId)
-      throw err
+      result.fail(err)
     }
+    return result
   }
 
   override fun onNext(requestId: Long, item: Any?) {

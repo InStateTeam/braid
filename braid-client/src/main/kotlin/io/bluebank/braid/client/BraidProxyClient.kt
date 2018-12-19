@@ -60,7 +60,7 @@ open class BraidProxyClient protected constructor(
 
   fun <ServiceType : Any> bind(
     clazz: Class<ServiceType>,
-    exceptionHandler: (Throwable) -> Unit = this::exceptionHandler,
+    exceptionHandler: (Throwable) -> Unit = this::defaultExceptionHandler,
     closeHandler: (() -> Unit) = this::closeHandler
   ): ServiceType {
     return bindAsync(clazz, exceptionHandler, closeHandler).getOrThrow()
@@ -70,7 +70,7 @@ open class BraidProxyClient protected constructor(
   @Suppress("UNCHECKED_CAST")
   fun <ServiceType : Any> bindAsync(
     clazz: Class<ServiceType>,
-    exceptionHandler: (Throwable) -> Unit = this::exceptionHandler,
+    exceptionHandler: (Throwable) -> Unit = this::defaultExceptionHandler,
     closeHandler: (() -> Unit) = this::closeHandler
   ): Future<ServiceType> {
     val result = future<ServiceType>()
@@ -102,9 +102,7 @@ open class BraidProxyClient protected constructor(
     log.info("closing proxy to {}", config.serviceURI)
   }
 
-  private fun exceptionHandler(error: Throwable) {
+  private fun defaultExceptionHandler(error: Throwable) {
     log.error("exception from socket", error)
-    // TODO: handle retries?
-    // TODO: handle error!
   }
 }

@@ -18,7 +18,6 @@ package io.bluebank.braid.client.invocations.impl
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
-import io.vertx.core.Future
 import org.junit.Test
 import kotlin.reflect.jvm.javaMethod
 import kotlin.test.assertEquals
@@ -33,13 +32,7 @@ class FutureInvocationStrategyTest {
 
   @Test
   fun `that if Invocations provides the wrong requestId an exception is raised`() {
-    var requestId: Long = -1
-
-    val invocations = MockInvocations {
-      requestId = it.id
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
+    val invocations = MockInvocations()
 
     val strategy = FutureInvocationStrategy(
       invocations,
@@ -51,7 +44,7 @@ class FutureInvocationStrategyTest {
     assertEquals(1, invocations.activeRequestsCount, "that there is one active request")
     assertEquals(
       strategy,
-      invocations.getInvocationStrategy(requestId),
+      invocations.getInvocationStrategy(invocations.lastRequestId),
       "that the strategy is our future strategy"
     )
     assertFalse(future.isComplete, "that the future should not have completed")
@@ -65,7 +58,7 @@ class FutureInvocationStrategyTest {
     )
     assertEquals(
       strategy,
-      invocations.getInvocationStrategy(requestId),
+      invocations.getInvocationStrategy(invocations.lastRequestId),
       "that the strategy is our future strategy"
     )
     assertFalse(future.isComplete, "that the future should not have completed")
@@ -119,12 +112,7 @@ class FutureInvocationStrategyTest {
 
   @Test
   fun `that an invocation can end with error`() {
-    var requestId: Long = 0
-    val invocations = MockInvocations {
-      requestId = it.id
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
+    val invocations = MockInvocations()
     val strategy = FutureInvocationStrategy(
       invocations,
       TestInterface::testFuture.name,
@@ -135,7 +123,7 @@ class FutureInvocationStrategyTest {
     assertEquals(1, invocations.activeRequestsCount, "that there is one active request")
     assertEquals(
       strategy,
-      invocations.getInvocationStrategy(requestId),
+      invocations.getInvocationStrategy(invocations.lastRequestId),
       "that the strategy is our future strategy"
     )
     assertFalse(future.isComplete, "that the future should not have completed")
@@ -157,12 +145,7 @@ class FutureInvocationStrategyTest {
 
   @Test
   fun `that we trap exceptions from a future handler that throws exception on handling an invocation result`() {
-    var requestId: Long = 0
-    val invocations = MockInvocations {
-      requestId = it.id
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
+    val invocations = MockInvocations()
     val strategy = FutureInvocationStrategy(
       invocations,
       TestInterface::testFuture.name,
@@ -177,7 +160,7 @@ class FutureInvocationStrategyTest {
     assertEquals(1, invocations.activeRequestsCount, "that there is one active request")
     assertEquals(
       strategy,
-      invocations.getInvocationStrategy(requestId),
+      invocations.getInvocationStrategy(invocations.lastRequestId),
       "that the strategy is our future strategy"
     )
     assertFalse(future.isComplete, "that the future should not have completed")
@@ -188,12 +171,7 @@ class FutureInvocationStrategyTest {
 
   @Test
   fun `that we trap exceptions from a future handler that throws exception on handling an invocation exception`() {
-    var requestId: Long = 0
-    val invocations = MockInvocations {
-      requestId = it.id
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
+    val invocations = MockInvocations()
     val strategy = FutureInvocationStrategy(
       invocations,
       TestInterface::testFuture.name,
@@ -208,7 +186,7 @@ class FutureInvocationStrategyTest {
     assertEquals(1, invocations.activeRequestsCount, "that there is one active request")
     assertEquals(
       strategy,
-      invocations.getInvocationStrategy(requestId),
+      invocations.getInvocationStrategy(invocations.lastRequestId),
       "that the strategy is our future strategy"
     )
     assertFalse(future.isComplete, "that the future should not have completed")
@@ -220,6 +198,31 @@ class FutureInvocationStrategyTest {
         RuntimeException("invocation exception")
       )
     }
+  }
+
+  @Test
+  fun `that receiving a message for an uninvoked strategy fails`() {
+    val invocations = MockInvocations()
+    val strategy = FutureInvocationStrategy(
+      invocations,
+      TestInterface::testFuture.name,
+      TestInterface::testFuture.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    assertFailsWith<java.lang.IllegalStateException> { strategy.onCompleted(1) }
+  }
+
+  @Test
+  fun `that throwing an exception during network invocation causes getResult to fail`() {
+    val invocations = MockInvocations { throw error("boom")}
+    val strategy = FutureInvocationStrategy(
+      invocations,
+      TestInterface::testFuture.name,
+      TestInterface::testFuture.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val result = strategy.getResult()
+    assertTrue { result.failed() && result.cause() is java.lang.IllegalStateException }
   }
 }
 

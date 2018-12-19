@@ -17,14 +17,18 @@ package io.bluebank.braid.client.invocations.impl
 
 import io.bluebank.braid.core.jsonrpc.JsonRPCCompletedResponse
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse
+import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import org.junit.Test
+import rx.Observable
+import rx.Subscriber
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.jvm.javaMethod
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class ObservableInvocationStrategyTest {
   companion object {
@@ -79,11 +83,7 @@ class ObservableInvocationStrategyTest {
 
   @Test
   fun `that a faulty subscriber onNext doesn't cause the flow to stop`() {
-    val invocations = MockInvocations {
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
-
+    val invocations = MockInvocations()
     val strategy = ObservableInvocationStrategy(
       invocations,
       TestInterface::testObservable.name,
@@ -144,10 +144,7 @@ class ObservableInvocationStrategyTest {
 
   @Test
   fun `that a faulty subscriber onNext and onError doesn't cause the flow to stop`() {
-    val invocations = MockInvocations {
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
+    val invocations = MockInvocations()
 
     val strategy = ObservableInvocationStrategy(
       invocations,
@@ -210,11 +207,7 @@ class ObservableInvocationStrategyTest {
 
   @Test
   fun `that a faulty subscriber onError doesn't cause the flow to stop`() {
-    val invocations = MockInvocations {
-      log.info("invoking", it)
-      Future.succeededFuture()
-    }
-
+    val invocations = MockInvocations()
     val strategy = ObservableInvocationStrategy(
       invocations,
       TestInterface::testObservable.name,
@@ -246,12 +239,7 @@ class ObservableInvocationStrategyTest {
 
     // now 'receive' a result
     invocations.receive(JsonRPCResultResponse(id = 1, result = "result"))
-    invocations.receive(
-      JsonRPCErrorResponse.serverError(
-        id = 1,
-        message = "we send an error"
-      )
-    )
+    invocations.receive(JsonRPCErrorResponse.serverError(id = 1, message = "we send an error"))
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -277,5 +265,193 @@ class ObservableInvocationStrategyTest {
       counter.get(),
       "subscriber should have been called twice: once for onNext and once onError"
     )
+  }
+
+  @Test
+  fun `that subscriber can cancel within onNext`() {
+
+    val invocations = MockInvocations()
+
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val observable = strategy.getResult() as Observable<String>
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
+    assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
+    val subscriber = object : Subscriber<String>() {
+      var itemsReceived = 0
+        private set
+
+      override fun onNext(t: String?) {
+        ++itemsReceived
+        this.unsubscribe()
+      }
+
+      override fun onCompleted() {
+      }
+
+      override fun onError(e: Throwable?) {
+      }
+    }
+    observable.subscribe(subscriber)
+
+    // now 'receive' a result
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "hello"))
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "world"))
+
+    assertTrue(subscriber.isUnsubscribed)
+    assertEquals(1, invocations.invocationsCount)
+    assertEquals(1, invocations.cancellationsCount)
+    assertEquals(1, subscriber.itemsReceived)
+  }
+
+  @Test
+  fun `that subscriber can cancel from outside`() {
+    val invocations = MockInvocations()
+
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val observable = strategy.getResult() as Observable<String>
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
+    assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
+    val subscriber = object : Subscriber<String>() {
+      var itemsReceived = 0
+        private set
+
+      override fun onNext(t: String?) {
+        ++itemsReceived
+      }
+
+      override fun onCompleted() {
+      }
+
+      override fun onError(e: Throwable?) {
+      }
+    }
+    observable.subscribe(subscriber)
+
+    // now 'receive' a result
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "hello"))
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "world"))
+    subscriber.unsubscribe()
+    assertTrue(subscriber.isUnsubscribed)
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "how's it going?"))
+
+    assertEquals(1, invocations.invocationsCount)
+    assertEquals(1, invocations.cancellationsCount)
+    assertEquals(2, subscriber.itemsReceived)
+  }
+
+  @Test
+  fun `that a communication error whilst cancelling the flow does not break the strategy`() {
+    val invocations = MockInvocations {
+      when {
+        it.method == JsonRPCRequest.CANCEL_STREAM_METHOD -> Future.failedFuture("network error")
+        else -> Future.succeededFuture(Unit)
+      }
+    }
+
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val observable = strategy.getResult() as Observable<String>
+
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
+    assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
+    val subscriber = object : Subscriber<String>() {
+      var itemsReceived = 0
+        private set
+
+      override fun onNext(t: String?) {
+        ++itemsReceived
+      }
+
+      override fun onCompleted() {
+      }
+
+      override fun onError(e: Throwable?) {
+      }
+    }
+    observable.subscribe(subscriber)
+
+    // now 'receive' a result
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "hello"))
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "world"))
+    subscriber.unsubscribe()
+    assertTrue(subscriber.isUnsubscribed)
+    invocations.receive(JsonRPCResultResponse(id = 1, result = "how's it going?"))
+
+    assertEquals(1, invocations.invocationsCount)
+    assertEquals(1, invocations.cancellationsCount)
+    assertEquals(2, subscriber.itemsReceived)
+  }
+
+
+  @Test
+  fun `that strategy can handle an onComplete after subscriber has unsubscribed`() {
+
+    val invocations = MockInvocations()
+
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val observable = strategy.getResult() as Observable<String>
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
+    assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
+    val subscription = observable.subscribe {}
+    subscription.unsubscribe()
+    strategy.onCompleted(1)
+  }
+
+  @Test
+  fun `that strategy can handle an onError after subscriber has unsubscribed`() {
+
+    val invocations = MockInvocations()
+
+    val strategy = ObservableInvocationStrategy(
+      invocations,
+      TestInterface::testObservable.name,
+      TestInterface::testObservable.javaMethod?.genericReturnType!!,
+      arrayOf()
+    )
+    val observable = strategy.getResult() as Observable<String>
+    assertEquals(
+      0,
+      invocations.activeRequestsCount,
+      "that there are zero invocations so far"
+    )
+    assertEquals(0, strategy.subscriberCount, "that the strategy has no subscribers")
+    val subscription = observable.subscribe {}
+    subscription.unsubscribe()
+    strategy.onError(1, RuntimeException("failed stream"))
   }
 }
