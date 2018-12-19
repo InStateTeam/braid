@@ -81,50 +81,6 @@
           </execution>
         </executions>
       </plugin>
-      <!--<plugin>-->
-      <!--<groupId>org.apache.maven.plugins</groupId>-->
-      <!--<artifactId>maven-shade-plugin</artifactId>-->
-      <!--<version>3.1.0</version>-->
-      <!--<executions>-->
-      <!--<execution>-->
-      <!--<phase>package</phase>-->
-      <!--<goals>-->
-      <!--<goal>shade</goal>-->
-      <!--</goals>-->
-      <!--<configuration>-->
-      <!--<relocations>-->
-      <!--<relocation>-->
-      <!--<pattern>io.netty</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.io.netty</shadedPattern>-->
-      <!--</relocation>-->
-      <!--<relocation>-->
-      <!--<pattern>com.fasterxml</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.com.fasterxml</shadedPattern>-->
-      <!--</relocation>-->
-      <!--<relocation>-->
-      <!--<pattern>io.swagger</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.io.swagger</shadedPattern>-->
-      <!--</relocation>-->
-      <!--<relocation>-->
-      <!--<pattern>rx</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.rx</shadedPattern>-->
-      <!--</relocation>-->
-      <!--<relocation>-->
-      <!--<pattern>io.vertx</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.io.vertx</shadedPattern>-->
-      <!--</relocation>-->
-      <!--<relocation>-->
-      <!--<pattern>org.apache</pattern>-->
-      <!--<shadedPattern>io.bluebank.braid.shaded.org.apache</shadedPattern>-->
-      <!--</relocation>-->
-      <!--</relocations>-->
-      <!--<transformers>-->
-      <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
-      <!--</transformers>-->
-      <!--</configuration>-->
-      <!--</execution>-->
-      <!--</executions>-->
-      <!--</plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
