@@ -44,7 +44,7 @@ abstract class AbstractSocket<R, S> : Socket<R, S> {
     return this
   }
 
-  protected fun Socket<R, S>.onEnd() {
+  protected fun onEnd() {
     listeners.forEach {
       try {
         it.endHandler(this)

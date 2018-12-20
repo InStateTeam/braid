@@ -16,12 +16,9 @@
 package io.bluebank.braid.core.jsonrpc
 
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
-import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.NonBlockingSocket
-import io.bluebank.braid.core.socket.Socket
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
-import io.vertx.ext.auth.User
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.Test
@@ -49,7 +46,7 @@ class JsonRPCMounterTest {
   fun `requests with duplicate ids to those in progress should throw an exception`(context: TestContext) {
     val service = ControlledService()
     val executor = ConcreteServiceExecutor(service)
-    val socket = MockSocket()
+    val socket = MockSocket<JsonRPCRequest, JsonRPCResponse>()
     val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
       socket.addListener(this)
     }
@@ -62,26 +59,5 @@ class JsonRPCMounterTest {
     }
     socket.process(JsonRPCRequest(id = 1, method = "doSomething", params = listOf<Any>()))
     service.trigger()
-  }
-
-  private class MockSocket : AbstractSocket<JsonRPCRequest, JsonRPCResponse>() {
-    private val responseListeners = mutableListOf<(JsonRPCResponse) -> Unit>()
-
-    internal fun process(request: JsonRPCRequest) {
-      onData(request)
-    }
-
-    internal fun addResponseListener(fn: (JsonRPCResponse) -> Unit) {
-      responseListeners.add(fn)
-    }
-
-    override fun write(obj: JsonRPCResponse): Socket<JsonRPCRequest, JsonRPCResponse> {
-      responseListeners.forEach { it(obj) }
-      return this
-    }
-
-    override fun user(): User? {
-      return null
-    }
   }
 }

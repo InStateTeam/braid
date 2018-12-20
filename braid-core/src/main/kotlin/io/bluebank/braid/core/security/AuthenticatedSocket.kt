@@ -22,6 +22,11 @@ import io.vertx.ext.auth.AuthProvider
 
 interface AuthenticatedSocket : SocketProcessor<Buffer, Buffer, Buffer, Buffer> {
   companion object {
+    const val LOGIN_METHOD = "login"
+    const val LOGOUT_METHOD = "logout"
+    const val MSG_FAILED = "failed to authenticate"
+    const val MSG_PARAMETER_ERROR = "invalid parameter for login - expected a single object"
+
     fun create(authProvider: AuthProvider) = AuthenticatedSocketImpl(authProvider)
   }
 }
