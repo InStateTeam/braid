@@ -54,7 +54,7 @@ class AuthenticatedSocketImpl(
     this.user = null
   }
 
-  override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
+  override fun onData(socket: Socket<Buffer, Buffer>, item: Buffer) {
     log.trace("decoding potential auth payload")
     val op = Json.decodeValue(item, JsonRPCRequest::class.java)
     op.withMDC {
@@ -80,7 +80,7 @@ class AuthenticatedSocketImpl(
     }
   }
 
-  override fun endHandler(socket: Socket<Buffer, Buffer>) {
+  override fun onEnd(socket: Socket<Buffer, Buffer>) {
     onEnd()
   }
 

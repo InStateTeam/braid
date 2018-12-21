@@ -19,21 +19,21 @@ import io.vertx.ext.auth.User
 
 /**
  * Abstract for a bi-directional network socket
- * A client of this socket will receive objects of type [R] and send objects of type [S]
+ * A client of this socket will receive objects of type [Receive] and send objects of type [Send]
  */
-interface Socket<R, S> {
+interface Socket<Receive, Send> {
 
   /**
    * called to register a listener on a socket
    * @return this socket
    */
-  fun addListener(listener: SocketListener<R, S>): Socket<R, S>
+  fun addListener(listener: SocketListener<Receive, Send>): Socket<Receive, Send>
 
   /**
    * Writes an object into the socket
    * @return this socket
    */
-  fun write(obj: S): Socket<R, S>
+  fun write(obj: Send): Socket<Receive, Send>
 
   /**
    * A socket can have a [User] associated with it. This function returns the user

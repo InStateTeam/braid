@@ -71,7 +71,7 @@ class NonBlockingSocket<R, S>(
 
   override fun user(): User? = socket?.user()
 
-  override fun dataHandler(socket: Socket<R, S>, item: R) {
+  override fun onData(socket: Socket<R, S>, item: R) {
     try {
       pool.executeBlocking<R>({ onData(item) }, true, { })
     } catch (err: IllegalStateException) {
@@ -81,8 +81,8 @@ class NonBlockingSocket<R, S>(
     }
   }
 
-  override fun endHandler(socket: Socket<R, S>) {
-    log.trace("endHandler for $id")
+  override fun onEnd(socket: Socket<R, S>) {
+    log.trace("end handler for $id")
     try {
       pool.executeBlocking<Unit>({
         onEnd() // notify all listeners

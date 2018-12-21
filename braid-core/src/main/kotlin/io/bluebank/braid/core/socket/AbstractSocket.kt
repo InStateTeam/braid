@@ -20,23 +20,23 @@ import io.bluebank.braid.core.logging.loggerFor
 /**
  * This class implements a thread-safe lock-free implementation of [Socket] listener notifications
  */
-abstract class AbstractSocket<R, S> : Socket<R, S> {
+abstract class AbstractSocket<Receive, Send> : Socket<Receive, Send> {
 
   companion object {
     private val logger = loggerFor<AbstractSocket<*, *>>()
   }
 
-  private var listeners = emptyList<SocketListener<R, S>>()
-  override fun addListener(listener: SocketListener<R, S>): Socket<R, S> {
+  private var listeners = emptyList<SocketListener<Receive, Send>>()
+  override fun addListener(listener: SocketListener<Receive, Send>): Socket<Receive, Send> {
     listeners += listener // deep copy - slow but safe
     listener.onRegister(this)
     return this
   }
 
-  protected fun Socket<R, S>.onData(item: R): Socket<R, S> {
+  protected fun Socket<Receive, Send>.onData(item: Receive): Socket<Receive, Send> {
     listeners.forEach {
       try {
-        it.dataHandler(this, item)
+        it.onData(this, item)
       } catch (err: Throwable) {
         logger.error("failed to dispatch onData", err)
       }
@@ -47,7 +47,7 @@ abstract class AbstractSocket<R, S> : Socket<R, S> {
   protected fun onEnd() {
     listeners.forEach {
       try {
-        it.endHandler(this)
+        it.onEnd(this)
       } catch (err: Throwable) {
         logger.error("failed to dispatch onEnd", err)
       }

@@ -44,7 +44,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
     this.socket = socket
   }
 
-  override fun dataHandler(
+  override fun onData(
     socket: Socket<JsonRPCRequest, JsonRPCResponse>,
     item: JsonRPCRequest
   ) {
@@ -53,7 +53,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
     }
   }
 
-  override fun endHandler(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
+  override fun onEnd(socket: Socket<JsonRPCRequest, JsonRPCResponse>) {
     activeSubscriptions.forEach { _, subscription -> subscription.unsubscribe() }
     activeSubscriptions.clear()
   }

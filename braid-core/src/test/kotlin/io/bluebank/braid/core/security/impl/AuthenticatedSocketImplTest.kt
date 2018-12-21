@@ -96,14 +96,14 @@ class AuthenticatedSocketImplTest {
       )
       assertTrue(json.containsKey("id"), "has id field")
     }
-    authSocket.onRegister(predecessor)
+    predecessor.addListener(authSocket)
     val token = jwtAuth.generateToken(JsonObject().put(userField, user), JWTOptions())
     val loginRequest = JsonRPCRequest(
       id = 1,
       method = LOGIN_METHOD,
       params = listOf(JWTLoginPayload(token))
     )
-    authSocket.dataHandler(predecessor, Json.encodeToBuffer(loginRequest))
+    authSocket.onData(predecessor, Json.encodeToBuffer(loginRequest))
     assertNotNull(authSocket.user(), "that we have an authenticated user")
     val uid = authSocket.user()!!.principal().getString("user")
     assertEquals(user, uid, "that user id is $user")
@@ -113,10 +113,10 @@ class AuthenticatedSocketImplTest {
       method = LOGOUT_METHOD,
       params = null
     )
-    authSocket.dataHandler(predecessor, Json.encodeToBuffer(logoutRequest))
+    authSocket.onData(predecessor, Json.encodeToBuffer(logoutRequest))
     assertNull(authSocket.user(), "that we have logged out")
 
-    assertEquals(2, predecessor.count)
+    assertEquals(2, predecessor.writeCount)
   }
 
   @Test
@@ -126,14 +126,14 @@ class AuthenticatedSocketImplTest {
       val response = Json.decodeValue(it, JsonRPCErrorResponse::class.java)
       assertEquals(MSG_FAILED, response.error.message)
     }
-    authSocket.onRegister(predecessor)
+    predecessor.addListener(authSocket)
     val request = JsonRPCRequest(
       id = 1,
       method = LOGIN_METHOD,
       params = listOf(JWTLoginPayload("dodgy token"))
     )
-    authSocket.dataHandler(predecessor, Json.encodeToBuffer(request))
-    assertEquals(1, predecessor.count)
+    authSocket.onData(predecessor, Json.encodeToBuffer(request))
+    assertEquals(1, predecessor.writeCount)
   }
 
   @Test
@@ -143,16 +143,16 @@ class AuthenticatedSocketImplTest {
       val response = Json.decodeValue(it, JsonRPCErrorResponse::class.java)
       assertEquals(MSG_PARAMETER_ERROR, response.error.message)
     }
-    authSocket.onRegister(predecessor)
+    predecessor.addListener(authSocket)
     val requests = listOf(
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = null),
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = "bad param"),
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = listOf<String>()),
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = listOf("bad param"))
       )
-      requests.map { Json.encodeToBuffer(it) }.forEach { authSocket.dataHandler(predecessor, it) }
+      requests.map { Json.encodeToBuffer(it) }.forEach { authSocket.onData(predecessor, it) }
 
-    assertEquals(requests.size, predecessor.count)
+    assertEquals(requests.size, predecessor.writeCount)
   }
 
   @Test
@@ -166,25 +166,24 @@ class AuthenticatedSocketImplTest {
       }
     }
 
-    authSocket.onRegister(predecessor)
     predecessor.addListener(authSocket)
     var hasEnded = false
     authSocket.addListener(object: SocketListener<Buffer, Buffer> {
       override fun onRegister(socket: Socket<Buffer, Buffer>) {
       }
 
-      override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
+      override fun onData(socket: Socket<Buffer, Buffer>, item: Buffer) {
         val request = Json.decodeValue(item, JsonRPCRequest::class.java)
         socket.write(Json.encodeToBuffer(JsonRPCResultResponse(id = request.id, result = "OK")))
       }
 
-      override fun endHandler(socket: Socket<Buffer, Buffer>) {
+      override fun onEnd(socket: Socket<Buffer, Buffer>) {
         hasEnded = true
       }
     })
 
     fun AuthenticatedSocket.dataHandler(request: JsonRPCRequest) {
-      this.dataHandler(predecessor, Json.encodeToBuffer(request))
+      this.onData(predecessor, Json.encodeToBuffer(request))
     }
     val token = jwtAuth.generateToken(JsonObject(), JWTOptions())
 
@@ -192,7 +191,7 @@ class AuthenticatedSocketImplTest {
     authSocket.dataHandler(JsonRPCRequest(id = 2, method = "someMethod", params = null))
     authSocket.dataHandler(JsonRPCRequest(id = 3, method = LOGOUT_METHOD, params = null))
     authSocket.dataHandler(JsonRPCRequest(id = 4, method = "someMethod", params = null))
-    assertEquals(4, predecessor.count)
+    assertEquals(4, predecessor.writeCount)
     predecessor.end()
     assertTrue(hasEnded)
   }
@@ -203,9 +202,9 @@ class AuthenticatedSocketImplTest {
     predecessor.addResponseListener {
       error("network failure")
     }
-    authSocket.onRegister(predecessor)
+    predecessor.addListener(authSocket)
     val badLoginRequest = JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = null)
-    authSocket.dataHandler(predecessor, Json.encodeToBuffer(badLoginRequest))
+    authSocket.onData(predecessor, Json.encodeToBuffer(badLoginRequest))
   }
 }
 
