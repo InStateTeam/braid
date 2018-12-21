@@ -21,6 +21,10 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.security.AuthenticatedSocket
+import io.bluebank.braid.core.security.AuthenticatedSocket.Companion.LOGIN_METHOD
+import io.bluebank.braid.core.security.AuthenticatedSocket.Companion.LOGOUT_METHOD
+import io.bluebank.braid.core.security.AuthenticatedSocket.Companion.MSG_FAILED
+import io.bluebank.braid.core.security.AuthenticatedSocket.Companion.MSG_PARAMETER_ERROR
 import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.Socket
 import io.vertx.core.buffer.Buffer
@@ -29,7 +33,9 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
 
-class AuthenticatedSocketImpl(private val authProvider: AuthProvider) :
+class AuthenticatedSocketImpl(
+  private val authProvider: AuthProvider
+) :
   AbstractSocket<Buffer, Buffer>(), AuthenticatedSocket {
 
   companion object {
@@ -54,10 +60,8 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) :
     op.withMDC {
       log.trace("decoded {}", op)
       when (op.method) {
-        "login" -> {
-          handleAuthRequest(op)
-        }
-        "logout" -> {
+        LOGIN_METHOD -> handleAuthRequest(op)
+        LOGOUT_METHOD -> {
           log.trace("logout received - un-authenticating this connection")
           user = null
           sendOk(op)
@@ -99,7 +103,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) :
             sendOk(op)
           } else {
             user = null
-            sendFailed(op, "failed to authenticate")
+            sendFailed(op, MSG_FAILED)
           }
         }
       }
@@ -110,7 +114,7 @@ class AuthenticatedSocketImpl(private val authProvider: AuthProvider) :
     try {
       val msg = invalidParams(
         id = op.id,
-        message = "invalid parameter count for login - expected a single object"
+        message = MSG_PARAMETER_ERROR
       )
       log.error(msg.error.message)
       write(Json.encodeToBuffer(msg))

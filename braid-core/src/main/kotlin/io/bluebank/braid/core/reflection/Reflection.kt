@@ -28,14 +28,7 @@ fun <T : Any> Class<T>.serviceName(): String {
 }
 
 fun Method.underlyingGenericType(): Type {
-  return when {
-    isAsyncResponse() -> genericReturnType.getGenericParameterType(0)
-    else -> genericReturnType
-  }
-}
-
-fun Method.isAsyncResponse(): Boolean {
-  return returnType.isAsyncResponse()
+  return genericReturnType.underlyingGenericType()
 }
 
 fun Type.isStreaming() = this.actualType() == Observable::class.java
