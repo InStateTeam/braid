@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.integration
 
-import io.bluebank.braid.core.socket.findConsequtiveFreePorts
+import io.bluebank.braid.core.socket.findConsecutiveFreePorts
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.driver.DriverDSL
@@ -38,7 +38,7 @@ class CordaNet(
     }
 
     fun createCordaNet(): CordaNet {
-      val startPort = findConsequtiveFreePorts(100)
+      val startPort = findConsecutiveFreePorts(100)
       return CordaNet(startPort, startPort + 50)
     }
   }

@@ -16,6 +16,7 @@
 package io.bluebank.braid.core.async
 
 import io.bluebank.braid.core.json.BraidJacksonInit
+import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -36,6 +37,7 @@ class WebKtTest {
   companion object {
     init {
       BraidJacksonInit.init()
+      LogInitialiser.init()
     }
   }
 
