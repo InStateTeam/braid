@@ -15,11 +15,14 @@
  */
 package io.bluebank.braid.core.jsonschema
 
+import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.type.TypeFactory
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema
 import io.bluebank.braid.core.annotation.MethodDescription
+import io.bluebank.braid.core.reflection.underlyingGenericType
 import io.bluebank.braid.core.service.MethodDescriptor
 import io.vertx.core.json.JsonObject
 import io.vertx.kotlin.core.json.json
@@ -33,12 +36,14 @@ fun Method.toDescriptor(): MethodDescriptor {
   val name = this.name
   val params = parameters.map { it.name to it.type.toJavascriptType() }.toMap()
 
-  val returnDescription =
-    if (serviceAnnotation != null && serviceAnnotation.returnType != Any::class) {
+  val returnDescription = when {
+    serviceAnnotation != null && serviceAnnotation.returnType != Any::class ->
       serviceAnnotation.returnType.javaObjectType.toJavascriptType()
-    } else {
-      returnType.toJavascriptType()
+    else -> {
+      TypeFactory.defaultInstance().constructType(genericReturnType.underlyingGenericType()).toJavascriptType()
     }
+  }
+
   val returnPrefix = if (returnType == Observable::class.java) {
     "stream-of "
   } else {
@@ -49,27 +54,15 @@ fun Method.toDescriptor(): MethodDescriptor {
 }
 
 fun <T : Any> Constructor<T>.toDescriptor(): MethodDescriptor {
-  val serviceAnnotation =
-    getAnnotation<MethodDescription>(io.bluebank.braid.core.annotation.MethodDescription::class.java)
   val name = this.name
   val params = parameters.map { it.name to it.type.toJavascriptType() }.toMap()
-
-  val returnDescription =
-    if (serviceAnnotation != null && serviceAnnotation.returnType != kotlin.Any::class) {
-      serviceAnnotation.returnType.javaObjectType.toJavascriptType()
-    } else {
-      this.declaringClass.toJavascriptType()
-    }
-  val description = serviceAnnotation?.description ?: ""
-  return io.bluebank.braid.core.service.MethodDescriptor(
-    name,
-    description,
-    params,
-    returnDescription
-  )
+  val returnDescription = this.declaringClass.toJavascriptType()
+  val description = this.declaringClass.toSimpleJavascriptType()
+  return MethodDescriptor(name = name, description = description, parameters = params, returnType = returnDescription)
 }
 
 fun Class<*>.toJavascriptType(): String = describeClass(this)
+fun JavaType.toJavascriptType(): String = describeJavaType(this)
 
 fun Class<*>.toSimpleJavascriptType(): String = describeClassSimple(this)
 
@@ -87,6 +80,13 @@ fun describeClass(clazz: Class<*>): String {
   val mapper = ObjectMapper()
   val visitor = SchemaFactoryWrapper()
   mapper.acceptJsonFormatVisitor(clazz, visitor)
+  return describe(visitor.finalSchema()).replace("\"", "")
+}
+
+fun describeJavaType(type: JavaType) : String {
+  val mapper = ObjectMapper()
+  val visitor = SchemaFactoryWrapper()
+  mapper.acceptJsonFormatVisitor(type, visitor)
   return describe(visitor.finalSchema()).replace("\"", "")
 }
 

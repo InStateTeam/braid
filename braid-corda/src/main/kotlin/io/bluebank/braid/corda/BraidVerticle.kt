@@ -46,7 +46,7 @@ class BraidVerticle(
     setupWebserver(router, startFuture)
     Node.printBasicNodeInfo(
       "Braid server started on",
-      "http://localhost:${config.port}${config.rootPath}"
+      "${config.protocol}://localhost:${config.port}${config.rootPath}"
     )
   }
 
