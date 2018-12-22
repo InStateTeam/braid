@@ -15,30 +15,18 @@
  */
 package io.bluebank.braid.core.socket
 
-import java.net.BindException
+import org.junit.Test
 import java.net.ServerSocket
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-fun findFreePort(): Int {
-  return ServerSocket(0).use {
-    it.localPort
-  }
-}
-
-fun findConsecutiveFreePorts(count: Int): Int {
-  return generateSequence { findFreePort() }.filter { isPortRangeFree(it..it + count) }
-    .first()
-}
-
-internal fun isPortRangeFree(range: IntRange): Boolean {
-  return range.asSequence().map { isPortFree(it) }.firstOrNull { !it } ?: true
-}
-
-internal fun isPortFree(port: Int) : Boolean {
-  return try {
-    ServerSocket(port).use {
-      true
-    }
-  } catch (error: BindException) {
-    false
+class FreePortKtTest {
+  @Test
+  fun `find consecutive free ports`() {
+    val count = 5
+    val base = findConsecutiveFreePorts(count)
+    val range = base until base + count
+    assertTrue { isPortRangeFree(range) }
+    ServerSocket(base).use { assertFalse { isPortRangeFree(range) } }
   }
 }

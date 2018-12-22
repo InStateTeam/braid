@@ -23,8 +23,8 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
-class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket<R, K>(),
-                                                                  SocketProcessor<R, K, Buffer, Buffer> {
+class TypedSocketImpl<Receive, Send>(private val receiveClass: Class<Receive>) : AbstractSocket<Receive, Send>(),
+                                                                  SocketProcessor<Receive, Send, Buffer, Buffer> {
 
   companion object {
     private val log = loggerFor<TypedSocketImpl<*, *>>()
@@ -38,19 +38,19 @@ class TypedSocketImpl<R, K>(private val receiveClass: Class<R>) : AbstractSocket
 
   override fun user(): User? = socket.user()
 
-  override fun dataHandler(socket: Socket<Buffer, Buffer>, item: Buffer) {
+  override fun onData(socket: Socket<Buffer, Buffer>, item: Buffer) {
     log.trace("decoding item {}", item)
     val decoded = Json.decodeValue(item, receiveClass)
     log.trace("decode to {}", decoded)
     onData(decoded)
   }
 
-  override fun endHandler(socket: Socket<Buffer, Buffer>) {
+  override fun onEnd(socket: Socket<Buffer, Buffer>) {
     log.trace("socket closed")
     onEnd()
   }
 
-  override fun write(obj: K): Socket<R, K> {
+  override fun write(obj: Send): Socket<Receive, Send> {
     val s = Json.encodeToBuffer(obj)
     log.trace("writing {} as {}", obj, s)
     socket.write(s)

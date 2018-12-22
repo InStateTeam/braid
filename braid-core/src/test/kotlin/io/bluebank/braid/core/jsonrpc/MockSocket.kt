@@ -20,11 +20,17 @@ import io.bluebank.braid.core.socket.Socket
 import io.vertx.ext.auth.User
 import java.util.concurrent.atomic.AtomicInteger
 
-class MockSocket<In, Out> : AbstractSocket<In, Out>() {
-  private val counter = AtomicInteger(0)
-  private val responseListeners = mutableListOf<(Out) -> Unit>()
+/**
+ * Nominal implementation of a socket
+ * this acts as the entry point of incoming messages to a pipeline, as used in the tests
+ * this also acts as the exit point for all outgoing messages from the pipeline
+ */
+open class MockSocket<In, Out>(private val user: User? = null) :
+  AbstractSocket<In, Out>() {
 
-  val count get() = counter.get()
+  private val writeCounter = AtomicInteger(0)
+  val writeCount get() = writeCounter.get()
+  private val responseListeners = mutableListOf<(Out) -> Unit>()
 
   internal fun process(request: In) {
     onData(request)
@@ -35,13 +41,13 @@ class MockSocket<In, Out> : AbstractSocket<In, Out>() {
   }
 
   override fun write(obj: Out): Socket<In, Out> {
-    counter.incrementAndGet()
+    writeCounter.incrementAndGet()
     responseListeners.forEach { it(obj) }
     return this
   }
 
   override fun user(): User? {
-    return null
+    return user
   }
 
   fun end() {

@@ -254,6 +254,12 @@
         <artifactId>jackson-module-jsonSchema</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.3</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

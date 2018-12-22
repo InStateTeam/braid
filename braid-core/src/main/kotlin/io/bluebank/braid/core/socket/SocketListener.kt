@@ -18,21 +18,21 @@ package io.bluebank.braid.core.socket
 /**
  * Implemented by a listener to a socket
  */
-interface SocketListener<R, S> {
+interface SocketListener<Receive, Send> {
 
   /**
    * Called by [AbstractSocket] to inform this listener that it will be receiving events from [socket]
    * Following this call, this listener is allowed to call [Socket] methods such as [Socket.write]
    */
-  fun onRegister(socket: Socket<R, S>)
+  fun onRegister(socket: Socket<Receive, Send>)
 
   /**
    * Called when a new [item] is received on a given registered socket
    */
-  fun dataHandler(socket: Socket<R, S>, item: R)
+  fun onData(socket: Socket<Receive, Send>, item: Receive)
 
   /**
    * called when a registered socket has closed
    */
-  fun endHandler(socket: Socket<R, S>)
+  fun onEnd(socket: Socket<Receive, Send>)
 }

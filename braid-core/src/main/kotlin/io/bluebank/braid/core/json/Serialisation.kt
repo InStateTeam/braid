@@ -23,28 +23,26 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.vertx.core.json.Json
 
-class BraidJacksonInit {
-  companion object {
-    init {
-      listOf(
-        KotlinModule(),
-        JavaTimeModule(),
-        SimpleModule()
-          .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
-          .addSerializer(
-            JsonRPCResultResponse::class.java,
-            JsonRPCResultResponseSerializer()
-          )
-      ).forEach {
-        Json.mapper.registerModule(it)
-        Json.prettyMapper.registerModule(it)
-      }
-      Json.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-      Json.prettyMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+object BraidJacksonInit {
+  init {
+    listOf(
+      KotlinModule(),
+      JavaTimeModule(),
+      SimpleModule()
+        .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
+        .addSerializer(
+          JsonRPCResultResponse::class.java,
+          JsonRPCResultResponseSerializer()
+        )
+    ).forEach {
+      Json.mapper.registerModule(it)
+      Json.prettyMapper.registerModule(it)
     }
+    Json.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    Json.prettyMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+  }
 
-    fun init() {
-      // automatically init during class load
-    }
+  fun init() {
+    // automatically init during class load
   }
 }

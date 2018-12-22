@@ -15,49 +15,190 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import io.bluebank.braid.core.async.getOrThrow
+import io.bluebank.braid.core.async.toFuture
+import io.bluebank.braid.core.jsonrpc.JsonRPCError.Companion.METHOD_NOT_FOUND
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.socket.NonBlockingSocket
+import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.json.Json
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+import rx.Observable
+import rx.Subscriber
+import rx.schedulers.Schedulers
 import java.util.concurrent.CountDownLatch
-
-class ControlledService {
-  private val lock = Object()
-  private val latch = CountDownLatch(1)
-  internal fun trigger() {
-    latch.countDown()
-  }
-
-  fun doSomething() {
-    latch.await()
-  }
-}
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @RunWith(VertxUnitRunner::class)
 class JsonRPCMounterTest {
 
   private val vertx = Vertx.vertx()
 
-  @Test
-  fun `requests with duplicate ids to those in progress should throw an exception`(context: TestContext) {
-    val service = ControlledService()
-    val executor = ConcreteServiceExecutor(service)
-    val socket = MockSocket<JsonRPCRequest, JsonRPCResponse>()
-    val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
-      socket.addListener(this)
-    }
+  private val service = ControlledService()
+  private val executor = ConcreteServiceExecutor(service)
+  private val socket = InvocableMockSocket()
+  private val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
+    socket.addListener(this)
+  }
+  init {
     JsonRPCMounter(executor, vertx).apply { nonBlocking.addListener(this) }
+  }
+  @After
+  fun after() {
+    socket.end()
+  }
 
+  @Test
+  fun `that we can execute a simple request`(context: TestContext) {
+    val result = socket.invoke(service::doSomething)
+    context.assertEquals("result", result)
+  }
+
+  @Test
+  fun `that we can execute something async`(context: TestContext) {
+    val result = socket.invoke(service::doSomethingAsync).getOrThrow()
+    context.assertEquals("result", result)
+  }
+
+  @Test(expected = JsonRPCException::class)
+  fun `that we can execute something that throws`(context: TestContext) {
+    socket.invoke(service::fails)
+  }
+
+  @Test(expected = JsonRPCException::class)
+  fun `that we can execute something async that throws`(context: TestContext) {
+    socket.invoke(service::failsAsync).getOrThrow()
+  }
+
+  @Test
+  fun `that we can execute a stream`(context: TestContext) {
+    val result = socket.invoke(service::someStream).toList().map { it.toList() }.toFuture().getOrThrow()
+    assertEquals(listOf(1, 2, 3), result)
+  }
+
+  @Test
+  fun `that executing a second invocation with the same id as an active invocation fails`(context: TestContext) {
+    val id = socket.nextId()
+    socket.invoke(id, service::block) // request one will prepare the service and block
+    service.waitForServiceReady()
+    // the next invocation, if it sees the same id, then it should raise an error
+    assertFailsWith<JsonRPCException> { socket.invoke(id, service::doSomething) }
+  }
+
+  @Test
+  fun `that we cancel a stream`(context: TestContext) {
     val async = context.async()
-    socket.addResponseListener {
-      println(Json.encode(it))
-      async.complete()
+    val subscription = socket.invoke(service::cancellableStream).subscribe(object: Subscriber<Int>() {
+      override fun onNext(t: Int?) {
+        if (!async.isCompleted) {
+          async.complete()
+        }
+      }
+
+      override fun onCompleted() {
+        error("should never see this")
+      }
+
+      override fun onError(e: Throwable?) {
+        error("should never see this")
+      }
+    })
+    async.await()
+    subscription.unsubscribe()
+    service.waitForServiceReady()
+  }
+
+  @Test
+  fun `that calling an unknown method fails`(context: TestContext) {
+    val id = socket.nextId()
+    try {
+      socket.invoke<String>(id, "unknownMethod")
+      throw RuntimeException("this should not be executed")
+    } catch (err: JsonRPCException) {
+      context.assertEquals(id, err.response.id)
+      context.assertEquals(METHOD_NOT_FOUND, err.response.error.code)
     }
-    socket.process(JsonRPCRequest(id = 1, method = "doSomething", params = listOf<Any>()))
-    service.trigger()
+  }
+}
+
+class ControlledService {
+  private val serviceReady = CountDownLatch(1)
+  private val trigger = CountDownLatch(1)
+  internal fun trigger() {
+    trigger.countDown()
+  }
+
+  internal fun waitForServiceReady() {
+    serviceReady.await()
+  }
+
+  private fun serviceReady() {
+    serviceReady.countDown()
+  }
+
+  fun block() : Future<String> {
+    val result = Future.future<String>()
+    object: Thread() {
+      override fun run() {
+        serviceReady()
+        trigger.await()
+        result.complete("result")
+      }
+    }.start()
+    return result
+  }
+
+  fun doSomething() : String {
+    return "result"
+  }
+
+  fun fails() : String {
+    throw RuntimeException("failed")
+  }
+
+  fun doSomethingAsync() : Future<String> {
+    val result = Future.future<String>()
+    object: Thread() {
+      override fun run() {
+        result.complete("result")
+      }
+    }.start()
+    return result
+  }
+
+  fun failsAsync() : Future<String> {
+    val result = Future.future<String>()
+    object: Thread() {
+      override fun run() {
+        result.fail("failed")
+      }
+    }.start()
+    return result
+  }
+
+  fun someStream() : Observable<Int> {
+    return Observable.create<Int> {
+      it.onNext(1)
+      it.onNext(2)
+      it.onNext(3)
+      it.onCompleted()
+    }.subscribeOn(Schedulers.computation())
+  }
+
+  fun cancellableStream() : Observable<Int> {
+    return Observable.create<Int> {
+      var next = 1
+      while (!it.isUnsubscribed) {
+        it.onNext(next++)
+      }
+    }
+      .doOnUnsubscribe { serviceReady() }
+      .onBackpressureBuffer()
+      .subscribeOn(Schedulers.newThread())
   }
 }
