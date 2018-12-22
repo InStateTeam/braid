@@ -18,6 +18,7 @@ package io.bluebank.braid.core.jsonrpc
 import io.bluebank.braid.core.async.getOrThrow
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.jsonrpc.JsonRPCError.Companion.METHOD_NOT_FOUND
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.socket.NonBlockingSocket
 import io.vertx.core.Future
@@ -127,6 +128,9 @@ class JsonRPCMounterTest {
 }
 
 class ControlledService {
+  companion object {
+    private val log = loggerFor<ControlledService>()
+  }
   private val serviceReady = CountDownLatch(1)
   private val trigger = CountDownLatch(1)
   internal fun trigger() {
@@ -142,11 +146,14 @@ class ControlledService {
   }
 
   fun block() : Future<String> {
+    log.info("starting block()")
     val result = Future.future<String>()
     object: Thread() {
       override fun run() {
         serviceReady()
+        log.info("waiting for trigger ")
         trigger.await()
+        log.info("completing")
         result.complete("result")
       }
     }.start()
