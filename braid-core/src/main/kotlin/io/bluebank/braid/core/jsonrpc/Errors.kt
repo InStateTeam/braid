@@ -15,8 +15,6 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
-import io.vertx.core.Future
-
 class JsonRPCException(val response: JsonRPCErrorResponse) : Exception() {
   @Throws(JsonRPCException::class)
   fun raise(): Nothing {
@@ -47,17 +45,9 @@ data class JsonRPCErrorResponse(
   )
 
   companion object {
-    fun throwInternalError(id: Any?, message: String) {
-      internalError(id, message).asException().raise()
-    }
 
     fun internalError(id: Any?, message: String) =
       JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.INTERNAL_ERROR)
-
-    @Throws(JsonRPCException::class)
-    fun throwParseError(message: String): Nothing {
-      parseError(message).asException().raise()
-    }
 
     fun parseError(message: String) =
       JsonRPCErrorResponse(id = null, message = message, code = JsonRPCError.PARSE_ERROR)
@@ -73,10 +63,6 @@ data class JsonRPCErrorResponse(
         code = JsonRPCError.INVALID_REQUEST
       )
 
-    fun throwMethodNotFound(id: Any?, message: String): Nothing {
-      methodNotFound(id, message).asException().raise()
-    }
-
     fun methodNotFound(id: Any?, message: String) =
       JsonRPCErrorResponse(
         id = id,
@@ -84,16 +70,8 @@ data class JsonRPCErrorResponse(
         code = JsonRPCError.METHOD_NOT_FOUND
       )
 
-    fun throwInvalidParams(message: String, id: Any? = null) {
-      invalidParams(id, message).asException().raise()
-    }
-
     fun invalidParams(id: Any?, message: String) =
       JsonRPCErrorResponse(id = id, message = message, code = JsonRPCError.INVALID_PARAMS)
-
-    fun throwServerError(id: Any?, message: String?, offset: Int = 0) {
-      serverError(id, message, offset).asException().raise()
-    }
 
     fun serverError(id: Any?, message: String?, offset: Int = 0) =
       JsonRPCErrorResponse(
@@ -101,13 +79,10 @@ data class JsonRPCErrorResponse(
         message = message ?: "unknown error",
         code = JsonRPCError.BASE_SERVER_ERROR - offset
       )
-
   }
 
   fun asException() = JsonRPCException(this)
 }
-
-fun <T : Any> Throwable.toFailedFuture(): Future<T> = Future.failedFuture<T>(this)
 
 fun Throwable.createJsonException(request: JsonRPCRequest) =
   JsonRPCErrorResponse.serverError(request.id, message).asException()

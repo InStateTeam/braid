@@ -17,20 +17,20 @@ package io.bluebank.braid.core.jsonrpc
 
 import io.bluebank.braid.core.socket.AbstractSocket
 import io.bluebank.braid.core.socket.Socket
-import io.vertx.core.AsyncResult
-import io.vertx.core.Future
-import io.vertx.core.Handler
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AbstractUser
-import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.User
 import java.util.concurrent.atomic.AtomicInteger
 
-class MockSocket<In, Out>(private val user: User? = null) : AbstractSocket<In, Out>() {
-  private val writeCounter = AtomicInteger(0)
-  private val responseListeners = mutableListOf<(Out) -> Unit>()
+/**
+ * Nominal implementation of a socket
+ * this acts as the entry point of incoming messages to a pipeline, as used in the tests
+ * this also acts as the exit point for all outgoing messages from the pipeline
+ */
+open class MockSocket<In, Out>(private val user: User? = null) :
+  AbstractSocket<In, Out>() {
 
+  private val writeCounter = AtomicInteger(0)
   val writeCount get() = writeCounter.get()
+  private val responseListeners = mutableListOf<(Out) -> Unit>()
 
   internal fun process(request: In) {
     onData(request)
@@ -52,21 +52,5 @@ class MockSocket<In, Out>(private val user: User? = null) : AbstractSocket<In, O
 
   fun end() {
     super.onEnd()
-  }
-}
-
-class MockUser(private val userId : String = "fred") : AbstractUser() {
-  override fun doIsPermitted(
-    permission: String?,
-    resultHandler: Handler<AsyncResult<Boolean>>?
-  ) {
-    resultHandler?.handle(Future.succeededFuture(true))
-  }
-
-  override fun setAuthProvider(authProvider: AuthProvider?) {
-  }
-
-  override fun principal(): JsonObject {
-    return JsonObject().put("id", userId)
   }
 }

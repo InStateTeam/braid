@@ -21,10 +21,11 @@ import io.vertx.core.Future.future
 import io.vertx.core.Future.succeededFuture
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
+import rx.Observable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
-fun <T : Any> Future<T>.getOrThrow(): T {
+fun <T> Future<T>.getOrThrow(): T {
   val latch = CountDownLatch(1)
 
   this.setHandler {
@@ -137,4 +138,10 @@ fun <T> Future<T>.assertFails() : Future<Unit> {
     }
   }
   return result
+}
+
+fun <T> Observable<T>.toFuture() : Future<T> {
+  val future = future<T>()
+  this.single().subscribe(future::complete, future::fail)
+  return future
 }

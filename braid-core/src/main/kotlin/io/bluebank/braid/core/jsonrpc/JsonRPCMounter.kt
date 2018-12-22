@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.jsonrpc
 
+import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.invalidRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.serverError
 import io.bluebank.braid.core.jsonrpc.JsonRPCErrorResponse.Companion.throwInvalidRequest
 import io.bluebank.braid.core.logging.loggerFor
@@ -75,10 +76,12 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
           stopStream(request)
         } else {
           if (activeSubscriptions.containsKey(request.id)) {
-            val msg =
+            val err = invalidRequest(
+              request.id,
               "a request with duplicate request id is in progress for this connection"
-            log.warn(msg)
-            throw RuntimeException(msg)
+            )
+            log.warn(err.error.message)
+            throw JsonRPCException(err)
           }
           val subscription = executor.invoke(request)
             .observeOn(scheduler, true)
@@ -133,7 +136,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
   private fun handlerError(err: Throwable, request: JsonRPCRequest) {
     request.withMDC {
       try {
-        log.trace("handling error result {}", err)
+        log.trace(request.id, err) { "handling error result" }
         when (err) {
           is MethodDoesNotExist -> JsonRPCErrorResponse.methodNotFound(
             request.id,
@@ -143,7 +146,7 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
           else -> serverError(request.id, err.message).send()
         }
       } catch (err: Throwable) {
-        log.error("failed to handle error", err)
+        log.error(request.id, err) { "failed to handle error" }
       } finally {
         activeSubscriptions.remove(request.id)
       }
@@ -192,9 +195,18 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
 
   private fun JsonRPCErrorResponse.send() {
     try {
-      log.trace("sending error response: {}", this.error)
+      if (this.id != null && this.id is Long) {
+        log.trace(this.id) { "sending error response: ${this.error}" }
+      } else if (log.isTraceEnabled) {
+        log.trace("sending error response: ${this.error}")
+      }
       socket.write(this)
     } catch (err: Throwable) {
+      if (this.id != null && this.id is Long) {
+        log.error(id, err) { "failed to send error response" }
+      } else if (log.isErrorEnabled) {
+        log.error("failed to send error response", err)
+      }
       log.error("failed to send error response", err)
     }
   }
