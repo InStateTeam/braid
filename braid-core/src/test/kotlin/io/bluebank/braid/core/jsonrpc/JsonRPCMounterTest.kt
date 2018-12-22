@@ -26,6 +26,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import rx.Observable
@@ -82,6 +83,7 @@ class JsonRPCMounterTest {
     assertEquals(listOf(1, 2, 3), result)
   }
 
+  @Ignore("see issue #84")
   @Test
   fun `that executing a second invocation with the same id as an active invocation fails`(context: TestContext) {
     val id = socket.nextId()
