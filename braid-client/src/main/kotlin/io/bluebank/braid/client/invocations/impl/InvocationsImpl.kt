@@ -35,7 +35,9 @@ internal class InvocationsImpl internal constructor(
   private val exceptionHandler: (Throwable) -> Unit,
   private val closeHandler: (() -> Unit),
   clientOptions: HttpClientOptions
-) : InvocationsInternalImpl(config.serviceURI.toString()) {
+) : InvocationsInternalImpl(
+  config.serviceURI.toString(),
+  InvocationStrategy.Companion::invoke) {
 
   companion object {
     private val log = loggerFor<InvocationsImpl>()

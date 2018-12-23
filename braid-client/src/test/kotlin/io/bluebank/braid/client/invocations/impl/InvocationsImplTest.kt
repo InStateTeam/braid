@@ -95,4 +95,33 @@ class InvocationsImplTest {
         })
     }
   }
+
+  @Test(expected = IllegalStateException::class)
+  fun `that submitting strategies with duplicate ids does not fail - should ra`() {
+    val invocations = MockInvocations(invocationTarget = { parent, method, returnType, params ->
+      parent.setStrategy(1, object : InvocationStrategy<Any>(parent, method, returnType, params) {
+        override fun getResult(): Any {
+          error("should not be called")
+        }
+        override fun onNext(requestId: Long, item: Any?) {
+          error("should not be called")
+        }
+        override fun onError(requestId: Long, error: Throwable) {
+          error("should not be called")
+        }
+        override fun onCompleted(requestId: Long) {
+          error("should not be called")
+        }
+      })
+    })
+    invocations.invoke("foo", Any::class.java, emptyArray())
+    invocations.invoke("foo", Any::class.java, emptyArray())
+  }
+
+  @Test()
+  fun `that removing an unregistered strategy does not fail - should write to logs`() {
+    val invocations = MockInvocations()
+    invocations.removeStrategy(1)
+  }
+
 }
