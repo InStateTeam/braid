@@ -207,7 +207,6 @@ class JsonRPCMounter(private val executor: ServiceExecutor, vertx: Vertx) :
       } else if (log.isErrorEnabled) {
         log.error("failed to send error response", err)
       }
-      log.error("failed to send error response", err)
     }
   }
 }

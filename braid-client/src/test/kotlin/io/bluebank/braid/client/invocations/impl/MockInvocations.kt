@@ -21,10 +21,12 @@ import io.vertx.core.Future
 import io.vertx.core.json.Json
 import java.util.concurrent.atomic.AtomicInteger
 
-internal class MockInvocations(private val writeCallback: MockInvocations.(JsonRPCRequest) -> Future<Unit> = {
-  Future.succeededFuture(Unit)
-}) :
-  InvocationsInternalImpl() {
+internal typealias WriteCallback = MockInvocations.(JsonRPCRequest) -> Future<Unit>
+
+internal class MockInvocations(
+  invocationTarget: InvocationTarget = InvocationStrategy.Companion::invoke,
+  private val writeCallback: WriteCallback = { Future.succeededFuture(Unit) }
+) : InvocationsInternalImpl(invocationTarget = invocationTarget) {
 
   private val invocationsCounter = AtomicInteger(0)
   private val cancellationsCounter = AtomicInteger(0)

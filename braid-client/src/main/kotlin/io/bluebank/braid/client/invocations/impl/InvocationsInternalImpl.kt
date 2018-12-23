@@ -25,8 +25,10 @@ import java.lang.reflect.Type
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-internal abstract class InvocationsInternalImpl(private val destinationName: String = "") :
-  InvocationsInternal {
+internal abstract class InvocationsInternalImpl(
+  private val destinationName: String = "",
+  private val invocationTarget: InvocationTarget = InvocationStrategy.Companion::invoke
+) : InvocationsInternal {
 
   companion object {
     private val log = loggerFor<InvocationsInternalImpl>()
@@ -66,8 +68,10 @@ internal abstract class InvocationsInternalImpl(private val destinationName: Str
    * set the invocation [strategy] for a [requestId]
    */
   override fun setStrategy(requestId: Long, strategy: InvocationStrategy<*>) {
-    if (invocations.contains(requestId)) {
-      log.error(requestId) { "tried to add a strategy for request $requestId but one already exists!" }
+    if (invocations.containsKey(requestId)) {
+      val msg = "tried to add a strategy for request $requestId but one already exists!"
+      log.error(requestId) { msg }
+      error(msg)
     } else {
       log.trace("adding strategy for request $requestId")
       invocations[requestId] = strategy
@@ -82,7 +86,7 @@ internal abstract class InvocationsInternalImpl(private val destinationName: Str
       log.trace(requestId) { "removing strategy for request" }
       invocations.remove(requestId)
     } else {
-      log.error(requestId) { "could not remove strategy for request because none could be found!" }
+      log.error(requestId) { "could not remove strategy for request $requestId because none could be found!" }
     }
   }
 
@@ -95,7 +99,7 @@ internal abstract class InvocationsInternalImpl(private val destinationName: Str
    * @return the result of the invocation
    */
   override fun invoke(method: String, returnType: Type, params: Array<out Any?>): Any? {
-    return InvocationStrategy.invoke(this, method, returnType, params)
+    return invocationTarget(this, method, returnType, params)
   }
 
   override fun close() {
