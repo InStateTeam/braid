@@ -15,20 +15,22 @@
  */
 package io.bluebank.braid.corda.example
 
+import io.bluebank.braid.corda.services.transaction
 import io.bluebank.braid.core.annotation.MethodDescription
+import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.Vault
 import net.corda.finance.contracts.asset.Cash
 import net.corda.node.services.api.ServiceHubInternal
 import rx.Observable
 
-class MyService(private val serviceHub: ServiceHubInternal) {
+class MyService(private val serviceHub: AppServiceHub) {
 
   @MethodDescription(
     description = "listens for cash state updates in the vault",
     returnType = Vault.Update::class
   )
   fun listenForCashUpdates(): Observable<Vault.Update<Cash.State>> {
-    return serviceHub.database.transaction {
+    return serviceHub.transaction {
       serviceHub.vaultService.trackBy(Cash.State::class.java).updates
     }
   }
