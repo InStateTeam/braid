@@ -42,7 +42,7 @@ class JavascriptIntegrationTests {
       assertTrue { testDir.exists() }
       val pb = ProcessBuilder("npm", "run", "test:integration")
       pb.environment()["braidService"] =
-        "https://localhost:${cordaNet.braidStartingPort}$DEFAULT_API_MOUNT"
+        "https://localhost:${cordaNet.braidPortForParty("PartyA")}$DEFAULT_API_MOUNT"
       pb.directory(testDir)
       val process = pb.start()
       Thread {
