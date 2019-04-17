@@ -15,10 +15,7 @@
  */
 package io.bluebank.braid.corda.rest
 
-import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.contracts.StateRef
-import net.corda.core.contracts.TransactionState
+import net.corda.core.contracts.*
 import net.corda.core.cordapp.CordappProvider
 import net.corda.core.flows.FlowLogic
 import net.corda.core.messaging.FlowHandle
@@ -35,12 +32,29 @@ import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.TestIdentity
 import java.sql.Connection
 import java.time.Clock
+import java.util.function.Consumer
+import javax.persistence.EntityManager
 
 /**
  * A stub class to simulate the service hub - we need this for Braid Corda
  * Technically braid-corda's core could be moved to core
  */
 class TestAppServiceHub : AppServiceHub {
+
+  override val networkParametersService: NetworkParametersService
+    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+  override fun loadContractAttachment(stateRef: StateRef): Attachment {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun withEntityManager(block: Consumer<EntityManager>) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun <T : Any> withEntityManager(block: EntityManager.() -> T): T {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
 
   override val attachments: AttachmentStorage
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
