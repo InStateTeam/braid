@@ -24,8 +24,8 @@ import io.vertx.core.http.HttpClientOptions
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import io.vertx.ext.web.Router
-import io.vertx.kotlin.core.json.JsonArray
-import io.vertx.kotlin.core.json.JsonObject
+import io.vertx.kotlin.core.json.jsonArrayOf
+import io.vertx.kotlin.core.json.jsonObjectOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -51,10 +51,10 @@ class WebKtTest {
     .requestHandler(Router.router(vertx).apply {
       get("/string").handler { it.end("string") }
       get("/object").handler { it.end(Person("fred")) }
-      get("/jsonobject").handler { it.end(JsonObject("name" to "value")) }
-      get("/jsonarray").handler { it.end(JsonArray(1, 2, 3)) }
+      get("/jsonobject").handler { it.end(jsonObjectOf("name" to "value")) }
+      get("/jsonarray").handler { it.end(jsonArrayOf(1, 2, 3)) }
       get("/error").handler { it.end(RuntimeException("error")) }
-    }::accept)
+    })
 
   @Before
   fun before(context: TestContext) {
@@ -95,7 +95,7 @@ class WebKtTest {
       .map { io.vertx.core.json.JsonObject(it) }
       .onSuccess {
         context.assertEquals(
-          JsonObject("name" to "value"),
+          jsonObjectOf("name" to "value"),
           it,
           "that json object matches"
         )
@@ -105,7 +105,7 @@ class WebKtTest {
       .map { io.vertx.core.json.JsonArray(it) }
       .onSuccess {
         context.assertEquals(
-          JsonArray(1, 2, 3),
+          jsonArrayOf(1, 2, 3),
           it,
           "that json array matches"
         )
@@ -116,7 +116,7 @@ class WebKtTest {
           Future.succeededFuture()
         }
       }
-      .compose { withFuture<Void> { future -> httpServer.close(future.completer()) } }
+      .compose { withFuture<Void> { future -> httpServer.close(future) } }
       .compose { client.get("/string").getBodyAsString().assertFails() }
       .onSuccess { async.complete() }
       .catch { context.fail(it) }

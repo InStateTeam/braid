@@ -46,7 +46,7 @@ fun <T> Future<T>.onSuccess(fn: (T) -> Unit): Future<T> {
       if (it.succeeded()) {
         fn(it.result())
       }
-      result.completer().handle(it)
+      result.handle(it)
     } catch (err: Throwable) {
       result.fail(err)
     }
@@ -61,7 +61,7 @@ fun <T> Future<T>.catch(fn: (Throwable) -> Unit): Future<T> {
       if (it.failed()) {
         fn(it.cause())
       }
-      result.completer().handle(it)
+      result.handle(it)
     } catch (err: Throwable) {
       result.fail(err)
     }
@@ -74,7 +74,7 @@ fun <T> Future<T>.finally(fn: (AsyncResult<T>) -> Unit): Future<T> {
   setHandler {
     try {
       fn(it)
-      result.completer().handle(it)
+      result.handle(it)
     } catch (err: Throwable) {
       result.fail(err)
     }

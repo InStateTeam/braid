@@ -38,7 +38,7 @@ object BraidCordaJacksonInit {
     BraidJacksonInit.init()
     // we reuse the jackson support from corda, replacing those that are not flexible enough for
     // dynamic languages
-    val sm = SimpleModule()
+    @Suppress("DEPRECATION") val sm = SimpleModule()
       .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
 
 // we won't use the party serliazers due to the way they require a specialised ObjectMapper!

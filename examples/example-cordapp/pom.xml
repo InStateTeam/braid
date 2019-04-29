@@ -104,8 +104,8 @@
             <configuration>
               <target>
                 <replaceregexp file="build.gradle"
-                               match="ext\.braid_version = '[^']*'"
-                               replace="ext.braid_version = '${project.version}'">
+                               match="braid_version = '[^']*'"
+                               replace="braid_version = '${project.version}'">
 
                 </replaceregexp>
                 <replaceregexp match="&quot;braid-client&quot;: &quot;[^&quot;]*&quot;"

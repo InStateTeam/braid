@@ -76,6 +76,7 @@ fun HttpClientRequest.getBodyBuffer() : Future<Buffer> = this.toFuture().getBody
 
 fun HttpClientRequest.toFuture() : Future<HttpClientResponse> {
   val result = future<HttpClientResponse>()
+  @Suppress("DEPRECATION")
   this.handler(result::complete)
   this.exceptionHandler(result::fail)
   this.end()
