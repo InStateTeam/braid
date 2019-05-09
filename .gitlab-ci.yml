@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+image: jimador/docker-jdk-8-maven-node
+
 variables:
   MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode -Dmaven.repo.local=./.m2/repository"
   MAVEN_PARALLEL: ""
@@ -25,7 +27,7 @@ before_script:
 cache:
   paths:
     - ./.m2/repository
-  key: "$CI_BUILD_REF_NAME"
+#  key: "$CI_BUILD_REF_NAME"
 
 stages:
   - build
@@ -34,7 +36,6 @@ stages:
 
 build:
   stage: build
-  image: jimador/docker-jdk-8-maven-node
   only:
     - master
     - /^[0-9]+-.*$/
@@ -48,7 +49,6 @@ build:
 
 deploy:
   stage: snapshot_release
-  image: jimador/docker-jdk-8-maven-node
   script:
     - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
   only:
