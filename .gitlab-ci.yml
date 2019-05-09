@@ -15,7 +15,7 @@
 #
 
 variables:
-  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
+  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode -Dmaven.repo.local=./.m2/repository"
   MAVEN_PARALLEL: ""
 
 before_script:
@@ -24,7 +24,8 @@ before_script:
 
 cache:
   paths:
-    - /root/.m2/repository
+    - ./.m2/repository
+  key: "$CI_BUILD_REF_NAME"
 
 stages:
   - build
