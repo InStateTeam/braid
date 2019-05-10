@@ -26,7 +26,7 @@ before_script:
 
 cache:
   paths:
-    - .m2/repository
+    - $CI_PROJECT_DIR/.m2/repository
     - examples/example-cordapp/.gradle/
 
 stages:
