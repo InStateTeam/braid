@@ -44,20 +44,28 @@ stages:
   - snapshot_release
   - release
 
-#build:
-#  stage: build
-#  only:
-#    - master
-#    - /^[0-9]+-.*$/
-#  script:
-#    - mkdir -p ~/.m2/repository
-#    - cp maven/settings.xml ~/.m2/settings.xml
-#    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
-#    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
-#  artifacts:
-#    name: "javascript-logs-$CI_JOB_NAME"
-#    paths:
-#    - braid-corda/target/logs/js.log
+build:
+  stage: build
+  only:
+    - master
+    - /^[0-9]+-.*$/
+  script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
+    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
+    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+  artifacts:
+    name: "javascript-logs-$CI_JOB_NAME"
+    paths:
+    - braid-corda/target/logs/js.log
+    - braid-client/target
+    - braid-client-js/dist
+    - braid-client-js/target
+    - braid-corda/target
+    - braid-corda-client/target
+    - braid-core/target
+    - braid-quickstart/target
+    - braid-standalone-server/target
 
 deploy:
   stage: snapshot_release
@@ -68,8 +76,7 @@ deploy:
     - gpg --version
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
     - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
-#    - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
-    - mvn $MAVEN_CLI_OPTS clean deploy -DskipTests -P release
+    - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
     - 91-provide-a-means-of-capturing-jax-rs-header-parameters
