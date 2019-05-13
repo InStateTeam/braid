@@ -34,7 +34,7 @@ before_script:
 
 cache:
   paths:
-    - $CI_PROJECT_DIR/maven/repository
+    - $CI_PROJECT_DIR/.m2/repository
     - examples/example-cordapp/.gradle/
 
 stages:
