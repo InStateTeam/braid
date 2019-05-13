@@ -44,20 +44,20 @@ stages:
   - snapshot_release
   - release
 
-build:
-  stage: build
-  only:
-    - master
-    - /^[0-9]+-.*$/
-  script:
-    - mkdir -p ~/.m2/repository
-    - cp maven/settings.xml ~/.m2/settings.xml
-    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
-    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
-  artifacts:
-    name: "javascript-logs-$CI_JOB_NAME"
-    paths:
-    - braid-corda/target/logs/js.log
+#build:
+#  stage: build
+#  only:
+#    - master
+#    - /^[0-9]+-.*$/
+#  script:
+#    - mkdir -p ~/.m2/repository
+#    - cp maven/settings.xml ~/.m2/settings.xml
+#    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
+#    - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+#  artifacts:
+#    name: "javascript-logs-$CI_JOB_NAME"
+#    paths:
+#    - braid-corda/target/logs/js.log
 
 deploy:
   stage: snapshot_release
