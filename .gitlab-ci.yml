@@ -36,8 +36,8 @@ before_script:
 cache:
   paths:
     - $CI_PROJECT_DIR/.m2/repository
-    - examples/example-cordapp/.gradle/wrapper
-    - examples/example-cordapp/.gradle/caches
+    - .gradle/wrapper
+    - .gradle/caches
 
 stages:
   - build
