@@ -64,7 +64,12 @@ deploy:
   script:
     - mkdir -p ~/.m2/repository
     - cp maven/settings.xml ~/.m2/settings.xml
-    - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
+    - rm -rf ~/.gnupg
+    - gpg --version
+    - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
+    - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
+#    - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
+    - mvn $MAVEN_CLI_OPTS clean deploy -DskipTests -P release
   only:
     - master
 
