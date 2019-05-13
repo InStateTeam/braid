@@ -16,8 +16,16 @@
 
 image: jimador/docker-jdk-8-maven-node
 
+# PLEASE NOTE!
+# This project, for historical reasons uses a combination of maven and gradle
+# For the sake of build time, it's critical that the maven repository is cached on docker runners
+# configuring gradle to use an alternate local maven repository has several issues
+# the cleanest way is to update ~/.m2/settings.xml with the actual location of the local repo
+# placing it under this projects directory structure
+# therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
+
 variables:
-  MAVEN_OPTS: "-s maven/settings.xml -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
@@ -26,7 +34,7 @@ before_script:
 
 cache:
   paths:
-    - $CI_PROJECT_DIR/.m2/repository
+    - $CI_PROJECT_DIR/maven/repository
     - examples/example-cordapp/.gradle/
 
 stages:
@@ -40,6 +48,8 @@ build:
     - master
     - /^[0-9]+-.*$/
   script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
   artifacts:
@@ -50,6 +60,8 @@ build:
 deploy:
   stage: snapshot_release
   script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
     - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
@@ -63,6 +75,8 @@ release:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/
   when: manual
   script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
     - rm -rf ~/.gnupg
     - gpg --version
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
