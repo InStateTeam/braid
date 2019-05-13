@@ -16,16 +16,13 @@
 package io.bluebank.braid.core.jsonrpc
 
 import io.bluebank.braid.core.logging.loggerFor
-import io.vertx.core.json.Json
 import java.lang.reflect.Constructor
-import java.lang.reflect.Parameter
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.valueParameters
-import kotlin.reflect.jvm.jvmErasure
 
 private val log = loggerFor<Params>()
 
@@ -160,11 +157,11 @@ class SingleValueParam(val param: Any) : AbstractParams() {
   override val count: Int = 1
 
   override fun mapParams(method: KFunction<*>): List<Any?> {
-    return listOf(convert(param, method.valueParameters[0]))
+    return listOf(Converter.convert(param, method.valueParameters[0]))
   }
 
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
-    return listOf(convert(param, constructor.parameters[0]))
+    return listOf(Converter.convert(param, constructor.parameters[0]))
   }
 
   override fun toString(): String {
@@ -181,14 +178,14 @@ class NamedParams(val map: Map<String, Any?>) : AbstractParams() {
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.map { parameter ->
       val value = map[parameter.name]
-      convert(value, parameter)
+      Converter.convert(value, parameter)
     }
   }
 
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     return constructor.parameters.map { parameter ->
       val value = map[parameter.name]
-      convert(value, parameter)
+      Converter.convert(value, parameter)
     }
   }
 
@@ -212,13 +209,13 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
   override val count: Int = params.size
   override fun mapParams(method: KFunction<*>): List<Any?> {
     return method.valueParameters.zip(params).map { (parameter, value) ->
-      convert(value, parameter)
+      Converter.convert(value, parameter)
     }
   }
 
   override fun mapParams(constructor: Constructor<*>): List<Any?> {
     return constructor.parameters.zip(params).map { (parameter, value) ->
-      convert(value, parameter)
+      Converter.convert(value, parameter)
     }
   }
 
@@ -228,20 +225,6 @@ class ListParams(val params: List<Any?>) : AbstractParams() {
 
   override fun computeScore(fn: KFunction<*>): Int {
     return computeScore(fn.parameters.drop(1), params)
-  }
-}
-
-private fun convert(value: Any?, parameter: KParameter) =
-  convert(value, parameter.type.jvmErasure.javaObjectType)
-
-private fun convert(value: Any?, parameter: Parameter) = convert(value, parameter.type)
-
-private fun convert(value: Any?, clazz: Class<*>): Any? {
-  return when (value) {
-    null -> null
-    else -> {
-      Json.mapper.convertValue(value, clazz)
-    }
   }
 }
 

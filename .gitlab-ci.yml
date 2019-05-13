@@ -14,17 +14,30 @@
 # limitations under the License.
 #
 
+image: jimador/docker-jdk-8-maven-node
+
+# PLEASE NOTE!
+# This project, for historical reasons uses a combination of maven and gradle
+# For the sake of build time, it's critical that the maven repository is cached on docker runners
+# configuring gradle to use an alternate local maven repository has several issues
+# the cleanest way is to update ~/.m2/settings.xml with the actual location of the local repo
+# placing it under this projects directory structure
+# therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
+
 variables:
-  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode"
-  MAVEN_PARALLEL: ""
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
 - npm set registry $NPM_REPO
 - npm set $NPM_CREDENTIALS
+- export GRADLE_USER_HOME=`pwd`/.gradle
 
 cache:
   paths:
-    - /root/.m2/repository
+    - $CI_PROJECT_DIR/.m2/repository
+    - .gradle/wrapper
+    - .gradle/caches
 
 stages:
   - build
@@ -33,12 +46,13 @@ stages:
 
 build:
   stage: build
-  image: jimador/docker-jdk-8-maven-node
   only:
     - master
     - /^[0-9]+-.*$/
   script:
-    - mvn $MAVEN_CLI_OPTS $MAVEN_PARALLEL clean license:check install
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
+    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
   artifacts:
     name: "javascript-logs-$CI_JOB_NAME"
@@ -47,8 +61,9 @@ build:
 
 deploy:
   stage: snapshot_release
-  image: jimador/docker-jdk-8-maven-node
   script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
     - mvn $MAVEN_CLI_OPTS clean license:format dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
@@ -62,6 +77,8 @@ release:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/
   when: manual
   script:
+    - mkdir -p ~/.m2/repository
+    - cp maven/settings.xml ~/.m2/settings.xml
     - rm -rf ~/.gnupg
     - gpg --version
     - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"

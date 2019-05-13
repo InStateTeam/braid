@@ -189,6 +189,51 @@ class RestMounterTest {
       .putHeader("Authorization", "Bearer $token")
       .setChunked(true)
       .end("hello")
+
+    async10.await()
+
+    val async11 = context.async()
+    val headerValues = listOf(1, 2, 3)
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/list/string")
+      .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          val bodyArray = body.toJsonArray()
+          context.assertEquals(headerValues.map { it.toString() }, bodyArray.list)
+          async11.complete()
+        }
+      }
+      .end()
+    async11.await()
+
+    val async12 = context.async()
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/list/int")
+      .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          val bodyArray = body.toJsonArray()
+          context.assertEquals(headerValues, bodyArray.list)
+          async12.complete()
+        }
+      }
+      .end()
+    async12.await()
+
+    val async13 = context.async()
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers")
+      .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          val bodyArray = body.toJsonArray()
+          context.assertEquals(headerValues, bodyArray.list)
+          async13.complete()
+        }
+      }
+      .end()
+    async13.await()
   }
 
   @Test
