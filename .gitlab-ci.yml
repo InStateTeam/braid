@@ -17,8 +17,8 @@
 image: jimador/docker-jdk-8-maven-node
 
 variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
-  MAVEN_CLI_OPTS: "-s maven/settings.xml --batch-mode --errors --fail-at-end --show-version"
+  MAVEN_OPTS: "-s maven/settings.xml -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
 - npm set registry $NPM_REPO
