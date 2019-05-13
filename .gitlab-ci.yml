@@ -72,6 +72,7 @@ deploy:
     - mvn $MAVEN_CLI_OPTS clean deploy -DskipTests -P release
   only:
     - master
+    - 91-provide-a-means-of-capturing-jax-rs-header-parameters
 
 release:
   stage: release
