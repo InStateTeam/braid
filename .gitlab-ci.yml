@@ -42,6 +42,9 @@ stages:
   - snapshot_release
   - release
 
+before_scripts:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
 build:
   stage: build
   only:
