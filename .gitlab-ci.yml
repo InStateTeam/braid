@@ -80,7 +80,6 @@ release:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/
-    - 91-provide-a-means-of-capturing-jax-rs-header-parameters
   when: manual
   script:
     - mkdir -p ~/.m2/repository
