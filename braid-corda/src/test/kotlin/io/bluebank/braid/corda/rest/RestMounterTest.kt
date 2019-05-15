@@ -234,6 +234,44 @@ class RestMounterTest {
       }
       .end()
     async13.await()
+
+    val async14 = context.async()
+    val testString = "this is a test"
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/optional")
+      .putHeader(X_HEADER_STRING, testString)
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals(testString, body.toString())
+          async14.complete()
+        }
+      }
+      .end()
+    async14.await()
+
+    val async15 = context.async()
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/optional")
+      // N.B. no header set
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        response.bodyHandler { body ->
+          context.assertEquals("null", body.toString())
+          async15.complete()
+        }
+      }
+      .end()
+    async15.await()
+
+    val async16 = context.async()
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/non-optional")
+      // N.B. no header set
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        context.assertEquals(500, response.statusCode())
+        async16.complete()
+      }
+      .end()
+    async16.await()
   }
 
   @Test
