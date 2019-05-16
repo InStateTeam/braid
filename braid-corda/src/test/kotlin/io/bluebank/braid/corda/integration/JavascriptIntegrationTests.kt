@@ -65,7 +65,7 @@ class JavascriptIntegrationTests {
         } catch (e: Exception) {
         }
       }.start()
-      process.waitFor(20, TimeUnit.SECONDS)
+      process.waitFor(5, TimeUnit.MINUTES)
       assertEquals(0, process.exitValue(), "tests should succeed")
     }
   }

@@ -35,7 +35,12 @@ import io.vertx.ext.web.RoutingContext
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+import javax.ws.rs.HeaderParam
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
+
+const val X_HEADER_LIST_STRING = "x-list-string"
+const val X_HEADER_STRING = "x-string"
 
 class TestService {
   fun sayHello() = "hello"
@@ -94,6 +99,41 @@ class TestService {
   fun willFail(): String {
     throw RuntimeException("total fail!")
   }
+
+  fun headerListOfStrings(@HeaderParam(X_HEADER_LIST_STRING) value: List<String>) : List<String> {
+    return value
+  }
+
+  fun headerListOfInt(@HeaderParam(X_HEADER_LIST_STRING) value: List<Int>) : List<Int> {
+    return value
+  }
+
+  fun optionalHeader(@HeaderParam(X_HEADER_STRING) value: String?) : String {
+    return value ?: "null"
+  }
+
+  fun nonOptionalHeader(@HeaderParam(X_HEADER_STRING) value: String) : String {
+    return value
+  }
+
+  fun headers(@Context headers: javax.ws.rs.core.HttpHeaders) : List<Int> {
+    val acceptableLanguages = headers.acceptableLanguages
+    assert(acceptableLanguages.size == 1 && acceptableLanguages.first().language == "*")
+    val acceptableMediaTypes = headers.acceptableMediaTypes
+    assert(acceptableMediaTypes.size == 1 && acceptableMediaTypes.first() == MediaType.WILDCARD_TYPE)
+    val cookies = headers.cookies
+    assert(cookies.isEmpty())
+    val date = headers.date
+    assert(date == null)
+    val language = headers.language
+    assert(language == null)
+    val length = headers.length
+    assert(length == -1)
+    val mediaType = headers.mediaType
+    assert(mediaType == null)
+
+    return headers.getRequestHeader(X_HEADER_LIST_STRING).map { it.toInt() }
+  }
 }
 
 class TestServiceApp(port: Int, private val service: TestService) {
@@ -141,6 +181,11 @@ class TestServiceApp(port: Int, private val service: TestService) {
               post("/custom", service::somethingCustom)
               get("/stringlist", service::returnsListOfStuff)
               get("/willfail", service::willFail)
+              get("/headers/list/string", service::headerListOfStrings)
+              get("/headers/list/int", service::headerListOfInt)
+              get("/headers", service::headers)
+              get("/headers/optional", service::optionalHeader)
+              get("/headers/non-optional", service::nonOptionalHeader)
             }
             protected {
               post("/echo", service::echo)
