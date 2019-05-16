@@ -62,31 +62,31 @@ private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?
   return this.parameters.map { it.parseParameter(context) }.toTypedArray()
 }
 
-private fun KParameter.parseBodyParameter(context: RoutingContext): Any? {
+private fun parseBodyParameter(parameter: KParameter, context: RoutingContext): ParseResult {
   return context.body.let { body ->
-    val type = this.getType()
+    val type = parameter.getType()
     when {
       type.isSubclassOf(Buffer::class) -> {
-        body
+        ParseResult(body)
       }
       type.isSubclassOf(ByteArray::class) -> {
-        body.bytes
+        ParseResult(body.bytes)
       }
       type.isSubclassOf(ByteBuf::class) -> {
-        body.byteBuf
+        ParseResult(body.byteBuf)
       }
       type.isSubclassOf(ByteBuffer::class) -> {
-        ByteBuffer.wrap(body.bytes)
+        ParseResult(ByteBuffer.wrap(body.bytes))
       }
       type == String::class -> {
-        body.toString()
+        ParseResult(body.toString())
       }
       else -> {
         if (body != null && body.length() > 0) {
-          val constructType = Json.mapper.typeFactory.constructType(this.type.javaType)
-          Json.mapper.readValue<Any>(body.toString(), constructType)
+          val constructType = Json.mapper.typeFactory.constructType(parameter.type.javaType)
+          ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
         } else {
-          null
+          ParseResult.NOT_FOUND
         }
       }
     }
@@ -117,29 +117,60 @@ private fun KParameter.getType(): KClass<*> {
   }
 }
 
+private data class ParseResult(val found: Boolean, val result: Any? = null) {
+  constructor(result: Any?) : this(result != null, result)
+
+  companion object {
+    val NOT_FOUND = ParseResult(false)
+  }
+}
+
+private fun parser(fn: (KParameter, RoutingContext) -> ParseResult) : (KParameter, RoutingContext) -> ParseResult {
+  return { parameter, context ->
+    fn(parameter, context)
+  }
+}
+
+private fun ((KParameter, RoutingContext) -> ParseResult).then(fn: (KParameter, RoutingContext) -> ParseResult) : (KParameter, RoutingContext) -> ParseResult {
+  return { parameter, context ->
+    val result = this(parameter, context)
+    when {
+      !result.found -> fn(parameter, context)
+      else -> result
+    }
+  }
+}
+
+
+private val parameterParser = ::parsePathParameter
+  .then(::parseQueryParameter)
+  .then(::parseContextParameter)
+  .then(::parseHeaderParameter)
+  .then(::parseBodyParameter)
+
 private fun KParameter.parseParameter(context: RoutingContext): Any? {
-  return this.parsePathParameter(context)
-    ?: this.parseQueryParameter(context)
-    ?: this.parseContextParameter(context)
-    ?: this.parseHeaderParameter(context)
-    ?: this.parseBodyParameter(context)
+  return parameterParser(this, context).result
 }
 
-private fun KParameter.parseContextParameter(context: RoutingContext): Any? {
-  this.findAnnotation<Context>() ?: return null
+private fun parseContextParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+  parameter.findAnnotation<Context>() ?: return ParseResult.NOT_FOUND
   // we always map and pass HttpHeaders
-  assert(this.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}")}
-  return HttpHeadersImpl(context)
+  assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}")}
+  return ParseResult(HttpHeadersImpl(context))
 }
 
-private fun KParameter.parseHeaderParameter(context: RoutingContext): Any? {
-  val annotation = this.findAnnotation<HeaderParam>() ?: return null
+private fun parseHeaderParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+  val annotation = parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
   val headerName = annotation.value
   val values = context.request().headers().getAll(headerName)
-  return when (this.type.classifier) {
-    List::class -> this.parseHeaderValuesAsList(values)
-    Set::class -> this.parseHeaderValuesAsSet(values)
-    else -> this.type.parseHeaderValue(values.first())
+  return when (parameter.type.classifier) {
+    List::class -> ParseResult(parameter.parseHeaderValuesAsList(values))
+    Set::class -> ParseResult(parameter.parseHeaderValuesAsSet(values))
+    else -> {
+      val result = parameter.type.parseHeaderValue(values.firstOrNull())
+      assert(parameter.type.isMarkedNullable || result != null) { "method requires header $headerName but it was missing"}
+      ParseResult(true, result)
+    }
   }
 }
 
@@ -151,7 +182,7 @@ private fun KParameter.parseHeaderValuesAsSet(values: List<String>) : Set<*> {
   return parseHeaderValuesAsList(values).toSet()
 }
 
-private fun KTypeProjection.parseHeaderValue(value: String): Any {
+private fun KTypeProjection.parseHeaderValue(value: String?): Any? {
   val type = this.type
   return when (type) {
     null -> value
@@ -163,37 +194,37 @@ private fun KType.parseHeaderValue(value: String?): Any? {
   return Converter.convert(value, this)
 }
 
-private fun KParameter.parseQueryParameter(context: RoutingContext): Any? {
+private fun parseQueryParameter(parameter: KParameter, context: RoutingContext): ParseResult {
   return when {
-    this.isSimpleType() -> {
-      val parameterName = this.parameterName() ?: return null
+    parameter.isSimpleType() -> {
+      val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
       val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
       // TODO: handle arrays
       if (queryParam != null) {
-        this.parseSimpleType(queryParam)
+        ParseResult(parameter.parseSimpleType(queryParam))
       } else {
-        null
+        ParseResult.NOT_FOUND
       }
     }
     else -> {
-      null
+      ParseResult.NOT_FOUND
     }
   }
 }
 
-private fun KParameter.parsePathParameter(context: RoutingContext): Any? {
+private fun parsePathParameter(parameter: KParameter, context: RoutingContext): ParseResult {
   return when {
-    this.isSimpleType() -> {
-      val parameterName = this.parameterName() ?: return null
+    parameter.isSimpleType() -> {
+      val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
       val paramString = context.pathParam(parameterName)
       if (paramString == null) {
-        null
+        ParseResult.NOT_FOUND
       } else {
-        this.parseSimpleType(paramString)
+        ParseResult(parameter.parseSimpleType(paramString))
       }
     }
     else -> {
-      null
+      ParseResult.NOT_FOUND
     }
   }
 }
@@ -220,9 +251,7 @@ private fun KParameter.validateHeaderParamAnnotation() {
   this.findAnnotation<HeaderParam>() ?: return
   val type = this.getType()
   when (type) {
-    String::class -> {
-      assert(this.isOptional) { "parameter ${this.name} should be nullable" }
-    }
+    String::class -> { }
     List::class, Set::class -> {
 //      val args = this.type.arguments
 //      val argType = args.first().type!!.classifier as KClass<*>

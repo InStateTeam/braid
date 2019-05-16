@@ -40,6 +40,7 @@ import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 
 const val X_HEADER_LIST_STRING = "x-list-string"
+const val X_HEADER_STRING = "x-string"
 
 class TestService {
   fun sayHello() = "hello"
@@ -104,6 +105,14 @@ class TestService {
   }
 
   fun headerListOfInt(@HeaderParam(X_HEADER_LIST_STRING) value: List<Int>) : List<Int> {
+    return value
+  }
+
+  fun optionalHeader(@HeaderParam(X_HEADER_STRING) value: String?) : String {
+    return value ?: "null"
+  }
+
+  fun nonOptionalHeader(@HeaderParam(X_HEADER_STRING) value: String) : String {
     return value
   }
 
@@ -175,6 +184,8 @@ class TestServiceApp(port: Int, private val service: TestService) {
               get("/headers/list/string", service::headerListOfStrings)
               get("/headers/list/int", service::headerListOfInt)
               get("/headers", service::headers)
+              get("/headers/optional", service::optionalHeader)
+              get("/headers/non-optional", service::nonOptionalHeader)
             }
             protected {
               post("/echo", service::echo)
