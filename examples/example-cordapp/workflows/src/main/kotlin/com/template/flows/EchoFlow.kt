@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.template.flows
 
-include 'workflows'
-include 'contracts'
+import co.paralleluniverse.fibers.Suspendable
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.flows.StartableByRPC
+import net.corda.core.flows.StartableByService
+
+@InitiatingFlow
+@StartableByRPC
+@StartableByService
+class EchoFlow(private val text: String) : FlowLogic<String>() {
+
+  @Suspendable
+  override fun call(): String = text
+}

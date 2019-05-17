@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.template.contracts
 
-include 'workflows'
-include 'contracts'
+import net.corda.testing.node.MockServices
+import org.junit.Test
+
+class ContractTests {
+  val ledgerServices = MockServices()
+
+  @Test
+  fun `dummy test`() {
+
+  }
+}

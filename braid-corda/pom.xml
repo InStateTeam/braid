@@ -116,12 +116,17 @@
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>net.corda</groupId>
       <artifactId>corda-node</artifactId>
       <version>${corda.version}</version>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>net.corda.plugins</groupId>
@@ -136,7 +141,6 @@
           <artifactId>log4j-web</artifactId>
         </exclusion>
       </exclusions>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -171,24 +175,6 @@
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.apache.logging.log4j</groupId>-->
-      <!--<artifactId>log4j-api</artifactId>-->
-      <!--<version>2.11.1</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.logging.log4j</groupId>-->
-      <!--<artifactId>log4j-core</artifactId>-->
-      <!--<version>2.11.1</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.apache.logging.log4j</groupId>-->
-      <!--<artifactId>log4j-slf4j-impl</artifactId>-->
-      <!--<version>2.11.1</version>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
   </dependencies>
 
   <build>

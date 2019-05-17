@@ -82,7 +82,7 @@
 
   <properties>
     <kotlin.version>1.2.71</kotlin.version>
-    <corda.version>4.1-RC01</corda.version>
+    <corda.version>4.1-RC03</corda.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>4.12</junit.version>
     <vertx.version>3.7.0</vertx.version>
@@ -224,6 +224,10 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -261,6 +265,12 @@
         <groupId>com.fasterxml.jackson.module</groupId>
         <artifactId>jackson-module-jsonSchema</artifactId>
         <version>${jackson.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
