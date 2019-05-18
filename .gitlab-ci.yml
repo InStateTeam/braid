@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-image: jimador/docker-jdk-8-maven-node
+image: dazraf/build-tools:0.0.1
 
 # PLEASE NOTE!
 # This project, for historical reasons uses a combination of maven and gradle
