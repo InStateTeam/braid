@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers
 import com.fasterxml.jackson.databind.module.SimpleModule
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
@@ -30,7 +29,6 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
-import java.math.BigDecimal
 import java.security.PublicKey
 
 object BraidCordaJacksonInit {
@@ -47,14 +45,6 @@ object BraidCordaJacksonInit {
 //          .addSerializer(Party::class.java, JacksonSupport.PartySerializer)
 //          .addDeserializer(Party::class.java, JacksonSupport.PartyDeserializer)
 //          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
-      .addSerializer(
-        BigDecimal::class.java,
-        com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance
-      )
-      .addDeserializer(
-        BigDecimal::class.java,
-        NumberDeserializers.BigDecimalDeserializer()
-      )
       .addSerializer(SecureHash::class.java, SecureHashSerializer)
       .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
       .addDeserializer(SecureHash::class.java, SecureHashDeserializer())

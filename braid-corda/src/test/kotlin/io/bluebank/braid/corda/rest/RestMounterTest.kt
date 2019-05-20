@@ -30,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
 class RestMounterTest {
 
@@ -50,52 +51,49 @@ class RestMounterTest {
   fun `test that we can mount rest endpoints and access via swagger`(context: TestContext) {
     val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
-    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json")
-      .exceptionHandler(context::fail)
-      .handler {
-        it.bodyHandler {
-          it.toJsonObject()
-          async1.complete()
-        }
+    @Suppress("DEPRECATION")
+    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json") {
+      it.bodyHandler {
+        it.toJsonObject()
+        async1.complete()
       }
+    }
+      .exceptionHandler(context::fail)
       .end()
 
     val async2 = context.async()
-    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/")
-      .exceptionHandler(context::fail)
-      .handler {
-        it.bodyHandler {
-          val body = it.toString()
-          context.assertTrue(body.contains("<title>Swagger UI</title>", true))
-          async2.complete()
-        }
+    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/") {
+      it.bodyHandler {
+        val body = it.toString()
+        context.assertTrue(body.contains("<title>Swagger UI</title>", true))
+        async2.complete()
       }
+    }
+      .exceptionHandler(context::fail)
       .end()
 
     val async3 = context.async()
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/hello")
-      .exceptionHandler(context::fail)
-      .handler {
-        it.bodyHandler {
-          context.assertEquals("hello", it.toString())
-          async3.complete()
-        }
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/hello") {
+      it.bodyHandler {
+        context.assertEquals("hello", it.toString())
+        async3.complete()
       }
+    }
+      .exceptionHandler(context::fail)
       .end()
 
     val async4 = context.async()
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/buffer")
-      .exceptionHandler(context::fail)
-      .handler { response ->
-        response.bodyHandler { body ->
-          context.assertEquals(
-            APPLICATION_OCTET_STREAM.toString(),
-            response.getHeader(HttpHeaders.CONTENT_TYPE)
-          )
-          context.assertEquals("hello", body.toString())
-          async4.complete()
-        }
+    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/buffer") { response ->
+      response.bodyHandler { body ->
+        context.assertEquals(
+          APPLICATION_OCTET_STREAM.toString(),
+          response.getHeader(HttpHeaders.CONTENT_TYPE)
+        )
+        context.assertEquals("hello", body.toString())
+        async4.complete()
       }
+    }
+      .exceptionHandler(context::fail)
       .end()
 
     val async5 = context.async()

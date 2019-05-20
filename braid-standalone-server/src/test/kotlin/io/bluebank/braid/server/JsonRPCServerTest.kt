@@ -43,13 +43,16 @@ import java.net.ServerSocket
 
 @RunWith(VertxUnitRunner::class)
 class JsonRPCServerTest {
+
   private val port = getFreePort()
-  private val vertx: Vertx = Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
+  private val vertx: Vertx =
+    Vertx.vertx(VertxOptions().setBlockedThreadCheckInterval(30_000))
   private val server = createServerBuilder()
-      .withVertx(vertx)
-      .withPort(port)
-      .build()
-  private val client = vertx.createHttpClient(HttpClientOptions()
+    .withVertx(vertx)
+    .withPort(port)
+    .build()
+  private val client = vertx.createHttpClient(
+    HttpClientOptions()
       .setDefaultPort(port)
       .setDefaultHost("localhost")
       .setSsl(true)
@@ -60,16 +63,17 @@ class JsonRPCServerTest {
   @Before
   fun before(testContext: TestContext) {
     JavascriptExecutor.clearScriptsFolder(vertx)
-        .compose {
-          val result = future<Void>()
-          server.start(result.completer()::handle)
-          result
-        }.setHandler(testContext.asyncAssertSuccess())
+      .compose {
+        val result = future<Void>()
+        server.start(result::handle)
+        result
+      }.setHandler(testContext.asyncAssertSuccess())
   }
 
   @After
   fun after(testContext: TestContext) {
-    JavascriptExecutor.clearScriptsFolder(vertx).setHandler(testContext.asyncAssertSuccess())
+    JavascriptExecutor.clearScriptsFolder(vertx)
+      .setHandler(testContext.asyncAssertSuccess())
     server.stop(testContext.asyncAssertSuccess<Void>()::handle)
     client.close()
   }
@@ -78,25 +82,35 @@ class JsonRPCServerTest {
   fun `that we can list services and create them`(testContext: TestContext) {
     val serviceName = "myservice"
     httpGetAsJsonObject("/api/")
-        .compose {
-          testContext.assertEquals(0, it.size())
-          httpGet("/api/$serviceName/script")
-        }
-        .map {
-          testContext.assertEquals("", it.toString())
-        }
-        .compose {
-          httpGetAsJsonObject("/api/")
-        }
-        .map {
-          testContext.assertEquals(1, it.size())
-          testContext.assertTrue(it.containsKey(serviceName))
-          val serviceDef = it.getJsonObject(serviceName)
-          testContext.assertTrue(serviceDef.containsKey("endpoint") && serviceDef.containsKey("documentation"))
-          testContext.assertEquals(defaultServiceEndpoint(serviceName), serviceDef.getString("endpoint"))
-          testContext.assertEquals(defaultServiceMountpoint(serviceName), serviceDef.getString("documentation"))
-        }
-        .setHandler(testContext.asyncAssertSuccess())
+      .compose {
+        testContext.assertEquals(0, it.size())
+        httpGet("/api/$serviceName/script")
+      }
+      .map {
+        testContext.assertEquals("", it.toString())
+      }
+      .compose {
+        httpGetAsJsonObject("/api/")
+      }
+      .map {
+        testContext.assertEquals(1, it.size())
+        testContext.assertTrue(it.containsKey(serviceName))
+        val serviceDef = it.getJsonObject(serviceName)
+        testContext.assertTrue(
+          serviceDef.containsKey("endpoint") && serviceDef.containsKey(
+            "documentation"
+          )
+        )
+        testContext.assertEquals(
+          defaultServiceEndpoint(serviceName),
+          serviceDef.getString("endpoint")
+        )
+        testContext.assertEquals(
+          defaultServiceMountpoint(serviceName),
+          serviceDef.getString("documentation")
+        )
+      }
+      .setHandler(testContext.asyncAssertSuccess())
   }
 
   @Test
@@ -110,17 +124,17 @@ class JsonRPCServerTest {
       """.trimIndent().trimMargin("|")
 
     httpPost("/api/$serviceName/script", script)
-        .compose {
-          jsonRPC("${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
-        }
-        .map {
-          Json.decodeValue(it, JsonRPCResultResponse::class.java)
-        }
-        .map { it.result.toString().toDouble().toInt() }
-        .map {
-          testContext.assertEquals(3, it)
-        }
-        .setHandler(testContext.asyncAssertSuccess())
+      .compose {
+        jsonRPC("${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
+      }
+      .map {
+        Json.decodeValue(it, JsonRPCResultResponse::class.java)
+      }
+      .map { it.result.toString().toDouble().toInt() }
+      .map {
+        testContext.assertEquals(3, it)
+      }
+      .setHandler(testContext.asyncAssertSuccess())
   }
 
   private fun jsonRPC(url: String, method: String, vararg params: Any?): Future<Buffer> {
@@ -161,13 +175,14 @@ class JsonRPCServerTest {
     return httpGet(url).map { JsonArray(it) }
   }
 
-  private fun httpGetAsJsonObject(url: String) : Future<JsonObject> {
+  private fun httpGetAsJsonObject(url: String): Future<JsonObject> {
     return httpGet(url).map { JsonObject(it) }
   }
 
   private fun httpGet(url: String): Future<Buffer> {
     val future = future<Buffer>()
     try {
+      @Suppress("DEPRECATION")
       client.get(url) { response ->
         if (response.failed) {
           future.fail(response.statusMessage() ?: "failed")
@@ -188,21 +203,21 @@ class JsonRPCServerTest {
   private fun httpPost(url: String, data: String): Future<Buffer> {
     val future = future<Buffer>()
     try {
-      client.post(url)
-          .putHeader(HttpHeaders.CONTENT_LENGTH, data.length.toString())
-          .handler {
-            if ((it.statusCode() / 100) != 2) {
-              future.fail("failed: ${it.statusMessage()}")
-            } else {
-              it.bodyHandler {
-                future.complete(it)
-              }
-            }
+      @Suppress("DEPRECATION")
+      client.post(url) {
+        if ((it.statusCode() / 100) != 2) {
+          future.fail("failed: ${it.statusMessage()}")
+        } else {
+          it.bodyHandler {
+            future.complete(it)
           }
-          .exceptionHandler {
-            future.fail(it)
-          }
-          .end(data)
+        }
+      }
+        .putHeader(HttpHeaders.CONTENT_LENGTH, data.length.toString())
+        .exceptionHandler {
+          future.fail(it)
+        }
+        .end(data)
     } catch (err: Throwable) {
       future.fail(err)
     }

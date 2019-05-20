@@ -52,14 +52,14 @@ class BraidVerticle(
 
   private fun setupWebserver(router: Router, startFuture: Future<Void>) {
     vertx.createHttpServer(config.httpServerOptions.withCompatibleWebsockets())
-      .requestHandler(router::accept)
+      .requestHandler(router)
       .listen(config.port) {
         if (it.succeeded()) {
           log.info("Braid service mounted on ${config.protocol}://localhost:${config.port}${config.rootPath}")
         } else {
           log.error("failed to start server: ${it.cause().message}")
         }
-        startFuture.completer().handle(it.mapEmpty())
+        startFuture.handle(it.mapEmpty())
       }
   }
 

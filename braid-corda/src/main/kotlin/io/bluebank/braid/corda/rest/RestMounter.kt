@@ -80,7 +80,6 @@ class RestMounter(
       )
     )
   }
-  private val userSessionHandler by lazy { UserSessionHandler.create(config.authProvider) }
   private val basicAuthHandler by lazy { BasicAuthHandler.create(config.authProvider) }
   private val unprotectedRouter = Router.router(vertx)
   private val protectedRouter: Router = Router.router(vertx)
@@ -165,7 +164,6 @@ class RestMounter(
       AuthSchema.Basic -> {
         protectedRouter.route().handler(cookieHandler)
         protectedRouter.route().handler(sessionHandler)
-        protectedRouter.route().handler(userSessionHandler)
         protectedRouter.route().handler(basicAuthHandler)
       }
       AuthSchema.Token -> {

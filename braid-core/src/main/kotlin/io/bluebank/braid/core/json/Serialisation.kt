@@ -16,12 +16,14 @@
 package io.bluebank.braid.core.json
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.vertx.core.json.Json
+import java.math.BigDecimal
 
 object BraidJacksonInit {
   init {
@@ -33,6 +35,14 @@ object BraidJacksonInit {
         .addSerializer(
           JsonRPCResultResponse::class.java,
           JsonRPCResultResponseSerializer()
+        )
+        .addSerializer(
+          BigDecimal::class.java,
+          com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance
+        )
+        .addDeserializer(
+          BigDecimal::class.java,
+          NumberDeserializers.BigDecimalDeserializer()
         )
     ).forEach {
       Json.mapper.registerModule(it)
