@@ -139,6 +139,10 @@ class BraidServiceProxy {
         return invokeForPromise(method, args);
       }
     }
+
+    that.close = function() {
+      client.close();
+    }
   }
 }
 
@@ -155,8 +159,12 @@ class BraidServiceProxy {
 export default function(url, onOpen, onClose, onError, transportOptions) {
   return new Proxy(new BraidServiceProxy(url, onOpen, onClose, onError, transportOptions), {
     get: (target, propKey) => {
-      return function (...args) {
-        return target.invoke(propKey, args)
+      if (propKey == "close") {
+        return target.close;
+      } else {
+        return function (...args) {
+          return target.invoke(propKey, args)
+        }
       }
     }
   });

@@ -285,6 +285,9 @@ export default class JsonRPC {
       return new CancellableInvocation(this, id, state);
     };
 
+    that.close = function() {
+      that.socket.close();
+    }
     // -- INITIALISATION --
 
     checkServiceExistsAndBootstrap();
