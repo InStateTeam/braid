@@ -204,7 +204,7 @@
                   <target>
                     <exec executable="npm" failonerror="true">
                       <arg value="version"/>
-                      <arg value="${project.version}-${timestamp}"/>
+                      <arg value="${project.version}"/>
                       <arg value="--allow-same-version"/>
                     </exec>
                     <exec executable="npm" failonerror="true">
