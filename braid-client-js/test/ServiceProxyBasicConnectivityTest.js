@@ -24,6 +24,7 @@ describe('ServiceProxyBasicConnectivityTest', () => {
       proxy.login({username: 'admin', password: 'admin'})
         .then(() => proxy.add(5, 6))
         .then(result => assert.equal(11, result))
+        .finally(() => proxy.close())
         .then(done, done)
     })
   }).timeout(0);
@@ -39,6 +40,7 @@ describe('ServiceProxyBasicConnectivityTest', () => {
           assert.equal(err.codeDescription, "Server error");
           assert.equal(err.message, "I threw an exception");
         })
+        .finally(() => proxy.close())
         .then(done, done)
     });
   }).timeout(0);
@@ -54,6 +56,7 @@ describe('ServiceProxyBasicConnectivityTest', () => {
           assert.equal(err.codeDescription, "Method not found");
           assert.ok(err.message.includes('unknownMethod'));
         })
+        .finally(() => proxy.close())
         .then(done, done)
     });
   }).timeout(0);

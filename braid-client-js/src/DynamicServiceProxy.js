@@ -143,6 +143,10 @@ export default class DynamicProxy {
 
     function bind(item) {
       const name = item.name;
+      if (item.name == "close") {
+        console.warn(`service ${serviceName} declares a reserved method: close. You won't be able to call this service method`);
+        return;
+      }
       if (!that.hasOwnProperty(name)) {
         const fn = function (...args) {
           return invoke(name, ...args)
@@ -219,6 +223,10 @@ export default class DynamicProxy {
         }).join('\n')
     }
     // --- PUBLIC FUNCTIONS ---
+
+    that.close = function() {
+      proxy.close();
+    }
 
     // --- INITIALISATION ---
   }

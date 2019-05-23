@@ -32,6 +32,7 @@ describe('ServiceProxyAuthTest', () => {
           assert.equal(err.codeDescription, "Server error");
           assert.ok(err.message.includes('not authenticated'));
         })
+        .finally(() => proxy.close())
         .then(done, done)
     })
   }).timeout(0);
@@ -47,6 +48,7 @@ describe('ServiceProxyAuthTest', () => {
           assert.equal(err.codeDescription, "Server error");
           assert.ok(err.message.includes('failed to authenticate'));
         })
+        .finally(() => proxy.close())
         .then(done, done)
     })
   }).timeout(0);
