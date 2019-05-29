@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-image: dazraf/build-tools:0.0.1
+# image: dazraf/build-tools:0.0.1
 
 # PLEASE NOTE!
 # This project, for historical reasons uses a combination of maven and gradle
@@ -39,12 +39,11 @@ before_script:
 - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
 - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
 
-
-cache:
-  paths:
-    - $CI_PROJECT_DIR/.m2/repository
-    - .gradle/wrapper
-    - .gradle/caches
+# cache:
+#   paths:
+#     - $CI_PROJECT_DIR/.m2/repository
+#     - .gradle/wrapper
+#     - .gradle/caches
 
 stages:
   - build
@@ -71,6 +70,8 @@ build:
   only:
     - master
     - /^[0-9]+-.*$/
+  tags:
+    - script-maven
 
 deploy:
   stage: snapshot_release
@@ -78,6 +79,8 @@ deploy:
     - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
+  tags:
+    - script-maven
 
 release:
   stage: release
@@ -89,3 +92,5 @@ release:
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/
+  tags:
+    - script-maven
