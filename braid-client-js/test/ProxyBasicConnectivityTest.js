@@ -25,6 +25,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
         .then(result => {
           assert.ok(result.includes(echoParam))
         })
+        .finally(() => proxy.close())
         .then(done, done)
     })
   }).timeout(0)
@@ -46,6 +47,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
             }
           }
         })
+        .finally(() => proxy.close())
         .then(done, done)
     })
   }).timeout(0)
@@ -56,6 +58,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
         if (!cancellable.cancelled()) {
           cancellable.cancel();
         }
+        proxy.close()
         done()
       }, done, () => {
       });
@@ -70,6 +73,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
       }, done, () => {
         console.log("items received", items);
         assert.deepEqual(items, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "messages should match this order")
+        proxy.close();
         done();
       });
     });
@@ -83,7 +87,8 @@ describe('braid-corda basic connectivity and method invocation', () => {
       }, err => {
         assert.equal(err.message, "boom");
         console.log("items received", items);
-        assert.deepEqual(items, [0, 1, 2, 3, 4], "messages should have the right order")
+        assert.deepEqual(items, [0, 1, 2, 3, 4], "messages should have the right order");
+        proxy.close();
         done();
       }, () => {
         assert.fail("expected for the stream to fail")
@@ -97,6 +102,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
         .then(result => {
           console.log("dao created", result);
         })
+        .finally(() => proxy.close())
         .then(done, done)
        });
   }).timeout(0);

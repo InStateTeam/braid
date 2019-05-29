@@ -103,6 +103,10 @@ export class Proxy {
       requiredConnections = serviceNames.length;
       for (let idx = 0; idx < serviceNames.length; ++idx) {
         const serviceName = serviceNames[idx];
+        if (serviceName == "close") {
+          console.warn(`service ${serviceName} uses a restricted name. this service will not be accessible`)
+          continue;
+        }
         that[serviceName] = new DynamicProxy(config, serviceName, onInternalOpen, onInternalClose, onInternalError, options);
       }
       clearCredentials();
@@ -113,6 +117,13 @@ export class Proxy {
     }
 
     // --- PUBLIC FUNCTIONS ---
+    that.close = function() {
+      for (const key in that) {
+        if (that.hasOwnProperty(key) && key !== "close") {
+          that[key].close()
+        }
+      }
+    };
 
     // --- INITIALISATION ---
     bootstrap();
