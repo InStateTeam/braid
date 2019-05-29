@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("DEPRECATION")
+
 package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.BraidConfig
@@ -201,6 +203,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
   @Suppress("MemberVisibilityCanBePrivate")
   fun login(request: LoginRequest): String {
     if (request == LoginRequest("sa", "admin")) {
+      @Suppress("DEPRECATION")
       return jwtAuth.generateToken(
         JsonObject().put("user", request.user),
         JWTOptions().setExpiresInMinutes(24 * 60)
@@ -212,6 +215,7 @@ class TestServiceApp(port: Int, private val service: TestService) {
 
   private fun createAuthProvider(vertx: Vertx): AuthProvider {
     ensureJWTKeyStoreExists()
+    @Suppress("DEPRECATION")
     return JWTAuth.create(
       vertx, JsonObject().put(
         "keyStore", JsonObject()

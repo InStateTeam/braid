@@ -19,11 +19,16 @@ import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.socket.findConsecutiveFreePorts
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
-import net.corda.testing.driver.DriverDSL
-import net.corda.testing.driver.DriverParameters
-import net.corda.testing.driver.NodeHandle
-import net.corda.testing.driver.PortAllocation.Incremental
-import net.corda.testing.driver.driver
+import net.corda.testing.driver.*
+import java.net.ServerSocket
+
+class DynamicPortAllocation : PortAllocation() {
+  override fun nextPort(): Int {
+    return ServerSocket(0).use {
+      it.localPort
+    }
+  }
+}
 
 class CordaNet(
   private val cordaStartingPort: Int = 5005,
@@ -34,6 +39,7 @@ class CordaNet(
     init {
       LogInitialiser.init()
     }
+
     @JvmStatic
     fun main(args: Array<String>) {
       CordaNet(5005, 8080).withCluster {
@@ -49,17 +55,16 @@ class CordaNet(
 
   fun withCluster(callback: DriverDSL.() -> Unit) {
     val parties = listOf("PartyA")
+    val portAllocation = DynamicPortAllocation()
 
     // setup braid ports per party
     val systemProperties = setupBraidPortsPerParty(parties, braidStartingPort)
-
-    println("Starting cluster with Corda base port $cordaStartingPort and Braid base port $braidStartingPort")
 
     driver(
       DriverParameters(
         isDebug = false,
         startNodesInProcess = true,
-        portAllocation = Incremental(cordaStartingPort),
+        portAllocation = portAllocation,
         systemProperties = systemProperties,
         extraCordappPackagesToScan = listOf(
           "net.corda.finance",
@@ -77,11 +82,14 @@ class CordaNet(
     }
   }
 
+  fun braidPortForParty(party: String) : Int {
+    return System.getProperty("braid.$party.port")?.toInt() ?: error("could not locate braid port for $party")
+  }
+
   private fun DriverDSL.startupNodes(parties: List<String>): List<NodeHandle> {
+    // start the nodes sequentially, to minimise port clashes
     return parties.map { party ->
-      startNode(providedName = CordaX500Name(party, "London", "GB"))
-    }.map {
-      it.getOrThrow()
+      startNode(providedName = CordaX500Name(party, "London", "GB")).getOrThrow()
     }
   }
 
@@ -89,15 +97,16 @@ class CordaNet(
     parties: List<String>,
     braidStartingPort: Int
   ): Map<String, String> {
-    val result = with(System.getProperties()) {
-      parties
-        .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
-        .toMap()
-    }
-    result.forEach {
-      System.setProperty(it.key, it.value)
-    }
-    return result
+    return parties
+      .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
+      .toMap()
+      .apply {
+        println("braid port map")
+        forEach {
+          println("${it.key} = ${it.value}")
+          System.setProperty(it.key, it.value)
+        }
+      }
   }
 }
 

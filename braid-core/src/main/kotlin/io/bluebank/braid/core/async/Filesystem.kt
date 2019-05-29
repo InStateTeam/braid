@@ -20,17 +20,17 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.file.FileSystem
 
 fun FileSystem.readFile(path: String): Future<Buffer> {
-  return withFuture { readFile(path, it.completer()) }
+  return withFuture { readFile(path, it) }
 }
 
 fun FileSystem.writeFile(path: String, byteArray: ByteArray): Future<Unit> {
-  return withFuture<Void> { writeFile(path, Buffer.buffer(byteArray), it.completer()) }.mapUnit()
+  return withFuture<Void> { writeFile(path, Buffer.buffer(byteArray), it) }.mapUnit()
 }
 
 fun FileSystem.copy(from: String, to: String): Future<Unit> {
-  return withFuture<Void> { copy(from, to, it.completer()) }.mapUnit()
+  return withFuture<Void> { copy(from, to, it) }.mapUnit()
 }
 
 fun FileSystem.delete(path: String): Future<Unit> {
-  return withFuture<Void> { delete(path, it.completer()) }.mapUnit()
+  return withFuture<Void> { delete(path, it) }.mapUnit()
 }

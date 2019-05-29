@@ -121,6 +121,7 @@ class SwaggerTest {
       .name(CreateAccountRequest::class.simpleName)
     bodyParam.required = true
 
+    @Suppress("DEPRECATION")
     swagger.path(
       "/api/accounts", Path().post(
         Operation()

@@ -122,7 +122,7 @@ class JsonRPCVerticle(
 
   private fun setupWebserver(router: Router, startFuture: Future<Void>) {
     vertx.createHttpServer(httpServerOptions.withCompatibleWebsockets())
-      .requestHandler(router::accept)
+      .requestHandler(router)
       .listen(port) {
         if (it.succeeded()) {
           logger.info("started on port $port")

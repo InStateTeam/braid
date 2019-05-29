@@ -42,7 +42,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) :
     fun clearScriptsFolder(vertx: Vertx): Future<Unit> {
       val future = Future.future<Void>()
 
-      vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future.completer())
+      vertx.fileSystem().deleteRecursive(SCRIPTS_PATH, true, future)
       return future
         .map { Unit }
         .otherwise { Unit }

@@ -1,6 +1,6 @@
 {
   "name": "braid-client",
-  "version": "3.3.2-SNAPSHOT",
+  "version": "4.1.0-SNAPSHOT",
   "description": "service proxies for Braid JsonRPC services",
   "main": "dist/Proxy.js",
   "repository": "https://gitlab.com/bluebank/braid",

@@ -68,14 +68,14 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
 
     val port = 8080
     vertx.createHttpServer()
-        .requestHandler(router::accept)
+        .requestHandler(router)
         .listen(port) {
           if (it.succeeded()) {
             logger.info("started on http://localhost:$port")
           } else {
             logger.error("failed to startup", it.cause())
           }
-          startFuture.completer().handle(it.mapEmpty<Void>())
+          startFuture.handle(it.mapEmpty<Void>())
         }
 
   }

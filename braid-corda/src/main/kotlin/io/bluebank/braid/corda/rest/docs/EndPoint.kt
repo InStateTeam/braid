@@ -207,6 +207,7 @@ abstract class EndPoint(
         }
 
       }
+      @Suppress("DEPRECATION")
       operation
         .produces(produces)
         .defaultResponse(Response().schema(responseSchema).description("default response"))

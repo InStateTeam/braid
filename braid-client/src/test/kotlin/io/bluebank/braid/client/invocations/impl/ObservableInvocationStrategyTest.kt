@@ -278,7 +278,7 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -322,7 +322,7 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -372,7 +372,7 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
 
     assertEquals(
       0,
@@ -420,7 +420,7 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -443,7 +443,7 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,

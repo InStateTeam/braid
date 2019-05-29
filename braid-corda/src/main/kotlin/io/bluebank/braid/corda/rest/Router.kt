@@ -125,12 +125,6 @@ private data class ParseResult(val found: Boolean, val result: Any? = null) {
   }
 }
 
-private fun parser(fn: (KParameter, RoutingContext) -> ParseResult) : (KParameter, RoutingContext) -> ParseResult {
-  return { parameter, context ->
-    fn(parameter, context)
-  }
-}
-
 private fun ((KParameter, RoutingContext) -> ParseResult).then(fn: (KParameter, RoutingContext) -> ParseResult) : (KParameter, RoutingContext) -> ParseResult {
   return { parameter, context ->
     val result = this(parameter, context)
@@ -140,7 +134,6 @@ private fun ((KParameter, RoutingContext) -> ParseResult).then(fn: (KParameter, 
     }
   }
 }
-
 
 private val parameterParser = ::parsePathParameter
   .then(::parseQueryParameter)
