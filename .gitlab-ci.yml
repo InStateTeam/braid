@@ -44,6 +44,12 @@ stages:
   - build
   - snapshot_release
   - release
+  
+cache:
+  paths:
+    - $CI_PROJECT_DIR/.m2/repository
+    - .gradle/wrapper
+    - .gradle/caches
 
 build:
   stage: build
