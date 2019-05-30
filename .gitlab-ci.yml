@@ -65,7 +65,8 @@ build:
     - braid-core/target
     - braid-quickstart/target
     - braid-standalone-server/target
-  tags: docker
+  tags:
+    - docker
   only:
     - master
     - patch-1
