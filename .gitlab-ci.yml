@@ -39,12 +39,6 @@ before_script:
 - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
 - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
 
-cache:
-  paths:
-    - $CI_PROJECT_DIR/.m2/repository
-    - .gradle/wrapper
-    - .gradle/caches
-
 stages:
   - build
   - snapshot_release
@@ -69,6 +63,7 @@ build:
     - braid-standalone-server/target
   only:
     - master
+    - patch-1
     - /^[0-9]+-.*$/
 
 deploy:
