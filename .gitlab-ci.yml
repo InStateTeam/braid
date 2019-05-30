@@ -87,5 +87,5 @@ release:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
   only:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
 
