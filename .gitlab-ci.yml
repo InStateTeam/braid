@@ -29,6 +29,7 @@ variables:
   MAVEN_CLI_OPTS: "--threads 1C --batch-mode --errors --fail-at-end --show-version"
 
 before_script:
+- echo TIMESTAMP $(date)
 - npm set registry $NPM_REPO
 - npm set $NPM_CREDENTIALS
 - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -47,8 +48,11 @@ stages:
 build:
   stage: build
   script:
+    - echo TIMESTAMP $(date)
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
+    - echo TIMESTAMP $(date)
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+    - echo TIMESTAMP $(date)
   artifacts:
     name: "javascript-logs-$CI_JOB_NAME"
     paths:
@@ -61,6 +65,7 @@ build:
     - braid-core/target
     - braid-quickstart/target
     - braid-standalone-server/target
+  tags: docker
   only:
     - master
     - patch-1
