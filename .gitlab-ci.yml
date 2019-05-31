@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+# Moved to runner with dazraf/build-tools as the base image
 #image: dazraf/build-tools:0.0.3
 
 # PLEASE NOTE!
@@ -24,9 +25,9 @@
 # placing it under this projects directory structure
 # therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
 
-#variables:
-#  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
-#  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+variables:
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
+  MAVEN_CLI_OPTS: "--threads 1C --batch-mode --errors --fail-at-end --show-version"
 
 before_script:
 - npm set registry $NPM_REPO
@@ -43,7 +44,8 @@ stages:
   - build
   - snapshot_release
   - release
-  
+
+# Use runner's local cache
 #cache:
 #  paths:
 #    - $CI_PROJECT_DIR/.m2/repository
@@ -53,11 +55,8 @@ stages:
 build:
   stage: build
   script:
-    - echo TIMESTAMP $(date)
-    - mvn -T 1C clean install
-    - echo TIMESTAMP $(date)
+    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
-    - echo TIMESTAMP $(date)
   artifacts:
     name: "javascript-logs-$CI_JOB_NAME"
     paths:
@@ -80,7 +79,7 @@ build:
 deploy:
   stage: snapshot_release
   script:
-    - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -P release
+    - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -nsu -P release
   only:
     - master
 
@@ -91,7 +90,7 @@ release:
   when: manual
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
+    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -nsu -P release,npm-release
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
 
