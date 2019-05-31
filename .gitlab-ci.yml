@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-image: dazraf/build-tools:0.0.3
+#image: dazraf/build-tools:0.0.3
 
 # PLEASE NOTE!
 # This project, for historical reasons uses a combination of maven and gradle
