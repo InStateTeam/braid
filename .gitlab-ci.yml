@@ -24,17 +24,16 @@ image: dazraf/build-tools:0.0.3
 # placing it under this projects directory structure
 # therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
 
-variables:
-  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+#variables:
+#  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
+#  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
-- echo TIMESTAMP $(date)
 - npm set registry $NPM_REPO
 - npm set $NPM_CREDENTIALS
-- export GRADLE_USER_HOME=`pwd`/.gradle
-- mkdir -p ~/.m2/repository
-- cp maven/settings.xml ~/.m2/settings.xml
+#- export GRADLE_USER_HOME=`pwd`/.gradle
+#- mkdir -p ~/.m2/repository
+#- cp maven/settings.xml ~/.m2/settings.xml
 - rm -rf ~/.gnupg
 - gpg --version
 - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
@@ -45,17 +44,17 @@ stages:
   - snapshot_release
   - release
   
-cache:
-  paths:
-    - $CI_PROJECT_DIR/.m2/repository
-    - .gradle/wrapper
-    - .gradle/caches
+#cache:
+#  paths:
+#    - $CI_PROJECT_DIR/.m2/repository
+#    - .gradle/wrapper
+#    - .gradle/caches
 
 build:
   stage: build
   script:
     - echo TIMESTAMP $(date)
-    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
+    - mvn clean install
     - echo TIMESTAMP $(date)
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
     - echo TIMESTAMP $(date)
@@ -72,7 +71,7 @@ build:
     - braid-quickstart/target
     - braid-standalone-server/target
   tags:
-    - docker
+    - shell
   only:
     - master
     - patch-1
