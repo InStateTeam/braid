@@ -54,7 +54,7 @@ build:
   stage: build
   script:
     - echo TIMESTAMP $(date)
-    - mvn clean install
+    - mvn -T 1C clean install
     - echo TIMESTAMP $(date)
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
     - echo TIMESTAMP $(date)
