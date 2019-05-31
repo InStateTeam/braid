@@ -71,7 +71,7 @@ build:
     - braid-quickstart/target
     - braid-standalone-server/target
   tags:
-    - shell
+    - build-tools
   only:
     - master
     - patch-1
