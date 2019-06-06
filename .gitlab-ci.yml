@@ -54,6 +54,7 @@ stages:
 
 build:
   stage: build
+  image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
@@ -70,7 +71,7 @@ build:
     - braid-quickstart/target
     - braid-standalone-server/target
   tags:
-    - build-tools
+    - docker
   only:
     - master
     - patch-1
@@ -78,19 +79,25 @@ build:
 
 deploy:
   stage: snapshot_release
+  image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -P release
+  tags:
+    - docker
   only:
     - master
 
 release:
   stage: release
+  image: dazraf/build-tools:latest
   variables:
     BRAID_VERSION: $CI_COMMIT_REF_NAME
   when: manual
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
+  tags:
+    - docker
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
 
