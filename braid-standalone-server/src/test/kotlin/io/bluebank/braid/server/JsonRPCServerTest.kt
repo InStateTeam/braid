@@ -141,6 +141,7 @@ class JsonRPCServerTest {
     val id = 1L
     val result = future<Buffer>()
     try {
+      @Suppress("DEPRECATION")
       client.websocket(url, { socket ->
         socket.handler { response ->
           try {
@@ -169,10 +170,6 @@ class JsonRPCServerTest {
       result.fail(err)
     }
     return result
-  }
-
-  private fun httpGetAsJsonArray(url: String): Future<JsonArray> {
-    return httpGet(url).map { JsonArray(it) }
   }
 
   private fun httpGetAsJsonObject(url: String): Future<JsonObject> {

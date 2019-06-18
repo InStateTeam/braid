@@ -68,24 +68,24 @@ class JsonRPCMounterTest {
   }
 
   @Test(expected = JsonRPCException::class)
-  fun `that we can execute something that throws`(context: TestContext) {
+  fun `that we can execute something that throws`() {
     socket.invoke(service::fails)
   }
 
   @Test(expected = JsonRPCException::class)
-  fun `that we can execute something async that throws`(context: TestContext) {
+  fun `that we can execute something async that throws`() {
     socket.invoke(service::failsAsync).getOrThrow()
   }
 
   @Test
-  fun `that we can execute a stream`(context: TestContext) {
+  fun `that we can execute a stream`() {
     val result = socket.invoke(service::someStream).toList().map { it.toList() }.toFuture().getOrThrow()
     assertEquals(listOf(1, 2, 3), result)
   }
 
   @Ignore("see issue #84")
   @Test
-  fun `that executing a second invocation with the same id as an active invocation fails`(context: TestContext) {
+  fun `that executing a second invocation with the same id as an active invocation fails`() {
     val id = socket.nextId()
     socket.invoke(id, service::block) // request one will prepare the service and block
     service.waitForServiceReady()
@@ -191,12 +191,7 @@ class ControlledService {
   }
 
   fun someStream() : Observable<Int> {
-    return Observable.create<Int> {
-      it.onNext(1)
-      it.onNext(2)
-      it.onNext(3)
-      it.onCompleted()
-    }.subscribeOn(Schedulers.computation())
+    return Observable.just(1, 2, 3).subscribeOn(Schedulers.computation())
   }
 
   fun cancellableStream() : Observable<Int> {

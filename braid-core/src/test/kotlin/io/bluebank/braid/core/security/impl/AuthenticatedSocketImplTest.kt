@@ -33,9 +33,12 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
-import io.vertx.ext.auth.jwt.JWTOptions
+import io.vertx.ext.auth.jwt.JWTAuthOptions
+import io.vertx.ext.jwt.JWTOptions
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
+import io.vertx.kotlin.ext.auth.KeyStoreOptions
+import io.vertx.kotlin.ext.auth.keyStoreOptionsOf
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,12 +68,8 @@ class AuthenticatedSocketImplTest {
     }
   }
   private val jwtAuth: JWTAuth = JWTAuth.create(
-    vertx, JsonObject().put(
-      "keyStore", JsonObject()
-        .put("path", tempJKS.absolutePath)
-        .put("type", "jceks")
-        .put("password", jwtSecret)
-    )
+    vertx,
+    JWTAuthOptions().setKeyStore(keyStoreOptionsOf(jwtSecret, tempJKS.absolutePath, "jceks"))
   )
 
   private val authSocket = AuthenticatedSocket.create(jwtAuth)
@@ -149,8 +148,9 @@ class AuthenticatedSocketImplTest {
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = "bad param"),
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = listOf<String>()),
       JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = listOf("bad param"))
-      )
-      requests.map { Json.encodeToBuffer(it) }.forEach { authSocket.onData(predecessor, it) }
+    )
+    requests.map { Json.encodeToBuffer(it) }
+      .forEach { authSocket.onData(predecessor, it) }
 
     assertEquals(requests.size, predecessor.writeCount)
   }
@@ -160,21 +160,31 @@ class AuthenticatedSocketImplTest {
     val predecessor = MockSocket<Buffer, Buffer>()
     predecessor.addResponseListener {
       val jo = JsonObject(it)
-      when(jo.getInteger("id")) {
-        4 -> Json.decodeValue(it, JsonRPCErrorResponse::class.java) // invocation 4 should be unsuccessful because logged out
+      when (jo.getInteger("id")) {
+        4 -> Json.decodeValue(
+          it,
+          JsonRPCErrorResponse::class.java
+        ) // invocation 4 should be unsuccessful because logged out
         else -> Json.decodeValue(it, JsonRPCResultResponse::class.java)
       }
     }
 
     predecessor.addListener(authSocket)
     var hasEnded = false
-    authSocket.addListener(object: SocketListener<Buffer, Buffer> {
+    authSocket.addListener(object : SocketListener<Buffer, Buffer> {
       override fun onRegister(socket: Socket<Buffer, Buffer>) {
       }
 
       override fun onData(socket: Socket<Buffer, Buffer>, item: Buffer) {
         val request = Json.decodeValue(item, JsonRPCRequest::class.java)
-        socket.write(Json.encodeToBuffer(JsonRPCResultResponse(id = request.id, result = "OK")))
+        socket.write(
+          Json.encodeToBuffer(
+            JsonRPCResultResponse(
+              id = request.id,
+              result = "OK"
+            )
+          )
+        )
       }
 
       override fun onEnd(socket: Socket<Buffer, Buffer>) {
@@ -185,9 +195,16 @@ class AuthenticatedSocketImplTest {
     fun AuthenticatedSocket.dataHandler(request: JsonRPCRequest) {
       this.onData(predecessor, Json.encodeToBuffer(request))
     }
+
     val token = jwtAuth.generateToken(JsonObject(), JWTOptions())
 
-    authSocket.dataHandler(JsonRPCRequest(id = 1, method = LOGIN_METHOD, params = listOf(JWTLoginPayload(token))))
+    authSocket.dataHandler(
+      JsonRPCRequest(
+        id = 1,
+        method = LOGIN_METHOD,
+        params = listOf(JWTLoginPayload(token))
+      )
+    )
     authSocket.dataHandler(JsonRPCRequest(id = 2, method = "someMethod", params = null))
     authSocket.dataHandler(JsonRPCRequest(id = 3, method = LOGOUT_METHOD, params = null))
     authSocket.dataHandler(JsonRPCRequest(id = 4, method = "someMethod", params = null))

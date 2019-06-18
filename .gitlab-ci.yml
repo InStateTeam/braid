@@ -76,6 +76,8 @@ build:
     - master
     - patch-1
     - /^[0-9]+-.*$/
+  tags:
+    - build-tools
 
 deploy:
   stage: snapshot_release
@@ -86,6 +88,8 @@ deploy:
     - docker
   only:
     - master
+  tags:
+    - build-tools
 
 release:
   stage: release
@@ -100,4 +104,6 @@ release:
     - docker
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
+  tags:
+    - build-tools
 
