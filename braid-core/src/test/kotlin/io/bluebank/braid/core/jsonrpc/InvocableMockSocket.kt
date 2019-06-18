@@ -104,7 +104,10 @@ class InvocableMockSocket : MockSocket<JsonRPCRequest, JsonRPCResponse>() {
           else -> throw RuntimeException("unknown type $it")
         }
       }
-      .map { it as T }
+      .map {
+        @Suppress("UNCHECKED_CAST")
+        it as T
+      }
   }
   private fun matchesId(
     it: JsonRPCResponse,
