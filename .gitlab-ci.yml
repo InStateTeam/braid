@@ -70,6 +70,8 @@ build:
   only:
     - master
     - /^[0-9]+-.*$/
+  tags:
+    - build-tools
 
 deploy:
   stage: snapshot_release
@@ -77,6 +79,8 @@ deploy:
     - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests -P release
   only:
     - master
+  tags:
+    - build-tools
 
 release:
   stage: release
@@ -88,4 +92,6 @@ release:
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
+  tags:
+    - build-tools
 
