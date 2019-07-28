@@ -26,6 +26,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
+import java.net.URLDecoder
 import java.nio.ByteBuffer
 import javax.ws.rs.HeaderParam
 import javax.ws.rs.core.Context
@@ -194,7 +195,7 @@ private fun parseQueryParameter(parameter: KParameter, context: RoutingContext):
       val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
       // TODO: handle arrays
       if (queryParam != null) {
-        ParseResult(parameter.parseSimpleType(queryParam))
+        ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
       } else {
         ParseResult.NOT_FOUND
       }

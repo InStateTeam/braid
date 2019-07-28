@@ -18,10 +18,7 @@ package io.bluebank.braid.corda.rest.docs
 import io.bluebank.braid.corda.rest.Paths
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.ApiParam
-import io.swagger.models.parameters.BodyParameter
-import io.swagger.models.parameters.Parameter
-import io.swagger.models.parameters.PathParameter
-import io.swagger.models.parameters.QueryParameter
+import io.swagger.models.parameters.*
 import io.vertx.core.http.HttpMethod
 import java.lang.reflect.Type
 import javax.ws.rs.DefaultValue
@@ -73,16 +70,15 @@ class KEndPoint(
   }
 
   override fun mapPathParameters(): List<PathParameter> {
-    return pathParams.map { pathParam ->
-      val swaggerProperty = pathParam.type.getSwaggerProperty()
+    return pathParams.map { param ->
+      val swaggerProperty = param.type.getSwaggerProperty()
       val p = PathParameter()
-        .name(pathParam.name)
+        .name(param.name)
         .property(swaggerProperty)
         .type(swaggerProperty.type)
-      pathParam.findAnnotation<DefaultValue>()?.apply {
-        p.setDefaultValue(this.value)
-      }
-      p.required = true
+      applyDefaultValueAnnotation(param, p)
+      applyApiParamDocs(param, p)
+      applyRequiredAndVarArg(param, p)
       p
     }
   }
@@ -92,19 +88,47 @@ class KEndPoint(
       val q = QueryParameter()
         .name(param.name)
         .property(param.type.getSwaggerProperty())
-      param.findAnnotation<DefaultValue>()?.apply {
-        q.setDefaultValue(this.value)
-      }
-      q.required = true
-      if (param.isOptional) {
-        q.minItems = 0
-      }
-      if (param.isVararg) {
-        q.minItems = 0
-      }
+      applyDefaultValueAnnotation(param, q)
+      applyApiParamDocs(param, q)
+      applyRequiredAndVarArg(param, q)
       q
     }
   }
+
+  private fun <T:AbstractSerializableParameter<T>> applyDefaultValueAnnotation(
+    param: KParameter,
+    q: T
+  ) {
+    param.findAnnotation<DefaultValue>()?.apply {
+      if (value.isNotBlank()) q.setDefaultValue(value)
+    }
+  }
+
+  private fun <T:AbstractSerializableParameter<T>> applyApiParamDocs(
+    pathParam: KParameter,
+    p: T
+  ) {
+    pathParam.findAnnotation<ApiParam>()?.apply {
+      if (value.isNotBlank()) p.description(value)
+      if (name.isNotBlank()) p.name(name)
+      if (type.isNotBlank())  p.type(type)
+      if (example.isNotBlank()) p.example(example)
+    }
+  }
+
+  private fun <T:AbstractSerializableParameter<T>> applyRequiredAndVarArg(
+    param: KParameter,
+    p: T
+  ) {
+    p.required = !param.isOptional && !param.isVararg
+    p.minItems = if (param.isOptional || param.isVararg) {
+      0
+    } else {
+      p.minItems
+    }
+  }
+
+
 
   override fun mapBodyParameter(): BodyParameter? {
     return bodyParameter?.let {

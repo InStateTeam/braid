@@ -32,13 +32,14 @@ import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
+import net.corda.core.concurrent.CordaFuture
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
 import java.util.concurrent.ConcurrentHashMap
 
 @CordaService
-class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
+class TestBraidCordaService(private val serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
 
   companion object {
     private val log = loggerFor<TestBraidCordaService>()
@@ -64,6 +65,7 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
           .withPort(port)
           .withRestConfig(RestConfig().withPaths {
             get("/add", service::add)
+            post("/echo", ::doEcho)
           })
           .bootstrapBraid(serviceHub)
         // DOCEND 1
@@ -73,6 +75,9 @@ class TestBraidCordaService(serviceHub: AppServiceHub) : SingletonSerializeAsTok
     }
   }
 
+  fun doEcho(payload: String) : CordaFuture<String> {
+    return serviceHub.startFlow(EchoFlow(payload)).returnValue
+  }
   private fun getBraidPort(): Int {
     val property = "braid.$org.port"
     return System.getProperty(property)?.toInt() ?: when (org) {
