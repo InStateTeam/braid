@@ -27,7 +27,7 @@ buildscript {
         slf4j_version = '1.7.25'
         log4j_version = '2.11.2'
         corda_platform_version = '4'
-        braid_version = '4.1.0-SNAPSHOT'
+        braid_version = '4.1.1-SNAPSHOT'
     }
 
     repositories {
