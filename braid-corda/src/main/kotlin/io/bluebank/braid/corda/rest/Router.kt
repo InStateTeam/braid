@@ -254,7 +254,7 @@ internal fun KParameter.parameterName(): String? {
     ?: this.name
 }
 
-private fun String.nonEmptyOrNull() = when {
+internal fun String.nonEmptyOrNull() = when {
   this.isEmpty() -> null
   else -> this
 }

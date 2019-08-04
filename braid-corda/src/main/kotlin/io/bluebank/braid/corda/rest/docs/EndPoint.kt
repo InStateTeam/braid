@@ -15,6 +15,8 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.corda.rest.nonEmptyOrNull
+import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
 import io.swagger.converter.ModelConverters
@@ -88,7 +90,11 @@ abstract class EndPoint(
   abstract val parameterTypes: List<Type>
 
   private val apiOperation: ApiOperation? by lazy {
-    annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
+    annotations.filterIsInstance<ApiOperation>().firstOrNull()
+  }
+
+  private val methodDescription: MethodDescription? by lazy {
+    annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
 
   val responseContainer: String?
@@ -98,7 +104,9 @@ abstract class EndPoint(
 
   val description: String
     get() {
-      return apiOperation?.value ?: ""
+      return methodDescription?.description?.nonEmptyOrNull()
+        ?: apiOperation?.value?.nonEmptyOrNull()
+        ?: ""
     }
 
   open val produces: String
