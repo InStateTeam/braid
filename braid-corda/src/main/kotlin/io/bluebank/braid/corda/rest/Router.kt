@@ -28,7 +28,7 @@ import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
 import java.net.URLDecoder
 import java.nio.ByteBuffer
-import javax.ws.rs.HeaderParam
+import javax.ws.rs.*
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.HttpHeaders
 import kotlin.reflect.*
@@ -63,7 +63,10 @@ private fun <R> KCallable<R>.parseArguments(context: RoutingContext): Array<Any?
   return this.parameters.map { it.parseParameter(context) }.toTypedArray()
 }
 
-private fun parseBodyParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+private fun parseBodyParameter(
+  parameter: KParameter,
+  context: RoutingContext
+): ParseResult {
   return context.body.let { body ->
     val type = parameter.getType()
     when {
@@ -84,7 +87,8 @@ private fun parseBodyParameter(parameter: KParameter, context: RoutingContext): 
       }
       else -> {
         if (body != null && body.length() > 0) {
-          val constructType = Json.mapper.typeFactory.constructType(parameter.type.javaType)
+          val constructType =
+            Json.mapper.typeFactory.constructType(parameter.type.javaType)
           ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
         } else {
           ParseResult.NOT_FOUND
@@ -126,7 +130,7 @@ private data class ParseResult(val found: Boolean, val result: Any? = null) {
   }
 }
 
-private fun ((KParameter, RoutingContext) -> ParseResult).then(fn: (KParameter, RoutingContext) -> ParseResult) : (KParameter, RoutingContext) -> ParseResult {
+private fun ((KParameter, RoutingContext) -> ParseResult).then(fn: (KParameter, RoutingContext) -> ParseResult): (KParameter, RoutingContext) -> ParseResult {
   return { parameter, context ->
     val result = this(parameter, context)
     when {
@@ -146,14 +150,20 @@ private fun KParameter.parseParameter(context: RoutingContext): Any? {
   return parameterParser(this, context).result
 }
 
-private fun parseContextParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+private fun parseContextParameter(
+  parameter: KParameter,
+  context: RoutingContext
+): ParseResult {
   parameter.findAnnotation<Context>() ?: return ParseResult.NOT_FOUND
   // we always map and pass HttpHeaders
-  assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}")}
+  assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}") }
   return ParseResult(HttpHeadersImpl(context))
 }
 
-private fun parseHeaderParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+private fun parseHeaderParameter(
+  parameter: KParameter,
+  context: RoutingContext
+): ParseResult {
   val annotation = parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
   val headerName = annotation.value
   val values = context.request().headers().getAll(headerName)
@@ -162,17 +172,17 @@ private fun parseHeaderParameter(parameter: KParameter, context: RoutingContext)
     Set::class -> ParseResult(parameter.parseHeaderValuesAsSet(values))
     else -> {
       val result = parameter.type.parseHeaderValue(values.firstOrNull())
-      assert(parameter.type.isMarkedNullable || result != null) { "method requires header $headerName but it was missing"}
+      assert(parameter.type.isMarkedNullable || result != null) { "method requires header $headerName but it was missing" }
       ParseResult(true, result)
     }
   }
 }
 
-private fun KParameter.parseHeaderValuesAsList(values: List<String>) : List<*> {
+private fun KParameter.parseHeaderValuesAsList(values: List<String>): List<*> {
   return values.map { this.type.arguments.first().parseHeaderValue(it) }
 }
 
-private fun KParameter.parseHeaderValuesAsSet(values: List<String>) : Set<*> {
+private fun KParameter.parseHeaderValuesAsSet(values: List<String>): Set<*> {
   return parseHeaderValuesAsList(values).toSet()
 }
 
@@ -188,7 +198,10 @@ private fun KType.parseHeaderValue(value: String?): Any? {
   return Converter.convert(value, this)
 }
 
-private fun parseQueryParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+private fun parseQueryParameter(
+  parameter: KParameter,
+  context: RoutingContext
+): ParseResult {
   return when {
     parameter.isSimpleType() -> {
       val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
@@ -206,7 +219,10 @@ private fun parseQueryParameter(parameter: KParameter, context: RoutingContext):
   }
 }
 
-private fun parsePathParameter(parameter: KParameter, context: RoutingContext): ParseResult {
+private fun parsePathParameter(
+  parameter: KParameter,
+  context: RoutingContext
+): ParseResult {
   return when {
     parameter.isSimpleType() -> {
       val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
@@ -228,8 +244,19 @@ private fun KParameter.isSimpleType(): Boolean {
   return (Number::class.isSuperclassOf(k) || k == String::class || k == Boolean::class)
 }
 
-private fun KParameter.parameterName(): String? {
-  return this.findAnnotation<ApiParam>()?.name ?: this.name
+internal fun KParameter.parameterName(): String? {
+  return this.findAnnotation<ApiParam>()?.name?.nonEmptyOrNull()
+    ?: this.findAnnotation<QueryParam>()?.value?.nonEmptyOrNull()
+    ?: this.findAnnotation<PathParam>()?.value?.nonEmptyOrNull()
+    ?: this.findAnnotation<HeaderParam>()?.value?.nonEmptyOrNull()
+    ?: this.findAnnotation<FormParam>()?.value?.nonEmptyOrNull()
+    ?: this.findAnnotation<MatrixParam>()?.value?.nonEmptyOrNull()
+    ?: this.name
+}
+
+private fun String.nonEmptyOrNull() = when {
+  this.isEmpty() -> null
+  else -> this
 }
 
 private fun <R> KCallable<R>.validateParameters() {
@@ -245,14 +272,15 @@ private fun KParameter.validateHeaderParamAnnotation() {
   this.findAnnotation<HeaderParam>() ?: return
   val type = this.getType()
   when (type) {
-    String::class -> { }
+    String::class -> {
+    }
     List::class, Set::class -> {
 //      val args = this.type.arguments
 //      val argType = args.first().type!!.classifier as KClass<*>
 //      assert(argType == String::class) { "the collection type for parameter ${this.name} should be String" }
     }
     else -> {
-      error ("parameter ${this.name} is not a String?, List<String>, or Set<String>")
+      error("parameter ${this.name} is not a String?, List<String>, or Set<String>")
     }
   }
 }

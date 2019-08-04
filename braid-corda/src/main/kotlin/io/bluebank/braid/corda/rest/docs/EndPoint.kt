@@ -153,11 +153,12 @@ abstract class EndPoint(
       }
       else -> {
         val pathParameters = mapPathParameters() as List<Parameter>
+        val queryParams = mapQueryParameters()
         val bodyParameter = mapBodyParameter()
         if (bodyParameter != null) {
-          pathParameters + bodyParameter
+          pathParameters + queryParams + bodyParameter
         } else {
-          pathParameters
+          pathParameters + queryParams
         }
       }
     }

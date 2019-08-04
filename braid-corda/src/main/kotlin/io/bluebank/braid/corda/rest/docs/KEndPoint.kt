@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.rest.docs
 
 import io.bluebank.braid.corda.rest.Paths
+import io.bluebank.braid.corda.rest.parameterName
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.ApiParam
 import io.swagger.models.parameters.*
@@ -59,7 +60,7 @@ class KEndPoint(
   override val parameterTypes: List<Type>
     get() = parameters.map { it.type.javaType }
 
-  private val bodyParameter = parameters.subtract(pathParams).lastOrNull()
+  private val bodyParameter = parameters.subtract(pathParams).subtract(queryParams).lastOrNull()
 
   override fun toSwaggerParams(): List<Parameter> {
     return if (this.parameters.isEmpty()) {
@@ -73,7 +74,7 @@ class KEndPoint(
     return pathParams.map { param ->
       val swaggerProperty = param.type.getSwaggerProperty()
       val p = PathParameter()
-        .name(param.name)
+        .name(param.parameterName())
         .property(swaggerProperty)
         .type(swaggerProperty.type)
       applyDefaultValueAnnotation(param, p)
@@ -86,7 +87,7 @@ class KEndPoint(
   override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { param ->
       val q = QueryParameter()
-        .name(param.name)
+        .name(param.parameterName())
         .property(param.type.getSwaggerProperty())
       applyDefaultValueAnnotation(param, q)
       applyApiParamDocs(param, q)
@@ -113,6 +114,7 @@ class KEndPoint(
       if (name.isNotBlank()) p.name(name)
       if (type.isNotBlank())  p.type(type)
       if (example.isNotBlank()) p.example(example)
+      if (defaultValue.isNotBlank()) p.setDefaultValue(defaultValue)
     }
   }
 
