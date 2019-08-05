@@ -34,6 +34,7 @@ import io.swagger.models.properties.PropertyBuilder
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -154,7 +155,7 @@ abstract class EndPoint(
 
   protected open fun toSwaggerParams(): List<Parameter> {
     return when (method) {
-      HttpMethod.GET -> {
+      GET, HEAD, DELETE, CONNECT, OPTIONS  -> {
         val pathParams = mapPathParameters()
         val queryParams = mapQueryParameters()
         return pathParams + queryParams
