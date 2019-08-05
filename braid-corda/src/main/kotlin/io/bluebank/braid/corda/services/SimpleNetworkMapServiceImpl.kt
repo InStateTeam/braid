@@ -50,7 +50,6 @@ class SimpleNetworkMapServiceImpl(
     val node: SimpleNodeInfo,
     val previousNode: SimpleNodeInfo? = null
   ) {
-
     constructor(change: NetworkMapCache.MapChange) : this(
       when (change) {
         is NetworkMapCache.MapChange.Added -> MapChangeType.ADDED

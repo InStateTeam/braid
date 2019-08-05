@@ -71,7 +71,10 @@ data class RestConfig(
 
   internal fun withAuth(value: AuthProvider?) = this.copy(authProvider = value)
   @Suppress("unused")
-  fun withPaths(value: RestMounter.(Router) -> Unit) = this.copy(pathsInit = value)
+  fun withPaths(value: RestMounter.(Router) -> Unit) = this.copy(pathsInit = {
+    this.pathsInit(it)
+    value(it)
+  })
 
   @Suppress("unused")
   fun withAuthSchema(authSchema: AuthSchema) = this.copy(authSchema = authSchema)

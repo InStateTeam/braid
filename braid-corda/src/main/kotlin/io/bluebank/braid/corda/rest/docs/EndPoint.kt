@@ -15,6 +15,8 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.corda.rest.nonEmptyOrNull
+import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
 import io.swagger.converter.ModelConverters
@@ -32,6 +34,7 @@ import io.swagger.models.properties.PropertyBuilder
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -88,7 +91,11 @@ abstract class EndPoint(
   abstract val parameterTypes: List<Type>
 
   private val apiOperation: ApiOperation? by lazy {
-    annotations.filter { it is ApiOperation }.map { it as ApiOperation }.firstOrNull()
+    annotations.filterIsInstance<ApiOperation>().firstOrNull()
+  }
+
+  private val methodDescription: MethodDescription? by lazy {
+    annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
 
   val responseContainer: String?
@@ -98,7 +105,9 @@ abstract class EndPoint(
 
   val description: String
     get() {
-      return apiOperation?.value ?: ""
+      return methodDescription?.description?.nonEmptyOrNull()
+        ?: apiOperation?.value?.nonEmptyOrNull()
+        ?: ""
     }
 
   open val produces: String
@@ -146,18 +155,19 @@ abstract class EndPoint(
 
   protected open fun toSwaggerParams(): List<Parameter> {
     return when (method) {
-      HttpMethod.GET -> {
+      GET, HEAD, DELETE, CONNECT, OPTIONS  -> {
         val pathParams = mapPathParameters()
         val queryParams = mapQueryParameters()
         return pathParams + queryParams
       }
       else -> {
         val pathParameters = mapPathParameters() as List<Parameter>
+        val queryParams = mapQueryParameters()
         val bodyParameter = mapBodyParameter()
         if (bodyParameter != null) {
-          pathParameters + bodyParameter
+          pathParameters + queryParams + bodyParameter
         } else {
-          pathParameters
+          pathParameters + queryParams
         }
       }
     }

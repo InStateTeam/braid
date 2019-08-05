@@ -16,12 +16,15 @@
 package io.bluebank.braid.corda.rest.docs
 
 import io.bluebank.braid.corda.rest.Paths
+import io.bluebank.braid.corda.rest.parameterName
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.ApiParam
 import io.swagger.models.parameters.*
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.HttpMethod.*
 import java.lang.reflect.Type
 import javax.ws.rs.DefaultValue
+import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
@@ -42,14 +45,28 @@ class KEndPoint(
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
   }
 
-  private val pathParams = Paths.PATH_PARAMS_RE.findAll(path)
+  private val pathParamNames = Paths.PATH_PARAMS_RE.findAll(path)
     .map { it.groups[2]!!.value }
-    .map { paramName -> parameters.firstOrNull { it.name == paramName } }
-    .filter { it != null }
-    .map { it!! }
+
+  private val pathParams = pathParamNames
+    .map { paramName ->
+      parameters.firstOrNull { it.parameterName() == paramName }
+        ?: error("could not bind path parameter with name $paramName")
+    }
     .toList()
 
-  private val queryParams = parameters - pathParams
+  private val bodyParameter: KParameter? =
+    when (method) {
+      GET, HEAD, DELETE, CONNECT, OPTIONS -> null // can't have body parameters for this - everything that's not a path param, gets bound as query parameter
+      else -> parameters.subtract(pathParams).lastOrNull { it.findAnnotation<QueryParam>() == null }
+    }
+
+  private val queryParams = parameters.subtract(pathParams).let {
+    when (bodyParameter) {
+      null -> it
+      else -> it - bodyParameter
+    }
+  }
 
   override val consumes: String
     get() {
@@ -58,8 +75,6 @@ class KEndPoint(
 
   override val parameterTypes: List<Type>
     get() = parameters.map { it.type.javaType }
-
-  private val bodyParameter = parameters.subtract(pathParams).lastOrNull()
 
   override fun toSwaggerParams(): List<Parameter> {
     return if (this.parameters.isEmpty()) {
@@ -73,7 +88,7 @@ class KEndPoint(
     return pathParams.map { param ->
       val swaggerProperty = param.type.getSwaggerProperty()
       val p = PathParameter()
-        .name(param.name)
+        .name(param.parameterName())
         .property(swaggerProperty)
         .type(swaggerProperty.type)
       applyDefaultValueAnnotation(param, p)
@@ -86,7 +101,7 @@ class KEndPoint(
   override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { param ->
       val q = QueryParameter()
-        .name(param.name)
+        .name(param.parameterName())
         .property(param.type.getSwaggerProperty())
       applyDefaultValueAnnotation(param, q)
       applyApiParamDocs(param, q)
@@ -95,7 +110,7 @@ class KEndPoint(
     }
   }
 
-  private fun <T:AbstractSerializableParameter<T>> applyDefaultValueAnnotation(
+  private fun <T : AbstractSerializableParameter<T>> applyDefaultValueAnnotation(
     param: KParameter,
     q: T
   ) {
@@ -104,19 +119,20 @@ class KEndPoint(
     }
   }
 
-  private fun <T:AbstractSerializableParameter<T>> applyApiParamDocs(
+  private fun <T : AbstractSerializableParameter<T>> applyApiParamDocs(
     pathParam: KParameter,
     p: T
   ) {
     pathParam.findAnnotation<ApiParam>()?.apply {
       if (value.isNotBlank()) p.description(value)
       if (name.isNotBlank()) p.name(name)
-      if (type.isNotBlank())  p.type(type)
+      if (type.isNotBlank()) p.type(type)
       if (example.isNotBlank()) p.example(example)
+      if (defaultValue.isNotBlank()) p.setDefaultValue(defaultValue)
     }
   }
 
-  private fun <T:AbstractSerializableParameter<T>> applyRequiredAndVarArg(
+  private fun <T : AbstractSerializableParameter<T>> applyRequiredAndVarArg(
     param: KParameter,
     p: T
   ) {
@@ -127,8 +143,6 @@ class KEndPoint(
       p.minItems
     }
   }
-
-
 
   override fun mapBodyParameter(): BodyParameter? {
     return bodyParameter?.let {
