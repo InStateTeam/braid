@@ -6,6 +6,7 @@
 **/file-uploads
 **/pom.xml.versionsBackup
 **/package-lock.json
+logs
 build
 build/**
 **/.DS_Store

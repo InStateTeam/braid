@@ -112,6 +112,7 @@
     <module>braid-corda-client</module>
     <module>examples/example-cordapp</module>
     <module>braid-docs</module>
+    <module>braid-server</module>
   </modules>
 
   <distributionManagement>
