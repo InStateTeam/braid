@@ -17,7 +17,7 @@ package io.bluebank.braid.server
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import com.typesafe.config.ConfigFactory
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
@@ -31,8 +31,8 @@ private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
 
-    if (args.size != 3) {
-        throw IllegalArgumentException("Usage: Braid <node address> <username> <password>")
+    if (args.size != 4) {
+        throw IllegalArgumentException("Usage: Braid <node address> <username> <password> <port>")
     }
     val nodeAddress = NetworkHostAndPort.parse(args[0])
     val username = args[1]
@@ -43,7 +43,7 @@ fun main(args: Array<String>) {
     val cordaRPCOperations = connection.proxy
 
 
-    BraidServer(cordaRPCOperations).bootstrapBraid(8080)
+    BraidServer(cordaRPCOperations).bootstrapBraid(Integer.valueOf(args[3]))
             
 
     //connection.notifyServerAndClose()
