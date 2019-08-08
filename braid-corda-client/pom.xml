@@ -5,7 +5,7 @@
   <parent>
     <artifactId>braid</artifactId>
     <groupId>io.bluebank.braid</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.1.2-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
