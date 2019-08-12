@@ -52,7 +52,7 @@ class BraidServerTest     {
                     bankA.name
             )
 
-            Braid()
+          //  Braid().
         }
     }
 }
