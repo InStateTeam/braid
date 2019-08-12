@@ -27,6 +27,7 @@ import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
@@ -106,7 +107,7 @@ class BraidTest {
     }
 
     @Test
-    fun shouldListNodes(context: TestContext) {
+    fun shouldListNetworkNodes(context: TestContext) {
         val async = context.async()
 
         log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
@@ -126,6 +127,52 @@ class BraidTest {
                                         .or(equalTo(NetworkHostAndPort("localhost", 10000)))
                                         .or(equalTo(NetworkHostAndPort("localhost", 10008)))
                         )
+
+                        async.complete()
+                    }
+                }
+                .end()
+    }
+
+    @Test
+    fun shouldListSelf(context: TestContext) {
+        val async = context.async()
+
+        log.info("calling get: http://localhost:${port}/api/rest/network/nodes/self")
+        client.get(port, "localhost", "/api/rest/network/nodes/self")
+                .putHeader("Accept", "application/json; charset=utf8")
+                .exceptionHandler(context::fail)
+                .handler {
+                    context.assertEquals(200, it.statusCode())
+
+                    it.bodyHandler {
+                        val node = Json.decodeValue(it, SimpleNodeInfo::class.java)
+
+                        context.assertThat(node.addresses.size,equalTo(1))
+                        context.assertThat(node.addresses.get(0),equalTo(NetworkHostAndPort("localhost", 10004)))
+
+                        async.complete()
+                    }
+                }
+                .end()
+    }
+
+   @Test
+    fun shouldListNetworkNotaries(context: TestContext) {
+        val async = context.async()
+
+        log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+        client.get(port, "localhost", "/api/rest/network/notaries")
+                .putHeader("Accept", "application/json; charset=utf8")
+                .exceptionHandler(context::fail)
+                .handler {
+                    context.assertEquals(200, it.statusCode())
+
+                    it.bodyHandler {
+                        val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
+
+                        context.assertThat(nodes.size, equalTo(1))
+                        context.assertThat(nodes.get(0).name, equalTo(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH")))
 
                         async.complete()
                     }
