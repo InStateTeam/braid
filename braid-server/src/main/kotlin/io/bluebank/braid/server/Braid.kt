@@ -18,11 +18,13 @@ package io.bluebank.braid.server
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.utilities.NetworkHostAndPort
+import net.corda.nodeapi.internal.addShutdownHook
 
 
 data class Braid(
@@ -41,7 +43,7 @@ data class Braid(
     fun withNodeAddress(nodeAddress : String):Braid = this.copy(nodeAddress = nodeAddress)
 
 
-    fun startServer() : Future<String>? {
+    fun startServer() : Future<String> {
         val client = CordaRPCClient(NetworkHostAndPort.parse(nodeAddress))
         val connection = client.start(userName, password)
         val rpc = connection.proxy
@@ -59,12 +61,16 @@ data class Braid(
                                 get("/network/nodes", NetworkService(rpc)::nodes)
                                 get("/network/notaries", NetworkService(rpc)::notaries)
                                 get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+                                get("/flows", FlowService(rpc)::flows)
+                                get("/flows/:flow", FlowService(rpc)::flowDetails)
                             }
 //                            group("cordapps") {
 //                                post("/cordapps/obligation-cordapp/flows/issue-obligation", this@BraidServer::issueObligation)
 //                            }
                         })
                 .bootstrapBraid(null, result.completer())
+
+        addShutdownHook {  }
         return result
     }
     
@@ -80,12 +86,25 @@ fun main(args: Array<String>) {
         throw IllegalArgumentException("Usage: Braid <node address> <username> <password> <port>")
     }
 
+    val port = Integer.valueOf(args[3])
     Braid()
             .withNodeAddress(args[0])
             .withUserName(args[1])
             .withPassword(args[2])
-            .withPort(Integer.valueOf(args[3]))
+            .withPort(port)
             .startServer()
+            .recover {
+                log.error("Server failed to start:", it)
+                Future.succeededFuture("-1")
+            }
+            .apply {
+                log.info("Braid started on port:$port")
+                ProcessBuilder().command("open" , "http://localhost:$port/swagger.json")   .start()
+                ProcessBuilder().command("open" , "http://localhost:$port/api/rest/flows")   .start()
+            }
+
+
+
 
     //connection.notifyServerAndClose()
 }

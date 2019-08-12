@@ -15,15 +15,12 @@
  */
 package io.bluebank.braid.server.rpc
 
-import io.bluebank.braid.corda.BraidConfig
-import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.server.Braid
 import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.domain.toSimpleNodeInfo
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
-import io.vertx.core.http.HttpServerOptions
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
