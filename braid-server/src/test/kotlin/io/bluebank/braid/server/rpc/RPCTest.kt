@@ -13,29 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.server.rpc
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
-import io.bluebank.braid.corda.BraidConfig
-import io.bluebank.braid.corda.rest.RestConfig
-import io.bluebank.braid.corda.serialisation.AmountDeserializer
-import io.bluebank.braid.corda.serialisation.AmountSerializer
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.core.logging.loggerFor
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
-import io.vertx.core.AsyncResult
-import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.contracts.Amount
-import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
-import java.security.PublicKey
-import javax.ws.rs.QueryParam
 
 class RPCTest
 

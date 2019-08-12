@@ -42,8 +42,11 @@ data class Braid(
 
     fun withNodeAddress(nodeAddress : String):Braid = this.copy(nodeAddress = nodeAddress)
 
+    fun withNodeAddress(nodeAddress : NetworkHostAndPort):Braid = this.copy(nodeAddress = nodeAddress.toString())
+
 
     fun startServer() : Future<String> {
+        log.info("Attempting to connect Braid RPC to:" + nodeAddress + " username:" + userName)
         val client = CordaRPCClient(NetworkHostAndPort.parse(nodeAddress))
         val connection = client.start(userName, password)
         val rpc = connection.proxy
