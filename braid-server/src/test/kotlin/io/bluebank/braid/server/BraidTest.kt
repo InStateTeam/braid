@@ -23,6 +23,7 @@ import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
@@ -31,6 +32,7 @@ import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
+import net.corda.finance.AMOUNT
 import net.corda.nodeapi.internal.ArtemisMessagingComponent
 import net.corda.testing.core.TestIdentity
 import net.corda.testing.driver.DriverParameters
@@ -44,6 +46,8 @@ import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.URLEncoder
+import java.security.PublicKey
 import java.util.Arrays.asList
 
 
@@ -115,7 +119,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
@@ -143,7 +147,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
@@ -167,7 +171,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
@@ -191,7 +195,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val node = Json.decodeValue(it, SimpleNodeInfo::class.java)
@@ -214,7 +218,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
@@ -237,7 +241,7 @@ class BraidTest {
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode())
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
                         val nodes = Json.decodeValue(it, object : TypeReference<List<String>>() {})
@@ -247,11 +251,45 @@ class BraidTest {
                         context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise"))
                         context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise"))
                         context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
+                        context.assertThat(nodes,hasItem("net.corda.finance.flows.CashIssueFlow"))
 
                         async.complete()
                     }
                 }
                 .end()
+    }
+
+    @Test
+    fun shouldStartFlow(context: TestContext) {
+        val async = context.async()
+
+        // amount as query parameter
+        // issuerBankPartyRef as query parameter
+        // Party as body
+        val amount = URLEncoder.encode(Json.encode(AMOUNT(100, "GBP")))
+
+        val json = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyHW9wdnkysnj37Bq1wPe1WsrY4nDcvWJcjeCpxXHpDZwe\"}";
+
+        log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows")
+        client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow?amount=$amount&issuerBankPartyRef=23452345")
+                .putHeader("Accept", "application/json; charset=utf8")
+                .exceptionHandler(context::fail)
+                .setChunked(true)
+                .handler {
+                    context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+                    it.bodyHandler {
+                        val nodes = Json.decodeValue(it, object : TypeReference<List<String>>() {})
+
+                        context.assertThat(nodes.size, greaterThan(2))
+
+                        
+                        context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
+
+                        async.complete()
+                    }
+                }
+                .end(json)
     }
 
 }

@@ -21,6 +21,7 @@ import io.bluebank.braid.core.http.withErrorHandler
 import io.bluebank.braid.core.jsonrpc.Converter
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiParam
+import io.vertx.codegen.annotations.Nullable
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
@@ -68,31 +69,35 @@ private fun parseBodyParameter(
   context: RoutingContext
 ): ParseResult {
   return context.body.let { body ->
-    val type = parameter.getType()
-    when {
-      type.isSubclassOf(Buffer::class) -> {
-        ParseResult(body)
-      }
-      type.isSubclassOf(ByteArray::class) -> {
-        ParseResult(body.bytes)
-      }
-      type.isSubclassOf(ByteBuf::class) -> {
-        ParseResult(body.byteBuf)
-      }
-      type.isSubclassOf(ByteBuffer::class) -> {
-        ParseResult(ByteBuffer.wrap(body.bytes))
-      }
-      type == String::class -> {
-        ParseResult(body.toString())
-      }
-      else -> {
-        if (body != null && body.length() > 0) {
-          val constructType =
-            Json.mapper.typeFactory.constructType(parameter.type.javaType)
-          ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
-        } else {
-          ParseResult.NOT_FOUND
-        }
+    parseComplexType(parameter, body)
+  }
+}
+
+private fun parseComplexType(parameter: KParameter, body: @Nullable Buffer): ParseResult {
+  val type = parameter.getType()
+  return when {
+    type.isSubclassOf(Buffer::class) -> {
+      ParseResult(body)
+    }
+    type.isSubclassOf(ByteArray::class) -> {
+      ParseResult(body.bytes)
+    }
+    type.isSubclassOf(ByteBuf::class) -> {
+      ParseResult(body.byteBuf)
+    }
+    type.isSubclassOf(ByteBuffer::class) -> {
+      ParseResult(ByteBuffer.wrap(body.bytes))
+    }
+    type == String::class -> {
+      ParseResult(body.toString())
+    }
+    else -> {
+      if (body.length() > 0) {
+        val constructType =
+                Json.mapper.typeFactory.constructType(parameter.type.javaType)
+        ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
+      } else {
+        ParseResult.NOT_FOUND
       }
     }
   }
@@ -202,15 +207,15 @@ private fun parseQueryParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
+  val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
+  val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
   return when {
-    parameter.isSimpleType() -> {
-      val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
-      val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
-      // TODO: handle arrays
-      if (queryParam != null) {
+    queryParam != null-> {
+      if(parameter.isSimpleType()) {
+        // TODO: handle arrays
         ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
       } else {
-        ParseResult.NOT_FOUND
+        parseComplexType(parameter, Buffer.buffer(URLDecoder.decode(queryParam, "UTF-8")))
       }
     }
     else -> {

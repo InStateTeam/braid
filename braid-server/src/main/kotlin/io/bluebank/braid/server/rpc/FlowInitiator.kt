@@ -18,7 +18,12 @@ class FlowInitiator(rpc: CordaRPCOps) {
 
     fun getInitiator(it: KClass<*>): KCallable<*> {
         val next = it.constructors.iterator().next()
-        return next
+        return RPCCallable(next)
+    }
+
+    fun getInitiatorFunction(it: KClass<*>): KCallable<*> {
+        val next = it.constructors.iterator().next()
+        return RPCCallable(next)
     }
 
 
