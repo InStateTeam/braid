@@ -7,24 +7,14 @@ import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
-class FlowInitiator(rpc: CordaRPCOps) {
-
-    fun getInitiator(): KFunction<Any> {
-        val classobj=ContractUpgradeFlow.Initiate::class
-        val next = classobj.constructors.iterator().next()
-        return next
-    }
+class FlowInitiator(val rpc: CordaRPCOps) {
 
 
     fun getInitiator(it: KClass<*>): KCallable<*> {
         val next = it.constructors.iterator().next()
-        return RPCCallable(next)
+        return RPCCallable(rpc,next)
     }
 
-    fun getInitiatorFunction(it: KClass<*>): KCallable<*> {
-        val next = it.constructors.iterator().next()
-        return RPCCallable(next)
-    }
 
 
 }
