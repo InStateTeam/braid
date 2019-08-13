@@ -135,6 +135,54 @@ class BraidTest {
     }
 
     @Test
+    fun shouldListNetworkNodesByHostAndPort(context: TestContext) {
+        val async = context.async()
+
+        log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+        client.get(port, "localhost", "/api/rest/network/nodes?host-and-port=localhost:10004")
+                .putHeader("Accept", "application/json; charset=utf8")
+                .exceptionHandler(context::fail)
+                .handler {
+                    context.assertEquals(200, it.statusCode())
+
+                    it.bodyHandler {
+                        val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
+
+                        context.assertThat(nodes.size, equalTo(1))
+
+                        context.assertThat(nodes.get(0).addresses.get(0),      equalTo(NetworkHostAndPort("localhost", 10004)))
+
+                        async.complete()
+                    }
+                }
+                .end()
+    }
+
+   @Test
+    fun shouldListNetworkNodesByX509Name(context: TestContext) {
+        val async = context.async()
+
+        log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+        client.get(port, "localhost", "/api/rest/network/nodes?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH")
+                .putHeader("Accept", "application/json; charset=utf8")
+                .exceptionHandler(context::fail)
+                .handler {
+                    context.assertEquals(200, it.statusCode())
+
+                    it.bodyHandler {
+                        val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
+
+                        context.assertThat(nodes.size, equalTo(1))
+
+                        context.assertThat(nodes.get(0).addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10000)))
+
+                        async.complete()
+                    }
+                }
+                .end()
+    }
+
+    @Test
     fun shouldListSelf(context: TestContext) {
         val async = context.async()
 
@@ -184,8 +232,8 @@ class BraidTest {
     fun shouldListFlows(context: TestContext) {
         val async = context.async()
 
-        log.info("calling get: http://localhost:${port}/api/rest/flows")
-        client.get(port, "localhost", "/api/rest/flows")
+        log.info("calling get: http://localhost:${port}/api/rest/cordapps/flows")
+        client.get(port, "localhost", "/api/rest/cordapps/flows")
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
                 .handler {
@@ -205,4 +253,5 @@ class BraidTest {
                 }
                 .end()
     }
+
 }

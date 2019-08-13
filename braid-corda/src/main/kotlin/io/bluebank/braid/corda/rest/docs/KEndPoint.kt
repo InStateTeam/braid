@@ -160,4 +160,10 @@ class KEndPoint(
     this.example(HttpHeaderValues.APPLICATION_JSON.toString(), example)
     return this
   }
+
+  override fun toString(): String {
+    return "KEndPoint(name='$name', parameters=$parameters, returnType=$returnType)"
+  }
+
+
 }

@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.rest.docs
 
 import io.bluebank.braid.corda.rest.toSwaggerPath
+import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.models.*
@@ -27,6 +28,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.net.URL
+import kotlin.math.log
 import kotlin.reflect.KCallable
 
 class DocsHandler(
@@ -41,8 +43,8 @@ class DocsHandler(
   private val auth: SecuritySchemeDefinition? = null,
   private val debugMode: Boolean = false
 ) : Handler<RoutingContext> {
-
-  companion object {
+   companion object {
+    var log = loggerFor<DocsHandler>()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }
 
@@ -98,25 +100,28 @@ class DocsHandler(
   }
 
   private fun Swagger.addEndpoint(endpoint: EndPoint) {
+    try {
+      val swaggerPath = endpoint.path.toSwaggerPath()
+      val path = if (this.paths != null && this.paths.contains(swaggerPath)) {
+        paths[swaggerPath]!!
+      } else {
+        val path = Path()
+        this.path(swaggerPath, path)
+        path
+      }
 
-    val swaggerPath = endpoint.path.toSwaggerPath()
-    val path = if (this.paths != null && this.paths.contains(swaggerPath)) {
-      paths[swaggerPath]!!
-    } else {
-      val path = Path()
-      this.path(swaggerPath, path)
-      path
-    }
+      val operation = endpoint.toOperation()
 
-    val operation = endpoint.toOperation()
-
-    when (endpoint.method) {
-      GET -> path.get(operation)
-      POST -> path.post(operation)
-      PUT -> path.put(operation)
-      DELETE -> path.delete(operation)
-      PATCH -> path.patch(operation)
-      OPTIONS, HEAD, TRACE, CONNECT, OTHER -> TODO("Implement ${endpoint.method.name}")
+      when (endpoint.method) {
+        GET -> path.get(operation)
+        POST -> path.post(operation)
+        PUT -> path.put(operation)
+        DELETE -> path.delete(operation)
+        PATCH -> path.patch(operation)
+        OPTIONS, HEAD, TRACE, CONNECT, OTHER -> TODO("Implement ${endpoint.method.name}")
+      }
+    } catch (e: Throwable) {
+      log.warn("Unable to add endpoint:$endpoint : " + e.message)
     }
   }
 
@@ -158,7 +163,12 @@ class DocsHandler(
 
   private fun Swagger.addAllModels(types: Map<String, Model>): Swagger {
     types.forEach { name, model ->
-      this.model(name, model)
+      try {
+        this.model(name, model)
+      } catch (e: Throwable) {
+        log.error("Unable to model class:$name", e)
+        throw RuntimeException("Unable to model class:$name", e)
+      }
     }
     return this
   }

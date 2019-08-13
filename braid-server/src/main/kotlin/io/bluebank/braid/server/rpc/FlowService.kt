@@ -21,9 +21,11 @@ import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.domain.toSimpleNodeInfo
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
+import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.NetworkHostAndPort
 import java.util.stream.Collectors.toList
 import javax.ws.rs.QueryParam
@@ -38,9 +40,11 @@ class FlowService(val rpc: CordaRPCOps) {
         return rpc.registeredFlows()
     }
 
-    @ApiOperation(value = "Retrieves a list of flow details")
-    fun flowDetails(@ApiParam(value = "Flow name", example = "net.corda.core.flows.ContractUpgradeFlow\$Authorise") @QueryParam(value = "flow") flow:String): String {
-        return rpc.registeredFlows().filter { it.equals(flow) }.first()
-    }
+//    @ApiOperation(value = "Retrieves a list of flow details")
+//    fun flowDetails(@ApiParam(value = "Flow name", example = "net.corda.core.flows.ContractUpgradeFlow\$Authorise") @QueryParam(value = "flow") flow:String): String {
+////        var old
+////        var newState
+////        return rpc.startFlow(ContractUpgradeFlow.Initiate::, old, newState)
+//    }
 
 }

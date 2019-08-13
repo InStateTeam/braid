@@ -36,7 +36,8 @@ fun main(args: Array<String>) {
 
     driver(DriverParameters(cordappsForAllNodes = listOf(
             TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
-            TestCordapp.findCordapp("net.corda.finance.schemas")
+            TestCordapp.findCordapp("net.corda.finance.schemas"),
+            TestCordapp.findCordapp("net.corda.finance.flows")
      //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
     ),
             waitForAllNodesToFinish = true,

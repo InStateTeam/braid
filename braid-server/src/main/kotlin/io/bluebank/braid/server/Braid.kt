@@ -18,6 +18,8 @@ package io.bluebank.braid.server
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
+import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.vertx.core.Future
@@ -33,6 +35,10 @@ data class Braid(
         val password: String = "",
         val nodeAddress: String = ""
 )       {
+
+    init {
+
+    }
 
     fun withPort(port : Int):Braid = this.copy(port = port)
 
@@ -64,11 +70,18 @@ data class Braid(
                                 get("/network/nodes", NetworkService(rpc)::nodes)
                                 get("/network/notaries", NetworkService(rpc)::notaries)
                                 get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
-                                get("/flows", FlowService(rpc)::flows)
-                                get("/flows/:flow", FlowService(rpc)::flowDetails)
+                                get("/cordapps/flows", FlowService(rpc)::flows)
+                          //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
+
+
+                                rpcClasses().forEach({
+
+                                    post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
+
+                                })
                             }
 //                            group("cordapps") {
-//                                post("/cordapps/obligation-cordapp/flows/issue-obligation", this@BraidServer::issueObligation)
+//                                post("/cordapps/obligation-cordapp/flows/issue-obligation", this@::issueObligation)
 //                            }
                         })
                 .bootstrapBraid(null, result.completer())
@@ -80,34 +93,13 @@ data class Braid(
 
 }
 
+
+
+//fun issueObligation(params: IssueObligationInitiatorParameters): Future<SignedTransaction> {
+//    val amount = Amount.parseCurrency(params.amount)
+//    val lender = r.identityService.wellKnownPartyFromX500Name(CordaX500Name.parse(params.lender)) ?: error("lender not found ${params.lender}")
+//    return serviceHub.startFlow(IssueObligation.Initiator(amount, lender,  params.anonymous)).returnValue.toVertxFuture()
+//}
+
+
 private val log = loggerFor<Braid>()
-
-
-fun main(args: Array<String>) {
-
-    if (args.size != 4) {
-        throw IllegalArgumentException("Usage: Braid <node address> <username> <password> <port>")
-    }
-
-    val port = Integer.valueOf(args[3])
-    Braid()
-            .withNodeAddress(args[0])
-            .withUserName(args[1])
-            .withPassword(args[2])
-            .withPort(port)
-            .startServer()
-            .recover {
-                log.error("Server failed to start:", it)
-                Future.succeededFuture("-1")
-            }
-            .apply {
-                log.info("Braid started on port:$port")
-                ProcessBuilder().command("open" , "http://localhost:$port/swagger.json")   .start()
-                ProcessBuilder().command("open" , "http://localhost:$port/api/rest/flows")   .start()
-            }
-
-
-
-
-    //connection.notifyServerAndClose()
-}

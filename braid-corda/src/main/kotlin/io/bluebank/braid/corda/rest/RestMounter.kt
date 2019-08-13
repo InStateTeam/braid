@@ -71,7 +71,7 @@ class RestMounter(
     "$swaggerPath/*"
   }
 
-  private val docsHandler: DocsHandler
+  public val docsHandler: DocsHandler
   private val cookieHandler by lazy { CookieHandler.create() }
   private val sessionHandler by lazy {
     SessionHandler.create(
@@ -83,7 +83,7 @@ class RestMounter(
   private val basicAuthHandler by lazy { BasicAuthHandler.create(config.authProvider) }
   private val unprotectedRouter = Router.router(vertx)
   private val protectedRouter: Router = Router.router(vertx)
-  private var currentRouter = unprotectedRouter
+  public var currentRouter = unprotectedRouter
   private var groupName: String = ""
   private val protected: Boolean
     get() {
@@ -308,7 +308,7 @@ class RestMounter(
   }
 
   @JvmName("bindMethod0")
-  private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
+  public fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
     currentRouter.route(method, path).bind(fn)
     docsHandler.add(groupName, protected, method, path, fn)
   }

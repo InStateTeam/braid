@@ -21,6 +21,7 @@ import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.NetworkHostAndPort
 
 class RPCTest
@@ -38,7 +39,7 @@ fun main(args: Array<String>) {
 
     val client = CordaRPCClient(nodeAddress)
     val connection = client.start(username, password)
-    val cordaRPCOperations = connection.proxy
+    val ops = connection.proxy
 
 
     BraidCordaJacksonInit.init()
@@ -50,16 +51,19 @@ fun main(args: Array<String>) {
     Json.prettyMapper.registerModule(it)
 
 
-    log.info("currentNodeTime"+ Json.encodePrettily( cordaRPCOperations.currentNodeTime()))
-    log.info("nodeInfo" + Json.encodePrettily(cordaRPCOperations.nodeInfo()))
-    log.info("nodeInfo/addresses" + Json.encodePrettily(cordaRPCOperations.nodeInfo().addresses))
-    log.info("nodeInfo/legalIdentities" + Json.encodePrettily(cordaRPCOperations.nodeInfo().legalIdentities))
+    log.info("currentNodeTime"+ Json.encodePrettily( ops.currentNodeTime()))
+    log.info("nodeInfo" + Json.encodePrettily(ops.nodeInfo()))
+    log.info("nodeInfo/addresses" + Json.encodePrettily(ops.nodeInfo().addresses))
+    log.info("nodeInfo/legalIdentities" + Json.encodePrettily(ops.nodeInfo().legalIdentities))
   //  log.info(cordaRPCOperations.nodeInfoFromParty(Party(CordaX500Name.parse(""), PublicKey())).toString())
-    log.info("notaryIdentities:" + Json.encodePrettily(cordaRPCOperations.notaryIdentities())  )
-    log.info("networkMapFeed:" + Json.encodePrettily(cordaRPCOperations.networkMapFeed())    )
-    log.info("registeredFlows:" + Json.encodePrettily(cordaRPCOperations.registeredFlows()))
+    log.info("notaryIdentities:" + Json.encodePrettily(ops.notaryIdentities())  )
+    log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed())    )
+    log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
     //cordaRPCOperations.
 
+
+    //ops.
+    //ops.startFlow()
     connection.notifyServerAndClose()
 }
 

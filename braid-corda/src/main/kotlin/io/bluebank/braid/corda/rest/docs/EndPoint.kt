@@ -36,6 +36,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
+import java.lang.RuntimeException
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
@@ -189,10 +190,14 @@ abstract class EndPoint(
 
   protected fun Type.getSwaggerProperty(): Property {
     val actualType = this.actualType()
-    return if (actualType.isBinary()) {
-      BinaryProperty()
-    } else {
-      ModelConverters.getInstance().readAsProperty(actualType)
+    try {
+        return if (actualType.isBinary()) {
+          BinaryProperty()
+        } else {
+              ModelConverters.getInstance().readAsProperty(actualType)
+        }
+    } catch (e: Throwable) {
+      throw RuntimeException("Unable to convert actual type:" + actualType)
     }
   }
 
