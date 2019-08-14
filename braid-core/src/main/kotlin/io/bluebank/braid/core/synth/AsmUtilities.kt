@@ -104,10 +104,11 @@ fun ClassWriter.addField(it: Parameter) {
  *
  */
 internal fun ClassWriter.declareSimplePublicClass(className: String) {
+  val jvmByteCodeName = className.replace('.', '/');
   visit(
     Opcodes.V1_8,
     Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL,
-    className,
+    jvmByteCodeName,
     null, // no generic signature on this type
     objectClassRef, // base type is Object
     emptyArray() // no implemented interfaces

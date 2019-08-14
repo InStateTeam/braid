@@ -114,9 +114,8 @@ data class ClassFromParametersSynthesizer(
    */
   fun build(): ByteArray {
     assert(className.isNotBlank()) { "class name was not set" }
-    val jvmByteCodeName = className.replace('.', '/');
     return ClassWriter(0).apply {
-      declareSimplePublicClass(jvmByteCodeName)
+      declareSimplePublicClass(className)
       addFields(parameters.toTypedArray())
       writeDefaultConstructor()
       visitEnd()
