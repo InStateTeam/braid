@@ -1,36 +1,44 @@
 package io.bluebank.braid.server.rpc
 
+import net.corda.core.internal.ResolveTransactionsFlow
+import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.startFlow
+import java.util.Arrays.asList
+import java.util.stream.Collectors.toList
 import kotlin.reflect.*
 
-class RPCCallable<T>(val callable: KCallable<T>) :KCallable<T> {
+class RPCCallable<T>(val rpc: CordaRPCOps, val constructor: KCallable<T>) :KCallable<T> {
     override val annotations: List<Annotation>
-        get() = callable.annotations
+        get() = constructor.annotations
     override val isAbstract: Boolean
-        get() = callable.isAbstract
+        get() = constructor.isAbstract
     override val isFinal: Boolean
-        get() = callable.isFinal
+        get() = constructor.isFinal
     override val isOpen: Boolean
-        get() = callable.isOpen
+        get() = constructor.isOpen
     override val name: String
-        get() = callable.name
+        get() = constructor.name
     override val parameters: List<KParameter>
-        get() = callable.parameters
+        get() = constructor.parameters
     override val returnType: KType
-        get() = callable.returnType
+        get() = constructor.returnType
     override val typeParameters: List<KTypeParameter>
-        get() = callable.typeParameters
+        get() = constructor.typeParameters
     override val visibility: KVisibility?
-        get() = callable.visibility
+        get() = constructor.visibility
 
-    init {
 
-    }
 
     override fun call(vararg args: Any?): T {
+        println("Attempted to call with args:" + args)
+
+      //  rpc.startFlow(::ResolveTransactionsFlow,args[0],args[0]);
+
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun callBy(args: Map<KParameter, Any?>): T {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        println("Attempted to call callBy!!")
+        TODO("not needed for swagger call") //To change body of created functions use File | Settings | File Templates.
     }
 }
