@@ -16,7 +16,7 @@
 package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.json.BraidJacksonInit
-import io.bluebank.braid.core.synth.ClassFromParametersSynthesizer.Companion.acquireClass
+import io.bluebank.braid.core.synth.ClassFromParametersBuilder.Companion.acquireClass
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.vertx.core.json.Json
@@ -33,7 +33,7 @@ class Simple(val amount: Long)
 class MoreComplex(val name: String, val age: Int, val amount: Amount<String>)
 class NestedGenerics(val map: Map<String, List<String>>)
 
-class ClassFromParametersSynthesizerTest {
+class ClassFromParametersBuilderTest {
   companion object {
     init {
       BraidJacksonInit.init()

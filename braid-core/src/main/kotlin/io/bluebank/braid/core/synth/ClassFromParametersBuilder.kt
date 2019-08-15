@@ -25,12 +25,12 @@ import java.lang.reflect.Parameter
  * Builder for synthetic POJO with just a single constructor and fields
  * from parameters of an existing constructor or method
  */
-data class ClassFromParametersSynthesizer(
+data class ClassFromParametersBuilder(
   val parameters: List<Parameter> = emptyList(),
   val className: String = ""
 ) {
   companion object {
-    private val logger = loggerFor<ClassFromParametersSynthesizer>()
+    private val logger = loggerFor<ClassFromParametersBuilder>()
 
     @JvmStatic
     fun acquireClass(
@@ -53,7 +53,7 @@ data class ClassFromParametersSynthesizer(
       className: String
     ): Class<*> {
       return classLoader.lazyAcquire(className) {
-        ClassFromParametersSynthesizer()
+        ClassFromParametersBuilder()
           .withParameters(parameters)
           .withClassName(className)
           .buildAndInject(classLoader)
@@ -89,12 +89,12 @@ data class ClassFromParametersSynthesizer(
     }
   }
 
-  fun withConstructor(constructor: Constructor<*>): ClassFromParametersSynthesizer {
+  fun withConstructor(constructor: Constructor<*>): ClassFromParametersBuilder {
     val name = classNameOrDefault { constructor.declaringClass.payloadClassName() }
     return copy(parameters = constructor.parameters.toList(), className = name)
   }
 
-  fun withMethod(method: Method): ClassFromParametersSynthesizer {
+  fun withMethod(method: Method): ClassFromParametersBuilder {
     val name = classNameOrDefault { method.declaringClass.payloadClassName() }
     return copy(parameters = method.parameters.toList(), className = name)
   }

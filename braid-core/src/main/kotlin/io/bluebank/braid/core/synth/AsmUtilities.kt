@@ -24,7 +24,6 @@ import org.objectweb.asm.Type as AsmType
 
 private val objectClassRef = Object::class.java.canonicalName.replace('.', '/')
 
-
 /**
  * Writes out to the bytecode a default constructor
  * This is usually done by the Java / Kotlin compiler, but here using ASM we need to be explicit`
@@ -101,7 +100,8 @@ fun ClassWriter.addField(it: Parameter) {
 }
 
 /**
- *
+ * add the declaration of a class
+ * NOTE: callers must call [ClassWriter.endVisit] when the class body is complete
  */
 internal fun ClassWriter.declareSimplePublicClass(className: String) {
   val jvmByteCodeName = className.replace('.', '/');
@@ -154,4 +154,3 @@ private fun SignatureVisitor.writeParameterizedTypeSignature(
   }
   visitEnd()
 }
-
