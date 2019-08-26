@@ -37,14 +37,16 @@ fun main(args: Array<String>) {
                 log.error("Server failed to start:", it)
                 Future.succeededFuture("-1")
             }
-            .apply {
-                log.info("Braid started on port:$port")
-                ProcessBuilder().command("open" , "http://localhost:$port/swagger.json")   .start()
-                ProcessBuilder().command("open" , "http://localhost:$port/api/rest/cordapps/flows")   .start()
-            }
+            .map({openBrowser(port, it)})
 
 
 
 
     //connection.notifyServerAndClose()
+}
+
+private fun openBrowser(port: Int?, it: String?) {
+    log.info("Started Vertical:$it on port:$port")
+    ProcessBuilder().command("open", "http://localhost:$port/swagger.json").start()
+    ProcessBuilder().command("open", "http://localhost:$port/api/rest/cordapps/flows").start()
 }
