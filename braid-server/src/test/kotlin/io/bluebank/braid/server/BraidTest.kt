@@ -16,15 +16,18 @@
 package io.bluebank.braid.server
 
 import com.fasterxml.jackson.core.type.TypeReference
+import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.core.socket.findFreePort
 import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.util.assertThat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
+import io.vertx.kotlin.core.json.get
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
@@ -40,16 +43,21 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.net.URLEncoder
+import sun.security.rsa.RSAPublicKeyImpl
 import java.util.Arrays.asList
 
 
 /**
- * Run with  -DcordaStarted=true and CordaStandalone in the background if you want this test to run fast.
- * Otherwise it takes about 45 seconds.
+ * Run with Either
+ *          -DbraidStarted=true and CordaStandalone and BraidMain started on port 8999 in the background if you want this test to run faster.
+ *          -DcordaStarted=true and CordaStandalone in the background if you want this test to run fastish.
+ * Otherwise it takes about 45 seconds or more to run.
  */
 @RunWith(VertxUnitRunner::class)
 class BraidTest {
+
+
+
     companion object {
         var log = loggerFor<BraidTest>()
 
@@ -57,15 +65,20 @@ class BraidTest {
         val bankA = CordaX500Name("BankA", "", "GB")
         val bankB = CordaX500Name("BankB", "", "US")
 
-        val port = findFreePort()
+        var port = findFreePort()
         val client = Vertx.vertx().createHttpClient()
 
         @BeforeClass
         @JvmStatic
         fun setUp(textContext: TestContext) {
+            BraidCordaJacksonInit.init()
             val async = textContext.async()
 
-            if ("true".equals(System.getProperty("cordaStarted")))
+            if ("true".equals(System.getProperty("braidStarted"))) {
+                port = 8999
+                async.complete()
+
+            } else if ("true".equals(System.getProperty("cordaStarted")))
                 startBraid(async, NetworkHostAndPort("localhost", 10005))
             else {
                 driver(DriverParameters(isDebug = true, startNodesInProcess = true)) {
@@ -144,11 +157,14 @@ class BraidTest {
                     context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
+                        val nodes = it.toJsonArray()
 
-                        context.assertThat(nodes.size, equalTo(1))
+                        val node = nodes.getJsonObject(0)
 
-                        context.assertThat(nodes.get(0).addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10004)))
+                        val addresses = node.getJsonArray("addresses")
+                        context.assertThat(addresses.size(), equalTo(1))
+                        context.assertThat(addresses.getJsonObject(0).getString("host"), equalTo("localhost"))
+                        context.assertThat(addresses.getJsonObject(0).getInteger("port"), equalTo(10004))
 
                         async.complete()
                     }
@@ -168,11 +184,14 @@ class BraidTest {
                     context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val nodes = Json.decodeValue(it, object : TypeReference<List<SimpleNodeInfo>>() {})
+                        val nodes = it.toJsonArray()
 
-                        context.assertThat(nodes.size, equalTo(1))
+                        val node = nodes.getJsonObject(0)
 
-                        context.assertThat(nodes.get(0).addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10000)))
+                        val addresses = node.getJsonArray("addresses")
+                        context.assertThat(addresses.size(), equalTo(1))
+                        context.assertThat(addresses.getJsonObject(0).getString("host"), equalTo("localhost"))
+                        context.assertThat(addresses.getJsonObject(0).getInteger("port"), equalTo(10004))
 
                         async.complete()
                     }
@@ -192,10 +211,12 @@ class BraidTest {
                     context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val node = Json.decodeValue(it, SimpleNodeInfo::class.java)
+                        val node = it.toJsonObject()
 
-                        context.assertThat(node.addresses.size, equalTo(1))
-                        context.assertThat(node.addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10004)))
+                        val addresses = node.getJsonArray("addresses")
+                        context.assertThat(addresses.size(), equalTo(1))
+                        context.assertThat(addresses.getJsonObject(0).getString("host"), equalTo("localhost"))
+                        context.assertThat(addresses.getJsonObject(0).getInteger("port"), equalTo(10004))
 
                         async.complete()
                     }
@@ -207,7 +228,7 @@ class BraidTest {
     fun shouldListNetworkNotaries(context: TestContext) {
         val async = context.async()
 
-        log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+        log.info("calling get: http://localhost:${port}/api/rest/network/notaries")
         client.get(port, "localhost", "/api/rest/network/notaries")
                 .putHeader("Accept", "application/json; charset=utf8")
                 .exceptionHandler(context::fail)
@@ -215,10 +236,12 @@ class BraidTest {
                     context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
+                        val nodes = it.toJsonArray()
 
-                        context.assertThat(nodes.size, equalTo(1))
-                        context.assertThat(nodes.get(0).name, equalTo(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH")))
+                     //   val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
+
+                        context.assertThat(nodes.size(), equalTo(1))
+                        context.assertThat(nodes.getJsonObject(0).getString("name"), equalTo("O=Notary Service, L=Zurich, C=CH"))
 
                         async.complete()
                     }
@@ -260,30 +283,34 @@ class BraidTest {
         // amount as query parameter
         // issuerBankPartyRef as query parameter
         // Party as body
-        val amount = URLEncoder.encode(Json.encode(AMOUNT(100, "GBP")))
+        val amount = Json.encode(AMOUNT(100, "GBP"))
+        val party = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyHW9wdnkysnj37Bq1wPe1WsrY4nDcvWJcjeCpxXHpDZwe\"}";
+    //    val party2 = Json.encode(Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"), RSAPublicKeyImpl(null)))
 
-        val json = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyHW9wdnkysnj37Bq1wPe1WsrY4nDcvWJcjeCpxXHpDZwe\"}";
+        val json = JsonObject()
+                .put("notary", JsonObject(party))
+                .put("amount", JsonObject(amount))
+                .put("issuerBankPartyRef", JsonObject())       /// todo serialize OpaqueBytes
 
-        log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows")
-        client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow?amount=$amount&issuerBankPartyRef=23452345")
+
+        log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
+
+        val encodePrettily = json.encodePrettily()
+        client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
                 .putHeader("Accept", "application/json; charset=utf8")
+                .putHeader("Content-length",""+encodePrettily.length)
                 .exceptionHandler(context::fail)
-                .setChunked(true)
                 .handler {
                     context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val nodes = Json.decodeValue(it, object : TypeReference<List<String>>() {})
-
-                        context.assertThat(nodes.size, greaterThan(2))
-
-
-                        context.assertThat(nodes, hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
+                        val reply = it.toJsonObject()
+                        context.assertThat(reply, notNullValue())
 
                         async.complete()
                     }
                 }
-                .end(json)
+                .end(encodePrettily)
     }
 
 }

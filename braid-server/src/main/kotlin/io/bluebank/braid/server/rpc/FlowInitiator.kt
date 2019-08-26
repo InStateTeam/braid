@@ -17,9 +17,13 @@ package io.bluebank.braid.server.rpc
 
 import io.bluebank.braid.core.synth.preferredConstructor
 import io.bluebank.braid.core.synth.trampoline
+import net.corda.core.contracts.Amount
+import net.corda.core.flows.FlowLogic
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.startFlow
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 class FlowInitiator(val rpc: CordaRPCOps) {
 
@@ -33,6 +37,7 @@ class FlowInitiator(val rpc: CordaRPCOps) {
             // e.g. call the flow directly
             // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
             // and return a Future
+            rpc.startTrackedFlowDynamic(it::class.java as Class<FlowLogic<*>>, Amount.parseCurrency("100 USD"))
             println(it)
         }
 
