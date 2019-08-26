@@ -54,7 +54,9 @@ class SyntheticConstructorAndTransformerTest {
       // e.g. call the flow directly
       // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
       // and return a Future
-      it.call()
+      // it.call()
+      constructor.newInstance(*it).call()
+     // println(it)
     }
 
     val json = """

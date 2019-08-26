@@ -27,7 +27,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   className: String = constructor.declaringClass.payloadClassName(),
   private val boundTypes: Map<Class<*>, Any>,
   classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
-  private val transformer: (K) -> R
+  private val transformer: (Array<Any?>) -> R
 ) : KFunction<R> {
 
   companion object {
@@ -51,7 +51,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   fun invoke(payload: Any): R {
     val parameterValues =
       constructor.parameters.map { getFieldValue(payload, it) }.toTypedArray()
-    return transformer(constructor.newInstance(*parameterValues))
+    return transformer(parameterValues)
   }
 
   override val annotations: List<Annotation> = constructor.annotations.toList()
@@ -113,7 +113,7 @@ fun <K: Any, R> trampoline(
   boundTypes: Map<Class<*>, Any>,
   className: String = constructor.declaringClass.payloadClassName(),
   classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
-  transform: (K) -> R
+  transform: (Array<Any?>) -> R
 ): KFunction<R> {
   @Suppress("UNCHECKED_CAST")
   return SyntheticConstructorAndTransformer(constructor, className, boundTypes, classLoader, transform)

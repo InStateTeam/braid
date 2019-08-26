@@ -27,9 +27,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import io.vertx.kotlin.core.json.get
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
@@ -43,7 +41,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
-import sun.security.rsa.RSAPublicKeyImpl
 import java.util.Arrays.asList
 
 
@@ -283,12 +280,12 @@ class BraidTest {
         // amount as query parameter
         // issuerBankPartyRef as query parameter
         // Party as body
-        val amount = Json.encode(AMOUNT(100, "GBP"))
-        val party = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyHW9wdnkysnj37Bq1wPe1WsrY4nDcvWJcjeCpxXHpDZwe\"}";
+        val amount = Json.encode(AMOUNT(10.00, "GBP"))
+        val notary = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE\"}";
     //    val party2 = Json.encode(Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"), RSAPublicKeyImpl(null)))
 
         val json = JsonObject()
-                .put("notary", JsonObject(party))
+                .put("notary", JsonObject(notary))
                 .put("amount", JsonObject(amount))
                 .put("issuerBankPartyRef", JsonObject())       /// todo serialize OpaqueBytes
 
