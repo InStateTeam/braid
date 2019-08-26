@@ -104,7 +104,7 @@ class BraidTest {
                     .withUserName("user1")
                     .withPassword("test")
                     .withPort(port)
-                    .startServer()
+                    .   startServer()
                     .setHandler {
                         async.complete()
                     }

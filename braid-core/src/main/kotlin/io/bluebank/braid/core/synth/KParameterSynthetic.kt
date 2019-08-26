@@ -26,7 +26,7 @@ class KParameterSynthetic(override val name: String, val clazz: Class<*>) :
   override val isOptional: Boolean = false
   override val isVararg: Boolean = false
   override val kind: KParameter.Kind = KParameter.Kind.VALUE
-  override val type: KType = clazz.kotlin.createType() // KTypeSynthetic(clazz)
+  override val type: KType = clazz.kotlin.createType()
 
 }
 
