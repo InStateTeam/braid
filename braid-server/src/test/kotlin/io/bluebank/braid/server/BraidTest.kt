@@ -92,6 +92,7 @@ class BraidTest {
                     // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
                     // working as intended.
                     println("partyAHandle:$partyA.rpcAddress")
+                    Thread.sleep(5000)  // not sure how to know when rpc is available
                     startBraid(async, partyA.rpcAddress)
                 }
             }
