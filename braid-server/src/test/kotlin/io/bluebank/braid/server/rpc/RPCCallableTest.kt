@@ -15,18 +15,57 @@
  */
 package io.bluebank.braid.server.rpc
 
+import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.server.BraidTestFlow
+import io.swagger.converter.ModelConverters
+import net.corda.core.flows.ContractUpgradeFlow
+import net.corda.core.messaging.CordaRPCOps
+import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class RPCCallableTest {
     @Test
     fun shouldBeCallableWithOneParameter() {
 
         val flow = BraidTestFlow::class
-        val rpcCallable = RPCCallable(flow.constructors.iterator().next())
+
+        val rpcCallable = RPCCallable(mock(),flow.constructors.iterator().next())
 
         assertThat(rpcCallable.parameters.size,equalTo(3))
+    }
+
+    @Test
+    fun testModelConverters() {
+        val java = net.corda.core.contracts.UpgradedContract::class.java
+        val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
+        println(readAsProperty)
+
+
+    }
+
+    @Test
+    fun testModelConvertersOfFlow() {
+        val java = ContractUpgradeFlow.Initiate::class.java
+        val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
+        println(readAsProperty)
+    }
+
+    @Test
+    @Ignore // todo make ModelConverter for UpgradedContract
+    fun testModelConvertersOfFlowConstrucor() {
+        val constructors = ContractUpgradeFlow.Initiate::class.java.constructors
+
+        constructors.forEach {
+            it.parameters.forEach {
+                val readAsProperty = ModelConverters.getInstance().readAsProperty(it.parameterizedType)
+                assertThat(it.parameterizedType.toString(), readAsProperty, notNullValue())
+            }
+        }
     }
 }
