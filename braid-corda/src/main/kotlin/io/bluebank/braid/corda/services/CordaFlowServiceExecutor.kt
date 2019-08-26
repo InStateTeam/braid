@@ -26,7 +26,6 @@ import net.corda.core.concurrent.CordaFuture
 import net.corda.core.context.InvocationContext
 import net.corda.core.flows.FlowLogic
 import net.corda.core.internal.FlowStateMachine
-import net.corda.core.node.AppServiceHub
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
 import net.corda.node.services.api.StartedNodeServices
@@ -34,7 +33,7 @@ import rx.Observable
 import java.lang.reflect.Constructor
 
 class CordaFlowServiceExecutor(
-  private val services: AppServiceHub,
+  private val services: FlowStarter,
   val config: BraidConfig
 ) : ServiceExecutor {
 
@@ -77,8 +76,7 @@ class CordaFlowServiceExecutor(
           @Suppress("UNCHECKED_CAST")
           val flow = constructor.newInstance(*params) as FlowLogic<Any>
 
-
-          services.startFlow(flow).returnValue
+          services.startFlowDynamic(clazz, *params).returnValue
             .toObservable().subscribe({ item ->
               subscriber.onNext(item)
             }, { err ->
@@ -97,7 +95,7 @@ class CordaFlowServiceExecutor(
 private fun Constructor<*>.matches(request: JsonRPCRequest) =
   this.parameterCount == request.paramCount()
 
-private fun <T> StartedNodeServices.startFlow(flow: FlowLogic<T>): CordaFuture<FlowStateMachine<T>> {
+private fun <T> StartedNodeServices.startFlowDynamic(flow: FlowLogic<T>): CordaFuture<FlowStateMachine<T>> {
   val context =
     InvocationContext.service(this.javaClass.name, myInfo.legalIdentities[0].name)
   return this.startFlow(flow, context)

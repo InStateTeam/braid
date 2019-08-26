@@ -75,9 +75,11 @@ data class Braid(
 
 
                                 rpcClasses().forEach({
-
-                                    post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
-
+                                    try {
+                                        post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
+                                    } catch (e: Throwable) {
+                                        log.error("Unable to register flow:${it.java.name}",e);
+                                    }
                                 })
                             }
 //                            group("cordapps") {

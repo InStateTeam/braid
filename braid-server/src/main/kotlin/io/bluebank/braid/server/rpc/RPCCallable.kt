@@ -19,6 +19,8 @@ import net.corda.core.messaging.CordaRPCOps
 import kotlin.reflect.*
 
 class RPCCallable<T>(val rpc: CordaRPCOps, val constructor: KCallable<T>) :KCallable<T> {
+//    override val isSuspend: Boolean
+//        get() = constructor.isSuspend
     override val annotations: List<Annotation>
         get() = constructor.annotations
     override val isAbstract: Boolean
@@ -43,13 +45,14 @@ class RPCCallable<T>(val rpc: CordaRPCOps, val constructor: KCallable<T>) :KCall
     override fun call(vararg args: Any?): T {
         println("Attempted to call with args:" + args)
 
+
       //  rpc.startFlow(::ResolveTransactionsFlow,args[0],args[0]);
 
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun callBy(args: Map<KParameter, Any?>): T {
-        println("Attempted to call callBy!!")
+        println("Attempted to call callBy!!" + args)
         TODO("not needed for swagger call") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -16,10 +16,11 @@
 package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.json.BraidJacksonInit
-import io.bluebank.braid.core.synth.ClassFromParametersSynthesizer.Companion.acquireClass
+import io.bluebank.braid.core.synth.ClassFromParametersBuilder.Companion.acquireClass
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.vertx.core.json.Json
+import org.junit.Ignore
 import org.junit.Test
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
@@ -33,7 +34,7 @@ class Simple(val amount: Long)
 class MoreComplex(val name: String, val age: Int, val amount: Amount<String>)
 class NestedGenerics(val map: Map<String, List<String>>)
 
-class ClassFromParametersSynthesizerTest {
+class ClassFromParametersBuilderTest {
   companion object {
     init {
       BraidJacksonInit.init()
@@ -70,7 +71,7 @@ class ClassFromParametersSynthesizerTest {
       )
       acc + ModelConverters.getInstance().readAll(payloadClass)
     }
-    typesForSynthesis.forEach { assertTrue(modelMap.containsKey(it.java.payloadClassName())) }
+    typesForSynthesis.forEach { assertTrue(modelMap.containsKey(Class.forName(it.java.payloadClassName()).simpleName),it.java.payloadClassName()) }
     assertTrue(modelMap.containsKey(Amount::class.java.simpleName))
     assertTrue(modelMap.containsKey("AmountString")) // contains the name for the specialised Amount class
   }

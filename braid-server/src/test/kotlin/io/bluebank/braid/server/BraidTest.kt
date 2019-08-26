@@ -21,9 +21,7 @@ import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.util.assertThat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
@@ -33,21 +31,16 @@ import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
 import net.corda.finance.AMOUNT
-import net.corda.nodeapi.internal.ArtemisMessagingComponent
-import net.corda.testing.core.TestIdentity
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.User
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.Matchers.greaterThan
 import org.junit.AfterClass
-import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.URLEncoder
-import java.security.PublicKey
 import java.util.Arrays.asList
 
 
@@ -73,8 +66,8 @@ class BraidTest {
             val async = textContext.async()
 
             if ("true".equals(System.getProperty("cordaStarted")))
-                startBraid(async, NetworkHostAndPort("localhost",10005))
-            else
+                startBraid(async, NetworkHostAndPort("localhost", 10005))
+            else {
                 driver(DriverParameters(isDebug = true, startNodesInProcess = true)) {
                     // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
                     // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
@@ -90,6 +83,7 @@ class BraidTest {
                     println("partyAHandle:$partyA.rpcAddress")
                     startBraid(async, partyA.rpcAddress)
                 }
+            }
         }
 
         private fun startBraid(async: Async, networkHostAndPort: NetworkHostAndPort): Future<String>? {
@@ -106,7 +100,7 @@ class BraidTest {
         @AfterClass
         @JvmStatic
         fun closeDown() {
-              client.close()
+            client.close()
         }
     }
 
@@ -154,7 +148,7 @@ class BraidTest {
 
                         context.assertThat(nodes.size, equalTo(1))
 
-                        context.assertThat(nodes.get(0).addresses.get(0),      equalTo(NetworkHostAndPort("localhost", 10004)))
+                        context.assertThat(nodes.get(0).addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10004)))
 
                         async.complete()
                     }
@@ -162,7 +156,7 @@ class BraidTest {
                 .end()
     }
 
-   @Test
+    @Test
     fun shouldListNetworkNodesByX509Name(context: TestContext) {
         val async = context.async()
 
@@ -200,8 +194,8 @@ class BraidTest {
                     it.bodyHandler {
                         val node = Json.decodeValue(it, SimpleNodeInfo::class.java)
 
-                        context.assertThat(node.addresses.size,equalTo(1))
-                        context.assertThat(node.addresses.get(0),equalTo(NetworkHostAndPort("localhost", 10004)))
+                        context.assertThat(node.addresses.size, equalTo(1))
+                        context.assertThat(node.addresses.get(0), equalTo(NetworkHostAndPort("localhost", 10004)))
 
                         async.complete()
                     }
@@ -209,7 +203,7 @@ class BraidTest {
                 .end()
     }
 
-   @Test
+    @Test
     fun shouldListNetworkNotaries(context: TestContext) {
         val async = context.async()
 
@@ -248,10 +242,10 @@ class BraidTest {
 
                         context.assertThat(nodes.size, greaterThan(2))
 
-                        context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise"))
-                        context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise"))
-                        context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
-                        context.assertThat(nodes,hasItem("net.corda.finance.flows.CashIssueFlow"))
+                        context.assertThat(nodes, hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise"))
+                        context.assertThat(nodes, hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise"))
+                        context.assertThat(nodes, hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
+                        context.assertThat(nodes, hasItem("net.corda.finance.flows.CashIssueFlow"))
 
                         async.complete()
                     }
@@ -283,8 +277,8 @@ class BraidTest {
 
                         context.assertThat(nodes.size, greaterThan(2))
 
-                        
-                        context.assertThat(nodes,hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
+
+                        context.assertThat(nodes, hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate"))
 
                         async.complete()
                     }

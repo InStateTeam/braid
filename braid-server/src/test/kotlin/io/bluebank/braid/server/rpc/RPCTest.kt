@@ -21,7 +21,6 @@ import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.NetworkHostAndPort
 
 class RPCTest

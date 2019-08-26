@@ -21,19 +21,13 @@ import org.hamcrest.Matchers.greaterThan
 import org.junit.Assert.assertThat
 import org.junit.Test
 
-class StarableByRPCFinderTest {
+class StartableByRPCFinderTest {
 
     @Test
     fun shouldfindClassRPCClass() {
         var classes = StartableByRPCFinder().findStartableByRPC();
         assertThat(classes.size, greaterThan(2))
-        assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class.java))
+        assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class))
     }
 
-    @Test
-    fun shouldfindConstructor() {
-        var classes = StartableByRPCFinder().findStartableByRPC();
-        assertThat(classes.size, greaterThan(2))
-        assertThat(classes,hasItem(ContractUpgradeFlow.Authorise::class.java))
-    }
 }

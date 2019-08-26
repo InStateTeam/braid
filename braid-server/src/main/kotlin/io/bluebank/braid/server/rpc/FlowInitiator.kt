@@ -15,6 +15,8 @@
  */
 package io.bluebank.braid.server.rpc
 
+import io.bluebank.braid.core.synth.preferredConstructor
+import io.bluebank.braid.core.synth.trampoline
 import net.corda.core.messaging.CordaRPCOps
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -22,9 +24,19 @@ import kotlin.reflect.KClass
 class FlowInitiator(val rpc: CordaRPCOps) {
 
 
-    fun getInitiator(it: KClass<*>): KCallable<*> {
-        val next = it.constructors.iterator().next()
-        return RPCCallable(rpc,next)
+    fun getInitiator(kClass: KClass<*>): KCallable<*> {
+        val constructor = kClass.java.preferredConstructor()
+
+        //val constructor = FooFlow::class.java.preferredConstructor()
+        val fn = trampoline(constructor, HashMap()) {
+            // do what you want here ...
+            // e.g. call the flow directly
+            // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
+            // and return a Future
+            println(it)
+        }
+
+        return fn;//RPCCallable(rpc, fn)
     }
 
 

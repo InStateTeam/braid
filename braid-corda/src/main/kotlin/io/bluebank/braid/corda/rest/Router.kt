@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest
 
+import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
 import io.bluebank.braid.core.http.withErrorHandler
@@ -94,7 +95,7 @@ private fun parseComplexType(parameter: KParameter, body: @Nullable Buffer): Par
     else -> {
       if (body.length() > 0) {
         val constructType =
-                Json.mapper.typeFactory.constructType(parameter.type.javaType)
+                Json.mapper.typeFactory.constructType(parameter.type.javaTypeIncludingSynthetics())
         ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
       } else {
         ParseResult.NOT_FOUND

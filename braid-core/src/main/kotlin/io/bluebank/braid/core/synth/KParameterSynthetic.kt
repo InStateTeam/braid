@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.core.synth
 
-import kotlin.reflect.KClassifier
+import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.createType
 
-class BodyKType(override val arguments: List<KTypeProjection>,
-                override val classifier: KClassifier?,
-                override val isMarkedNullable: Boolean) : KType
+class KParameterSynthetic(override val name: String, val clazz: Class<*>) :
+  KParameter {
+  override val annotations: List<Annotation> = emptyList()
+  override val index: Int = 0
+  override val isOptional: Boolean = false
+  override val isVararg: Boolean = false
+  override val kind: KParameter.Kind = KParameter.Kind.VALUE
+  override val type: KType = clazz.kotlin.createType() // KTypeSynthetic(clazz)
+
+}
+
