@@ -17,7 +17,6 @@ package io.bluebank.braid.corda.rest.docs
 
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
-import io.bluebank.braid.core.synth.KTypeSynthetic
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
 import io.swagger.converter.ModelConverters
