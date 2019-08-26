@@ -41,6 +41,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 import java.util.Arrays.asList
 
 
@@ -280,7 +281,7 @@ class BraidTest {
         // amount as query parameter
         // issuerBankPartyRef as query parameter
         // Party as body
-        val amount = Json.encode(AMOUNT(10.00, "GBP"))
+        val amount = Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))
         val notary = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE\"}";
     //    val party2 = Json.encode(Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"), RSAPublicKeyImpl(null)))
 
@@ -303,6 +304,8 @@ class BraidTest {
                     it.bodyHandler {
                         val reply = it.toJsonObject()
                         context.assertThat(reply, notNullValue())
+                        context.assertThat(reply.getJsonObject("stx"), notNullValue())
+                        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
                         async.complete()
                     }
