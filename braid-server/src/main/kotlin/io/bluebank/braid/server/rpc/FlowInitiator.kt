@@ -37,7 +37,7 @@ class FlowInitiator(val rpc: CordaRPCOps) {
             // e.g. call the flow directly
             // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
             // and return a Future
-            rpc.startTrackedFlowDynamic(it::class.java as Class<FlowLogic<*>>, Amount.parseCurrency("100 USD"))
+          //  rpc.startTrackedFlowDynamic(it::class.java as Class<FlowLogic<*>>, Amount.parseCurrency("100 USD"))
             println(it)
         }
 
