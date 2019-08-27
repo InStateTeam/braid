@@ -36,10 +36,7 @@ class DocsHandler(
   private val description: String = "",
   private val basePath: String = "http://localhost:8080",
   private val scheme: Scheme = Scheme.HTTPS,
-  private val contact: Contact = Contact()
-    .name("")
-    .email("")
-    .url(""),
+  private val contact: Contact = Contact(),
   private val auth: SecuritySchemeDefinition? = null,
   private val debugMode: Boolean = false
 ) : Handler<RoutingContext> {

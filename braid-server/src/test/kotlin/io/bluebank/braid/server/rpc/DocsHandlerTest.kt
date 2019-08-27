@@ -20,10 +20,12 @@ import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.vertx.core.http.HttpMethod
+import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.finance.flows.CashIssueFlow
 import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Ignore
 import org.junit.Test
 
 
@@ -39,5 +41,22 @@ class DocsHandlerTest{
         //handler.returnType.javaType
 
         docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
+    }
+
+    @Test
+    @Ignore
+    fun shouldEscapeInnerClassDefinitionName() {
+        val docsHandler = DocsHandler()
+        val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
+
+        // need to be able to do this..
+        val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
+        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("generated.net.corda.core.flows.ContractUpgradeFlow\$AuthorisePayload"))
+        //handler.returnType.javaType
+
+        docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
+        val createSwagger = docsHandler.createSwagger()
+        assertThat(createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"), nullValue())
+        assertThat(createSwagger.definitions.get("ContractUpgradeFlow.AuthorisePayload"), notNullValue())
     }
 }

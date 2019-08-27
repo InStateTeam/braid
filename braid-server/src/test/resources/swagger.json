@@ -4,11 +4,7 @@
     "description" : "",
     "version" : "1.0.0",
     "title" : "",
-    "contact" : {
-      "name" : "",
-      "url" : "",
-      "email" : ""
-    }
+    "contact" : { }
   },
   "host" : "localhost:8080",
   "basePath" : "/api/rest/",
@@ -149,7 +145,7 @@
     "/cordapps/flows" : {
       "get" : {
         "tags" : [ "network" ],
-        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow$Authorise\"]",
+        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow-Authorise\"]",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
         "parameters" : [ ],
@@ -211,7 +207,7 @@
         }
       }
     },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : {
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow-Authorise" : {
       "post" : {
         "tags" : [ "network" ],
         "description" : "",
@@ -222,20 +218,20 @@
           "name" : "payload",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow$AuthorisePayload"
+            "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
           }
         } ],
         "responses" : {
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow$AuthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow$AuthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
             }
           },
           "500" : {
@@ -244,7 +240,7 @@
         }
       }
     },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : {
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow-Deauthorise" : {
       "post" : {
         "tags" : [ "network" ],
         "description" : "",
@@ -255,20 +251,20 @@
           "name" : "payload",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow$DeauthorisePayload"
+            "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
           }
         } ],
         "responses" : {
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow$DeauthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow$DeauthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
             }
           },
           "500" : {
@@ -651,7 +647,7 @@
         }
       }
     },
-    "ContractUpgradeFlow$AuthorisePayload" : {
+    "ContractUpgradeFlow-AuthorisePayload" : {
       "type" : "object",
       "properties" : {
         "stateAndRef" : {
@@ -776,7 +772,7 @@
         }
       }
     },
-    "ContractUpgradeFlow$DeauthorisePayload" : {
+    "ContractUpgradeFlow-DeauthorisePayload" : {
       "type" : "object",
       "properties" : {
         "stateRef" : {
