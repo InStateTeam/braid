@@ -22,6 +22,7 @@ import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.util.assertThat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
@@ -34,6 +35,7 @@ import net.corda.core.utilities.loggerFor
 import net.corda.finance.AMOUNT
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
+import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.Matchers.greaterThan
@@ -65,36 +67,49 @@ class BraidTest {
 
         var port = findFreePort()
         val client = Vertx.vertx().createHttpClient()
+        var driverl=Future.succeededFuture("");
+        //var nodeA =
 
         @BeforeClass
         @JvmStatic
-        fun setUp(textContext: TestContext) {
+        fun setUp(testContext: TestContext) {
             BraidCordaJacksonInit.init()
-            val async = textContext.async()
+            val async = testContext.async()
+
 
             if ("true".equals(System.getProperty("braidStarted"))) {
                 port = 8999
                 async.complete()
 
-            } else if ("true".equals(System.getProperty("cordaStarted")))
+            } else if ("true".equals(System.getProperty("cordaStarted"))) {
                 startBraid(async, NetworkHostAndPort("localhost", 10005))
-            else {
-                driver(DriverParameters(isDebug = true, startNodesInProcess = true)) {
-                    // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
-                    // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
-                    val (partyA, partyB) = listOf(
-                            startNode(providedName = bankA, rpcUsers = asList(user)),
-                            startNode(providedName = bankB, rpcUsers = asList(user))
-                    ).map { it.getOrThrow() }
+            } else {
+                Vertx.vertx(VertxOptions()
+                        .setBlockedThreadCheckInterval(10000000))
+                        .executeBlocking<String>({ startNodesAndBraid(async)},{})
+            }
+        }
 
-                    // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
-                    // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
-                    // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
-                    // working as intended.
-                    println("partyAHandle:$partyA.rpcAddress")
-                    Thread.sleep(5000)  // not sure how to know when rpc is available
-                    startBraid(async, partyA.rpcAddress)
-                }
+        private fun startNodesAndBraid(async: Async) {
+            driver(DriverParameters(cordappsForAllNodes = listOf(
+                    TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
+                    TestCordapp.findCordapp("net.corda.finance.schemas"),
+                    TestCordapp.findCordapp("net.corda.finance.flows")),
+                    isDebug = true, startNodesInProcess = true)) {
+                // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
+                // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
+                val (partyA, partyB) = listOf(
+                        startNode(providedName = bankA, rpcUsers = asList(user)),
+                        startNode(providedName = bankB, rpcUsers = asList(user))
+                ).map { it.getOrThrow() }
+
+                // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
+                // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
+                // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
+                // working as intended.
+                println("partyAHandle:$partyA.rpcAddress")
+                startBraid(async, partyA.rpcAddress)
+                readLine()          // stop the driver shutting down corda at this point. Whats wrong with objects and garbage collection!!
             }
         }
 
@@ -103,7 +118,7 @@ class BraidTest {
                     .withUserName("user1")
                     .withPassword("test")
                     .withPort(port)
-                    .   startServer()
+                    .startServer()
                     .setHandler {
                         async.complete()
                     }
@@ -190,7 +205,7 @@ class BraidTest {
                         val addresses = node.getJsonArray("addresses")
                         context.assertThat(addresses.size(), equalTo(1))
                         context.assertThat(addresses.getJsonObject(0).getString("host"), equalTo("localhost"))
-                        context.assertThat(addresses.getJsonObject(0).getInteger("port"), equalTo(10004))
+                        context.assertThat(addresses.getJsonObject(0).getInteger("port"), equalTo(10000))
 
                         async.complete()
                     }
