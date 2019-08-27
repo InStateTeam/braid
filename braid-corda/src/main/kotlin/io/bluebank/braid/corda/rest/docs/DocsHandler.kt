@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
+import org.h2.util.StringUtils.urlEncode
 import java.net.URL
 import kotlin.math.log
 import kotlin.reflect.KCallable

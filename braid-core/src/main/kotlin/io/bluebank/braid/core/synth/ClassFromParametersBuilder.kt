@@ -143,4 +143,4 @@ data class ClassFromParametersBuilder(
 
 const val PAYLOAD_CLASS_SUFFIX = "Payload"
 const val PAYLOAD_CLASS_PREFIX = "generated."
-fun Class<*>.payloadClassName() = PAYLOAD_CLASS_PREFIX + this.name + PAYLOAD_CLASS_SUFFIX
+fun Class<*>.payloadClassName() = PAYLOAD_CLASS_PREFIX + this.name.replace("$","_") + PAYLOAD_CLASS_SUFFIX

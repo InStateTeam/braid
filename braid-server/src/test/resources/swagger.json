@@ -145,7 +145,7 @@
     "/cordapps/flows" : {
       "get" : {
         "tags" : [ "network" ],
-        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow-Authorise\"]",
+        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow$Authorise\"]",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
         "parameters" : [ ],
@@ -207,7 +207,7 @@
         }
       }
     },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow-Authorise" : {
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : {
       "post" : {
         "tags" : [ "network" ],
         "description" : "",
@@ -218,20 +218,20 @@
           "name" : "payload",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
+            "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
           }
         } ],
         "responses" : {
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow-AuthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
             }
           },
           "500" : {
@@ -240,7 +240,7 @@
         }
       }
     },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow-Deauthorise" : {
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : {
       "post" : {
         "tags" : [ "network" ],
         "description" : "",
@@ -251,20 +251,20 @@
           "name" : "payload",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
+            "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
           }
         } ],
         "responses" : {
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow-DeauthorisePayload"
+              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
             }
           },
           "500" : {
@@ -647,7 +647,7 @@
         }
       }
     },
-    "ContractUpgradeFlow-AuthorisePayload" : {
+    "ContractUpgradeFlow_AuthorisePayload" : {
       "type" : "object",
       "properties" : {
         "stateAndRef" : {
@@ -772,7 +772,7 @@
         }
       }
     },
-    "ContractUpgradeFlow-DeauthorisePayload" : {
+    "ContractUpgradeFlow_DeauthorisePayload" : {
       "type" : "object",
       "properties" : {
         "stateRef" : {
