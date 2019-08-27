@@ -240,13 +240,13 @@
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-core</artifactId>
-      <version>1.5.22</version>
+      <version>1.5.23</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-models</artifactId>
-      <version>1.5.22</version>
+      <version>1.5.23</version>
     </dependency>
   </dependencies>
 

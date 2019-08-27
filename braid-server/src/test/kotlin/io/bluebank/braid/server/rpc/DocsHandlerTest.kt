@@ -44,7 +44,7 @@ class DocsHandlerTest{
     }
 
     @Test
-    @Ignore
+    //@Ignore
     fun shouldEscapeInnerClassDefinitionName() {
         val docsHandler = DocsHandler()
         val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
@@ -57,6 +57,6 @@ class DocsHandlerTest{
         docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
         val createSwagger = docsHandler.createSwagger()
         assertThat(createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"), nullValue())
-        assertThat(createSwagger.definitions.get("ContractUpgradeFlow.AuthorisePayload"), notNullValue())
+        assertThat(createSwagger.definitions.get("ContractUpgradeFlow%24AuthorisePayload"), notNullValue())
     }
 }
