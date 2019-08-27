@@ -67,7 +67,7 @@ class DocsHandler(
       .end(output)
   }
 
-  private fun createSwagger(): Swagger {
+  fun createSwagger(): Swagger {
     val url = URL(basePath)
     val info = createSwaggerInfo()
     return Swagger()

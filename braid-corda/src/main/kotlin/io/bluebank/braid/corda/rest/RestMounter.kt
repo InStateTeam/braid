@@ -92,35 +92,11 @@ class RestMounter(
 
   init {
     if (!config.apiPath.startsWith("/")) throw RuntimeException("path must begin with a /")
-    docsHandler = createDocsHandler()
+    docsHandler = DocsHandlerFactory(config).createDocsHandler()
     mount(config.pathsInit)
   }
 
-  private fun createDocsHandler(): DocsHandler {
-    return DocsHandler(
-      serviceName = config.serviceName,
-      description = config.description,
-      basePath = "${config.hostAndPortUri}/$path/",
-      scheme = config.scheme,
-      contact = config.contact,
-      auth = getSecuritySchemeDefinition(),
-      debugMode = config.debugMode
-    )
-  }
 
-  private fun getSecuritySchemeDefinition(): SecuritySchemeDefinition? {
-    return when (config.authSchema) {
-      AuthSchema.Basic -> {
-        BasicAuthDefinition()
-      }
-      AuthSchema.Token -> {
-        ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
-      }
-      else -> {
-        null
-      }
-    }
-  }
 
   private fun mount(fn: RestMounter.(Router) -> Unit) {
     configureSwaggerAndStatic()

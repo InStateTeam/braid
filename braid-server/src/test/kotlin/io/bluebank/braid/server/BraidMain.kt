@@ -23,7 +23,7 @@ private val log = loggerFor<Braid>()
 fun main(args: Array<String>) {
 
     if (args.size != 4) {
-        throw IllegalArgumentException("Usage: Braid <node address> <username> <password> <port>")
+        throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port>")
     }
 
     val port = Integer.valueOf(args[3])

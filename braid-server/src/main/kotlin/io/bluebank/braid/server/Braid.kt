@@ -25,6 +25,7 @@ import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
+import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 
 
@@ -63,25 +64,7 @@ data class Braid(
                             // .withFlow(IssueObligation.Initiator::class)
                             .withPort(port)
                             .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-                            .withRestConfig(RestConfig()
-                                    .withPaths {
-                                        group("network") {
-                                            get("/network/nodes", NetworkService(rpc)::nodes)
-                                            get("/network/notaries", NetworkService(rpc)::notaries)
-                                            get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
-                                            get("/cordapps/flows", FlowService(rpc)::flows)
-                                            //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
-
-
-                                            rpcClasses().forEach({
-                                                try {
-                                                    post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
-                                                } catch (e: Throwable) {
-                                                    log.error("Unable to register flow:${it.java.name}", e);
-                                                }
-                                            })
-                                        }
-                                    })
+                            .withRestConfig(restConfig(rpc))
                             .bootstrapBraid(null, result.completer())
                 }
 
@@ -89,6 +72,28 @@ data class Braid(
         //addShutdownHook {  }
 
         return result
+    }
+
+    fun restConfig(rpc: CordaRPCOps): RestConfig {
+        return RestConfig()
+                .withPaths {
+                    group("network") {
+                        get("/network/nodes", NetworkService(rpc)::nodes)
+                        get("/network/notaries", NetworkService(rpc)::notaries)
+                        get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+                        get("/cordapps/flows", FlowService(rpc)::flows)
+                        //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
+
+
+                        rpcClasses().forEach({
+                            try {
+                                post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
+                            } catch (e: Throwable) {
+                                log.error("Unable to register flow:${it.java.name}", e);
+                            }
+                        })
+                    }
+                }
     }
 
 
