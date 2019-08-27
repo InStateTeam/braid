@@ -71,7 +71,7 @@ class RestMounter(
     "$swaggerPath/*"
   }
 
-  private val docsHandler: DocsHandler
+  public val docsHandler: DocsHandler
   private val cookieHandler by lazy { CookieHandler.create() }
   private val sessionHandler by lazy {
     SessionHandler.create(
@@ -83,7 +83,7 @@ class RestMounter(
   private val basicAuthHandler by lazy { BasicAuthHandler.create(config.authProvider) }
   private val unprotectedRouter = Router.router(vertx)
   private val protectedRouter: Router = Router.router(vertx)
-  private var currentRouter = unprotectedRouter
+  public var currentRouter = unprotectedRouter
   private var groupName: String = ""
   private val protected: Boolean
     get() {
@@ -92,35 +92,11 @@ class RestMounter(
 
   init {
     if (!config.apiPath.startsWith("/")) throw RuntimeException("path must begin with a /")
-    docsHandler = createDocsHandler()
+    docsHandler = DocsHandlerFactory(config).createDocsHandler()
     mount(config.pathsInit)
   }
 
-  private fun createDocsHandler(): DocsHandler {
-    return DocsHandler(
-      serviceName = config.serviceName,
-      description = config.description,
-      basePath = "${config.hostAndPortUri}/$path/",
-      scheme = config.scheme,
-      contact = config.contact,
-      auth = getSecuritySchemeDefinition(),
-      debugMode = config.debugMode
-    )
-  }
 
-  private fun getSecuritySchemeDefinition(): SecuritySchemeDefinition? {
-    return when (config.authSchema) {
-      AuthSchema.Basic -> {
-        BasicAuthDefinition()
-      }
-      AuthSchema.Token -> {
-        ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
-      }
-      else -> {
-        null
-      }
-    }
-  }
 
   private fun mount(fn: RestMounter.(Router) -> Unit) {
     configureSwaggerAndStatic()
@@ -308,7 +284,7 @@ class RestMounter(
   }
 
   @JvmName("bindMethod0")
-  private fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
+  public fun <Response> bind(method: HttpMethod, path: String, fn: KCallable<Response>) {
     currentRouter.route(method, path).bind(fn)
     docsHandler.add(groupName, protected, method, path, fn)
   }

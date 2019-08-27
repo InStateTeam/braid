@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.server.rpc
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
-import io.bluebank.braid.corda.BraidConfig
-import io.bluebank.braid.corda.rest.RestConfig
-import io.bluebank.braid.corda.serialisation.AmountDeserializer
-import io.bluebank.braid.corda.serialisation.AmountSerializer
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
+import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
-import io.vertx.core.AsyncResult
-import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.contracts.Amount
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
+import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.toObservable
 import net.corda.core.utilities.NetworkHostAndPort
-import java.security.PublicKey
-import javax.ws.rs.QueryParam
+import net.corda.core.utilities.OpaqueBytes
+import net.corda.core.utilities.parsePublicKeyBase58
+import net.corda.finance.AMOUNT
+import net.corda.finance.flows.CashIssueFlow
+import java.util.*
 
 class RPCTest
 
@@ -52,7 +48,7 @@ fun main(args: Array<String>) {
 
     val client = CordaRPCClient(nodeAddress)
     val connection = client.start(username, password)
-    val cordaRPCOperations = connection.proxy
+    val ops = connection.proxy
 
 
     BraidCordaJacksonInit.init()
@@ -63,18 +59,36 @@ fun main(args: Array<String>) {
     Json.mapper.registerModule(it)
     Json.prettyMapper.registerModule(it)
 
+    issueCash(ops)
 
-    log.info("currentNodeTime"+ Json.encodePrettily( cordaRPCOperations.currentNodeTime()))
-    log.info("nodeInfo" + Json.encodePrettily(cordaRPCOperations.nodeInfo()))
-    log.info("nodeInfo/addresses" + Json.encodePrettily(cordaRPCOperations.nodeInfo().addresses))
-    log.info("nodeInfo/legalIdentities" + Json.encodePrettily(cordaRPCOperations.nodeInfo().legalIdentities))
-  //  log.info(cordaRPCOperations.nodeInfoFromParty(Party(CordaX500Name.parse(""), PublicKey())).toString())
-    log.info("notaryIdentities:" + Json.encodePrettily(cordaRPCOperations.notaryIdentities())  )
-    log.info("networkMapFeed:" + Json.encodePrettily(cordaRPCOperations.networkMapFeed())    )
-    log.info("registeredFlows:" + Json.encodePrettily(cordaRPCOperations.registeredFlows()))
+    //info(ops)
     //cordaRPCOperations.
 
+
+    //ops.
+    //ops.startFlow()
     connection.notifyServerAndClose()
+}
+
+private fun issueCash(ops: CordaRPCOps) {
+    val party = Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),
+            parsePublicKeyBase58("GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE"))
+    val progressHandler = ops.startFlowDynamic(CashIssueFlow::class.java, AMOUNT(10.00, Currency.getInstance("GBP")), OpaqueBytes("123".toByteArray()), party)
+    progressHandler.returnValue.toObservable().toFuture()
+            .setHandler {
+                println(it)
+            }
+}
+
+private fun info(ops: CordaRPCOps) {
+    log.info("currentNodeTime" + Json.encodePrettily(ops.currentNodeTime()))
+    log.info("nodeInfo" + Json.encodePrettily(ops.nodeInfo()))
+    log.info("nodeInfo/addresses" + Json.encodePrettily(ops.nodeInfo().addresses))
+    log.info("nodeInfo/legalIdentities" + Json.encodePrettily(ops.nodeInfo().legalIdentities))
+    //  log.info(cordaRPCOperations.nodeInfoFromParty(Party(CordaX500Name.parse(""), PublicKey())).toString())
+    log.info("notaryIdentities:" + Json.encodePrettily(ops.notaryIdentities()))
+    log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed()))
+    log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
 }
 
 

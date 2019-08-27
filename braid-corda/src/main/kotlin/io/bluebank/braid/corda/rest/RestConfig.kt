@@ -40,7 +40,7 @@ data class RestConfig(
     const val DEFAULT_HOST_AND_PORT_URI = "http://localhost:8080"
     const val DEFAULT_API_PATH = "/api/rest"
     const val DEFAULT_SWAGGER_PATH = "/"
-    val DEFAULT_CONTACT: Contact = Contact().email("").name("").url("")
+    val DEFAULT_CONTACT: Contact = Contact()
     val DEFAULT_AUTH_PROVIDER: AuthProvider? = null
     val DEFAULT_AUTH_SCHEMA = AuthSchema.None
   }

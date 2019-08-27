@@ -44,7 +44,7 @@ class BraidVerticle(
     log.info("starting with ", config)
     val router = setupRouter()
     setupWebserver(router, startFuture)
-    Node.printBasicNodeInfo(
+    log.info(
       "Braid server started on",
       "${config.protocol}://localhost:${config.port}${config.rootPath}"
     )

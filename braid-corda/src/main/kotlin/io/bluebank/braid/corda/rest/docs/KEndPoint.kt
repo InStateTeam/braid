@@ -70,11 +70,11 @@ class KEndPoint(
 
   override val consumes: String
     get() {
-      return bodyParameter?.type?.javaType?.mediaType() ?: MediaType.APPLICATION_JSON
+      return bodyParameter?.type?.javaTypeIncludingSynthetics()?.mediaType() ?: MediaType.APPLICATION_JSON
     }
 
   override val parameterTypes: List<Type>
-    get() = parameters.map { it.type.javaType }
+    get() = parameters.map { it.type.javaTypeIncludingSynthetics() }
 
   override fun toSwaggerParams(): List<Parameter> {
     return if (this.parameters.isEmpty()) {
@@ -160,4 +160,10 @@ class KEndPoint(
     this.example(HttpHeaderValues.APPLICATION_JSON.toString(), example)
     return this
   }
+
+  override fun toString(): String {
+    return "KEndPoint(name='$name', parameters=$parameters, returnType=$returnType)"
+  }
+
+
 }

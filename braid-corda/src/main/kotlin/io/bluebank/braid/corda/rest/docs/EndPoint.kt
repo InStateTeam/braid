@@ -36,10 +36,12 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
+import java.lang.RuntimeException
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.javaType
@@ -70,10 +72,11 @@ abstract class EndPoint(
         path,
         name,
         parameters,
-        returnType.javaType,
+        returnType.javaTypeIncludingSynthetics(),
         annotations
       )
     }
+
 
     fun create(
       groupName: String,
@@ -174,7 +177,7 @@ abstract class EndPoint(
   }
 
   protected fun KType.getSwaggerProperty(): Property {
-    return getKType().javaType.getSwaggerProperty()
+    return getKType().javaTypeIncludingSynthetics().getSwaggerProperty()
   }
 
   protected fun KType.getSwaggerModelReference(): Model {
@@ -189,10 +192,14 @@ abstract class EndPoint(
 
   protected fun Type.getSwaggerProperty(): Property {
     val actualType = this.actualType()
-    return if (actualType.isBinary()) {
-      BinaryProperty()
-    } else {
-      ModelConverters.getInstance().readAsProperty(actualType)
+    try {
+        return if (actualType.isBinary()) {
+          BinaryProperty()
+        } else {
+              ModelConverters.getInstance().readAsProperty(actualType)
+        }
+    } catch (e: Throwable) {
+      throw RuntimeException("Unable to convert actual type:" + actualType)
     }
   }
 
