@@ -51,12 +51,12 @@ class DocsHandlerTest{
 
         // need to be able to do this..
         val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
-        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("generated.net.corda.core.flows.ContractUpgradeFlow\$AuthorisePayload"))
+        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("generated.net.corda.core.flows.ContractUpgradeFlow_AuthorisePayload"))
         //handler.returnType.javaType
 
         docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
         val createSwagger = docsHandler.createSwagger()
         assertThat(createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"), nullValue())
-        assertThat(createSwagger.definitions.get("ContractUpgradeFlow%24AuthorisePayload"), notNullValue())
+        assertThat(createSwagger.definitions.get("ContractUpgradeFlow_AuthorisePayload"), notNullValue())
     }
 }
