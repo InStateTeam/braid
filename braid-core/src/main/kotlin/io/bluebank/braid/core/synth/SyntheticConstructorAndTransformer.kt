@@ -101,7 +101,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
 
 @Suppress("UNCHECKED_CAST")
 fun <T> Class<T>.preferredConstructor() : Constructor<T> {
-  return this.constructors.first() as Constructor<T>
+  return this.constructors.maxBy { c->c.parameterCount } as Constructor<T>
 }
 
 fun ObjectMapper.decodeValue(json: String, fn: KFunction<*>) : Any {

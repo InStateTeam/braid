@@ -19,17 +19,13 @@ import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.synth.preferredConstructor
 import io.bluebank.braid.core.synth.trampoline
-import io.bluebank.braid.server.Braid
 import io.vertx.core.Future
-import net.corda.core.contracts.Amount
 import net.corda.core.flows.FlowLogic
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.startFlow
 import net.corda.core.toObservable
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.primaryConstructor
+import net.corda.core.utilities.ProgressTracker
 
 class FlowInitiator(val rpc: CordaRPCOps) {
     private val log = loggerFor<FlowInitiator>()
@@ -39,20 +35,25 @@ class FlowInitiator(val rpc: CordaRPCOps) {
         val constructor = kClass.java.preferredConstructor()
 
         //val constructor = FooFlow::class.java.preferredConstructor()
-        val fn = trampoline(constructor, HashMap()) {
+        val fn = trampoline(constructor, createBoundParameterTypes()) {
             // do what you want here ...
             // e.g. call the flow directly
             // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
             // and return a Future
+            val excludeProgressTracker = it.toMutableList()
+            excludeProgressTracker.removeIf({ l->l is ProgressTracker})    //todo might have other classes tht aren't in startFlowDynamic
             log.info("About to start $kClass with args: $it")
 
-            rpc.startFlowDynamic(kClass.java as Class<FlowLogic<*>>, *it).returnValue.toObservable().toFuture()
+            rpc.startFlowDynamic(kClass.java as Class<FlowLogic<*>>, *excludeProgressTracker.toTypedArray()).returnValue.toObservable().toFuture()
 
         }
 
         return fn;//RPCCallable(rpc, fn)
     }
 
+    private fun createBoundParameterTypes(): Map<Class<*>, Any> {
+        return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
+    }
 
 
 }

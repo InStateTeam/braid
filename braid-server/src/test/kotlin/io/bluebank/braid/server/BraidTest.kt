@@ -29,6 +29,7 @@ import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
@@ -257,6 +258,7 @@ class BraidTest {
 
                         context.assertThat(nodes.size(), equalTo(1))
                         context.assertThat(nodes.getJsonObject(0).getString("name"), equalTo("O=Notary Service, L=Zurich, C=CH"))
+//                        context.assertThat(nodes.getJsonObject(0).getString("owningKey"), equalTo("GfHq2tTVk9z4eXgySzYjYp2YsTewf2FHZCb1Ls31XPzG7Hy2hRUeM8cFaFu4"))
 
                         async.complete()
                     }
@@ -292,7 +294,7 @@ class BraidTest {
     }
 
     @Test
-    @Ignore   // failing for some reason in build ok locally.
+   // @Ignore   // failing for some reason in build ok locally.
     fun shouldStartFlow(context: TestContext) {
         val async = context.async()
 
@@ -300,35 +302,57 @@ class BraidTest {
         // issuerBankPartyRef as query parameter
         // Party as body
         val amount = Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))
-        val notary = "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE\"}";
-    //    val party2 = Json.encode(Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"), RSAPublicKeyImpl(null)))
 
-        val json = JsonObject()
-                .put("notary", JsonObject(notary))
-                .put("amount", JsonObject(amount))
-                .put("issuerBankPartyRef", JsonObject())       /// todo serialize OpaqueBytes
+        getNotary().map{
+            val notary = it
+            // "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgySzYjYp2YsTewf2FHZCb1Ls31XPzG7Hy2hRUeM8cFaFu4\"}";
+
+            val json = JsonObject()
+                    .put("notary", notary)
+                    .put("amount", JsonObject(amount))
+                    .put("issuerBankPartyRef", JsonObject())       /// todo serialize OpaqueBytes
 
 
-        log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
+            log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
 
-        val encodePrettily = json.encodePrettily()
-        client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
+            val encodePrettily = json.encodePrettily()
+            client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
+                    .putHeader("Accept", "application/json; charset=utf8")
+                    .putHeader("Content-length",""+encodePrettily.length)
+                    .exceptionHandler(context::fail)
+                    .handler {
+                        context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+                        it.bodyHandler {
+                            val reply = it.toJsonObject()
+                            context.assertThat(reply, notNullValue())
+                            context.assertThat(reply.getJsonObject("stx"), notNullValue())
+                            context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+
+                            async.complete()
+                        }
+                    }
+                    .end(encodePrettily)
+        }
+    }
+
+    private fun getNotary(): Future<JsonObject> {
+        val result = Future.future<JsonObject>()
+        client.get(port, "localhost", "/api/rest/network/notaries")
                 .putHeader("Accept", "application/json; charset=utf8")
-                .putHeader("Content-length",""+encodePrettily.length)
-                .exceptionHandler(context::fail)
                 .handler {
-                    context.assertEquals(200, it.statusCode(), it.statusMessage())
 
                     it.bodyHandler {
-                        val reply = it.toJsonObject()
-                        context.assertThat(reply, notNullValue())
-                        context.assertThat(reply.getJsonObject("stx"), notNullValue())
-                        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+                        val nodes = it.toJsonArray()
 
-                        async.complete()
+                        //   val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
+
+                        result.complete(nodes.getJsonObject(0))
                     }
                 }
-                .end(encodePrettily)
+                .end()
+        return result;
     }
+
 
 }
