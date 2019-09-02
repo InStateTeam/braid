@@ -25,7 +25,6 @@ import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
 
-
 fun main(args: Array<String>) {
   val vertx = Vertx.vertx()
   val server = createServerBuilder()

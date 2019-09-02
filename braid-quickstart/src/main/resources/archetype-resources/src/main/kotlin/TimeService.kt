@@ -17,8 +17,8 @@ package $
 
 { package }
 
-import io.bluebank.braid.core.annotation .MethodDescription
-import io.bluebank.braid.core.annotation .ServiceDescription
+import io.bluebank.braid.core.annotation.MethodDescription
+import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Vertx
 import rx.Observable
 import rx.Subscriber

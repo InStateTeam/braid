@@ -25,9 +25,31 @@ class BraidServiceProxy {
     this.client.onClose = onClose;
   }
 
+  static massageArgs(args) {
+    if(args != null) {
+      if(args.length === 0) {
+        args = null;
+      } else if(args.length === 1) {
+        args = args[0];
+      }
+    }
+    return args;
+  }
+
+  static bindCallbacks(args) {
+    if(!args) return null;
+    const last3Fns = args.slice(-3).filter(item => {
+      return typeof item === 'function'
+    });
+    if(last3Fns.length === 0) return null;
+    return {
+      onNext: last3Fns[0], onError: last3Fns[1], onCompleted: last3Fns[2]
+    }
+  }
+
   invoke(method, args) {
     const callbacks = BraidServiceProxy.bindCallbacks(args);
-    if (callbacks) {
+    if(callbacks) {
       return this.invokeForStream(method, args, callbacks);
     } else {
       return this.invokeForPromise(method, args);
@@ -44,30 +66,6 @@ class BraidServiceProxy {
       return typeof item !== 'function'
     }));
     return this.client.invokeForStream(method, noFunctionArgs, callbacks.onNext, callbacks.onError, callbacks.onCompleted);
-  }
-
-  static massageArgs(args) {
-    if (args != null) {
-      if (args.length === 0) {
-        args = null;
-      } else if (args.length === 1) {
-        args = args[0];
-      }
-    }
-    return args;
-  }
-
-  static bindCallbacks(args) {
-    if (!args) return null;
-    const last3Fns = args.slice(-3).filter(item => {
-      return typeof item === 'function'
-    });
-    if (last3Fns.length === 0) return null;
-    return {
-      onNext: last3Fns[0],
-      onError: last3Fns[1],
-      onCompleted: last3Fns[2]
-    }
   }
 }
 

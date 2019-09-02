@@ -28,7 +28,7 @@ class MemoizeTest {
     assertEquals(fn(8, 7), result)
   }
 
-  private fun sum(lhs: Int, rhs: Int) : Long {
+  private fun sum(lhs: Int, rhs: Int): Long {
     return (salt++ + lhs.toLong() + rhs.toLong())
   }
 }

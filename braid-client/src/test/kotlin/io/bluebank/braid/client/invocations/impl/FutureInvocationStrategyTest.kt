@@ -214,7 +214,7 @@ class FutureInvocationStrategyTest {
 
   @Test
   fun `that throwing an exception during network invocation causes getResult to fail`() {
-    val invocations = MockInvocations { throw error("boom")}
+    val invocations = MockInvocations { throw error("boom") }
     val strategy = FutureInvocationStrategy(
       invocations,
       TestInterface::testFuture.name,

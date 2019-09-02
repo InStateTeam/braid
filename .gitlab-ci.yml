@@ -30,15 +30,15 @@ variables:
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
-- npm set registry $NPM_REPO
-- npm set $NPM_CREDENTIALS
-#- export GRADLE_USER_HOME=`pwd`/.gradle
-- mkdir -p ~/.m2/repository
-- cp maven/settings.xml ~/.m2/settings.xml
-- rm -rf ~/.gnupg
-- gpg --version
-- gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
-- gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
+  - npm set registry $NPM_REPO
+  - npm set $NPM_CREDENTIALS
+  #- export GRADLE_USER_HOME=`pwd`/.gradle
+  - mkdir -p ~/.m2/repository
+  - cp maven/settings.xml ~/.m2/settings.xml
+  - rm -rf ~/.gnupg
+  - gpg --version
+  - gpg --import --batch --passphrase "$GPG_PASSPHRASE" <<< "$GPG_KEY"
+  - gpg --import-ownertrust <<< "$GPG_OWNER_TRUST"
 
 stages:
   - build
@@ -61,15 +61,15 @@ build:
   artifacts:
     name: "javascript-logs-$CI_JOB_NAME"
     paths:
-    - braid-corda/target/logs/js.log
-    - braid-client/target
-    - braid-client-js/dist
-    - braid-client-js/target
-    - braid-corda/target
-    - braid-corda-client/target
-    - braid-core/target
-    - braid-quickstart/target
-    - braid-standalone-server/target
+      - braid-corda/target/logs/js.log
+      - braid-client/target
+      - braid-client-js/dist
+      - braid-client-js/target
+      - braid-corda/target
+      - braid-corda-client/target
+      - braid-core/target
+      - braid-quickstart/target
+      - braid-standalone-server/target
   only:
     - master
     - patch-1

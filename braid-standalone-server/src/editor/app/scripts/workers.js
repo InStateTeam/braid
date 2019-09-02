@@ -20,8 +20,8 @@ const helpers = new Helpers();
 
 export function ensureServiceIsCreated(callback) {
   const params = helpers.parseURL(document.URL).searchObject;
-  if (typeof(params['service']) !== 'undefined' && params.service !== null) {
-    helpers.getServiceScript(params.service, function() {
+  if(typeof (params['service']) !== 'undefined' && params.service !== null) {
+    helpers.getServiceScript(params.service, function () {
       callback(params.service);
     })
   } else {
@@ -38,15 +38,15 @@ export function retrieveAndUpdateServices(selectedService) {
 export function updateServices(services, selectedService) {
   const selection = $('#services');
   populateServiceOptions(selection, services);
-  if (selectedService) {
+  if(selectedService) {
     selection.val(selectedService).trigger('change');
     switchService(selectedService);
   }
 }
 
-export function switchService(selectedService){
+export function switchService(selectedService) {
   helpers.setSelectedService(selectedService);
-  helpers.getServiceScript(selectedService, function(script) {
+  helpers.getServiceScript(selectedService, function (script) {
     helpers.setEditorContents(script)
     $('#saveBtn').prop('disabled', true)
   });
@@ -59,7 +59,7 @@ export function switchService(selectedService){
 function populateServiceOptions(selection, services) {
   selection.empty();
 
-  for (var idx in services) {
+  for(var idx in services) {
     const service = services[idx];
     const option = $('<li>', {value: service, text: service})
     //option.click(onServiceSelect);

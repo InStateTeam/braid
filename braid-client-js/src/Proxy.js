@@ -19,23 +19,23 @@ const xhr = require('request');
 
 import DynamicProxy from './DynamicServiceProxy';
 
-export { default as ServiceProxy } from './ServiceProxy';
+export {default as ServiceProxy} from './ServiceProxy';
 
 export class Proxy {
   constructor(config, onOpen, onClose, onError, options) {
-    if (!config.url) {
+    if(!config.url) {
       throw "config must include url property e.g. https://localhost:8080"
     }
 
-    if (typeof options === 'undefined') {
+    if(typeof options === 'undefined') {
       options = {};
     }
 
-    if (typeof options.strictSSL === 'undefined') {
+    if(typeof options.strictSSL === 'undefined') {
       options.strictSSL = true;
     }
-    if (!options.strictSSL) {
-      if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+    if(!options.strictSSL) {
+      if(typeof process !== 'undefined' && typeof process.env !== 'undefined') {
         // NOTE: rather nasty - to be used only in local dev for self-signed certificates
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
       }
@@ -49,14 +49,14 @@ export class Proxy {
     // --- PRIVATE FUNCTIONS ---
 
     function onInternalOpen() {
-      if (++connections === requiredConnections && errors === 0 && onOpen) {
+      if(++connections === requiredConnections && errors === 0 && onOpen) {
         onOpen()
       }
     }
 
     function failed(msg, e) {
       e.message = msg;
-      if (onError) {
+      if(onError) {
         onError(e)
       } else {
         console.error(e)
@@ -64,14 +64,14 @@ export class Proxy {
     }
 
     function onInternalClose() {
-      if (--connections <= 0 && errors === 0 && onClose) {
+      if(--connections <= 0 && errors === 0 && onClose) {
         onClose()
       }
     }
 
     function onInternalError(e) {
-      console.error(typeof(e), e);
-      if (++errors === 1 && onError) {
+      console.error(typeof (e), e);
+      if(++errors === 1 && onError) {
         onError(e)
       }
     }
@@ -86,12 +86,12 @@ export class Proxy {
         headers: {
           "Content-Type": "application/json"
         }
-      }, function(err, resp, body) {
-        if (err) {
+      }, function (err, resp, body) {
+        if(err) {
           clearCredentials();
           err.url = url;
           failed(`failed to get services descriptor from ${url}`, err)
-        } else if (resp) {
+        } else if(resp) {
           bindServices(body);
         }
       })
@@ -101,9 +101,9 @@ export class Proxy {
       const services = JSON.parse(body)
       const serviceNames = Object.keys(services);
       requiredConnections = serviceNames.length;
-      for (let idx = 0; idx < serviceNames.length; ++idx) {
+      for(let idx = 0; idx < serviceNames.length; ++idx) {
         const serviceName = serviceNames[idx];
-        if (serviceName == "close") {
+        if(serviceName == "close") {
           console.warn(`service ${serviceName} uses a restricted name. this service will not be accessible`)
           continue;
         }
@@ -117,9 +117,9 @@ export class Proxy {
     }
 
     // --- PUBLIC FUNCTIONS ---
-    that.close = function() {
-      for (const key in that) {
-        if (that.hasOwnProperty(key) && key !== "close") {
+    that.close = function () {
+      for(const key in that) {
+        if(that.hasOwnProperty(key) && key !== "close") {
           that[key].close()
         }
       }

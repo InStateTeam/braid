@@ -20,7 +20,6 @@ import java.lang.reflect.Constructor
 import java.lang.reflect.Parameter
 import kotlin.reflect.*
 import kotlin.reflect.full.createType
-import kotlin.reflect.jvm.reflect
 
 class SyntheticConstructorAndTransformer<K : Any, R>(
   internal val constructor: Constructor<K>,
@@ -46,7 +45,9 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
     }
   }
 
-  private val payloadClass = acquirePayloadClass(constructor, boundTypes, classLoader, className)
+  private val payloadClass =
+    acquirePayloadClass(constructor, boundTypes, classLoader, className)
+
   fun annotations(): Array<Annotation> = constructor.annotations
   fun invoke(payload: Any): R {
     val parameterValues =
@@ -69,7 +70,8 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   // DocsHandler cant get java type from this  payloadClass.kotlin.createType()
   // Unit::class.createType()
   //  transformer.reflect()!!.returnType     // DocsHandler cant get java type from this
-  override val returnType: KType = payloadClass.kotlin.createType() //KTypeSynthetic(payloadClass)       payloadClass.kotlin.createType()
+  override val returnType: KType =
+    payloadClass.kotlin.createType() //KTypeSynthetic(payloadClass)       payloadClass.kotlin.createType()
   override val typeParameters: List<KTypeParameter> = emptyList()
   override val visibility: KVisibility? = KVisibility.PUBLIC
   override val isExternal: Boolean = false
@@ -100,15 +102,18 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Class<T>.preferredConstructor() : Constructor<T> {
-  return this.constructors.maxBy { c->c.parameterCount } as Constructor<T>
+fun <T> Class<T>.preferredConstructor(): Constructor<T> {
+  return this.constructors.maxBy { c -> c.parameterCount } as Constructor<T>
 }
 
-fun ObjectMapper.decodeValue(json: String, fn: KFunction<*>) : Any {
-  return this.readValue(json, (fn.parameters.first().type.classifier as KClass<*>).javaObjectType)
+fun ObjectMapper.decodeValue(json: String, fn: KFunction<*>): Any {
+  return this.readValue(
+    json,
+    (fn.parameters.first().type.classifier as KClass<*>).javaObjectType
+  )
 }
 
-fun <K: Any, R> trampoline(
+fun <K : Any, R> trampoline(
   constructor: Constructor<K>,
   boundTypes: Map<Class<*>, Any>,
   className: String = constructor.declaringClass.payloadClassName(),
@@ -116,7 +121,13 @@ fun <K: Any, R> trampoline(
   transform: (Array<Any?>) -> R
 ): KFunction<R> {
   @Suppress("UNCHECKED_CAST")
-  return SyntheticConstructorAndTransformer(constructor, className, boundTypes, classLoader, transform)
+  return SyntheticConstructorAndTransformer(
+    constructor,
+    className,
+    boundTypes,
+    classLoader,
+    transform
+  )
 }
 
 

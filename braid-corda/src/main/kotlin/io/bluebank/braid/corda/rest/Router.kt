@@ -37,7 +37,6 @@ import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
-import kotlin.reflect.jvm.javaType
 
 fun <R> Route.bind(fn: KCallable<R>) {
   fn.validateParameters()
@@ -95,7 +94,7 @@ private fun parseComplexType(parameter: KParameter, body: @Nullable Buffer): Par
     else -> {
       if (body.length() > 0) {
         val constructType =
-                Json.mapper.typeFactory.constructType(parameter.type.javaTypeIncludingSynthetics())
+          Json.mapper.typeFactory.constructType(parameter.type.javaTypeIncludingSynthetics())
         ParseResult(Json.mapper.readValue<Any>(body.toString(), constructType))
       } else {
         ParseResult.NOT_FOUND
@@ -211,8 +210,8 @@ private fun parseQueryParameter(
   val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
   val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
   return when {
-    queryParam != null-> {
-      if(parameter.isSimpleType()) {
+    queryParam != null -> {
+      if (parameter.isSimpleType()) {
         // TODO: handle arrays
         ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
       } else {

@@ -15,22 +15,7 @@
  */
 package io.bluebank.braid.server.rpc
 
-import net.corda.core.contracts.Amount
-import net.corda.core.identity.CordaX500Name
-import net.corda.core.identity.Party
-import net.corda.core.utilities.OpaqueBytes
-import net.corda.core.utilities.parsePublicKeyBase58
-import net.corda.finance.AMOUNT
-import net.corda.finance.flows.CashIssueFlow
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
-import org.junit.Test
-import java.util.*
-
-class FlowToVarArgsTest{
+class FlowToVarArgsTest {
 //    @Test
 //    fun convertToVarArgs() {
 //        val party = Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),

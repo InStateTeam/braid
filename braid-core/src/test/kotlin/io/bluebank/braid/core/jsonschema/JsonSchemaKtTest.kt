@@ -28,7 +28,12 @@ class JsonSchemaKtTest {
   fun `that we can get the correct descriptor for a method with description`() {
     val method = TestService::echo.javaMethod!!
     val descriptor = method.toDescriptor()
-    val match = MethodDescriptor(name = "echo", description = "echo", parameters = mapOf("message" to "string"), returnType = "string")
+    val match = MethodDescriptor(
+      name = "echo",
+      description = "echo",
+      parameters = mapOf("message" to "string"),
+      returnType = "string"
+    )
     assertEquals(match, descriptor)
   }
 
@@ -36,7 +41,12 @@ class JsonSchemaKtTest {
   fun `that we can get the correct descriptor for a method without description`() {
     val method = TestService::echoNoDescription.javaMethod!!
     val descriptor = method.toDescriptor()
-    val match = MethodDescriptor(name = "echoNoDescription", description = "", parameters = mapOf("message" to "string"), returnType = "string")
+    val match = MethodDescriptor(
+      name = "echoNoDescription",
+      description = "",
+      parameters = mapOf("message" to "string"),
+      returnType = "string"
+    )
     assertEquals(match, descriptor)
   }
 
@@ -44,7 +54,12 @@ class JsonSchemaKtTest {
   fun `that we can get the correct descriptor for a method returning observable`() {
     val method = TestService::numbers.javaMethod!!
     val descriptor = method.toDescriptor()
-    val match = MethodDescriptor(name = "numbers", description = "", parameters = emptyMap(), returnType = "stream-of integer")
+    val match = MethodDescriptor(
+      name = "numbers",
+      description = "",
+      parameters = emptyMap(),
+      returnType = "stream-of integer"
+    )
     assertEquals(match, descriptor)
   }
 
@@ -52,7 +67,12 @@ class JsonSchemaKtTest {
   fun `that we can get the correct descriptor for a class constructor`() {
     val constructor = EchoFlow::class.java.constructors.first()
     val descriptor = constructor.toDescriptor()
-    val match = MethodDescriptor(name = EchoFlow::class.qualifiedName!!, description = EchoFlow::class.simpleName!!, parameters = mapOf("message" to "string"), returnType = "{message:string}")
+    val match = MethodDescriptor(
+      name = EchoFlow::class.qualifiedName!!,
+      description = EchoFlow::class.simpleName!!,
+      parameters = mapOf("message" to "string"),
+      returnType = "{message:string}"
+    )
     assertEquals(match, descriptor)
   }
 
@@ -68,10 +88,11 @@ class JsonSchemaKtTest {
 class TestService(val config: String) {
   @MethodDescription(description = "echo", returnType = String::class)
   fun echo(message: String) = message
+
   fun echoNoDescription(message: String) = message
-  fun numbers() : Observable<Int> = Observable.just(1, 2, 3)
+  fun numbers(): Observable<Int> = Observable.just(1, 2, 3)
 }
 
 class EchoFlow(val message: String) {
-  fun call() : String = message
+  fun call(): String = message
 }

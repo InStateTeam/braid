@@ -31,15 +31,15 @@ export default class JsonRPC {
     this.onError = null;
     this.socket = null;
 
-    if (!url.endsWith('/')) {
+    if(!url.endsWith('/')) {
       url = url + '/';
     }
 
-    if (typeof options === 'undefined') {
+    if(typeof options === 'undefined') {
       options = {}
     }
 
-    if (typeof options.strictSSL === 'undefined') {
+    if(typeof options.strictSSL === 'undefined') {
       options.strictSSL = true;
     }
 
@@ -47,8 +47,8 @@ export default class JsonRPC {
 
     function checkServiceExistsAndBootstrap() {
       const infoURL = url + "info";
-      if (!options.strictSSL) {
-        if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+      if(!options.strictSSL) {
+        if(typeof process !== 'undefined' && typeof process.env !== 'undefined') {
           // NOTE: rather nasty - to be used only in local dev for self-signed certificates
           process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         }
@@ -63,11 +63,11 @@ export default class JsonRPC {
         headers: {
           "Content-Type": "application/json"
         }
-      }, function(err, resp) {
-        if (err) {
+      }, function (err, resp) {
+        if(err) {
           err.url = infoURL;
           initialCheckFailed(err)
-        } else if (resp) {
+        } else if(resp) {
           onInitialCheck(resp);
         } else {
           const message = "no error nor response!";
@@ -79,13 +79,13 @@ export default class JsonRPC {
 
     function initialCheckFailed(e) {
       console.error("failed: ", e);
-      if (that.onError) {
+      if(that.onError) {
         let error;
-        if (e.code && e.code === 'ECONNREFUSED') {
+        if(e.code && e.code === 'ECONNREFUSED') {
           error = new ErrorEvent(false, false, "connection refused", e.url)
-        } else if (e.currentTarget && e.currentTarget.status && e.currentTarget.status === 0) {
+        } else if(e.currentTarget && e.currentTarget.status && e.currentTarget.status === 0) {
           error = new ErrorEvent(false, false, "connection refused", e.url)
-        } else  {
+        } else {
           error = new ErrorEvent(false, false, "unknown error", e.url)
         }
         that.onError(error);
@@ -95,14 +95,14 @@ export default class JsonRPC {
     }
 
     function onInitialCheck(oReq) {
-      if ((oReq.statusCode / 100) !== 2) {
+      if((oReq.statusCode / 100) !== 2) {
         console.log("Failed response", oReq.statusCode, oReq.statusMessage);
-        if (oReq.statusMessage.startsWith('Braid: ')) {
+        if(oReq.statusMessage.startsWith('Braid: ')) {
           logBraid(oReq.statusMessage.substring(8));
         } else {
           console.error(oReq.statusMessage)
         }
-        if (that.onError) {
+        if(that.onError) {
           that.onError(new ErrorEvent(true, oReq.status !== 404, oReq.statusMessage));
         }
         return
@@ -133,29 +133,29 @@ export default class JsonRPC {
 
     function openHandler(e) {
       status = "OPEN";
-      if (that.onOpen) {
+      if(that.onOpen) {
         that.onOpen(e);
       }
     }
 
     function closeHandler(e) {
       status = "CLOSED";
-      if (that.onClose) {
+      if(that.onClose) {
         that.onClose(e);
       }
     }
 
     function errorHandler(err) {
       status = "FAILED";
-      if (that.onError) {
+      if(that.onError) {
         that.onError(err);
       }
     }
 
     function messageHandler(message) {
-      if (message.hasOwnProperty('id')) {
-        if (state.hasOwnProperty(message.id)) {
-          if (message.hasOwnProperty("error")) {
+      if(message.hasOwnProperty('id')) {
+        if(state.hasOwnProperty(message.id)) {
+          if(message.hasOwnProperty("error")) {
             handleError(message);
           } else {
             handleResponse(message);
@@ -170,7 +170,7 @@ export default class JsonRPC {
 
     function handleError(message) {
       const msgState = state[message.id];
-      if (msgState.onError) {
+      if(msgState.onError) {
         let e = {
           code: message.error.code,
           codeDescription: translateErrorCode(message.error),
@@ -187,69 +187,68 @@ export default class JsonRPC {
     }
 
     function translateErrorCode(error) {
-      if (typeof(error.code) === 'undefined' || error.code === null) return "Unknown error";
+      if(typeof (error.code) === 'undefined' || error.code === null) return "Unknown error";
 
       let code = "unknown error";
-        switch(error.code) {
-          case -32700:
-            code = "Parse error";
-            break;
-          case -32600:
-            code = "Invalid request";
-            break;
-          case -32601:
-            code = "Method not found";
-            break;
-          case -32602:
-            code = "Invalid params";
-            break;
-          case -32603:
-            code = "Internal error";
-            break;
-          default:
-            if (error.code >= -32099 && error.code <= -32000) {
-              code = "Server error";
-            } else {
-              code = "Unknown error";
-            }
-            break;
-        }
+      switch(error.code) {
+        case -32700:
+          code = "Parse error";
+          break;
+        case -32600:
+          code = "Invalid request";
+          break;
+        case -32601:
+          code = "Method not found";
+          break;
+        case -32602:
+          code = "Invalid params";
+          break;
+        case -32603:
+          code = "Internal error";
+          break;
+        default:
+          if(error.code >= -32099 && error.code <= -32000) {
+            code = "Server error";
+          } else {
+            code = "Unknown error";
+          }
+          break;
+      }
       return code;
     }
 
     function translateErrorMessage(error) {
-      if (typeof(error.message) === 'undefined' || error.message === null) return "";
-      else return error.message;
+      if(typeof (error.message) === 'undefined' || error.message === null) return ""; else return error.message;
     }
 
     function handleResponse(message) {
       const hasResult = message.hasOwnProperty('result');
       const isCompleted = message.hasOwnProperty('completed');
-      if (hasResult) {
+      if(hasResult) {
         handleResultMessage(message);
       }
-      if (isCompleted) {
+      if(isCompleted) {
         handleCompletionMessage(message);
       }
-      if (!hasResult && !isCompleted) {
+      if(!hasResult && !isCompleted) {
         handleUnrecognisedResponseMessage(message);
       }
     }
 
     function handleResultMessage(message) {
       const msgState = state[message.id];
-      if (!msgState) {
+      if(!msgState) {
         console.error("could not find state for method " + message.id);
         return
       }
-      if (msgState.onNext) {
+      if(msgState.onNext) {
         msgState.onNext(message.result);
       }
     }
 
     function handleCompletionMessage(message) {
       const msgState = state[message.id];
-      if (msgState.onCompleted) {
+      if(msgState.onCompleted) {
         msgState.onCompleted();
       }
       delete state[message.id];
@@ -261,31 +260,27 @@ export default class JsonRPC {
 
     // -- PUBLIC FUNCTIONS --
 
-    that.invoke = function(method, params) {
+    that.invoke = function (method, params) {
       return new Promise(function (resolve, reject) {
         that.invokeForStream(method, params, resolve, reject, undefined, false);
       });
     };
 
-    that.invokeForStream = function(method, params, onNext, onError, onCompleted, streamed) {
+    that.invokeForStream = function (method, params, onNext, onError, onCompleted, streamed) {
       const id = nextId++;
-      if (streamed === undefined) {
+      if(streamed === undefined) {
         streamed = true;
       }
 
       const payload = {
-        id: id,
-        jsonrpc: "2.0",
-        method: method,
-        params: params,
-        streamed: streamed
+        id: id, jsonrpc: "2.0", method: method, params: params, streamed: streamed
       };
       state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
       that.socket.send(JSON.stringify(payload));
       return new CancellableInvocation(this, id, state);
     };
 
-    that.close = function() {
+    that.close = function () {
       that.socket.close();
     }
     // -- INITIALISATION --
@@ -303,11 +298,9 @@ class CancellableInvocation {
 
   cancel() {
     console.log("cancelling", this.id);
-    if (!this.cancelled()) {
+    if(!this.cancelled()) {
       const payload = {
-        id: this.id,
-        jsonrpc: "2.0",
-        method: "_cancelStream"
+        id: this.id, jsonrpc: "2.0", method: "_cancelStream"
       };
       this.jsonRPC.socket.send(JSON.stringify(payload));
       delete this.state[this.id];

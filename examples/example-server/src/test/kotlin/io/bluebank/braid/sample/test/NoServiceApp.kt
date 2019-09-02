@@ -19,6 +19,6 @@ import io.bluebank.braid.server.JsonRPCServerBuilder
 
 fun main(args: Array<String>) {
   JsonRPCServerBuilder.createServerBuilder()
-      .build()
-      .start()
+    .build()
+    .start()
 }

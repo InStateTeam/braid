@@ -17,7 +17,8 @@ package io.bluebank.braid.core.async
 
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.Future
-import io.vertx.core.Future.*
+import io.vertx.core.Future.failedFuture
+import io.vertx.core.Future.future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientRequest
 import io.vertx.core.http.HttpClientResponse
@@ -71,10 +72,12 @@ fun RoutingContext.end(err: Throwable) {
   }
 }
 
-fun HttpClientRequest.getBodyAsString() : Future<String> = this.getBodyBuffer().map { it.toString() }
-fun HttpClientRequest.getBodyBuffer() : Future<Buffer> = this.toFuture().getBodyBuffer()
+fun HttpClientRequest.getBodyAsString(): Future<String> =
+  this.getBodyBuffer().map { it.toString() }
 
-fun HttpClientRequest.toFuture() : Future<HttpClientResponse> {
+fun HttpClientRequest.getBodyBuffer(): Future<Buffer> = this.toFuture().getBodyBuffer()
+
+fun HttpClientRequest.toFuture(): Future<HttpClientResponse> {
   val result = future<HttpClientResponse>()
   @Suppress("DEPRECATION")
   this.handler(result::complete)
@@ -83,10 +86,10 @@ fun HttpClientRequest.toFuture() : Future<HttpClientResponse> {
   return result
 }
 
-fun Future<HttpClientResponse>.getBodyBuffer() : Future<Buffer> {
+fun Future<HttpClientResponse>.getBodyBuffer(): Future<Buffer> {
   return this.compose { response ->
-    when(response.statusCode() / 100 != 2) {
-       true -> failedFuture<Buffer>("failed with status ${response.statusCode()} - ${response.statusMessage()}")
+    when (response.statusCode() / 100 != 2) {
+      true -> failedFuture<Buffer>("failed with status ${response.statusCode()} - ${response.statusMessage()}")
       else -> {
         val result = future<Buffer>()
         response.bodyHandler(result::complete)

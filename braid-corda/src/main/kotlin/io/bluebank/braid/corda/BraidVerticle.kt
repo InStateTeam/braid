@@ -28,7 +28,6 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.LoggerFormat
 import io.vertx.ext.web.handler.LoggerHandler
 import net.corda.core.node.AppServiceHub
-import net.corda.node.internal.Node
 import java.net.URL
 
 class BraidVerticle(

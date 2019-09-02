@@ -23,8 +23,9 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
 
-class TypedSocketImpl<Receive, Send>(private val receiveClass: Class<Receive>) : AbstractSocket<Receive, Send>(),
-                                                                  SocketProcessor<Receive, Send, Buffer, Buffer> {
+class TypedSocketImpl<Receive, Send>(private val receiveClass: Class<Receive>) :
+  AbstractSocket<Receive, Send>(),
+  SocketProcessor<Receive, Send, Buffer, Buffer> {
 
   companion object {
     private val log = loggerFor<TypedSocketImpl<*, *>>()

@@ -33,7 +33,7 @@ internal fun isPortRangeFree(range: IntRange): Boolean {
   return range.asSequence().map { isPortFree(it) }.firstOrNull { !it } ?: true
 }
 
-internal fun isPortFree(port: Int) : Boolean {
+internal fun isPortFree(port: Int): Boolean {
   return try {
     ServerSocket(port).use {
       true

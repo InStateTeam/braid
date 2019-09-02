@@ -20,7 +20,9 @@
   <packaging>pom</packaging>
   <name>braid docs</name>
   <url>https://gitlab.bluebank.io/em-tech/hermes</url>
-  <description>a library to make it easy to write new services and apps with fewer configuration headaches</description>
+  <description>a library to make it easy to write new services and apps with fewer
+    configuration headaches
+  </description>
 
   <parent>
     <groupId>io.bluebank.braid</groupId>

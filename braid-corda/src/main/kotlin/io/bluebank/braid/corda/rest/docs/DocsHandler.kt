@@ -27,9 +27,7 @@ import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
-import org.h2.util.StringUtils.urlEncode
 import java.net.URL
-import kotlin.math.log
 import kotlin.reflect.KCallable
 
 class DocsHandler(
@@ -41,7 +39,8 @@ class DocsHandler(
   private val auth: SecuritySchemeDefinition? = null,
   private val debugMode: Boolean = false
 ) : Handler<RoutingContext> {
-   companion object {
+
+  companion object {
     var log = loggerFor<DocsHandler>()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }

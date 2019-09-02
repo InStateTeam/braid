@@ -36,15 +36,12 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
-import java.lang.RuntimeException
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
-import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 
 abstract class EndPoint(
@@ -76,7 +73,6 @@ abstract class EndPoint(
         annotations
       )
     }
-
 
     fun create(
       groupName: String,
@@ -158,7 +154,7 @@ abstract class EndPoint(
 
   protected open fun toSwaggerParams(): List<Parameter> {
     return when (method) {
-      GET, HEAD, DELETE, CONNECT, OPTIONS  -> {
+      GET, HEAD, DELETE, CONNECT, OPTIONS -> {
         val pathParams = mapPathParameters()
         val queryParams = mapQueryParameters()
         return pathParams + queryParams
@@ -193,11 +189,11 @@ abstract class EndPoint(
   protected fun Type.getSwaggerProperty(): Property {
     val actualType = this.actualType()
     try {
-        return if (actualType.isBinary()) {
-          BinaryProperty()
-        } else {
-              ModelConverters.getInstance().readAsProperty(actualType)
-        }
+      return if (actualType.isBinary()) {
+        BinaryProperty()
+      } else {
+        ModelConverters.getInstance().readAsProperty(actualType)
+      }
     } catch (e: Throwable) {
       throw RuntimeException("Unable to convert actual type:" + actualType)
     }

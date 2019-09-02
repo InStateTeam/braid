@@ -102,23 +102,23 @@ class TestService {
     throw RuntimeException("total fail!")
   }
 
-  fun headerListOfStrings(@HeaderParam(X_HEADER_LIST_STRING) value: List<String>) : List<String> {
+  fun headerListOfStrings(@HeaderParam(X_HEADER_LIST_STRING) value: List<String>): List<String> {
     return value
   }
 
-  fun headerListOfInt(@HeaderParam(X_HEADER_LIST_STRING) value: List<Int>) : List<Int> {
+  fun headerListOfInt(@HeaderParam(X_HEADER_LIST_STRING) value: List<Int>): List<Int> {
     return value
   }
 
-  fun optionalHeader(@HeaderParam(X_HEADER_STRING) value: String?) : String {
+  fun optionalHeader(@HeaderParam(X_HEADER_STRING) value: String?): String {
     return value ?: "null"
   }
 
-  fun nonOptionalHeader(@HeaderParam(X_HEADER_STRING) value: String) : String {
+  fun nonOptionalHeader(@HeaderParam(X_HEADER_STRING) value: String): String {
     return value
   }
 
-  fun headers(@Context headers: javax.ws.rs.core.HttpHeaders) : List<Int> {
+  fun headers(@Context headers: javax.ws.rs.core.HttpHeaders): List<Int> {
     val acceptableLanguages = headers.acceptableLanguages
     assert(acceptableLanguages.size == 1 && acceptableLanguages.first().language == "*")
     val acceptableMediaTypes = headers.acceptableMediaTypes

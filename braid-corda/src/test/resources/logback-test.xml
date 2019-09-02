@@ -20,7 +20,9 @@
     <!-- encoders are  by default assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [braid-id:%X{braid-id}] - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [braid-id:%X{braid-id}] -
+        %msg%n
+      </pattern>
     </encoder>
   </appender>
 

@@ -22,31 +22,29 @@ private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
 
-    if (args.size != 4) {
-        throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port>")
+  if (args.size != 4) {
+    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port>")
+  }
+
+  val port = Integer.valueOf(args[3])
+  Braid()
+    .withNodeAddress(args[0])
+    .withUserName(args[1])
+    .withPassword(args[2])
+    .withPort(port)
+    .startServer()
+    .recover {
+      log.error("Server failed to start:", it)
+      Future.succeededFuture("-1")
     }
+    .map({ openBrowser(port, it) })
 
-    val port = Integer.valueOf(args[3])
-    Braid()
-            .withNodeAddress(args[0])
-            .withUserName(args[1])
-            .withPassword(args[2])
-            .withPort(port)
-            .startServer()
-            .recover {
-                log.error("Server failed to start:", it)
-                Future.succeededFuture("-1")
-            }
-            .map({openBrowser(port, it)})
-
-
-
-
-    //connection.notifyServerAndClose()
+  //connection.notifyServerAndClose()
 }
 
 private fun openBrowser(port: Int?, it: String?) {
-    log.info("Started Vertical:$it on port:$port")
-    ProcessBuilder().command("open", "http://localhost:$port/swagger.json").start()
-    ProcessBuilder().command("open", "http://localhost:$port/api/rest/cordapps/flows").start()
+  log.info("Started Vertical:$it on port:$port")
+  ProcessBuilder().command("open", "http://localhost:$port/swagger.json").start()
+  ProcessBuilder().command("open", "http://localhost:$port/api/rest/cordapps/flows")
+    .start()
 }

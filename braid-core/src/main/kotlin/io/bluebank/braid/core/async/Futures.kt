@@ -125,11 +125,12 @@ inline fun <T> withFuture(fn: (Future<T>) -> Unit): Future<T> {
   return result
 }
 
-inline fun <reified T> Future<Buffer>.mapToObject() : Future<T> = this.map { Json.decodeValue(it, T::class.java) }
+inline fun <reified T> Future<Buffer>.mapToObject(): Future<T> =
+  this.map { Json.decodeValue(it, T::class.java) }
 
-fun <T> Future<T>.mapUnit() : Future<Unit> = this.map { Unit }
+fun <T> Future<T>.mapUnit(): Future<Unit> = this.map { Unit }
 
-fun <T> Future<T>.assertFails() : Future<Unit> {
+fun <T> Future<T>.assertFails(): Future<Unit> {
   val result = future<Unit>()
   setHandler {
     when {
@@ -140,7 +141,7 @@ fun <T> Future<T>.assertFails() : Future<Unit> {
   return result
 }
 
-fun <T> Observable<T>.toFuture() : Future<T> {
+fun <T> Observable<T>.toFuture(): Future<T> {
   val future = future<T>()
   this.single().subscribe(future::complete, future::fail)
   return future

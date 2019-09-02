@@ -25,9 +25,10 @@ import kotlin.test.assertTrue
 
 @ServiceDescription(name = "named-service", description = "named-service description")
 interface NamedService {
-  fun getSync() : String
-  fun getAsync() : Future<String>
-  fun getStream() : Observable<String>
+
+  fun getSync(): String
+  fun getAsync(): Future<String>
+  fun getStream(): Observable<String>
   fun getCollection(): List<String>
 }
 
@@ -42,11 +43,26 @@ class ReflectionTests {
 
   @Test
   fun `that types can be correctly inferred`() {
-    assertEquals(String::class.java, NamedService::getAsync.javaMethod!!.underlyingGenericType())
-    assertEquals(String::class.java, NamedService::getSync.javaMethod!!.underlyingGenericType())
-    assertEquals(String::class.java, NamedService::getStream.javaMethod!!.underlyingGenericType())
-    assertEquals(NamedService::getCollection.javaMethod!!.genericReturnType, NamedService::getCollection.javaMethod!!.underlyingGenericType())
+    assertEquals(
+      String::class.java,
+      NamedService::getAsync.javaMethod!!.underlyingGenericType()
+    )
+    assertEquals(
+      String::class.java,
+      NamedService::getSync.javaMethod!!.underlyingGenericType()
+    )
+    assertEquals(
+      String::class.java,
+      NamedService::getStream.javaMethod!!.underlyingGenericType()
+    )
+    assertEquals(
+      NamedService::getCollection.javaMethod!!.genericReturnType,
+      NamedService::getCollection.javaMethod!!.underlyingGenericType()
+    )
     assertTrue { NamedService::getStream.javaMethod!!.genericReturnType.isStreaming() }
-    assertEquals(Observable::class.java, NamedService::getStream.javaMethod!!.genericReturnType.actualType())
+    assertEquals(
+      Observable::class.java,
+      NamedService::getStream.javaMethod!!.genericReturnType.actualType()
+    )
   }
 }

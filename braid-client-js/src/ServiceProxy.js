@@ -25,7 +25,7 @@ import JsonRPC from './JsonRpcClient'
 class BraidServiceProxy {
   constructor(url, onOpen, onClose, onError, options) {
     const that = this;
-    if (!options) {
+    if(!options) {
       options = {}
     }
     options.noCredentials = true;
@@ -37,15 +37,13 @@ class BraidServiceProxy {
     // --- PRIVATE FUNCTIONS ---
 
     function bindCallbacks(args) {
-      if (!args) return null;
+      if(!args) return null;
       const last3Fns = args.slice(-3).filter(item => {
         return typeof item === 'function'
       });
-      if (last3Fns.length === 0) return null;
+      if(last3Fns.length === 0) return null;
       return {
-        onNext: last3Fns[0],
-        onError: last3Fns[1],
-        onCompleted: last3Fns[2]
+        onNext: last3Fns[0], onError: last3Fns[1], onCompleted: last3Fns[2]
       }
     }
 
@@ -58,15 +56,12 @@ class BraidServiceProxy {
       const noFunctionArgs = massageArgs(args.filter(item => {
         return typeof item !== 'function'
       }));
-      return client.invokeForStream(method, noFunctionArgs,
-        callbacks.onNext,
-        onErrorWrapper(callbacks.onError),
-        callbacks.onCompleted);
+      return client.invokeForStream(method, noFunctionArgs, callbacks.onNext, onErrorWrapper(callbacks.onError), callbacks.onCompleted);
     }
 
     function massageArgs(args) {
-      if (args) {
-        if (args.length === 0) {
+      if(args) {
+        if(args.length === 0) {
           args = null;
         }
       }
@@ -78,7 +73,7 @@ class BraidServiceProxy {
         try {
           onErrorTrap(err)
         } catch(err2) {
-          if (onError) {
+          if(onError) {
             onError(err2);
           } else {
             console.error(err2);
@@ -88,11 +83,8 @@ class BraidServiceProxy {
     }
 
     function onErrorTrap(err) {
-      if (typeof document !== 'undefined' && err.jsonRPCError && err.jsonRPCError.code === -32601) {
-        console.log("%cBraid: %c" + err.message + "\n%cCreate a stub here: " + uri(),
-          "font-family: sans-serif; font-size: 14px; font-weight: bold;",
-          "",
-          "font-weight: bold;");
+      if(typeof document !== 'undefined' && err.jsonRPCError && err.jsonRPCError.code === -32601) {
+        console.log("%cBraid: %c" + err.message + "\n%cCreate a stub here: " + uri(), "font-family: sans-serif; font-size: 14px; font-weight: bold;", "", "font-weight: bold;");
         throw Error(err.message)
       } else {
         throw err;
@@ -105,7 +97,7 @@ class BraidServiceProxy {
       uri.href = url;
       const base = "http://" + uri.hostname + ":" + uri.port;
       const serviceName = uri.pathname.split("/").filter(i => i.length > 0).pop();
-      if (serviceName !== undefined && serviceName !== null) {
+      if(serviceName !== undefined && serviceName !== null) {
         return base + "/?service=" + serviceName
       } else {
         return base;
@@ -131,16 +123,16 @@ class BraidServiceProxy {
      * @param args[onCompleted()] - a callback when the stream has successfully terminated.
      *
      */
-    that.invoke = function(method, args) {
+    that.invoke = function (method, args) {
       const callbacks = bindCallbacks(args);
-      if (callbacks) {
+      if(callbacks) {
         return invokeForStream(method, args, callbacks);
       } else {
         return invokeForPromise(method, args);
       }
     }
 
-    that.close = function() {
+    that.close = function () {
       client.close();
     }
   }
@@ -156,10 +148,10 @@ class BraidServiceProxy {
  *                           also, includes the flag strictSSL which defaults to true.
  * @returns {Proxy}
  */
-export default function(url, onOpen, onClose, onError, transportOptions) {
+export default function (url, onOpen, onClose, onError, transportOptions) {
   return new Proxy(new BraidServiceProxy(url, onOpen, onClose, onError, transportOptions), {
     get: (target, propKey) => {
-      if (propKey == "close") {
+      if(propKey == "close") {
         return target.close;
       } else {
         return function (...args) {

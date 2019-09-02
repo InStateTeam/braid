@@ -30,34 +30,38 @@ import java.util.Arrays.asList
   */
 
 fun main(args: Array<String>) {
-    val user = User("user1", "test", permissions = setOf("ALL"))
-    val bankA = CordaX500Name("BankA", "", "GB")
-    val bankB = CordaX500Name("BankB", "", "US")
+  val user = User("user1", "test", permissions = setOf("ALL"))
+  val bankA = CordaX500Name("BankA", "", "GB")
+  val bankB = CordaX500Name("BankB", "", "US")
 
-    driver(DriverParameters(cordappsForAllNodes = listOf(
-            TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
-            TestCordapp.findCordapp("net.corda.finance.schemas"),
-            TestCordapp.findCordapp("net.corda.finance.flows")
-     //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
-    ),
-            waitForAllNodesToFinish = true,
-            isDebug = true,
-            startNodesInProcess = true)) {
-        // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
-        // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
-        val (partyA, partyB) = listOf(
-                startNode(providedName = bankA, rpcUsers = asList(user)),
-                startNode(providedName = bankB, rpcUsers = asList(user))
-        ).map { it.getOrThrow() }
+  driver(
+    DriverParameters(
+      cordappsForAllNodes = listOf(
+        TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
+        TestCordapp.findCordapp("net.corda.finance.schemas"),
+        TestCordapp.findCordapp("net.corda.finance.flows")
+        //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
+      ),
+      waitForAllNodesToFinish = true,
+      isDebug = true,
+      startNodesInProcess = true
+    )
+  ) {
+    // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
+    // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
+    val (partyA, partyB) = listOf(
+      startNode(providedName = bankA, rpcUsers = asList(user)),
+      startNode(providedName = bankB, rpcUsers = asList(user))
+    ).map { it.getOrThrow() }
 
-        // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
-        // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
-        // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
-        // working as intended.
-        println("partyA rpc:$partyA.rpcAddress")
-        println("partyB rpc:$partyB.rpcAddress")
+    // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
+    // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
+    // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
+    // working as intended.
+    println("partyA rpc:$partyA.rpcAddress")
+    println("partyB rpc:$partyB.rpcAddress")
 
-    }
+  }
 
 }
 

@@ -35,15 +35,15 @@ describe('braid-corda basic connectivity and method invocation', () => {
       proxy.network.allNodes()
         .then(nodes => {
           assert.ok(nodes.length >= 0);
-          for (let n in nodes) {
+          for(let n in nodes) {
             const node = nodes[n];
             assert.ok(node !== null);
-            assert.ok(typeof(node.legalIdentities) !== 'undefined');
+            assert.ok(typeof (node.legalIdentities) !== 'undefined');
             assert.ok(node.legalIdentities.length > 0);
-            for (let l in node.legalIdentities) {
+            for(let l in node.legalIdentities) {
               const legalIdentity = node.legalIdentities[l];
-              assert.ok(typeof(legalIdentity.name) !== 'undefined');
-              assert.ok(typeof(legalIdentity.owningKey) !== 'undefined');
+              assert.ok(typeof (legalIdentity.name) !== 'undefined');
+              assert.ok(typeof (legalIdentity.owningKey) !== 'undefined');
             }
           }
         })
@@ -55,7 +55,7 @@ describe('braid-corda basic connectivity and method invocation', () => {
   it('that we can cancel an observed stream', done => {
     buildProxy({credentials: {username: 'admin', password: 'admin'}}, done, proxy => {
       const cancellable = proxy.customService.infiniteStream(result => {
-        if (!cancellable.cancelled()) {
+        if(!cancellable.cancelled()) {
           cancellable.cancel();
         }
         proxy.close()
@@ -104,6 +104,6 @@ describe('braid-corda basic connectivity and method invocation', () => {
         })
         .finally(() => proxy.close())
         .then(done, done)
-       });
+    });
   }).timeout(0);
 });

@@ -21,8 +21,7 @@ exports.files = {
       'vendor.js': /^(?!app)/, // Files that are not in `app` dir.
       'app.js': /^app/
     }
-  },
-  stylesheets: {joinTo: 'app.css'}
+  }, stylesheets: {joinTo: 'app.css'}
 };
 
 exports.plugins = {

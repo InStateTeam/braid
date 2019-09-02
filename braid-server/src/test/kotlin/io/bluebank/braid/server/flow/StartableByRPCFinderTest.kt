@@ -23,11 +23,11 @@ import org.junit.Test
 
 class StartableByRPCFinderTest {
 
-    @Test
-    fun shouldfindClassRPCClass() {
-        var classes = StartableByRPCFinder().findStartableByRPC();
-        assertThat(classes.size, greaterThan(2))
-        assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class))
-    }
+  @Test
+  fun shouldfindClassRPCClass() {
+    var classes = StartableByRPCFinder().findStartableByRPC();
+    assertThat(classes.size, greaterThan(2))
+    assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class))
+  }
 
 }

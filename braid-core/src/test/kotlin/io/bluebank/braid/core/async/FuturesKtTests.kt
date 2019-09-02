@@ -19,7 +19,6 @@ import io.vertx.core.Future
 import io.vertx.core.Future.failedFuture
 import io.vertx.core.Future.succeededFuture
 import org.junit.Test
-import java.lang.IllegalStateException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -27,7 +26,11 @@ class FuturesKtTests {
   @Test
   fun `getOrThrow on Future works`() {
     assertEquals("hello", succeededFuture("hello").getOrThrow())
-    assertFailsWith<IllegalStateException> { Future.failedFuture<String>(IllegalStateException("fail")).getOrThrow() }
+    assertFailsWith<IllegalStateException> {
+      Future.failedFuture<String>(
+        IllegalStateException("fail")
+      ).getOrThrow()
+    }
   }
 
   @Test
@@ -84,7 +87,11 @@ class FuturesKtTests {
       }
       .catch {
         ++counter
-        assertEquals("failure 2", it.message, "that we receive the error raised from catch")
+        assertEquals(
+          "failure 2",
+          it.message,
+          "that we receive the error raised from catch"
+        )
       }
       .finally {
         ++counter
@@ -102,7 +109,11 @@ class FuturesKtTests {
       }
       .catch {
         ++counter
-        assertEquals("failure 1", it.message, "that we received the error raised in finally")
+        assertEquals(
+          "failure 1",
+          it.message,
+          "that we received the error raised in finally"
+        )
       }
     assertEquals(2, counter, "that we hit all handlers")
   }

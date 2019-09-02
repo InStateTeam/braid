@@ -17,13 +17,8 @@ package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.core.logging.loggerFor
-import io.swagger.models.auth.ApiKeyAuthDefinition
-import io.swagger.models.auth.BasicAuthDefinition
-import io.swagger.models.auth.In
-import io.swagger.models.auth.SecuritySchemeDefinition
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.Router
@@ -95,8 +90,6 @@ class RestMounter(
     docsHandler = DocsHandlerFactory(config).createDocsHandler()
     mount(config.pathsInit)
   }
-
-
 
   private fun mount(fn: RestMounter.(Router) -> Unit) {
     configureSwaggerAndStatic()

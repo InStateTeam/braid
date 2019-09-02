@@ -39,56 +39,62 @@ private val log = loggerFor<RPCTest>()
 
 fun main(args: Array<String>) {
 
-    if (args.size != 3) {
-        throw IllegalArgumentException("Usage: RPCTest <node address> <username> <password>")
-    }
-    val nodeAddress = NetworkHostAndPort.parse(args[0])
-    val username = args[1]
-    val password = args[2]
+  if (args.size != 3) {
+    throw IllegalArgumentException("Usage: RPCTest <node address> <username> <password>")
+  }
+  val nodeAddress = NetworkHostAndPort.parse(args[0])
+  val username = args[1]
+  val password = args[2]
 
-    val client = CordaRPCClient(nodeAddress)
-    val connection = client.start(username, password)
-    val ops = connection.proxy
-
-
-    BraidCordaJacksonInit.init()
-
-    val it = SimpleModule()
-            .addSerializer(rx.Observable::class.java, ToStringSerializer())
-           
-    Json.mapper.registerModule(it)
-    Json.prettyMapper.registerModule(it)
-
-    issueCash(ops)
-
-    //info(ops)
-    //cordaRPCOperations.
+  val client = CordaRPCClient(nodeAddress)
+  val connection = client.start(username, password)
+  val ops = connection.proxy
 
 
-    //ops.
-    //ops.startFlow()
-    connection.notifyServerAndClose()
+  BraidCordaJacksonInit.init()
+
+  val it = SimpleModule()
+    .addSerializer(rx.Observable::class.java, ToStringSerializer())
+
+  Json.mapper.registerModule(it)
+  Json.prettyMapper.registerModule(it)
+
+  issueCash(ops)
+
+  //info(ops)
+  //cordaRPCOperations.
+
+  //ops.
+  //ops.startFlow()
+  connection.notifyServerAndClose()
 }
 
 private fun issueCash(ops: CordaRPCOps) {
-    val party = Party(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),
-            parsePublicKeyBase58("GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE"))
-    val progressHandler = ops.startFlowDynamic(CashIssueFlow::class.java, AMOUNT(10.00, Currency.getInstance("GBP")), OpaqueBytes("123".toByteArray()), party)
-    progressHandler.returnValue.toObservable().toFuture()
-            .setHandler {
-                println(it)
-            }
+  val party = Party(
+    CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),
+    parsePublicKeyBase58("GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE")
+  )
+  val progressHandler = ops.startFlowDynamic(
+    CashIssueFlow::class.java,
+    AMOUNT(10.00, Currency.getInstance("GBP")),
+    OpaqueBytes("123".toByteArray()),
+    party
+  )
+  progressHandler.returnValue.toObservable().toFuture()
+    .setHandler {
+      println(it)
+    }
 }
 
 private fun info(ops: CordaRPCOps) {
-    log.info("currentNodeTime" + Json.encodePrettily(ops.currentNodeTime()))
-    log.info("nodeInfo" + Json.encodePrettily(ops.nodeInfo()))
-    log.info("nodeInfo/addresses" + Json.encodePrettily(ops.nodeInfo().addresses))
-    log.info("nodeInfo/legalIdentities" + Json.encodePrettily(ops.nodeInfo().legalIdentities))
-    //  log.info(cordaRPCOperations.nodeInfoFromParty(Party(CordaX500Name.parse(""), PublicKey())).toString())
-    log.info("notaryIdentities:" + Json.encodePrettily(ops.notaryIdentities()))
-    log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed()))
-    log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
+  log.info("currentNodeTime" + Json.encodePrettily(ops.currentNodeTime()))
+  log.info("nodeInfo" + Json.encodePrettily(ops.nodeInfo()))
+  log.info("nodeInfo/addresses" + Json.encodePrettily(ops.nodeInfo().addresses))
+  log.info("nodeInfo/legalIdentities" + Json.encodePrettily(ops.nodeInfo().legalIdentities))
+  //  log.info(cordaRPCOperations.nodeInfoFromParty(Party(CordaX500Name.parse(""), PublicKey())).toString())
+  log.info("notaryIdentities:" + Json.encodePrettily(ops.notaryIdentities()))
+  log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed()))
+  log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
 }
 
 

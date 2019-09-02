@@ -46,6 +46,7 @@ import io.vertx.kotlin.core.json.obj
  * Demonstrates the principles of a secure eventbus over sockjs
  */
 class AuthenticatedSockJSTest : AbstractVerticle() {
+
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
@@ -68,15 +69,15 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
 
     val port = 8080
     vertx.createHttpServer()
-        .requestHandler(router)
-        .listen(port) {
-          if (it.succeeded()) {
-            logger.info("started on http://localhost:$port")
-          } else {
-            logger.error("failed to startup", it.cause())
-          }
-          startFuture.handle(it.mapEmpty<Void>())
+      .requestHandler(router)
+      .listen(port) {
+        if (it.succeeded()) {
+          logger.info("started on http://localhost:$port")
+        } else {
+          logger.error("failed to startup", it.cause())
         }
+        startFuture.handle(it.mapEmpty<Void>())
+      }
 
   }
 
@@ -85,10 +86,11 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
   }
 
   private fun setupStatic(router: Router) {
-    router.get().handler(StaticHandler.create("streamingtest")
+    router.get().handler(
+      StaticHandler.create("streamingtest")
 //        .setCachingEnabled(false)
 //        .setCacheEntryTimeout(1).setMaxCacheSize(1)
-    // enable the above lines to turn off caching - suitable for rapid coding of the UI
+      // enable the above lines to turn off caching - suitable for rapid coding of the UI
     )
   }
 
@@ -112,7 +114,10 @@ class AuthenticatedSockJSTest : AbstractVerticle() {
     val config = json {
       obj("properties_path" to "classpath:auth/shiro.properties")
     }
-    return ShiroAuth.create(vertx, ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES))
+    return ShiroAuth.create(
+      vertx,
+      ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES)
+    )
   }
 }
 
