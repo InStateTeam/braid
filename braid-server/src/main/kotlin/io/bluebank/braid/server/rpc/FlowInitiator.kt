@@ -44,7 +44,8 @@ class FlowInitiator(val rpc: CordaRPCOps) {
             excludeProgressTracker.removeIf({ l->l is ProgressTracker})    //todo might have other classes tht aren't in startFlowDynamic
             log.info("About to start $kClass with args: $it")
 
-            rpc.startFlowDynamic(kClass.java as Class<FlowLogic<*>>, *excludeProgressTracker.toTypedArray()).returnValue.toObservable().toFuture()
+            rpc.startFlowDynamic(kClass.java as Class<FlowLogic<*>>, *excludeProgressTracker.toTypedArray())
+                    .returnValue.toObservable().toFuture()
 
         }
 
