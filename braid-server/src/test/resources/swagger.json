@@ -12,18 +12,416 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/network/nodes" : { },
-    "/network/notaries" : { },
-    "/network/nodes/self" : { },
-    "/cordapps/flows" : { },
-    "/cordapps/flows/io.bluebank.braid.server.BraidTestFlow" : { },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : { },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : { },
-    "/cordapps/flows/net.corda.finance.flows.CashExitFlow" : { },
-    "/cordapps/flows/net.corda.finance.flows.CashIssueAndPaymentFlow" : { },
-    "/cordapps/flows/net.corda.finance.flows.CashIssueFlow" : { },
-    "/cordapps/flows/net.corda.finance.flows.CashPaymentFlow" : { },
-    "/cordapps/flows/net.corda.finance.internal.CashConfigDataFlow" : { }
+    "/network/nodes" : {
+      "get" : {
+        "tags" : [ "network" ],
+        "description" : "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "host-and-port",
+          "in" : "query",
+          "description" : "[host]:[port] for the Corda P2P of the node",
+          "required" : false,
+          "type" : "string",
+          "minItems" : 0,
+          "x-example" : "localhost:10000"
+        }, {
+          "name" : "x500-name",
+          "in" : "query",
+          "description" : "the X500 name for the node",
+          "required" : false,
+          "type" : "string",
+          "minItems" : 0,
+          "x-example" : "O=PartyB, L=New York, C=US"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/SimpleNodeInfo"
+              }
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/SimpleNodeInfo"
+              }
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/network/notaries" : {
+      "get" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "x500-name",
+          "in" : "query",
+          "description" : "the X500 name for the node",
+          "required" : false,
+          "type" : "string",
+          "minItems" : 0,
+          "x-example" : "O=PartyB, L=New York, C=US"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Party"
+              }
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Party"
+              }
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/network/nodes/self" : {
+      "get" : {
+        "tags" : [ "network" ],
+        "description" : "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/SimpleNodeInfo"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/SimpleNodeInfo"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows" : {
+      "get" : {
+        "tags" : [ "network" ],
+        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow$Authorise\"]",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/io.bluebank.braid.server.BraidTestFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/BraidTestFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/BraidTestFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/BraidTestFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.finance.flows.CashExitFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CashExitFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashExitFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashExitFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.finance.flows.CashIssueAndPaymentFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.finance.flows.CashIssueFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CashIssueFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashIssueFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashIssueFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.finance.flows.CashPaymentFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CashPaymentFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashPaymentFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashPaymentFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    },
+    "/cordapps/flows/net.corda.finance.internal.CashConfigDataFlow" : {
+      "post" : {
+        "tags" : [ "network" ],
+        "description" : "",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "payload",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CashConfigDataFlowPayload"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashConfigDataFlowPayload"
+            }
+          },
+          "200" : {
+            "description" : "default response",
+            "schema" : {
+              "$ref" : "#/definitions/CashConfigDataFlowPayload"
+            }
+          },
+          "500" : {
+            "description" : "server failure"
+          }
+        }
+      }
+    }
   },
   "definitions" : {
     "NetworkHostAndPort" : {
@@ -286,6 +684,63 @@
           "$ref" : "#/definitions/Party"
         }
       }
+    },
+    "Amount" : {
+      "type" : "object",
+      "properties" : {
+        "quantity" : {
+          "type" : "integer",
+          "format" : "int32",
+          "example" : 100,
+          "description" : "total amount in minor units"
+        },
+        "displayTokenSize" : {
+          "type" : "number",
+          "example" : 0.01
+        },
+        "token" : {
+          "type" : "string",
+          "example" : "GBP"
+        },
+        "_tokenType" : {
+          "type" : "string",
+          "example" : "net.corda.core.contracts.Issued"
+        }
+      }
+    },
+    "CashPaymentFlowPayload" : {
+      "type" : "object",
+      "properties" : {
+        "arg0" : {
+          "$ref" : "#/definitions/Amount"
+        },
+        "arg1" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "arg2" : {
+          "type" : "boolean"
+        },
+        "arg4" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "object"
+          }
+        },
+        "arg5" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "arg6" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "arg7" : {
+          "$ref" : "#/definitions/DefaultConstructorMarker"
+        }
+      }
+    },
+    "DefaultConstructorMarker" : {
+      "type" : "object"
     },
     "CashConfigDataFlowPayload" : {
       "type" : "object"
