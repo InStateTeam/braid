@@ -109,6 +109,19 @@ class CustomModelConvertersTest{
         assertThat(properties?.toString(), properties?.get("hash")?.type, equalTo("string"))
     }
 
+  @Test
+    fun `should Correctly Model Issuer as string`() {
+        val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+        println(models)
+
+        val model = models.get("ClassWithTypes")
+        assertThat(models.toString(), model, notNullValue())
+
+        val properties = model?.properties
+        assertThat(properties?.keys, hasItem("hash"))
+        assertThat(properties?.toString(), properties?.get("hash")?.type, equalTo("string"))
+    }
+
 
 
 
@@ -182,6 +195,9 @@ class CustomModelConvertersTest{
             ,val party:Party
             ,val bytes:OpaqueBytes
             ,val hash:SecureHash
+            ,val isduedString:Issued<String>
+            ,val isduedCurrency:Issued<Currency>
+            ,val issued:Issued<Currency>
     )
 
 }
