@@ -25,11 +25,11 @@ import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
+import io.bluebank.braid.server.util.getCordappName
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
-
 
 data class Braid(
         val port: Int = 8080,
@@ -88,13 +88,14 @@ data class Braid(
                         //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
 
 
-                        rpcClasses().forEach({
-                            try {
-                                post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
-                            } catch (e: Throwable) {
-                                log.error("Unable to register flow:${it.java.name}", e);
-                            }
-                        })
+                        rpcClasses().forEach { kotlinFlowClass ->
+                          val cordappName = kotlinFlowClass.java.protectionDomain.codeSource.location.getCordappName()
+                          try {
+                            post("/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}", FlowInitiator(rpc).getInitiator(kotlinFlowClass))
+                          } catch (e: Throwable) {
+                            log.error("Unable to register flow:${kotlinFlowClass.java.name}", e);
+                          }
+                        }
                     }
                 }
     }
