@@ -34,10 +34,7 @@ class NetworkService(val rpc: CordaRPCOps) {
     }
 
     @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
-    fun nodeInfo(
-            @ApiParam(value = "[host]:[port] for the Corda P2P of the node", example = "localhost:10000") @QueryParam(value = "host-and-port") hostAndPort: String? = null,
-            @ApiParam(value = "the X500 name for the node", example = "O=PartyB, L=New York, C=US") @QueryParam(value = "x500-name") x500Name: String? = null
-    ): SimpleNodeInfo {
+    fun nodeInfo(): SimpleNodeInfo {
         return rpc.nodeInfo().toSimpleNodeInfo()
     }
 

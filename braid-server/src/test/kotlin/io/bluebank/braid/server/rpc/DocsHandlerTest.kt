@@ -19,19 +19,20 @@ package io.bluebank.braid.server.rpc
 import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
+import io.swagger.converter.ModelConverters
 import io.vertx.core.http.HttpMethod
+import net.corda.core.contracts.Amount
 import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.finance.flows.CashIssueFlow
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Ignore
 import org.junit.Test
 
 
 class DocsHandlerTest{
     @Test
-    fun shouldDocumentDynamicClass() {
+    fun `should Document Dynamic Class`() {
         val docsHandler = DocsHandler()
         val handler = FlowInitiator(mock()).getInitiator(CashIssueFlow::class)
 
@@ -45,7 +46,7 @@ class DocsHandlerTest{
 
     @Test
     //@Ignore
-    fun shouldEscapeInnerClassDefinitionName() {
+    fun `should Escape Inner Class Definition Name`() {
         val docsHandler = DocsHandler()
         val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
 

@@ -17,6 +17,8 @@ package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
+import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
 import io.bluebank.braid.server.rpc.FlowInitiator
@@ -37,7 +39,8 @@ data class Braid(
 ) {
 
     init {
-
+        BraidCordaJacksonInit.init()
+        CustomModelConverters.init()
     }
 
     fun withPort(port: Int): Braid = this.copy(port = port)

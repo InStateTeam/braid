@@ -31,12 +31,15 @@ import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
 import java.security.PublicKey
 
+/**
+ * If you add to this file, please also add to CustomModelConverter forcorrect swagger generation
+ */
 object BraidCordaJacksonInit {
   init {
     BraidJacksonInit.init()
     // we reuse the jackson support from corda, replacing those that are not flexible enough for
     // dynamic languages
-    @Suppress("DEPRECATION") val sm = SimpleModule()
+    @Suppress("DEPRECATION") val sm = SimpleModule("io.swagger.util.DeserializationModule")
       .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
 
 // we won't use the party serliazers due to the way they require a specialised ObjectMapper!
@@ -93,9 +96,10 @@ object BraidCordaJacksonInit {
       .addSerializer(Issued::class.java, IssuedSerializer())
       .addDeserializer(Issued::class.java, IssuedDeserializer())
 
-
     Json.mapper.registerModule(sm)
     Json.prettyMapper.registerModule(sm)
+
+
   }
 
   fun init() {
