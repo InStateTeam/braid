@@ -15,16 +15,16 @@
  */
 package io.bluebank.braid.server.util
 
+import java.io.File
 import java.net.URL
 
-private val CORDAPP_NAME_RE = "(.+)(\\-[0-9](\\.[0-9])*\\.jar)?".toRegex()
+private val CORDAPP_NAME_RE = "^(.*?)(\\-\\d(\\.\\d)*\\.jar)?\$".toRegex()
 
-fun URL.getCordappName() : String {
-    return "test-cordapp"
-//    val fileName = File(this.file).name
-//    val matches = CORDAPP_NAME_RE.matchEntire(file)
-//    return when (matches) {
-//        null -> error("parsing of cordapp module location failed: $this")
-//        else -> matches.groupValues[2]
-//    }
+fun URL.toCordappName() : String {
+    val fileName = File(this.file).name
+    val matches = CORDAPP_NAME_RE.matchEntire(fileName)
+    return when (matches) {
+        null -> error("parsing of cordapp module location failed: $this")
+        else -> matches.groupValues[1].replace(".jar", "-jar")
+    }
 }

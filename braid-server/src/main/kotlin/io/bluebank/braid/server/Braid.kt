@@ -25,7 +25,7 @@ import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
-import io.bluebank.braid.server.util.getCordappName
+import io.bluebank.braid.server.util.toCordappName
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.messaging.CordaRPCOps
@@ -89,7 +89,7 @@ data class Braid(
 
 
                         rpcClasses().forEach { kotlinFlowClass ->
-                          val cordappName = kotlinFlowClass.java.protectionDomain.codeSource.location.getCordappName()
+                          val cordappName = kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
                           try {
                             post("/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}", FlowInitiator(rpc).getInitiator(kotlinFlowClass))
                           } catch (e: Throwable) {
