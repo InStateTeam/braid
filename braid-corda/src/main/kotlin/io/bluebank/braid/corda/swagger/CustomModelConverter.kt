@@ -91,29 +91,27 @@ class CustomModelConverter : ModelConverter {
 
                     }
                 }
-//                  if (Issued::class.java.isAssignableFrom(clazz)) {
-//                    // String and Currency get created as their own types
-//                    val boundType = jsonType.bindings.getBoundType(0)
-//                    if (boundType != null && (boundType.rawClass.equals(Currency::class.java) || boundType.rawClass.equals(String::class.java))) {
-//                        context?.defineModel("IssuedCurrency", ModelImpl()
-//                                .type("object")
-//                                .property("quantity", IntegerProperty().example(100).description("total Issued in minor units"))
-//                                .property("displayTokenSize", DecimalProperty().example("0.01"))
-//                                .property("token", StringProperty().example("GBP")))
-//                        return RefProperty("IssuedCurrency")
-//                    } else {
-//                        val model = ModelImpl()
-//                                .type("object")
-//                                .property("quantity", IntegerProperty().example(100).description("total Issued in minor units"))
-//                                .property("displayTokenSize", DecimalProperty().example("0.01"))
-//                                .property("token", StringProperty().example("GBP"))
-//                                .property("_tokenType", StringProperty().example("net.corda.core.contracts.Issued"))
-//                        context?.defineModel("Issued", model)
-//
-//                        return RefProperty("Issued")
-//
-//                    }
-//                }
+                  if (Issued::class.java.isAssignableFrom(clazz)) {
+                    // String and Currency get created as their own types
+                    val boundType = jsonType.bindings.getBoundType(0)
+                    if (boundType != null && (boundType.rawClass.equals(Currency::class.java) || boundType.rawClass.equals(String::class.java))) {
+                        context?.defineModel("IssuedCurrency", ModelImpl()
+                                .type("object")
+                                .property("issuer", RefProperty("Issuer"))
+                                .property("product", resolveProperty(boundType, context,annotations, chain))
+                        )
+                        return RefProperty("IssuedCurrency")
+                    } else {
+                        val model = ModelImpl()
+                                .type("object")
+                                .property("issuer", RefProperty("Issuer"))
+                                .property("product", resolveProperty(boundType, context,annotations, chain))
+                                .property("_productType", StringProperty().example("java.util.Currency"))
+                        context?.defineModel("Issued", model)
+
+                      return RefProperty("Issued")
+                    }
+                }
             }
 
         } catch (e:Throwable) {
