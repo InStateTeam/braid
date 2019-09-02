@@ -41,7 +41,7 @@ class RPCCallable<T>(val flow: KClass<*>,val fn: KCallable<T>) :KCallable<T> {
         get() = fn.visibility
 
     override fun call(vararg args: Any?): T {
-        return fn.call(args)
+        return fn.call(*args)
     }
 
     override fun callBy(args: Map<KParameter, Any?>): T {
