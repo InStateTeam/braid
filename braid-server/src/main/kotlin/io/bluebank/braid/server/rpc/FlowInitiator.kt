@@ -26,6 +26,7 @@ import net.corda.core.toObservable
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import net.corda.core.utilities.ProgressTracker
+import kotlin.reflect.jvm.javaType
 
 class FlowInitiator(val rpc: CordaRPCOps) {
     private val log = loggerFor<FlowInitiator>()
@@ -46,10 +47,9 @@ class FlowInitiator(val rpc: CordaRPCOps) {
 
             rpc.startFlowDynamic(kClass.java as Class<FlowLogic<*>>, *excludeProgressTracker.toTypedArray())
                     .returnValue.toObservable().toFuture()
-
         }
 
-        return fn;//RPCCallable(rpc, fn)
+        return RPCCallable(kClass, fn)
     }
 
     private fun createBoundParameterTypes(): Map<Class<*>, Any> {
