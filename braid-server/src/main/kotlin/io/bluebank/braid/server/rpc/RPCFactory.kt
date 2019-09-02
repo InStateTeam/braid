@@ -33,20 +33,8 @@ class RPCFactory(val userName:String,val password:String,val nodeAddress:String)
         val connection = client.start(userName, password)
         val rpc = connection.proxy
 
-//        while(!allFlowsRegistered(rpc)) {
-//            Thread.sleep(100)      // todo move to vertx timer but difficult as this is all "config"
-//        }
-
         return Future.succeededFuture(rpc)
     }
 
-//    private fun allFlowsRegistered(rpc: CordaRPCOps): Boolean {
-//        val registeredFlows = rpc.registeredFlows()
-//
-//        val findStartableByRPC = StartableByRPCFinder().findStartableByRPC()
-//
-//        log.info("registered: ${registeredFlows.size}  startable: ${findStartableByRPC.size}")
-//        log.info("registered flows: ${registeredFlows}  startable flows: ${findStartableByRPC}")
-//        return registeredFlows.size >= findStartableByRPC.size
-//    }
+
 }

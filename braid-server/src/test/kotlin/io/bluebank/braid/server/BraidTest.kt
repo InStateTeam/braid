@@ -325,6 +325,7 @@ class BraidTest {
 
                         it.bodyHandler {
                             val reply = it.toJsonObject()
+                            log.info("reply:" + reply.encodePrettily())
                             context.assertThat(reply, notNullValue())
                             context.assertThat(reply.getJsonObject("stx"), notNullValue())
                             context.assertThat(reply.getJsonObject("recipient"), notNullValue())

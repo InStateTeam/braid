@@ -26,6 +26,8 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.transactions.CoreTransaction
+import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
@@ -35,6 +37,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import java.util.*
+import java.util.Arrays.asList
 import kotlin.test.assertEquals
 
 
@@ -131,6 +134,15 @@ class CustomModelConvertersTest{
         val encoded = Json.encode(expected)
         assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}")
     }
+
+//   @Test
+//    fun `that SignedTransaction can be serialised and deserialised`() {
+//        val expected = SignedTransaction(CoreTransaction(),asList())
+//        val encoded = Json.encode(expected)
+//        assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}")
+//    }
+
+
 
     @Test
     fun `that Amount of Issued Currency can be serialised and deserialised`() {

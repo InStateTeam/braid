@@ -69,6 +69,7 @@
       }
     },
     "AmountCurrency" : {
+      "type" : "object",
       "properties" : {
         "quantity" : {
           "type" : "integer",
@@ -93,30 +94,11 @@
           "$ref" : "#/definitions/AmountCurrency"
         },
         "issuerBankPartyRef" : {
-          "$ref" : "#/definitions/OpaqueBytes"
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
-        }
-      }
-    },
-    "OpaqueBytes" : {
-      "type" : "object",
-      "properties" : {
-        "offset" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "size" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "bytes" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
         }
       }
     },
@@ -151,26 +133,6 @@
         }
       }
     },
-    "SecureHash" : {
-      "type" : "object",
-      "properties" : {
-        "offset" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "size" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "bytes" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        }
-      }
-    },
     "StateAndRef" : {
       "type" : "object",
       "properties" : {
@@ -197,7 +159,8 @@
       "type" : "object",
       "properties" : {
         "txhash" : {
-          "$ref" : "#/definitions/SecureHash"
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "index" : {
           "type" : "integer",
@@ -283,7 +246,8 @@
           "$ref" : "#/definitions/AmountCurrency"
         },
         "issuerRef" : {
-          "$ref" : "#/definitions/OpaqueBytes"
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
         }
       }
     },
@@ -294,7 +258,8 @@
           "$ref" : "#/definitions/AmountCurrency"
         },
         "issueRef" : {
-          "$ref" : "#/definitions/OpaqueBytes"
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
         },
         "recipient" : {
           "$ref" : "#/definitions/Party"
@@ -314,7 +279,8 @@
           "$ref" : "#/definitions/AmountCurrency"
         },
         "issuerBankPartyRef" : {
-          "$ref" : "#/definitions/OpaqueBytes"
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
