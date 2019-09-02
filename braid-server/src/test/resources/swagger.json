@@ -176,13 +176,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/BraidTestFlowPayload"
+              "$ref" : "#/definitions/SignedTransaction"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/BraidTestFlowPayload"
+              "$ref" : "#/definitions/SignedTransaction"
             }
           },
           "500" : {
@@ -196,7 +196,7 @@
         "tags" : [ "network" ],
         "description" : "",
         "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
+        "produces" : [ "text/plain" ],
         "parameters" : [ {
           "in" : "body",
           "name" : "payload",
@@ -207,16 +207,10 @@
         } ],
         "responses" : {
           "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
-            }
+            "description" : "empty response"
           },
           "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
-            }
+            "description" : "empty response"
           },
           "500" : {
             "description" : "server failure"
@@ -229,7 +223,7 @@
         "tags" : [ "network" ],
         "description" : "",
         "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
+        "produces" : [ "text/plain" ],
         "parameters" : [ {
           "in" : "body",
           "name" : "payload",
@@ -240,16 +234,10 @@
         } ],
         "responses" : {
           "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
-            }
+            "description" : "empty response"
           },
           "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
-            }
+            "description" : "empty response"
           },
           "500" : {
             "description" : "server failure"
@@ -275,13 +263,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashExitFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashExitFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "500" : {
@@ -308,13 +296,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "500" : {
@@ -341,13 +329,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashIssueFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashIssueFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "500" : {
@@ -374,13 +362,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashPaymentFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashPaymentFlowPayload"
+              "$ref" : "#/definitions/Result"
             }
           },
           "500" : {
@@ -407,13 +395,13 @@
           "default" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashConfigDataFlowPayload"
+              "$ref" : "#/definitions/CashConfiguration"
             }
           },
           "200" : {
             "description" : "default response",
             "schema" : {
-              "$ref" : "#/definitions/CashConfigDataFlowPayload"
+              "$ref" : "#/definitions/CashConfiguration"
             }
           },
           "500" : {
@@ -466,40 +454,6 @@
         }
       }
     },
-    "AmountCurrency" : {
-      "type" : "object",
-      "properties" : {
-        "quantity" : {
-          "type" : "integer",
-          "format" : "int32",
-          "example" : 100,
-          "description" : "total amount in minor units"
-        },
-        "displayTokenSize" : {
-          "type" : "number",
-          "example" : 0.01
-        },
-        "token" : {
-          "type" : "string",
-          "example" : "GBP"
-        }
-      }
-    },
-    "BraidTestFlowPayload" : {
-      "type" : "object",
-      "properties" : {
-        "amount" : {
-          "$ref" : "#/definitions/AmountCurrency"
-        },
-        "issuerBankPartyRef" : {
-          "type" : "string",
-          "description" : "Hex encoded Byte Array"
-        },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
-        }
-      }
-    },
     "AbstractParty" : {
       "type" : "object",
       "properties" : {
@@ -512,6 +466,58 @@
     "AttachmentConstraint" : {
       "type" : "object"
     },
+    "Command" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "$ref" : "#/definitions/CommandData"
+        },
+        "signers" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        }
+      }
+    },
+    "CommandData" : {
+      "type" : "object"
+    },
+    "CommandObject" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "object"
+        },
+        "signers" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        }
+      }
+    },
+    "ComponentGroup" : {
+      "type" : "object",
+      "properties" : {
+        "groupIndex" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "components" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "736F6D654279746573",
+            "description" : "Hex encoded Byte Array"
+          }
+        }
+      }
+    },
     "ContractState" : {
       "type" : "object",
       "properties" : {
@@ -523,33 +529,198 @@
         }
       }
     },
-    "ContractUpgradeFlow_AuthorisePayload" : {
+    "CoreTransaction" : {
       "type" : "object",
       "properties" : {
-        "stateAndRef" : {
-          "$ref" : "#/definitions/StateAndRefObject"
+        "inputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "references" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "outputStates" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContractState"
+          }
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         }
       }
     },
-    "StateAndRef" : {
+    "Duration" : {
       "type" : "object",
       "properties" : {
-        "state" : {
-          "$ref" : "#/definitions/TransactionStateContractState"
+        "seconds" : {
+          "type" : "integer",
+          "format" : "int64"
         },
-        "ref" : {
-          "$ref" : "#/definitions/StateRef"
+        "nano" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "zero" : {
+          "type" : "boolean"
+        },
+        "negative" : {
+          "type" : "boolean"
+        },
+        "units" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TemporalUnit"
+          }
         }
       }
     },
-    "StateAndRefObject" : {
+    "MerkleTree" : {
       "type" : "object",
       "properties" : {
-        "state" : {
-          "$ref" : "#/definitions/TransactionStateObject"
+        "hash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        }
+      }
+    },
+    "NotaryChangeWireTransaction" : {
+      "type" : "object",
+      "properties" : {
+        "inputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
         },
-        "ref" : {
-          "$ref" : "#/definitions/StateRef"
+        "references" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "newNotary" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "serializedComponents" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "736F6D654279746573",
+            "description" : "Hex encoded Byte Array"
+          }
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "outputStates" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContractState"
+          }
+        }
+      }
+    },
+    "SignedTransaction" : {
+      "type" : "object",
+      "properties" : {
+        "txBits" : {
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
+        },
+        "sigs" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "736F6D654279746573",
+            "description" : "Hex encoded Byte Array"
+          }
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "tx" : {
+          "$ref" : "#/definitions/WireTransaction"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
+        },
+        "inputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "references" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        },
+        "notaryChangeTx" : {
+          "$ref" : "#/definitions/NotaryChangeWireTransaction"
+        },
+        "notaryChangeTransaction" : {
+          "type" : "boolean"
+        },
+        "missingSigners" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
         }
       }
     },
@@ -563,6 +734,43 @@
         "index" : {
           "type" : "integer",
           "format" : "int32"
+        }
+      }
+    },
+    "TemporalUnit" : {
+      "type" : "object",
+      "properties" : {
+        "timeBased" : {
+          "type" : "boolean"
+        },
+        "duration" : {
+          "$ref" : "#/definitions/Duration"
+        },
+        "dateBased" : {
+          "type" : "boolean"
+        },
+        "durationEstimated" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "TimeWindow" : {
+      "type" : "object",
+      "properties" : {
+        "length" : {
+          "$ref" : "#/definitions/Duration"
+        },
+        "fromTime" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "untilTime" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "midpoint" : {
+          "type" : "integer",
+          "format" : "int64"
         }
       }
     },
@@ -608,6 +816,196 @@
         }
       }
     },
+    "WireTransaction" : {
+      "type" : "object",
+      "properties" : {
+        "attachments" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Secure Hash"
+          }
+        },
+        "inputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "references" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StateRef"
+          }
+        },
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
+        },
+        "commands" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/CommandObject"
+          }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "timeWindow" : {
+          "$ref" : "#/definitions/TimeWindow"
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "componentGroups" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ComponentGroup"
+          }
+        },
+        "privacySalt" : {
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
+        },
+        "id" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "merkleTree" : {
+          "$ref" : "#/definitions/MerkleTree"
+        },
+        "groupHashes$core" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Secure Hash"
+          }
+        },
+        "groupsMerkleRoots$core" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Secure Hash"
+          }
+        },
+        "availableComponentNonces$core" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+              "description" : "Base 58 Encoded Secure Hash"
+            }
+          }
+        },
+        "availableComponentHashes$core" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+              "description" : "Base 58 Encoded Secure Hash"
+            }
+          }
+        },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        },
+        "availableComponentGroups" : {
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        },
+        "outputStates" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContractState"
+          }
+        }
+      }
+    },
+    "AmountCurrency" : {
+      "type" : "object",
+      "properties" : {
+        "quantity" : {
+          "type" : "integer",
+          "format" : "int32",
+          "example" : 100,
+          "description" : "total amount in minor units"
+        },
+        "displayTokenSize" : {
+          "type" : "number",
+          "example" : 0.01
+        },
+        "token" : {
+          "type" : "string",
+          "example" : "GBP"
+        }
+      }
+    },
+    "BraidTestFlowPayload" : {
+      "type" : "object",
+      "properties" : {
+        "amount" : {
+          "$ref" : "#/definitions/AmountCurrency"
+        },
+        "issuerBankPartyRef" : {
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
+        }
+      }
+    },
+    "ContractUpgradeFlow_AuthorisePayload" : {
+      "type" : "object",
+      "properties" : {
+        "stateAndRef" : {
+          "$ref" : "#/definitions/StateAndRefObject"
+        }
+      }
+    },
+    "StateAndRef" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "$ref" : "#/definitions/TransactionStateContractState"
+        },
+        "ref" : {
+          "$ref" : "#/definitions/StateRef"
+        }
+      }
+    },
+    "StateAndRefObject" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "$ref" : "#/definitions/TransactionStateObject"
+        },
+        "ref" : {
+          "$ref" : "#/definitions/StateRef"
+        }
+      }
+    },
     "TransactionStateObject" : {
       "type" : "object",
       "properties" : {
@@ -634,6 +1032,17 @@
       "properties" : {
         "stateRef" : {
           "$ref" : "#/definitions/StateRef"
+        }
+      }
+    },
+    "Result" : {
+      "type" : "object",
+      "properties" : {
+        "stx" : {
+          "$ref" : "#/definitions/SignedTransaction"
+        },
+        "recipient" : {
+          "$ref" : "#/definitions/AbstractParty"
         }
       }
     },
@@ -741,6 +1150,45 @@
     },
     "DefaultConstructorMarker" : {
       "type" : "object"
+    },
+    "CashConfiguration" : {
+      "type" : "object",
+      "properties" : {
+        "issuableCurrencies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Currency"
+          }
+        },
+        "supportedCurrencies" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Currency"
+          }
+        }
+      }
+    },
+    "Currency" : {
+      "type" : "object",
+      "properties" : {
+        "currencyCode" : {
+          "type" : "string"
+        },
+        "defaultFractionDigits" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "numericCode" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "displayName" : {
+          "type" : "string"
+        },
+        "symbol" : {
+          "type" : "string"
+        }
+      }
     },
     "CashConfigDataFlowPayload" : {
       "type" : "object"

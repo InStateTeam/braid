@@ -16,7 +16,6 @@
 package io.bluebank.braid.server.rpc
 
 
-import io.bluebank.braid.corda.serialisation.AmountSerializer
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.converter.ModelConverters
@@ -26,8 +25,6 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
-import net.corda.core.transactions.CoreTransaction
-import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
@@ -37,9 +34,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import java.util.*
-import java.util.Arrays.asList
 import kotlin.test.assertEquals
-
 
 class CustomModelConvertersTest{
     companion object {
@@ -108,6 +103,25 @@ class CustomModelConvertersTest{
         assertThat(properties?.keys, hasItem("hash"))
         assertThat(properties?.toString(), properties?.get("hash")?.type, equalTo("string"))
     }
+
+    @Test
+    fun `should Correctly Model Issued as string`() {
+        val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+
+        val model = models.get("Issued")
+        assertThat(models.toString(), model, notNullValue())
+
+        val properties = model?.properties
+        assertThat(properties?.toString(), properties?.get("issuer")?.type, equalTo("ref"))
+
+        assertThat(properties?.toString(), properties?.get("product")?.type, equalTo("ref"))     // used to be object. shoul dit be?
+        assertThat(properties?.toString(), properties?.get("_productType")?.type, equalTo("string"))
+
+
+    // maps the issued type too
+    assertThat(models.toString(), models.get("IssuedType"), notNullValue())
+
+  }
 
 
 
@@ -182,6 +196,13 @@ class CustomModelConvertersTest{
             ,val party:Party
             ,val bytes:OpaqueBytes
             ,val hash:SecureHash
+            ,val issuedString:Issued<String>
+            ,val issuedCurrency:Issued<Currency>
+            ,val issued:Issued<IssuedType>
+    )
+
+    data class IssuedType(
+             val value:String
     )
 
 }

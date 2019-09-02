@@ -81,6 +81,8 @@ object BraidCordaJacksonInit {
                 // we do not use the Corda amount serialisers
                 .addSerializer(Amount::class.java, AmountSerializer())
                 .addDeserializer(Amount::class.java, AmountDeserializer())
+           //     .addSerializer(Currency::class.java, CurrencySerializer())
+           //     .addDeserializer(Currency::class.java, CurrencyDeserializer())
                 .addSerializer(Issued::class.java, IssuedSerializer())
                 .addDeserializer(Issued::class.java, IssuedDeserializer())
 

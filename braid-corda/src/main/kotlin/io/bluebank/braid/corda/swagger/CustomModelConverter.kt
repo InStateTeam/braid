@@ -22,6 +22,7 @@ import io.swagger.models.ModelImpl
 import io.swagger.models.properties.*
 import io.swagger.util.Json
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.Issued
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.OpaqueBytes
@@ -88,6 +89,27 @@ class CustomModelConverter : ModelConverter {
 
                         return RefProperty("Amount")
 
+                    }
+                }
+                  if (Issued::class.java.isAssignableFrom(clazz)) {
+                    // String and Currency get created as their own types
+                    val boundType = jsonType.bindings.getBoundType(0)
+                    if (boundType != null && (boundType.rawClass.equals(Currency::class.java) || boundType.rawClass.equals(String::class.java))) {
+                        context?.defineModel("IssuedCurrency", ModelImpl()
+                                .type("object")
+                                .property("issuer", RefProperty("Issuer"))
+                                .property("product", resolveProperty(boundType, context,annotations, chain))
+                        )
+                        return RefProperty("IssuedCurrency")
+                    } else {
+                        val model = ModelImpl()
+                                .type("object")
+                                .property("issuer", RefProperty("Issuer"))
+                                .property("product", resolveProperty(boundType, context,annotations, chain))
+                                .property("_productType", StringProperty().example("java.util.Currency"))
+                        context?.defineModel("Issued", model)
+
+                      return RefProperty("Issued")
                     }
                 }
             }

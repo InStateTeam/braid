@@ -350,7 +350,7 @@ class BraidTest {
       val json = JsonObject()
         .put("notary", notary)
         .put("amount", JsonObject(amount))
-        .put("issuerBankPartyRef", JsonObject())       /// todo serialize OpaqueBytes
+        .put("issuerBankPartyRef", "AABBCC")
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
