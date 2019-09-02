@@ -110,17 +110,20 @@ class CustomModelConvertersTest{
     }
 
   @Test
-    fun `should Correctly Model Issuer as string`() {
+    fun `should Correctly Model Issued as string`() {
         val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
         println(models)
 
-        val model = models.get("ClassWithTypes")
+        val model = models.get("Issued")
         assertThat(models.toString(), model, notNullValue())
 
         val properties = model?.properties
-        assertThat(properties?.keys, hasItem("hash"))
-        assertThat(properties?.toString(), properties?.get("hash")?.type, equalTo("string"))
-    }
+        assertThat(properties?.toString(), properties?.get("issuer")?.type, equalTo("ref"))
+
+        assertThat(properties?.toString(), properties?.get("product")?.type, equalTo("object"))
+        assertThat(properties?.toString(), properties?.get("_productType")?.type, equalTo("string"))
+
+  }
 
 
 
@@ -195,8 +198,8 @@ class CustomModelConvertersTest{
             ,val party:Party
             ,val bytes:OpaqueBytes
             ,val hash:SecureHash
-            ,val isduedString:Issued<String>
-            ,val isduedCurrency:Issued<Currency>
+            ,val issuedString:Issued<String>
+            ,val issuedCurrency:Issued<Currency>
             ,val issued:Issued<Currency>
     )
 
