@@ -12,460 +12,20 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/network/nodes" : {
-      "get" : {
-        "tags" : [ "network" ],
-        "description" : "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "host-and-port",
-          "in" : "query",
-          "description" : "[host]:[port] for the Corda P2P of the node",
-          "required" : false,
-          "type" : "string",
-          "minItems" : 0,
-          "x-example" : "localhost:10000"
-        }, {
-          "name" : "x500-name",
-          "in" : "query",
-          "description" : "the X500 name for the node",
-          "required" : false,
-          "type" : "string",
-          "minItems" : 0,
-          "x-example" : "O=PartyB, L=New York, C=US"
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/SimpleNodeInfo"
-              }
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/SimpleNodeInfo"
-              }
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/network/notaries" : {
-      "get" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "x500-name",
-          "in" : "query",
-          "description" : "the X500 name for the node",
-          "required" : false,
-          "type" : "string",
-          "minItems" : 0,
-          "x-example" : "O=PartyB, L=New York, C=US"
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Party"
-              }
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Party"
-              }
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/network/nodes/self" : {
-      "get" : {
-        "tags" : [ "network" ],
-        "description" : "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "host-and-port",
-          "in" : "query",
-          "description" : "[host]:[port] for the Corda P2P of the node",
-          "required" : false,
-          "type" : "string",
-          "minItems" : 0,
-          "x-example" : "localhost:10000"
-        }, {
-          "name" : "x500-name",
-          "in" : "query",
-          "description" : "the X500 name for the node",
-          "required" : false,
-          "type" : "string",
-          "minItems" : 0,
-          "x-example" : "O=PartyB, L=New York, C=US"
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/SimpleNodeInfo"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/SimpleNodeInfo"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows" : {
-      "get" : {
-        "tags" : [ "network" ],
-        "description" : "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow$Authorise\"]",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string"
-              }
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string"
-              }
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/io.bluebank.braid.server.BraidTestFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/BraidTestFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/BraidTestFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/BraidTestFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_AuthorisePayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/ContractUpgradeFlow_DeauthorisePayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.finance.flows.CashExitFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/CashExitFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashExitFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashExitFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.finance.flows.CashIssueAndPaymentFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashIssueAndPaymentFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.finance.flows.CashIssueFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/CashIssueFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashIssueFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashIssueFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.finance.flows.CashPaymentFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/CashPaymentFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashPaymentFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashPaymentFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    },
-    "/cordapps/flows/net.corda.finance.internal.CashConfigDataFlow" : {
-      "post" : {
-        "tags" : [ "network" ],
-        "description" : "",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "payload",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/CashConfigDataFlowPayload"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashConfigDataFlowPayload"
-            }
-          },
-          "200" : {
-            "description" : "default response",
-            "schema" : {
-              "$ref" : "#/definitions/CashConfigDataFlowPayload"
-            }
-          },
-          "500" : {
-            "description" : "server failure"
-          }
-        }
-      }
-    }
+    "/network/nodes" : { },
+    "/network/notaries" : { },
+    "/network/nodes/self" : { },
+    "/cordapps/flows" : { },
+    "/cordapps/flows/io.bluebank.braid.server.BraidTestFlow" : { },
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Authorise" : { },
+    "/cordapps/flows/net.corda.core.flows.ContractUpgradeFlow$Deauthorise" : { },
+    "/cordapps/flows/net.corda.finance.flows.CashExitFlow" : { },
+    "/cordapps/flows/net.corda.finance.flows.CashIssueAndPaymentFlow" : { },
+    "/cordapps/flows/net.corda.finance.flows.CashIssueFlow" : { },
+    "/cordapps/flows/net.corda.finance.flows.CashPaymentFlow" : { },
+    "/cordapps/flows/net.corda.finance.internal.CashConfigDataFlow" : { }
   },
   "definitions" : {
-    "CordaX500Name" : {
-      "type" : "object",
-      "properties" : {
-        "commonName" : {
-          "type" : "string"
-        },
-        "organisationUnit" : {
-          "type" : "string"
-        },
-        "organisation" : {
-          "type" : "string"
-        },
-        "locality" : {
-          "type" : "string"
-        },
-        "state" : {
-          "type" : "string"
-        },
-        "country" : {
-          "type" : "string"
-        },
-        "x500Principal" : {
-          "$ref" : "#/definitions/X500Principal"
-        }
-      }
-    },
     "NetworkHostAndPort" : {
       "type" : "object",
       "properties" : {
@@ -482,28 +42,12 @@
       "type" : "object",
       "properties" : {
         "owningKey" : {
-          "$ref" : "#/definitions/PublicKey"
+          "type" : "string",
+          "description" : "Base 58 Encoded Public Key"
         },
         "name" : {
-          "$ref" : "#/definitions/CordaX500Name"
-        }
-      }
-    },
-    "PublicKey" : {
-      "type" : "object",
-      "properties" : {
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "algorithm" : {
-          "type" : "string"
-        },
-        "format" : {
-          "type" : "string"
+          "type" : "string",
+          "description" : "CordaX500Name encoded Party"
         }
       }
     },
@@ -524,48 +68,21 @@
         }
       }
     },
-    "X500Principal" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        }
-      }
-    },
-    "Amount" : {
-      "type" : "object",
-      "properties" : {
-        "quantity" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "displayTokenSize" : {
-          "type" : "number"
-        },
-        "token" : {
-          "type" : "object"
-        }
-      }
-    },
     "AmountCurrency" : {
-      "type" : "object",
       "properties" : {
         "quantity" : {
           "type" : "integer",
-          "format" : "int64"
+          "format" : "int32",
+          "example" : 100,
+          "description" : "total amount in minor units"
         },
         "displayTokenSize" : {
-          "type" : "number"
+          "type" : "number",
+          "example" : 0.01
         },
         "token" : {
-          "$ref" : "#/definitions/Currency"
+          "type" : "string",
+          "example" : "GBP"
         }
       }
     },
@@ -580,28 +97,6 @@
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
-        }
-      }
-    },
-    "Currency" : {
-      "type" : "object",
-      "properties" : {
-        "currencyCode" : {
-          "type" : "string"
-        },
-        "defaultFractionDigits" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "numericCode" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "displayName" : {
-          "type" : "string"
-        },
-        "symbol" : {
-          "type" : "string"
         }
       }
     },
@@ -629,7 +124,8 @@
       "type" : "object",
       "properties" : {
         "owningKey" : {
-          "$ref" : "#/definitions/PublicKey"
+          "type" : "string",
+          "description" : "Base 58 Encoded Public Key"
         }
       }
     },
@@ -814,36 +310,11 @@
     "CashIssueFlowPayload" : {
       "type" : "object",
       "properties" : {
-        "request" : {
-          "$ref" : "#/definitions/IssueRequest"
-        }
-      }
-    },
-    "IssueRequest" : {
-      "type" : "object",
-      "properties" : {
         "amount" : {
           "$ref" : "#/definitions/AmountCurrency"
         },
-        "issueRef" : {
+        "issuerBankPartyRef" : {
           "$ref" : "#/definitions/OpaqueBytes"
-        },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
-        }
-      }
-    },
-    "CashPaymentFlowPayload" : {
-      "type" : "object",
-      "properties" : {
-        "amount" : {
-          "$ref" : "#/definitions/AmountCurrency"
-        },
-        "recipient" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "anonymous" : {
-          "type" : "boolean"
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
