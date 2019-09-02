@@ -30,6 +30,7 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
 import java.security.PublicKey
+import java.util.*
 
 /**
  * If you add to this file, please also add to CustomModelConverter forcorrect swagger generation
@@ -81,6 +82,8 @@ object BraidCordaJacksonInit {
                 // we do not use the Corda amount serialisers
                 .addSerializer(Amount::class.java, AmountSerializer())
                 .addDeserializer(Amount::class.java, AmountDeserializer())
+           //     .addSerializer(Currency::class.java, CurrencySerializer())
+           //     .addDeserializer(Currency::class.java, CurrencyDeserializer())
                 .addSerializer(Issued::class.java, IssuedSerializer())
                 .addDeserializer(Issued::class.java, IssuedDeserializer())
 

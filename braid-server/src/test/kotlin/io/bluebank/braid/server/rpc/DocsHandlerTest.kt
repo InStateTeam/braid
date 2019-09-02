@@ -38,7 +38,7 @@ class DocsHandlerTest{
 
         // need to be able to do this..
         val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
-        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("generated.net.corda.finance.flows.CashIssueFlowPayload"))
+        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("net.corda.finance.flows.AbstractCashFlow\$Result"))
         //handler.returnType.javaType
 
         docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
@@ -52,7 +52,7 @@ class DocsHandlerTest{
 
         // need to be able to do this..
         val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
-        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("generated.net.corda.core.flows.ContractUpgradeFlow_AuthorisePayload"))
+        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("java.lang.Void"))
         //handler.returnType.javaType
 
         docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
