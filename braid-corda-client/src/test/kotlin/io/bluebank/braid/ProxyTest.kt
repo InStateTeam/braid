@@ -67,7 +67,7 @@ class ProxyTest {
       try {
         myService = braidClient.bind(MyService::class.java)
         async.complete()
-      } catch(ex: Throwable) {
+      } catch (ex: Throwable) {
         println(ex.message)
         throw ex
       }

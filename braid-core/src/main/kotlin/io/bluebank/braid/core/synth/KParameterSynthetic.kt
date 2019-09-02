@@ -21,6 +21,7 @@ import kotlin.reflect.full.createType
 
 class KParameterSynthetic(override val name: String, val clazz: Class<*>) :
   KParameter {
+
   override val annotations: List<Annotation> = emptyList()
   override val index: Int = 0
   override val isOptional: Boolean = false

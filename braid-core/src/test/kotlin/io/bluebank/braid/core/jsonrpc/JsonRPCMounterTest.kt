@@ -44,12 +44,15 @@ class JsonRPCMounterTest {
   private val service = ControlledService()
   private val executor = ConcreteServiceExecutor(service)
   private val socket = InvocableMockSocket()
-  private val nonBlocking = NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
-    socket.addListener(this)
-  }
+  private val nonBlocking =
+    NonBlockingSocket<JsonRPCRequest, JsonRPCResponse>(vertx).apply {
+      socket.addListener(this)
+    }
+
   init {
     JsonRPCMounter(executor, vertx).apply { nonBlocking.addListener(this) }
   }
+
   @After
   fun after() {
     socket.end()
@@ -79,7 +82,9 @@ class JsonRPCMounterTest {
 
   @Test
   fun `that we can execute a stream`() {
-    val result = socket.invoke(service::someStream).toList().map { it.toList() }.toFuture().getOrThrow()
+    val result =
+      socket.invoke(service::someStream).toList().map { it.toList() }.toFuture()
+        .getOrThrow()
     assertEquals(listOf(1, 2, 3), result)
   }
 
@@ -96,21 +101,22 @@ class JsonRPCMounterTest {
   @Test
   fun `that we cancel a stream`(context: TestContext) {
     val async = context.async()
-    val subscription = socket.invoke(service::cancellableStream).subscribe(object: Subscriber<Int>() {
-      override fun onNext(t: Int?) {
-        if (!async.isCompleted) {
-          async.complete()
+    val subscription =
+      socket.invoke(service::cancellableStream).subscribe(object : Subscriber<Int>() {
+        override fun onNext(t: Int?) {
+          if (!async.isCompleted) {
+            async.complete()
+          }
         }
-      }
 
-      override fun onCompleted() {
-        error("should never see this")
-      }
+        override fun onCompleted() {
+          error("should never see this")
+        }
 
-      override fun onError(e: Throwable?) {
-        error("should never see this")
-      }
-    })
+        override fun onError(e: Throwable?) {
+          error("should never see this")
+        }
+      })
     async.await()
     subscription.unsubscribe()
     service.waitForServiceReady()
@@ -133,6 +139,7 @@ class ControlledService {
   companion object {
     private val log = loggerFor<ControlledService>()
   }
+
   private val serviceReady = CountDownLatch(1)
   private val trigger = CountDownLatch(1)
   internal fun trigger() {
@@ -147,10 +154,10 @@ class ControlledService {
     serviceReady.countDown()
   }
 
-  fun block() : Future<String> {
+  fun block(): Future<String> {
     log.info("starting block()")
     val result = Future.future<String>()
-    object: Thread() {
+    object : Thread() {
       override fun run() {
         serviceReady()
         log.info("waiting for trigger ")
@@ -162,17 +169,17 @@ class ControlledService {
     return result
   }
 
-  fun doSomething() : String {
+  fun doSomething(): String {
     return "result"
   }
 
-  fun fails() : String {
+  fun fails(): String {
     throw RuntimeException("failed")
   }
 
-  fun doSomethingAsync() : Future<String> {
+  fun doSomethingAsync(): Future<String> {
     val result = Future.future<String>()
-    object: Thread() {
+    object : Thread() {
       override fun run() {
         result.complete("result")
       }
@@ -180,9 +187,9 @@ class ControlledService {
     return result
   }
 
-  fun failsAsync() : Future<String> {
+  fun failsAsync(): Future<String> {
     val result = Future.future<String>()
-    object: Thread() {
+    object : Thread() {
       override fun run() {
         result.fail("failed")
       }
@@ -190,11 +197,11 @@ class ControlledService {
     return result
   }
 
-  fun someStream() : Observable<Int> {
+  fun someStream(): Observable<Int> {
     return Observable.just(1, 2, 3).subscribeOn(Schedulers.computation())
   }
 
-  fun cancellableStream() : Observable<Int> {
+  fun cancellableStream(): Observable<Int> {
     return Observable.create<Int> {
       var next = 1
       while (!it.isUnsubscribed) {

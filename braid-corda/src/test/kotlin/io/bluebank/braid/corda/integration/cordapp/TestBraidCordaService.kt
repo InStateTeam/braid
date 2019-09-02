@@ -39,7 +39,8 @@ import net.corda.core.serialization.SingletonSerializeAsToken
 import java.util.concurrent.ConcurrentHashMap
 
 @CordaService
-class TestBraidCordaService(private val serviceHub: AppServiceHub) : SingletonSerializeAsToken() {
+class TestBraidCordaService(private val serviceHub: AppServiceHub) :
+  SingletonSerializeAsToken() {
 
   companion object {
     private val log = loggerFor<TestBraidCordaService>()
@@ -75,9 +76,10 @@ class TestBraidCordaService(private val serviceHub: AppServiceHub) : SingletonSe
     }
   }
 
-  fun doEcho(payload: String) : CordaFuture<String> {
+  fun doEcho(payload: String): CordaFuture<String> {
     return serviceHub.startFlow(EchoFlow(payload)).returnValue
   }
+
   private fun getBraidPort(): Int {
     val property = "braid.$org.port"
     return System.getProperty(property)?.toInt() ?: when (org) {

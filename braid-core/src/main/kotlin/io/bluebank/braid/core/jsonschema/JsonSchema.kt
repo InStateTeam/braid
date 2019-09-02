@@ -40,7 +40,8 @@ fun Method.toDescriptor(): MethodDescriptor {
     serviceAnnotation != null && serviceAnnotation.returnType != Any::class ->
       serviceAnnotation.returnType.javaObjectType.toJavascriptType()
     else -> {
-      TypeFactory.defaultInstance().constructType(genericReturnType.underlyingGenericType()).toJavascriptType()
+      TypeFactory.defaultInstance()
+        .constructType(genericReturnType.underlyingGenericType()).toJavascriptType()
     }
   }
 
@@ -58,7 +59,12 @@ fun <T : Any> Constructor<T>.toDescriptor(): MethodDescriptor {
   val params = parameters.map { it.name to it.type.toJavascriptType() }.toMap()
   val returnDescription = this.declaringClass.toJavascriptType()
   val description = this.declaringClass.toSimpleJavascriptType()
-  return MethodDescriptor(name = name, description = description, parameters = params, returnType = returnDescription)
+  return MethodDescriptor(
+    name = name,
+    description = description,
+    parameters = params,
+    returnType = returnDescription
+  )
 }
 
 fun Class<*>.toJavascriptType(): String = describeClass(this)
@@ -83,7 +89,7 @@ fun describeClass(clazz: Class<*>): String {
   return describe(visitor.finalSchema()).replace("\"", "")
 }
 
-fun describeJavaType(type: JavaType) : String {
+fun describeJavaType(type: JavaType): String {
   val mapper = ObjectMapper()
   val visitor = SchemaFactoryWrapper()
   mapper.acceptJsonFormatVisitor(type, visitor)

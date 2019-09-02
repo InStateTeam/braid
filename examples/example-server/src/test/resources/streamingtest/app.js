@@ -27,14 +27,22 @@ $(document).ready(() => {
 class App {
   constructor(url) {
     const thisObj = this;
-    this.service = new ServiceProxy(url, () => { thisObj.onOpen() }, () => { thisObj.onClose() });
+    this.service = new ServiceProxy(url, () => {
+      thisObj.onOpen()
+    }, () => {
+      thisObj.onClose()
+    });
   }
 
   onOpen() {
     console.log("opened")
     this.service.login({username: 'admin', password: 'admin'})
-      .then(() => { console.log('login succeeded') }, (err) => console.error('login failed', err))
-      .then(() => { this.service.time(this.onTime) });
+      .then(() => {
+        console.log('login succeeded')
+      }, (err) => console.error('login failed', err))
+      .then(() => {
+        this.service.time(this.onTime)
+      });
   }
 
   onTime(time) {

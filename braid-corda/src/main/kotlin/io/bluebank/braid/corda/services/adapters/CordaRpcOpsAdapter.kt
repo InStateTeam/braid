@@ -20,7 +20,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.FlowHandle
 
-fun CordaRPCOps.asFlowStarter() : FlowStarter {
+fun CordaRPCOps.asFlowStarter(): FlowStarter {
   return CordaRpcOpsAdapter(this)
 }
 

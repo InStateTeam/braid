@@ -44,7 +44,8 @@ fun ClassWriter.writeDefaultConstructor() {
     "java/lang/Object",
     "<init>",
     "()V",
-    false)
+    false
+  )
 
   constructorMethod.visitInsn(Opcodes.RETURN)
   constructorMethod.visitMaxs(1, 1)
@@ -84,7 +85,8 @@ fun ClassWriter.addFields(method: Method) = addFields(method.parameters)
 /**
  * add all parameters as fields in the class writer
  */
-fun ClassWriter.addFields(parameters: Array<Parameter>) = parameters.forEach { addField(it) }
+fun ClassWriter.addFields(parameters: Array<Parameter>) =
+  parameters.forEach { addField(it) }
 
 /**
  * add a parameter as a field to the class being written

@@ -17,11 +17,10 @@ package $
 
 { package }
 
-import io.bluebank.braid.core.annotation .MethodDescription
-import io.bluebank.braid.core.annotation .ServiceDescription
+import io.bluebank.braid.core.annotation.MethodDescription
+import io.bluebank.braid.core.annotation.ServiceDescription
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
-
 
 @ServiceDescription("calculator", "a simple calculator")
 class CalculatorService {

@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>braid</artifactId>
@@ -188,7 +189,9 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest" failonerror="true">
+                <exec executable="npm"
+                      dir="${project.basedir}/src/test/resources/streamingtest"
+                      failonerror="true">
                   <arg value="install"/>
                 </exec>
               </target>
@@ -202,7 +205,9 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="npm" dir="${project.basedir}/src/test/resources/streamingtest" failonerror="true">
+                <exec executable="npm"
+                      dir="${project.basedir}/src/test/resources/streamingtest"
+                      failonerror="true">
                   <arg value="run"/>
                   <arg value="build"/>
                 </exec>

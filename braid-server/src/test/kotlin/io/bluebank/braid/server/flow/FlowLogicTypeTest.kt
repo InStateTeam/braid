@@ -27,21 +27,21 @@ import kotlin.test.assertEquals
 class FlowLogicTypeTest {
 
 
-    @Test
-    fun shouldGetReturnType() {
-        val returnType = BraidTestFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, SignedTransaction::class)
-    }
+  @Test
+  fun shouldGetReturnType() {
+    val returnType = BraidTestFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, SignedTransaction::class)
+  }
 
-    @Test
-    fun shouldGetReturnTypeForCashIssueFlow() {
-        val returnType = CashIssueFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
-    }
+  @Test
+  fun shouldGetReturnTypeForCashIssueFlow() {
+    val returnType = CashIssueFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
+  }
 
-    @Test
-    fun shouldGetReturnTypeForCashIssueAndPaymentFlow() {
-        val returnType = CashIssueAndPaymentFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
-    }
+  @Test
+  fun shouldGetReturnTypeForCashIssueAndPaymentFlow() {
+    val returnType = CashIssueAndPaymentFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
+  }
 }

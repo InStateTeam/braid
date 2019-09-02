@@ -239,7 +239,12 @@ class ObservableInvocationStrategyTest {
 
     // now 'receive' a result
     invocations.receive(JsonRPCResultResponse(id = 1, result = "result"))
-    invocations.receive(JsonRPCErrorResponse.serverError(id = 1, message = "we send an error"))
+    invocations.receive(
+      JsonRPCErrorResponse.serverError(
+        id = 1,
+        message = "we send an error"
+      )
+    )
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -278,7 +283,8 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable =
+      strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -322,7 +328,8 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable =
+      strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -372,7 +379,8 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable =
+      strategy.getResult() as Observable<String>
 
     assertEquals(
       0,
@@ -408,7 +416,6 @@ class ObservableInvocationStrategyTest {
     assertEquals(2, subscriber.itemsReceived)
   }
 
-
   @Test
   fun `that strategy can handle an onComplete after subscriber has unsubscribed`() {
 
@@ -420,7 +427,8 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable =
+      strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,
@@ -443,7 +451,8 @@ class ObservableInvocationStrategyTest {
       TestInterface::testObservable.javaMethod?.genericReturnType!!,
       arrayOf()
     )
-    @Suppress("UNCHECKED_CAST") val observable = strategy.getResult() as Observable<String>
+    @Suppress("UNCHECKED_CAST") val observable =
+      strategy.getResult() as Observable<String>
     assertEquals(
       0,
       invocations.activeRequestsCount,

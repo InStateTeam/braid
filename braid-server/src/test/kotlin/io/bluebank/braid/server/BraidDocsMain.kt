@@ -17,34 +17,31 @@ package io.bluebank.braid.server
 
 import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.util.Json
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
 import java.io.File
 
-
 private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
 
-    if (args.size != 1) {
-        throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName>")
-    }
+  if (args.size != 1) {
+    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName>")
+  }
 
-    val restConfig = Braid().restConfig(mock())
+  val restConfig = Braid().restConfig(mock())
 
-    val vertx = Vertx.vertx()
-    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-    val swagger = restMounter.docsHandler.createSwagger()
-    val swaggerText = Json.pretty().writeValueAsString(swagger)
+  val vertx = Vertx.vertx()
+  val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+  val swagger = restMounter.docsHandler.createSwagger()
+  val swaggerText = Json.pretty().writeValueAsString(swagger)
 
-    log.info(swaggerText)
-    val file = File(args[0])
-    file.parentFile.mkdirs()
-    file.writeText(swaggerText)
-    log.info("wrote to:" + file.absolutePath)
+  log.info(swaggerText)
+  val file = File(args[0])
+  file.parentFile.mkdirs()
+  file.writeText(swaggerText)
+  log.info("wrote to:" + file.absolutePath)
 }
 

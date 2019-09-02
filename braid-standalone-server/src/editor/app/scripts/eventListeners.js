@@ -19,68 +19,68 @@ import {switchService} from 'scripts/workers';
 import Helpers from 'scripts/helpers';
 
 export default class EventListeners {
-  constructor(){
+  constructor() {
     this.Buttons = new Buttons();
     this.Helpers = new Helpers();
     this.init();
   }
 
-  init(){
+  init() {
     this.functionButtonsClickEvents();
-    this.textBoxKeyEvents(); 
-    this.modalClickEvents();    
+    this.textBoxKeyEvents();
+    this.modalClickEvents();
     this.tooltipEvents();
     this.copyServiceClickEvent();
     this.serviceSelectEvent();
   }
 
-  functionButtonsClickEvents(){
+  functionButtonsClickEvents() {
     let functionButtons = document.querySelector('.functions');
     let self = this;
     functionButtons.addEventListener('click', (e) => {
 
-      if(e.target.id === 'createServiceBtn'){
+      if(e.target.id === 'createServiceBtn') {
         self.Buttons.onCreateService();
       }
-      if(e.target.id === 'saveBtn'){
-       self.Buttons.onSave(e); 
+      if(e.target.id === 'saveBtn') {
+        self.Buttons.onSave(e);
       }
-      if(e.target.id === 'formatBtn'){
-       self.Buttons.onFormat(e); 
+      if(e.target.id === 'formatBtn') {
+        self.Buttons.onFormat(e);
       }
-      if(e.target.id === 'deleteBtn'){
-       self.Buttons.onDelete(e); 
+      if(e.target.id === 'deleteBtn') {
+        self.Buttons.onDelete(e);
       }
     })
   }
 
-  textBoxKeyEvents(){
+  textBoxKeyEvents() {
     let textBoxCreate = document.querySelector('#newService');
     let self = this;
     textBoxCreate.addEventListener('keyup', (e) => {
       e.preventDefault();
-      if(e.keyCode === 13){
+      if(e.keyCode === 13) {
         self.Buttons.onCreateService();
       }
-    }); 
+    });
   }
 
-  modalClickEvents(){
+  modalClickEvents() {
     let modal = document.querySelector('.modal');
-    let self = this;    
+    let self = this;
     modal.addEventListener('click', (e) => {
-      if(e.target.classList.contains('modal')){
+      if(e.target.classList.contains('modal')) {
         modal.classList.toggle('shown');
       }
 
-      if(e.target.id === 'yesBtn'){        
+      if(e.target.id === 'yesBtn') {
         let selectedService = modal.dataset.service;
         self.Buttons.onSave(e);
         switchService(selectedService);
         modal.classList.toggle('shown');
       }
 
-      if(e.target.id === 'noBtn'){
+      if(e.target.id === 'noBtn') {
         let selectedService = modal.dataset.service;
         switchService(selectedService);
         modal.classList.toggle('shown');
@@ -88,27 +88,27 @@ export default class EventListeners {
     });
   }
 
-  tooltipEvents(){
+  tooltipEvents() {
     let tooltip = document.querySelector('.tooltip .close');
     tooltip.addEventListener('click', (e) => {
       document.querySelector('.tooltip').classList.remove('shown');
     });
   }
 
-  copyServiceClickEvent(){
+  copyServiceClickEvent() {
     let copyServiceBtn = document.querySelector('#copy-to-clipboard');
     let copyToolTip = document.querySelector('.tooltip-clip');
-    
+
     copyServiceBtn.addEventListener('click', (e) => {
       let serviceText = document.querySelector('#calls');
       serviceText.select();
-    
+
       try {
         let successful = document.execCommand('copy');
         let msg = successful ? 'copied' : 'not copied';
         copyToolTip.textContent = msg;
         copyToolTip.style.display = 'block';
-      } catch (err) {
+      } catch(err) {
         console.log('Oops, unable to copy');
       }
     });
@@ -118,24 +118,24 @@ export default class EventListeners {
     });
   }
 
-  serviceSelectEvent(){
+  serviceSelectEvent() {
     let services = document.querySelector('#services');
-    let self = this;    
+    let self = this;
     services.addEventListener('click', (e) => {
-      if(e.target.tagName === 'LI'){
+      if(e.target.tagName === 'LI') {
         onServiceSelect(e);
       }
     })
 
     function onServiceSelect(e) {
-      if(self.Helpers.getSelectedService() && !document.querySelector('#saveBtn').disabled){
+      if(self.Helpers.getSelectedService() && !document.querySelector('#saveBtn').disabled) {
         document.querySelector('.unsaved').textContent = self.Helpers.getSelectedService();
         let modal = document.querySelector('.modal');
         modal.setAttribute('data-service', e.target.textContent);
         modal.classList.toggle('shown');
       } else {
         switchService(e.target.textContent);
-      }  
-    }    
+      }
+    }
   }
 }

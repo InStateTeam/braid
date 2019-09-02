@@ -17,10 +17,10 @@
 "use strict";
 
 function buildURLClass() {
-  if (typeof(document) !== 'undefined' && typeof(window) !== 'undefined') {
+  if(typeof (document) !== 'undefined' && typeof (window) !== 'undefined') {
     return BrowserURL;
   } else {
-    const { URL } =require('url');
+    const {URL} = require('url');
     return URL;
   }
 }

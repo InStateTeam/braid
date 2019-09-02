@@ -30,7 +30,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.jvm.javaConstructor
 
-fun AppServiceHub.asFlowStarter() : FlowStarter {
+fun AppServiceHub.asFlowStarter(): FlowStarter {
   return AppServiceHubAdapter(this)
 }
 
@@ -40,14 +40,20 @@ class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : FlowStarter 
     vararg args: Any?
   ): FlowHandle<T> {
     val argTypes = args.map { it?.javaClass }
-    val constructor : KFunction<FlowLogic<T>> = uncheckedCast(findConstructor(logicType, argTypes))
-    val argsMap = args.zip(constructor.parameters).map { Pair(it.second.name!!, it.first) }.toMap()
-    val params = buildParams(constructor, argsMap) ?: error("could not find matching constructor")
+    val constructor: KFunction<FlowLogic<T>> =
+      uncheckedCast(findConstructor(logicType, argTypes))
+    val argsMap =
+      args.zip(constructor.parameters).map { Pair(it.second.name!!, it.first) }.toMap()
+    val params =
+      buildParams(constructor, argsMap) ?: error("could not find matching constructor")
     val flowLogic = constructor.callBy(params)
     return serviceHub.startFlow(flowLogic)
   }
 
-  private fun findConstructor(flowClass: Class<out FlowLogic<*>>, argTypes: List<Class<Any>?>): KFunction<FlowLogic<*>> {
+  private fun findConstructor(
+    flowClass: Class<out FlowLogic<*>>,
+    argTypes: List<Class<Any>?>
+  ): KFunction<FlowLogic<*>> {
     return flowClass.kotlin.constructors.single { ctor ->
       // Get the types of the arguments, always boxed (as that's what we get in the invocation).
       val ctorTypes = ctor.javaConstructor!!.parameterTypes.map { Primitives.wrap(it) }
@@ -61,7 +67,11 @@ class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : FlowStarter 
     }
 
   }
-  private fun buildParams(constructor: KFunction<FlowLogic<*>>, args: Map<String, Any?>): HashMap<KParameter, Any?>? {
+
+  private fun buildParams(
+    constructor: KFunction<FlowLogic<*>>,
+    args: Map<String, Any?>
+  ): HashMap<KParameter, Any?>? {
     val params = hashMapOf<KParameter, Any?>()
     val usedKeys = hashSetOf<String>()
     for (parameter in constructor.parameters) {
@@ -78,16 +88,31 @@ class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : FlowStarter 
     return params
   }
 
-  private fun tryBuildParam(args: Map<String, Any?>, parameter: KParameter, params: HashMap<KParameter, Any?>): Boolean {
+  private fun tryBuildParam(
+    args: Map<String, Any?>,
+    parameter: KParameter,
+    params: HashMap<KParameter, Any?>
+  ): Boolean {
     val containsKey = parameter.name in args
     // OK to be missing if optional
-    return (parameter.isOptional && !containsKey) || (containsKey && paramCanBeBuilt(args, parameter, params))
+    return (parameter.isOptional && !containsKey) || (containsKey && paramCanBeBuilt(
+      args,
+      parameter,
+      params
+    ))
   }
 
-  private fun paramCanBeBuilt(args: Map<String, Any?>, parameter: KParameter, params: HashMap<KParameter, Any?>): Boolean {
+  private fun paramCanBeBuilt(
+    args: Map<String, Any?>,
+    parameter: KParameter,
+    params: HashMap<KParameter, Any?>
+  ): Boolean {
     val value = args[parameter.name]
     params[parameter] = value
-    return (value is Any && parameterAssignableFrom(parameter.type.javaTypeIncludingSynthetics(), value)) || parameter.type.isMarkedNullable
+    return (value is Any && parameterAssignableFrom(
+      parameter.type.javaTypeIncludingSynthetics(),
+      value
+    )) || parameter.type.isMarkedNullable
   }
 
   private fun parameterAssignableFrom(type: Type, value: Any): Boolean {

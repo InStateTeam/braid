@@ -37,7 +37,6 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions
 import io.vertx.ext.jwt.JWTOptions
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import io.vertx.kotlin.ext.auth.KeyStoreOptions
 import io.vertx.kotlin.ext.auth.keyStoreOptionsOf
 import org.junit.After
 import org.junit.Test
@@ -69,7 +68,13 @@ class AuthenticatedSocketImplTest {
   }
   private val jwtAuth: JWTAuth = JWTAuth.create(
     vertx,
-    JWTAuthOptions().setKeyStore(keyStoreOptionsOf(jwtSecret, tempJKS.absolutePath, "jceks"))
+    JWTAuthOptions().setKeyStore(
+      keyStoreOptionsOf(
+        jwtSecret,
+        tempJKS.absolutePath,
+        "jceks"
+      )
+    )
   )
 
   private val authSocket = AuthenticatedSocket.create(jwtAuth)

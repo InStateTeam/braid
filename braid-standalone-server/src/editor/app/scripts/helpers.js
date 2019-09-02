@@ -19,14 +19,14 @@ import beautify from 'js-beautify';
 let selectedService = '';
 
 export default class Helpers {
-  constructor(){
+  constructor() {
     this.showExistingServices = this.showExistingServices.bind(this);
     this.formatTooltip = this.formatTooltip.bind(this);
   }
-  
+
   getSelectedService() {
     return selectedService;
-  }    
+  }
 
   setSelectedService(service) {
     selectedService = service;
@@ -38,35 +38,33 @@ export default class Helpers {
   }
 
   getServiceScript(serviceName, callback) {
-    $.get("/api/services/" + serviceName + "/script", function(script) {
+    $.get("/api/services/" + serviceName + "/script", function (script) {
       callback(script)
     })
   }
 
   getJavaHeaders(serviceName, callback) {
-    $.get("/api/services/" + serviceName + "/java", function(script) {
+    $.get("/api/services/" + serviceName + "/java", function (script) {
       callback(script);
     });
   }
 
-  showExistingServices(data){
-    if(data){
+  showExistingServices(data) {
+    if(data) {
       this.populateFunctions(data);
       this.expandFunctionsSection();
-    } else { 
+    } else {
       this.collapseFunctionsSection();
     }
   }
-  
+
   parseURL(url) {
-    let parser = document.createElement('a'),
-      searchObject = {},
-      queries, split, i;
+    let parser = document.createElement('a'), searchObject = {}, queries, split, i;
     // Let the browser do the work
     parser.href = url;
     // Convert query string to object
     queries = parser.search.replace(/^\?/, '').split('&');
-    for( i = 0; i < queries.length; i++ ) {
+    for(i = 0; i < queries.length; i++) {
       split = queries[i].split('=');
       searchObject[split[0]] = split[1];
     }
@@ -82,39 +80,36 @@ export default class Helpers {
     };
   }
 
-  parseCreateService(string){
+  parseCreateService(string) {
     const patternSubZero = /[A-Za-z]/;
     const patternRemainingChars = /\w/;
 
     const validation = {
-      empty: false,
-      first: false,
-      highlightedString: '',
-      remain: false
+      empty: false, first: false, highlightedString: '', remain: false
     }
-    
+
     let strArray = string.split('');
 
-    if(string.length == 0){
+    if(string.length == 0) {
       validation.empty = true;
     }
 
     strArray.forEach((char, index, array) => {
       let check = false;
-      if(index === 0){
+      if(index === 0) {
         check = patternSubZero.test(char);
-        if(!check){
+        if(!check) {
           validation.first = true;
         }
-      } else { 
+      } else {
         check = patternRemainingChars.test(char);
-        if(!check){
+        if(!check) {
           validation.remain = true;
         }
       }
 
-      if(!check){
-        validation.highlightedString  += '<span style="background:#DE0000">' + char + '</span>';
+      if(!check) {
+        validation.highlightedString += '<span style="background:#DE0000">' + char + '</span>';
       } else {
         validation.highlightedString += char;
       }
@@ -123,30 +118,30 @@ export default class Helpers {
     return validation;
   }
 
-  checkCreatedService(string){
+  checkCreatedService(string) {
     const pattern = /^[A-Za-z]\w*$/;
-    
-    if(!string){
-     return false
+
+    if(!string) {
+      return false
     }
 
     return pattern.test(string);
   }
-  
-  selectHighlight(selectedService){
+
+  selectHighlight(selectedService) {
     const lists = document.querySelector('#services').querySelectorAll('li');
     let selectedLi;
-    for (let item = 0; item < lists.length; item++) {
+    for(let item = 0; item < lists.length; item++) {
       lists[item].style.background = '#000';
-      if(lists[item].textContent == selectedService){
+      if(lists[item].textContent == selectedService) {
         selectedLi = lists[item];
       }
     }
     selectedLi.style.background = "#EF0017"
   }
 
-  populateList(list, serviceArray){
-    while(list.firstChild){
+  populateList(list, serviceArray) {
+    while(list.firstChild) {
       list.removeChild(list.firstChild);
     }
 
@@ -212,12 +207,11 @@ export default class Helpers {
 
       let returnTypeContent = document.createElement("PRE");
       returnTypeContent.classList.add('return-type-content');
-      text = beautify(service.returnType, { indent_size: 2 });
-      
+      text = beautify(service.returnType, {indent_size: 2});
+
       textNode = document.createTextNode(text);
       returnTypeContent.appendChild(textNode);
       returnType.appendChild(returnTypeContent);
-
 
       list.appendChild(node);
 
@@ -227,34 +221,36 @@ export default class Helpers {
     });
   }
 
-  populateFunctions(serviceArray){
+  populateFunctions(serviceArray) {
     const functionList = document.querySelector('.implemented-functions');
     this.populateList(functionList, serviceArray);
   }
 
-  expandFunctionsSection(){
+  expandFunctionsSection() {
     const funSection = document.querySelector('.calls');
     const editor = document.querySelector('#editor');
     funSection.style.marginLeft = '250px'
-    editor.style.width =  'calc(100% - 485px)'
+    editor.style.width = 'calc(100% - 485px)'
     editor.style.marginLeft = '230px'
-    setTimeout(() => {funSection.style.zIndex = 1;}, 500);
+    setTimeout(() => {
+      funSection.style.zIndex = 1;
+    }, 500);
   }
 
-  collapseFunctionsSection(){
+  collapseFunctionsSection() {
     const funSection = document.querySelector('.calls');
     const editor = document.querySelector('#editor');
     funSection.style.zIndex = -1;
     setTimeout(() => {
       funSection.style.marginLeft = '0px';
-      editor.style.width =  'calc(100% - 260px)';
+      editor.style.width = 'calc(100% - 260px)';
       editor.style.marginLeft = '5px'
-    }, 500);    
+    }, 500);
   }
 
   getEndPoint(serviceName) {
     const control = document.querySelector('#calls');
-    if (!serviceName || serviceName.trim() === "") {
+    if(!serviceName || serviceName.trim() === "") {
       control.value = ""
     } else {
       const host = window.location.host;
@@ -268,14 +264,11 @@ export default class Helpers {
     let invalidServiceName = this.parseCreateService(serviceName);
     document.querySelector('.badService').innerHTML = invalidServiceName.highlightedString;
 
-    (invalidServiceName.empty) ? 
-    document.querySelector('.empty').classList.add('shown') : document.querySelector('.empty').classList.remove('shown');
+    (invalidServiceName.empty) ? document.querySelector('.empty').classList.add('shown') : document.querySelector('.empty').classList.remove('shown');
 
-    (invalidServiceName.first) ? 
-    document.querySelector('.first').classList.add('shown') : document.querySelector('.first').classList.remove('shown');
+    (invalidServiceName.first) ? document.querySelector('.first').classList.add('shown') : document.querySelector('.first').classList.remove('shown');
 
-    (invalidServiceName.remain) ? 
-    document.querySelector('.remain').classList.add('shown') : document.querySelector('.remain').classList.remove('shown');    
+    (invalidServiceName.remain) ? document.querySelector('.remain').classList.add('shown') : document.querySelector('.remain').classList.remove('shown');
 
     document.querySelector('.tooltip').classList.add('shown');
   }

@@ -20,11 +20,11 @@ import java.net.URL
 
 private val CORDAPP_NAME_RE = "^(.*?)(\\-\\d(\\.\\d)*\\.jar)?\$".toRegex()
 
-fun URL.toCordappName() : String {
-    val fileName = File(this.file).name
-    val matches = CORDAPP_NAME_RE.matchEntire(fileName)
-    return when (matches) {
-        null -> error("parsing of cordapp module location failed: $this")
-        else -> matches.groupValues[1].replace(".jar", "-jar")
-    }
+fun URL.toCordappName(): String {
+  val fileName = File(this.file).name
+  val matches = CORDAPP_NAME_RE.matchEntire(fileName)
+  return when (matches) {
+    null -> error("parsing of cordapp module location failed: $this")
+    else -> matches.groupValues[1].replace(".jar", "-jar")
+  }
 }

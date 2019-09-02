@@ -24,7 +24,6 @@ function runTest(port) {
   })
 }
 
-
 function open(url, onOpen, onClose, onError, options) {
   const proxy = new Proxy(url, () => {
     callback(proxy);

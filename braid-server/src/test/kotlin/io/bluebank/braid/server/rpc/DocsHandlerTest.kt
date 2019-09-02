@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.server.rpc
 
-
 import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
@@ -28,34 +27,50 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
-class DocsHandlerTest{
-    @Test
-    fun `should Document Dynamic Class`() {
-        val docsHandler = DocsHandler()
-        val handler = FlowInitiator(mock()).getInitiator(CashIssueFlow::class)
+class DocsHandlerTest {
+  @Test
+  fun `should Document Dynamic Class`() {
+    val docsHandler = DocsHandler()
+    val handler = FlowInitiator(mock()).getInitiator(CashIssueFlow::class)
 
-        // need to be able to do this..
-        val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
-        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("net.corda.finance.flows.AbstractCashFlow\$Result"))
-        //handler.returnType.javaType
+    // need to be able to do this..
+    val javaTypeIncludingSynthetics =
+      handler.returnType.javaTypeIncludingSynthetics() as Class<*>
+    assertThat(
+      "expecting java class",
+      javaTypeIncludingSynthetics.name,
+      CoreMatchers.equalTo("net.corda.finance.flows.AbstractCashFlow\$Result")
+    )
+    //handler.returnType.javaType
 
-        docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
-    }
+    docsHandler.add("testGroup", false, HttpMethod.POST, "/test/path", handler)
+  }
 
-    @Test
-    //@Ignore
-    fun `should Escape Inner Class Definition Name`() {
-        val docsHandler = DocsHandler()
-        val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
+  @Test
+  //@Ignore
+  fun `should Escape Inner Class Definition Name`() {
+    val docsHandler = DocsHandler()
+    val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
 
-        // need to be able to do this..
-        val javaTypeIncludingSynthetics = handler.returnType.javaTypeIncludingSynthetics() as Class<*>
-        assertThat("expecting java class",javaTypeIncludingSynthetics.name, CoreMatchers.equalTo("java.lang.Void"))
-        //handler.returnType.javaType
+    // need to be able to do this..
+    val javaTypeIncludingSynthetics =
+      handler.returnType.javaTypeIncludingSynthetics() as Class<*>
+    assertThat(
+      "expecting java class",
+      javaTypeIncludingSynthetics.name,
+      CoreMatchers.equalTo("java.lang.Void")
+    )
+    //handler.returnType.javaType
 
-        docsHandler.add("testGroup",false, HttpMethod.POST,"/test/path", handler)
-        val createSwagger = docsHandler.createSwagger()
-        assertThat(createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"), nullValue())
-        assertThat(createSwagger.definitions.get("ContractUpgradeFlow_AuthorisePayload"), notNullValue())
-    }
+    docsHandler.add("testGroup", false, HttpMethod.POST, "/test/path", handler)
+    val createSwagger = docsHandler.createSwagger()
+    assertThat(
+      createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"),
+      nullValue()
+    )
+    assertThat(
+      createSwagger.definitions.get("ContractUpgradeFlow_AuthorisePayload"),
+      notNullValue()
+    )
+  }
 }

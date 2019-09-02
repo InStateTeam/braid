@@ -15,9 +15,11 @@ public class ClassReaderWriter extends ClassVisitor {
   public ClassReaderWriter() {
     super(Opcodes.ASM5);
   }
+
   public static void readAndPrint(Class clazz) throws IOException {
     new ClassReader(clazz.getName()).accept(new ClassReaderWriter(), ClassReader.EXPAND_FRAMES);
   }
+
   public static void readAndPrint(byte[] bytes) {
     new ClassReader(bytes).accept(new ClassReaderWriter(), ClassReader.EXPAND_FRAMES);
   }

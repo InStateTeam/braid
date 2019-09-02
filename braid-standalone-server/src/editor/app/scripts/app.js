@@ -18,13 +18,13 @@ import Monaco from 'scripts/Monaco';
 import EventListeners from 'scripts/eventListeners';
 
 export default class App {
-  constructor(){
+  constructor() {
     this.Monaco = new Monaco();
   }
-  
-  init(){
+
+  init() {
     this.Monaco.loadEditor();
-    this.EventListeners = new EventListeners(); 
+    this.EventListeners = new EventListeners();
   }
 }
 

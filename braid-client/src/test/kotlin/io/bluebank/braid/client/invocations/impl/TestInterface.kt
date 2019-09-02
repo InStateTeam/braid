@@ -23,5 +23,5 @@ interface TestInterface {
 
   fun testFuture(): Future<String>
   fun testObservable(): Observable<String>
-  fun testBlocking() : String
+  fun testBlocking(): String
 }

@@ -24,6 +24,7 @@ class ProgressTracker {
   companion object {
     private val log = loggerFor<ProgressTracker>()
   }
+
   fun ping() {
     log.info("ping")
   }
@@ -38,6 +39,7 @@ class FooFlow(
   private val l: Long,
   private val progressTracker: ProgressTracker
 ) : FlowLogic<Long> {
+
   override fun call(): Long {
     progressTracker.ping()
     return i.toLong() + l
@@ -56,7 +58,7 @@ class SyntheticConstructorAndTransformerTest {
       // and return a Future
       // it.call()
       constructor.newInstance(*it).call()
-     // println(it)
+      // println(it)
     }
 
     val json = """

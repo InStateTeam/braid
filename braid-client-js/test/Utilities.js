@@ -34,7 +34,7 @@ export function buildProxy(config, done, callback) {
 }
 
 function getRootAPIPath() {
-  if (typeof(process.env.braidService) === 'undefined') {
+  if(typeof (process.env.braidService) === 'undefined') {
     return "https://localhost:8080/api/"
   } else {
     return process.env.braidService;

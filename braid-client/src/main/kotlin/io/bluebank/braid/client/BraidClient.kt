@@ -40,6 +40,7 @@ open class BraidClient protected constructor(
     init {
       BraidJacksonInit.init()
     }
+
     fun createClient(
       config: BraidClientConfig,
       vertx: Vertx = Vertx.vertx(),

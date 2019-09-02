@@ -43,22 +43,22 @@ class JsonRPC {
 
   openHandler() {
     this.status = "OPEN";
-    if (this.onOpen) {
+    if(this.onOpen) {
       this.onOpen();
     }
   }
 
   closeHandler() {
     this.status = "CLOSED";
-    if (this.onClose) {
+    if(this.onClose) {
       this.onClose();
     }
   }
 
   messageHandler(message) {
-    if (message.hasOwnProperty('id')) {
-      if (this.state.hasOwnProperty(message.id)) {
-        if (message.hasOwnProperty("error")) {
+    if(message.hasOwnProperty('id')) {
+      if(this.state.hasOwnProperty(message.id)) {
+        if(message.hasOwnProperty("error")) {
           this.handleError(message);
         } else {
           this.handleResponse(message);
@@ -73,7 +73,7 @@ class JsonRPC {
 
   handleError(message) {
     const state = this.state[message.id];
-    if (state.onError) {
+    if(state.onError) {
       state.onError(new Error(`json rpc error ${message.error.code} with message ${message.error.message}`));
     }
     delete this.state[message.id];
@@ -82,32 +82,32 @@ class JsonRPC {
   handleResponse(message) {
     const hasResult = message.hasOwnProperty('result');
     const isCompleted = message.hasOwnProperty('completed');
-    if (hasResult) {
+    if(hasResult) {
       this.handleResultMessage(message);
     }
-    if (isCompleted) {
+    if(isCompleted) {
       this.handleCompletionMessage(message);
     }
-    if (!hasResult && !isCompleted) {
+    if(!hasResult && !isCompleted) {
       this.handleUnrecognisedResponseMessage(message);
     }
   }
 
   handleResultMessage(message) {
     const state = this.state[message.id];
-    if (!state) {
+    if(!state) {
       console.error("could not find state for method " + message.id);
       return
     }
     // console.log("received", message);
-    if (state.onNext) {
+    if(state.onNext) {
       state.onNext(message.result);
     }
   }
 
   handleCompletionMessage(message) {
     const state = this.state[message.id];
-    if (state.onCompleted) {
+    if(state.onCompleted) {
       state.onCompleted();
     }
     delete this.state[message.id];
@@ -126,16 +126,12 @@ class JsonRPC {
 
   invokeForStream(method, params, onNext, onError, onCompleted, streamed) {
     const id = this.nextId++
-    if (streamed === undefined) {
+    if(streamed === undefined) {
       streamed = true;
     }
 
     const payload = {
-      id: id,
-      jsonrpc: "2.0",
-      method: method,
-      params: params,
-      streamed: streamed
+      id: id, jsonrpc: "2.0", method: method, params: params, streamed: streamed
     };
     // console.log("payload", payload);
     this.state[id] = {onNext: onNext, onError: onError, onCompleted: onCompleted};
@@ -151,7 +147,7 @@ class CancellableInvocation {
   }
 
   cancel() {
-    if (this.jsonRPC.state[id]) {
+    if(this.jsonRPC.state[id]) {
       const payload = {
         cancel: this.id
       }

@@ -31,7 +31,6 @@ import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.WebSocketFrame
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner

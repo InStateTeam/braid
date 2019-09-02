@@ -25,7 +25,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 data class Person(val name: String, val dob: Instant)
 class TestService {
-  fun getNames(people: List<Person>) : List<String>{
+  fun getNames(people: List<Person>): List<String> {
     return people.map { it.name }
   }
 }
@@ -51,7 +51,8 @@ class ConverterTest {
     val params = request2.params as List<*>
     val param1 = params[0]
     Json.encode(param1)
-    val collectionType = TypeFactory.defaultInstance().constructCollectionType(ArrayList::class.java, elementType)
+    val collectionType = TypeFactory.defaultInstance()
+      .constructCollectionType(ArrayList::class.java, elementType)
     val any = Json.mapper.convertValue<ArrayList<*>>(param1!!, collectionType)
     val anyList = any.toList()
     val testService = TestService()

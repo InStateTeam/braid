@@ -31,7 +31,7 @@ internal class MockInvocations(
   private val invocationsCounter = AtomicInteger(0)
   private val cancellationsCounter = AtomicInteger(0)
   private val requestsList = mutableListOf<JsonRPCRequest>()
-  var lastRequestId : Long = -1
+  var lastRequestId: Long = -1
     private set
 
   val invocationsCount get() = invocationsCounter.get()
