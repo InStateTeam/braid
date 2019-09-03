@@ -354,7 +354,7 @@ class BraidTest {
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-      log.info("calling put: http://localhost:$port$path")
+      log.info("calling post: http://localhost:$port$path")
 
       val encodePrettily = json.encodePrettily()
       client.post(port, "localhost", path)

@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server.rpc
 
+
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.converter.ModelConverters
@@ -24,6 +25,8 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.transactions.SignedTransaction
+import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
@@ -31,6 +34,7 @@ import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -150,6 +154,29 @@ class CustomModelConvertersTest {
 
   }
 
+
+  @Test
+  @Ignore  // now serialize many parts
+  fun `should Strip out SignedTransaction Exclusions`() {
+    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+
+    val model = models.get("SignedTransaction")
+    assertThat(models.toString(), model, notNullValue())
+
+    val properties = model?.properties
+    assertThat(properties?.toString(), properties?.get("id"), nullValue())
+    assertThat(properties?.toString(), properties?.get("inputs"), nullValue())
+    assertThat(properties?.toString(), properties?.get("notary"), nullValue())
+    assertThat(properties?.toString(), properties?.get("notaryChangeTx"), nullValue())
+    assertThat(properties?.toString(), properties?.get("requiredSigningKeys"), nullValue())
+    assertThat(properties?.toString(), properties?.get("sigs"), nullValue())
+    assertThat(properties?.toString(), properties?.get("transaction"), nullValue())
+    assertThat(properties?.toString(), properties?.get("tx"), nullValue())
+    assertThat(properties?.toString(), properties?.get("txBits"), nullValue())
+
+  }
+
+
   @Test
   fun `that OpaqueBytes can be serialised and deserialised`() {
     val expected = OpaqueBytes("someBytes".toByteArray())
@@ -216,19 +243,21 @@ class CustomModelConvertersTest {
   }
 
   data class ClassWithTypes(
-    val amountCurrency: Amount<Currency>
-    , val amountString: Amount<String>
-    , val amount: Amount<Any>
-    , val party: Party
-    , val bytes: OpaqueBytes
-    , val hash: SecureHash
-    , val issuedString: Issued<String>
-    , val issuedCurrency: Issued<Currency>
-    , val issued: Issued<IssuedType>
+          val amountCurrency: Amount<Currency>
+          , val amountString: Amount<String>
+          , val amount: Amount<Any>
+          , val party: Party
+          , val bytes: OpaqueBytes
+          , val hash: SecureHash
+          , val issuedString: Issued<String>
+          , val issuedCurrency: Issued<Currency>
+          , val issued: Issued<IssuedType>
+          , val signed: SignedTransaction
+          , val wire: WireTransaction
   )
 
   data class IssuedType(
-    val value: String
+          val value: String
   )
 
 }
