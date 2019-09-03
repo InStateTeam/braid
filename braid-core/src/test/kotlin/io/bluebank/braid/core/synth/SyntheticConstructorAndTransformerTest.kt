@@ -17,6 +17,10 @@ package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
+import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -36,7 +40,7 @@ interface FlowLogic<T> {
 
 class FooFlow(
   private val i: Int,
-  private val l: Long,
+  private val l: Long = 42,
   private val progressTracker: ProgressTracker
 ) : FlowLogic<Long> {
 
@@ -75,5 +79,11 @@ class SyntheticConstructorAndTransformerTest {
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
     return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
+  }
+
+  @Test
+  fun shouldNotIncludeSyntheticConstructors() {
+    val constructor = FooFlow::class.java.preferredConstructor()
+    assertThat(constructor.isSynthetic, `is`(false))
   }
 }

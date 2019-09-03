@@ -28,7 +28,7 @@ class StartableByRPCFinder {
     }
   }
 
-  fun findStartableByRPC(classLoader: ClassLoader?): List<KClass<*>> {
+  fun findStartableByRPC(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): List<KClass<*>> {
     val res = ClassGraph()
       .enableClassInfo()
       .enableAnnotationInfo()

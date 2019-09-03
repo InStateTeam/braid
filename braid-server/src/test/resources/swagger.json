@@ -576,15 +576,15 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "zero" : {
           "type" : "boolean"
         },
         "negative" : {
           "type" : "boolean"
+        },
+        "nano" : {
+          "type" : "integer",
+          "format" : "int32"
         },
         "units" : {
           "type" : "array",
@@ -673,11 +673,11 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
-        },
         "tx" : {
           "$ref" : "#/definitions/WireTransaction"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -875,6 +875,9 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "merkleTree" : {
+          "$ref" : "#/definitions/MerkleTree"
+        },
         "groupHashes$core" : {
           "type" : "array",
           "items" : {
@@ -912,9 +915,6 @@
               "description" : "Base 58 Encoded Secure Hash"
             }
           }
-        },
-        "merkleTree" : {
-          "$ref" : "#/definitions/MerkleTree"
         },
         "requiredSigningKeys" : {
           "type" : "array",

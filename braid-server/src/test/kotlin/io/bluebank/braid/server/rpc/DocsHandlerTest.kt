@@ -18,14 +18,17 @@ package io.bluebank.braid.server.rpc
 import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
+import io.bluebank.braid.core.synth.preferredConstructor
 import io.vertx.core.http.HttpMethod
 import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.finance.flows.CashIssueFlow
+import net.corda.finance.flows.CashPaymentFlow
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
+import java.lang.reflect.Constructor
 
 class DocsHandlerTest {
   @Test
@@ -35,11 +38,11 @@ class DocsHandlerTest {
 
     // need to be able to do this..
     val javaTypeIncludingSynthetics =
-      handler.returnType.javaTypeIncludingSynthetics() as Class<*>
+        handler.returnType.javaTypeIncludingSynthetics() as Class<*>
     assertThat(
-      "expecting java class",
-      javaTypeIncludingSynthetics.name,
-      CoreMatchers.equalTo("net.corda.finance.flows.AbstractCashFlow\$Result")
+        "expecting java class",
+        javaTypeIncludingSynthetics.name,
+        CoreMatchers.equalTo("net.corda.finance.flows.AbstractCashFlow\$Result")
     )
     //handler.returnType.javaType
 
@@ -54,23 +57,47 @@ class DocsHandlerTest {
 
     // need to be able to do this..
     val javaTypeIncludingSynthetics =
-      handler.returnType.javaTypeIncludingSynthetics() as Class<*>
+        handler.returnType.javaTypeIncludingSynthetics() as Class<*>
     assertThat(
-      "expecting java class",
-      javaTypeIncludingSynthetics.name,
-      CoreMatchers.equalTo("java.lang.Void")
+        "expecting java class",
+        javaTypeIncludingSynthetics.name,
+        CoreMatchers.equalTo("java.lang.Void")
     )
     //handler.returnType.javaType
 
     docsHandler.add("testGroup", false, HttpMethod.POST, "/test/path", handler)
     val createSwagger = docsHandler.createSwagger()
     assertThat(
-      createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"),
-      nullValue()
+        createSwagger.definitions.get("ContractUpgradeFlow\$AuthorisePayload"),
+        nullValue()
     )
     assertThat(
-      createSwagger.definitions.get("ContractUpgradeFlow_AuthorisePayload"),
-      notNullValue()
+        createSwagger.definitions.get("ContractUpgradeFlow_AuthorisePayload"),
+        notNullValue()
     )
+  }
+
+
+  @Test
+  fun `should Get Parameter Names for loaded CashPaymentFlowPayload`() {
+    val preferredConstructor = CashPaymentFlow::class.java.preferredConstructor()
+
+    val constructors = CashPaymentFlow::class.java.constructors
+    val constructors2 = ContractUpgradeFlow.Authorise::class.java.constructors
+             
+    printParams(constructors)
+    printParams(constructors2)
+
+  }
+
+  private fun printParams(constructors2: Array<Constructor<*>>) {
+    for (constructor in constructors2) {
+      println("$constructor - ")
+      for (parameter in constructor.parameters) {
+        //assertThat("expecting to find proper name",parameter.name, not(startsWith("arg")))
+        print(" ${parameter.name},")
+      }
+      println()
+    }
   }
 }

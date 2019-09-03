@@ -334,23 +334,54 @@ class BraidTest {
   }
 
   @Test
-  // @Ignore   // failing for some reason in build ok locally.
   fun shouldStartFlow(context: TestContext) {
     val async = context.async()
 
-    // amount as query parameter
-    // issuerBankPartyRef as query parameter
-    // Party as body
-    val amount = Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))
-
     getNotary().map {
       val notary = it
-      // "{\"name\":\"O=Notary Service, L=Zurich, C=CH\",\"owningKey\":\"GfHq2tTVk9z4eXgySzYjYp2YsTewf2FHZCb1Ls31XPzG7Hy2hRUeM8cFaFu4\"}";
 
       val json = JsonObject()
         .put("notary", notary)
-        .put("amount", JsonObject(amount))
+        .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
         .put("issuerBankPartyRef", "AABBCC")
+
+      val path =
+        "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+      log.info("calling post: http://localhost:$port$path")
+
+      val encodePrettily = json.encodePrettily()
+      client.post(port, "localhost", path)
+        .putHeader("Accept", "application/json; charset=utf8")
+        .putHeader("Content-length", "" + encodePrettily.length)
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val reply = it.toJsonObject()
+            log.info("reply:" + reply.encodePrettily())
+            context.assertThat(reply, notNullValue())
+            context.assertThat(reply.getJsonObject("stx"), notNullValue())
+            context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+
+            async.complete()
+          }
+        }
+        .end(encodePrettily)
+    }
+  }
+
+ @Test
+  fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
+    val async = context.async()
+
+    getNotary().map {
+      val notary = it
+
+      val json = JsonObject()
+        .put("notary", notary)
+        .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+        .put("issuerBaaaaaankPartyRef", JsonObject().put("junk","sdsa"))
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
