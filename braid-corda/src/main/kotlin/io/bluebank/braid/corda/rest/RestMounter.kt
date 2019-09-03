@@ -66,7 +66,7 @@ class RestMounter(
     "$swaggerPath/*"
   }
 
-  public val docsHandler: DocsHandler
+  val docsHandler: DocsHandler
   private val cookieHandler by lazy { CookieHandler.create() }
   private val sessionHandler by lazy {
     SessionHandler.create(
@@ -78,7 +78,7 @@ class RestMounter(
   private val basicAuthHandler by lazy { BasicAuthHandler.create(config.authProvider) }
   private val unprotectedRouter = Router.router(vertx)
   private val protectedRouter: Router = Router.router(vertx)
-  public var currentRouter = unprotectedRouter
+  var currentRouter = unprotectedRouter
   private var groupName: String = ""
   private val protected: Boolean
     get() {
