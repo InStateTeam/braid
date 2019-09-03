@@ -21,27 +21,51 @@ import io.bluebank.braid.core.logging.loggerFor
 import io.swagger.util.Json
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
+import net.corda.core.internal.toTypedArray
 import java.io.File
+import java.net.URLClassLoader
+import java.util.Arrays.stream
+
 
 private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
 
-  if (args.size != 1) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName>")
+  if (args.size < 1) {
+    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
-  val restConfig = Braid().restConfig(mock())
-
-  val vertx = Vertx.vertx()
-  val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-  val swagger = restMounter.docsHandler.createSwagger()
-  val swaggerText = Json.pretty().writeValueAsString(swagger)
-
-  log.info(swaggerText)
   val file = File(args[0])
   file.parentFile.mkdirs()
+
+  val swaggerText = BraidDocsMain(classLoader(args)).swaggerText()
+  log.info(swaggerText)
   file.writeText(swaggerText)
   log.info("wrote to:" + file.absolutePath)
+}
+
+fun classLoader(args: Array<String>): ClassLoader {
+  val toArray = stream(args).skip(1).map { File(it).toURI().toURL() }.toTypedArray()
+  return URLClassLoader(
+          toArray,
+          BraidDocsMain::class.java.getClassLoader()
+  )
+}
+
+
+class BraidDocsMain(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()) {
+  private var restMounter: RestMounter
+
+  init {
+    val restConfig = Braid().restConfig(mock(), classLoader)
+    val vertx = Vertx.vertx()
+    restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+  }
+
+  fun swaggerText(): String {
+    val swagger = restMounter.docsHandler.createSwagger()
+    val swaggerText = Json.pretty().writeValueAsString(swagger)
+    return swaggerText
+  }
 }
 
