@@ -59,24 +59,22 @@ data class Braid(
     log.info("Starting Braid on port:" + port)
     val result = Future.future<String>();
 
-    RPCFactory(userName, password, nodeAddress)
-      .validConnection()
-      .map {
-        val rpc = it
-        BraidConfig()
-          // .withFlow(IssueObligation.Initiator::class)
-          .withPort(port)
-          .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-          .withRestConfig(restConfig(rpc))
-          .bootstrapBraid(null, result.completer())
-      }
+
+
+    BraidConfig()
+      // .withFlow(IssueObligation.Initiator::class)
+      .withPort(port)
+      .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+      .withRestConfig(restConfig(RPCFactory(userName, password, nodeAddress)))
+      .bootstrapBraid(null, result.completer())
+
 
     //addShutdownHook {  }
 
     return result
   }
 
-  fun restConfig(rpc: CordaRPCOps,classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): RestConfig {
+  fun restConfig(rpc: RPCFactory,classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): RestConfig {
     return RestConfig()
       .withPaths {
         group("network") {

@@ -27,7 +27,7 @@ import net.corda.core.utilities.ProgressTracker
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(val rpc: CordaRPCOps) {
+class FlowInitiator(val rpc: RPCFactory) {
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
@@ -43,7 +43,7 @@ class FlowInitiator(val rpc: CordaRPCOps) {
       excludeProgressTracker.removeIf({ l -> l is ProgressTracker })    //todo might have other classes tht aren't in startFlowDynamic
       log.info("About to start $kClass with args: $it")
 
-      rpc.startFlowDynamic(
+      rpc.validConnection().startFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
       )

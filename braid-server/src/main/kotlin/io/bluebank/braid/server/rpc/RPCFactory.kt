@@ -22,20 +22,28 @@ import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 
 class RPCFactory(
-  private val userName: String,
-  private val password: String,
-  val nodeAddress: String
+    userName: String,
+    password: String,
+   nodeAddress: String
 ) {
 
-  private val log = loggerFor<RPCFactory>()
-
-  fun validConnection(): Future<CordaRPCOps> {
+  private val rpc: CordaRPCOps by lazy{
     log.info("Attempting to connect Braid RPC to:$nodeAddress username:$userName")
     val client = CordaRPCClient(NetworkHostAndPort.parse(nodeAddress))
     val connection = client.start(userName, password)
-    val rpc = connection.proxy
+    connection.proxy
+  }
 
-    return Future.succeededFuture(rpc)
+  private val log = loggerFor<RPCFactory>()
+
+
+
+
+
+  fun validConnection(): CordaRPCOps {
+    //  todo manage recover and reconnection etc probably with Future class
+
+    return rpc
   }
 
 }
