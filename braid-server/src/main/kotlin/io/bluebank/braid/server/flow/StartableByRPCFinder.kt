@@ -23,16 +23,16 @@ import kotlin.reflect.KClass
 
 class StartableByRPCFinder {
   companion object {
-    fun rpcClasses(): Stream<KClass<*>> {
-      return StartableByRPCFinder().findStartableByRPC().stream()
+    fun rpcClasses(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): Stream<KClass<*>> {
+      return StartableByRPCFinder().findStartableByRPC(classLoader).stream()
     }
   }
 
-  fun findStartableByRPC(): List<KClass<*>> {
+  fun findStartableByRPC(classLoader: ClassLoader?): List<KClass<*>> {
     val res = ClassGraph()
       .enableClassInfo()
       .enableAnnotationInfo()
-      .addClassLoader(ClassLoader.getSystemClassLoader())
+      .addClassLoader(classLoader)
       //  .overrideClasspath(it.jarPath)
       .scan()
     return res.getClassesWithAnnotation(StartableByRPC::class.qualifiedName).names

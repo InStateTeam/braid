@@ -76,7 +76,7 @@ data class Braid(
     return result
   }
 
-  fun restConfig(rpc: CordaRPCOps): RestConfig {
+  fun restConfig(rpc: CordaRPCOps,classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): RestConfig {
     return RestConfig()
       .withPaths {
         group("network") {
@@ -84,14 +84,12 @@ data class Braid(
           get("/network/notaries", NetworkService(rpc)::notaries)
           get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
           get("/cordapps/flows", FlowService(rpc)::flows)
-          //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
 
-          rpcClasses().forEach { kotlinFlowClass ->
-            val cordappName =
-              kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
-            try {
-              val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
-              println("*** $path")
+          rpcClasses(classLoader).forEach { kotlinFlowClass ->
+             try {
+               val cordappName = kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
+               val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
+              log.info("registering:" + path)
               post(path, FlowInitiator(rpc).getInitiator(kotlinFlowClass))
             } catch (e: Throwable) {
               log.error("Unable to register flow:${kotlinFlowClass.java.name}", e);
