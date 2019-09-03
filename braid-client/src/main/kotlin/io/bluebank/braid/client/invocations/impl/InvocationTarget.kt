@@ -24,7 +24,9 @@ import java.lang.reflect.Type
  * result, potentially causing the execution of the invocation (note: not in the case
  * of methods returning [Observable]
  */
-internal typealias InvocationTarget = (parent: InvocationsInternal,
-                                  method: String,
-                                  returnType: Type,
-                                  params: Array<out Any?>) -> Any?
+internal typealias InvocationTarget = (
+  parent: InvocationsInternal,
+  method: String,
+  returnType: Type,
+  params: Array<out Any?>
+) -> Any?

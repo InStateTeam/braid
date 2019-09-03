@@ -15,42 +15,33 @@
  */
 package io.bluebank.braid.server.flow
 
-import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.server.BraidTestFlow
-import io.bluebank.braid.server.flow.flowLogicType
-import net.corda.core.flows.FlowLogic
 import net.corda.core.transactions.SignedTransaction
 import net.corda.finance.flows.AbstractCashFlow
 import net.corda.finance.flows.CashIssueAndPaymentFlow
 import net.corda.finance.flows.CashIssueFlow
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.*
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
-import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.jvmErasure
 import kotlin.test.assertEquals
 
 class FlowLogicTypeTest {
 
 
-    @Test
-    fun shouldGetReturnType() {
-        val returnType = BraidTestFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, SignedTransaction::class)
-    }
+  @Test
+  fun shouldGetReturnType() {
+    val returnType = BraidTestFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, SignedTransaction::class)
+  }
 
-    @Test
-    fun shouldGetReturnTypeForCashIssueFlow() {
-        val returnType = CashIssueFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
-    }
+  @Test
+  fun shouldGetReturnTypeForCashIssueFlow() {
+    val returnType = CashIssueFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
+  }
 
-    @Test
-    fun shouldGetReturnTypeForCashIssueAndPaymentFlow() {
-        val returnType = CashIssueAndPaymentFlow::class.flowLogicType()
-        assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
-    }
+  @Test
+  fun shouldGetReturnTypeForCashIssueAndPaymentFlow() {
+    val returnType = CashIssueAndPaymentFlow::class.flowLogicType()
+    assertEquals(returnType.jvmErasure, AbstractCashFlow.Result::class)
+  }
 }

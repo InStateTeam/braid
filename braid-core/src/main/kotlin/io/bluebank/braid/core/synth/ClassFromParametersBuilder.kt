@@ -29,6 +29,7 @@ data class ClassFromParametersBuilder(
   val parameters: List<Parameter> = emptyList(),
   val className: String = ""
 ) {
+
   companion object {
     private val logger = loggerFor<ClassFromParametersBuilder>()
 
@@ -64,10 +65,10 @@ data class ClassFromParametersBuilder(
      * attempts to load the class - if it fails builds the type, injects it
      * @return the class matching [className]
      */
-    private fun ClassLoader.lazyAcquire(className: String, fn: () -> Class<*>) : Class<*> {
+    private fun ClassLoader.lazyAcquire(className: String, fn: () -> Class<*>): Class<*> {
       return try {
         loadClass(className)
-      } catch(err: ClassNotFoundException) {
+      } catch (err: ClassNotFoundException) {
         return fn()
       }
     }
@@ -99,7 +100,8 @@ data class ClassFromParametersBuilder(
     return copy(parameters = method.parameters.toList(), className = name)
   }
 
-  fun withParameters(parameters: Array<Parameter>) = copy(parameters = parameters.toList())
+  fun withParameters(parameters: Array<Parameter>) =
+    copy(parameters = parameters.toList())
 
   fun withClassName(name: String) = this.copy(className = name)
 
@@ -143,4 +145,5 @@ data class ClassFromParametersBuilder(
 
 const val PAYLOAD_CLASS_SUFFIX = "Payload"
 const val PAYLOAD_CLASS_PREFIX = "generated."
-fun Class<*>.payloadClassName() = PAYLOAD_CLASS_PREFIX + this.name.replace("$","_") + PAYLOAD_CLASS_SUFFIX
+fun Class<*>.payloadClassName() =
+  PAYLOAD_CLASS_PREFIX + this.name.replace("$", "_") + PAYLOAD_CLASS_SUFFIX

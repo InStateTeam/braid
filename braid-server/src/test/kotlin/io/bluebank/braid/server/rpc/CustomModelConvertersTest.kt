@@ -39,7 +39,6 @@ import org.junit.Test
 import java.util.*
 import kotlin.test.assertEquals
 
-
 class CustomModelConvertersTest {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
@@ -61,13 +60,24 @@ class CustomModelConvertersTest {
     val properties = models.get("Amount")?.properties
 
     assertThat(properties?.toString(), properties?.size, equalTo(4))
-    assertThat(properties?.toString(), properties?.get("quantity")?.type, equalTo("integer"))
-    assertThat(properties?.toString(), properties?.get("displayTokenSize")?.type, equalTo("number"))
+    assertThat(
+      properties?.toString(),
+      properties?.get("quantity")?.type,
+      equalTo("integer")
+    )
+    assertThat(
+      properties?.toString(),
+      properties?.get("displayTokenSize")?.type,
+      equalTo("number")
+    )
     assertThat(properties?.toString(), properties?.get("token")?.type, equalTo("string"))
-    assertThat(properties?.toString(), properties?.get("_tokenType")?.type, equalTo("string"))
+    assertThat(
+      properties?.toString(),
+      properties?.get("_tokenType")?.type,
+      equalTo("string")
+    )
 
   }
-
 
   @Test
   fun `should Correctly Model AmountCurrency and AmountString`() {
@@ -79,8 +89,16 @@ class CustomModelConvertersTest {
     val properties = model?.properties
 
     assertThat(properties?.toString(), properties?.size, equalTo(3))
-    assertThat(properties?.toString(), properties?.get("quantity")?.type, equalTo("integer"))
-    assertThat(properties?.toString(), properties?.get("displayTokenSize")?.type, equalTo("number"))
+    assertThat(
+      properties?.toString(),
+      properties?.get("quantity")?.type,
+      equalTo("integer")
+    )
+    assertThat(
+      properties?.toString(),
+      properties?.get("displayTokenSize")?.type,
+      equalTo("number")
+    )
     assertThat(properties?.toString(), properties?.get("token")?.type, equalTo("string"))
   }
 
@@ -120,9 +138,16 @@ class CustomModelConvertersTest {
     val properties = model?.properties
     assertThat(properties?.toString(), properties?.get("issuer")?.type, equalTo("ref"))
 
-    assertThat(properties?.toString(), properties?.get("product")?.type, equalTo("ref"))     // used to be object. shoul dit be?
-    assertThat(properties?.toString(), properties?.get("_productType")?.type, equalTo("string"))
-
+    assertThat(
+      properties?.toString(),
+      properties?.get("product")?.type,
+      equalTo("ref")
+    )     // used to be object. shoul dit be?
+    assertThat(
+      properties?.toString(),
+      properties?.get("_productType")?.type,
+      equalTo("string")
+    )
 
     // maps the issued type too
     assertThat(models.toString(), models.get("IssuedType"), notNullValue())
@@ -172,21 +197,31 @@ class CustomModelConvertersTest {
   fun `that Amount of Currency token can be serialised and deserialised`() {
     val expected = Amount(100, GBP)
     val encoded = Json.encode(expected)
-    assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}")
+    assertEquals(
+      encoded,
+      "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}"
+    )
   }
 
+//   @Test
+//    fun `that SignedTransaction can be serialised and deserialised`() {
+//        val expected = SignedTransaction(CoreTransaction(),asList())
+//        val encoded = Json.encode(expected)
+//        assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}")
+//    }
 
   @Test
   fun `that Amount of Issued Currency can be serialised and deserialised`() {
     val expected =
-            Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
+      Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
     val encoded = Json.encode(expected)
-    assertEquals(encoded, "{\"quantity\":100," +
-            "\"displayTokenSize\":0.01," +
-            "\"token\":{\"issuer\":{\"party\":{\"name\":\"O=Bank A, L=London, C=GB\",\"owningKey\":\"GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE\"},\"reference\":\"01\"},\"product\":\"GBP\"}," +
-            "\"_tokenType\":\"net.corda.core.contracts.Issued\"}")
+    assertEquals(
+      encoded, "{\"quantity\":100," +
+        "\"displayTokenSize\":0.01," +
+        "\"token\":{\"issuer\":{\"party\":{\"name\":\"O=Bank A, L=London, C=GB\",\"owningKey\":\"GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE\"},\"reference\":\"01\"},\"product\":\"GBP\"}," +
+        "\"_tokenType\":\"net.corda.core.contracts.Issued\"}"
+    )
   }
-
 
   @Test
   fun `should Correctly Model Party as owning key string`() {
@@ -200,7 +235,11 @@ class CustomModelConvertersTest {
     assertThat(properties?.toString(), properties?.get("name")?.type, equalTo("string"))
 
     assertThat(properties?.keys, hasItem("owningKey"))
-    assertThat(properties?.toString(), properties?.get("owningKey")?.type, equalTo("string"))
+    assertThat(
+      properties?.toString(),
+      properties?.get("owningKey")?.type,
+      equalTo("string")
+    )
   }
 
   data class ClassWithTypes(

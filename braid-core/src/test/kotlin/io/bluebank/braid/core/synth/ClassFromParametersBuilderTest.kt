@@ -20,7 +20,6 @@ import io.bluebank.braid.core.synth.ClassFromParametersBuilder.Companion.acquire
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.vertx.core.json.Json
-import org.junit.Ignore
 import org.junit.Test
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
@@ -71,7 +70,12 @@ class ClassFromParametersBuilderTest {
       )
       acc + ModelConverters.getInstance().readAll(payloadClass)
     }
-    typesForSynthesis.forEach { assertTrue(modelMap.containsKey(Class.forName(it.java.payloadClassName()).simpleName),it.java.payloadClassName()) }
+    typesForSynthesis.forEach {
+      assertTrue(
+        modelMap.containsKey(Class.forName(it.java.payloadClassName()).simpleName),
+        it.java.payloadClassName()
+      )
+    }
     assertTrue(modelMap.containsKey(Amount::class.java.simpleName))
     assertTrue(modelMap.containsKey("AmountString")) // contains the name for the specialised Amount class
   }

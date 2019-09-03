@@ -28,26 +28,26 @@ import org.junit.Test
 import java.util.Arrays.asList
 
 @Ignore
-class NetworkServiceTest{
-    @Test
-    fun shouldListSimpleNodeInfo() {
-     //   val certFactory = CertificateFactory.getInstance("X509")
-     //   val certPath = certFactory.generateCertPath(asList())
+class NetworkServiceTest {
 
-        val partyAndCertificate = mock<PartyAndCertificate> { }
+  @Test
+  fun shouldListSimpleNodeInfo() {
+    //   val certFactory = CertificateFactory.getInstance("X509")
+    //   val certPath = certFactory.generateCertPath(asList())
 
-        
-        val addresses = asList(NetworkHostAndPort.parse("localhost:123"))
-        val legalIdentitiesAndCerts = asList<PartyAndCertificate>(partyAndCertificate)
-        val nodeInfo = NodeInfo(addresses, legalIdentitiesAndCerts, 1,2)
-        val ops = mock<CordaRPCOps> {
-            on { networkMapSnapshot() } doReturn asList(nodeInfo)
-            on { nodeInfo() } doReturn nodeInfo
-        }
+    val partyAndCertificate = mock<PartyAndCertificate> { }
 
-        val network = NetworkService(ops)
-        val simpleInfo = network.nodeInfo()
-        assertThat(simpleInfo.addresses, `is`(addresses))
-        assertThat(simpleInfo.legalIdentities, `is`(asList()))
+    val addresses = asList(NetworkHostAndPort.parse("localhost:123"))
+    val legalIdentitiesAndCerts = asList<PartyAndCertificate>(partyAndCertificate)
+    val nodeInfo = NodeInfo(addresses, legalIdentitiesAndCerts, 1, 2)
+    val ops = mock<CordaRPCOps> {
+      on { networkMapSnapshot() } doReturn asList(nodeInfo)
+      on { nodeInfo() } doReturn nodeInfo
     }
+
+    val network = NetworkService(ops)
+    val simpleInfo = network.nodeInfo()
+    assertThat(simpleInfo.addresses, `is`(addresses))
+    assertThat(simpleInfo.legalIdentities, `is`(asList()))
+  }
 }

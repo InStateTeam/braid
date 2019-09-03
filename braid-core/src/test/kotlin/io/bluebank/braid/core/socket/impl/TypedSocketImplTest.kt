@@ -34,6 +34,7 @@ class TypedSocketImplTest {
       BraidJacksonInit.init()
     }
   }
+
   @Test
   fun `that we can pass message through a typed socket`() {
     val payload = Payload(1)
@@ -43,9 +44,15 @@ class TypedSocketImplTest {
     socket.addListener(typedSocket)
 
     var listenerCallbacks = 0
-    typedSocket.addListener(object: SocketListener<Payload, Payload> {
-      override fun onRegister(socket: Socket<Payload, Payload>) { ++listenerCallbacks}
-      override fun onEnd(socket: Socket<Payload, Payload>) { ++listenerCallbacks }
+    typedSocket.addListener(object : SocketListener<Payload, Payload> {
+      override fun onRegister(socket: Socket<Payload, Payload>) {
+        ++listenerCallbacks
+      }
+
+      override fun onEnd(socket: Socket<Payload, Payload>) {
+        ++listenerCallbacks
+      }
+
       override fun onData(socket: Socket<Payload, Payload>, item: Payload) {
         ++listenerCallbacks
         socket.write(item)
@@ -59,7 +66,11 @@ class TypedSocketImplTest {
     assertEquals(userId, typedSocket.user()!!.principal().getString("id"))
     socket.process(Json.encodeToBuffer(payload))
     socket.end()
-    assertEquals(1, socket.writeCount, "that we received and wrote back one typed message")
+    assertEquals(
+      1,
+      socket.writeCount,
+      "that we received and wrote back one typed message"
+    )
     assertEquals(3, listenerCallbacks, "that listener was called")
   }
 }

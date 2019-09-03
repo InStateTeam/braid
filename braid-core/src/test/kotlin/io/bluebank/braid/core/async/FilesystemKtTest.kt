@@ -25,6 +25,7 @@ import java.io.File
 
 @RunWith(VertxUnitRunner::class)
 class FilesystemKtTest {
+
   private val vertx = Vertx.vertx()
 
   @After
@@ -43,13 +44,25 @@ class FilesystemKtTest {
     val text = "hello"
     fs.writeFile(file.absolutePath, text.toByteArray())
       .compose { fs.readFile(file.absolutePath) }
-      .onSuccess { context.assertEquals(text, it.toString(), "that file contents matches") }
+      .onSuccess {
+        context.assertEquals(
+          text,
+          it.toString(),
+          "that file contents matches"
+        )
+      }
       .compose {
         val file2 = File.createTempFile("braid-test", ".txt")
         fs.delete(file2.absolutePath)
           .compose { fs.copy(file.absolutePath, file2.absolutePath) }
           .compose { fs.readFile(file2.absolutePath) }
-          .onSuccess { context.assertEquals(text, it.toString(), "that file contents matches") }
+          .onSuccess {
+            context.assertEquals(
+              text,
+              it.toString(),
+              "that file contents matches"
+            )
+          }
       }
       .onSuccess { async.complete() }
       .catch(context::fail)

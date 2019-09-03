@@ -25,32 +25,32 @@ import org.junit.Test
 class ModelConvertersTest {
 
 
-    @Test
-    fun testModelConverters() {
-        val java = net.corda.core.contracts.UpgradedContract::class.java
-        val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
-        println(readAsProperty)
+  @Test
+  fun testModelConverters() {
+    val java = net.corda.core.contracts.UpgradedContract::class.java
+    val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
+    println(readAsProperty)
 
+  }
 
+  @Test
+  fun testModelConvertersOfFlow() {
+    val java = ContractUpgradeFlow.Initiate::class.java
+    val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
+    println(readAsProperty)
+  }
+
+  @Test
+  @Ignore // todo make ModelConverter for UpgradedContract
+  fun testModelConvertersOfFlowConstrucor() {
+    val constructors = ContractUpgradeFlow.Initiate::class.java.constructors
+
+    constructors.forEach {
+      it.parameters.forEach {
+        val readAsProperty =
+          ModelConverters.getInstance().readAsProperty(it.parameterizedType)
+        assertThat(it.parameterizedType.toString(), readAsProperty, notNullValue())
+      }
     }
-
-    @Test
-    fun testModelConvertersOfFlow() {
-        val java = ContractUpgradeFlow.Initiate::class.java
-        val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
-        println(readAsProperty)
-    }
-
-    @Test
-    @Ignore // todo make ModelConverter for UpgradedContract
-    fun testModelConvertersOfFlowConstrucor() {
-        val constructors = ContractUpgradeFlow.Initiate::class.java.constructors
-
-        constructors.forEach {
-            it.parameters.forEach {
-                val readAsProperty = ModelConverters.getInstance().readAsProperty(it.parameterizedType)
-                assertThat(it.parameterizedType.toString(), readAsProperty, notNullValue())
-            }
-        }
-    }
+  }
 }

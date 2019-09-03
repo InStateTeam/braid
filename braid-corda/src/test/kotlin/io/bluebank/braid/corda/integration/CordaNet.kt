@@ -82,8 +82,9 @@ class CordaNet(
     }
   }
 
-  fun braidPortForParty(party: String) : Int {
-    return System.getProperty("braid.$party.port")?.toInt() ?: error("could not locate braid port for $party")
+  fun braidPortForParty(party: String): Int {
+    return System.getProperty("braid.$party.port")?.toInt()
+      ?: error("could not locate braid port for $party")
   }
 
   private fun DriverDSL.startupNodes(parties: List<String>): List<NodeHandle> {

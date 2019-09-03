@@ -133,7 +133,8 @@ class KEndPointTest {
     age: Int,
     @ApiParam(defaultValue = "details")
     details: String
-  ) {}
+  ) {
+  }
 
   private fun <R> createOperation(
     method: HttpMethod = GET,

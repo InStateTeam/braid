@@ -18,9 +18,8 @@ package io.bluebank.braid.client.invocations.impl
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.lang.IllegalStateException
 import java.util.concurrent.CountDownLatch
 import kotlin.reflect.jvm.javaMethod
 import kotlin.test.assertFailsWith
@@ -46,9 +45,9 @@ class BlockingInvocationStrategyTest {
       TestInterface::testBlocking.name,
       TestInterface::testBlocking.javaMethod?.genericReturnType!!,
       arrayOf()
-      )
+    )
 
-    var result : String? = null
+    var result: String? = null
     val latch = CountDownLatch(1)
     Thread {
       result = strategy.getResult() as String

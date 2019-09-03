@@ -22,7 +22,8 @@ import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
 
 object Converter {
-  fun convert(value: Any?, parameter: KParameter) = convert(value, parameter.type.jvmErasure.javaObjectType)
+  fun convert(value: Any?, parameter: KParameter) =
+    convert(value, parameter.type.jvmErasure.javaObjectType)
 
   fun convert(value: Any?, parameter: Parameter) = convert(value, parameter.type)
 

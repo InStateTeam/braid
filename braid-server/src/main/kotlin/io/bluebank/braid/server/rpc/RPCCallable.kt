@@ -16,45 +16,39 @@
 package io.bluebank.braid.server.rpc
 
 import io.bluebank.braid.server.flow.flowLogicType
-import net.corda.core.flows.FlowLogic
 import kotlin.reflect.*
-import kotlin.reflect.full.declaredMembers
 
-class RPCCallable<T>(val flow: KClass<*>,val fn: KCallable<T>) :KCallable<T> {
-//    override val isSuspend: Boolean
+class RPCCallable<T>(val flow: KClass<*>, val fn: KCallable<T>) : KCallable<T> {
+  //    override val isSuspend: Boolean
 //        get() = constructor.isSuspend
-    override val annotations: List<Annotation>
-        get() = fn.annotations
-    override val isAbstract: Boolean
-        get() = fn.isAbstract
-    override val isFinal: Boolean
-        get() = fn.isFinal
-    override val isOpen: Boolean
-        get() = fn.isOpen
-    override val name: String
-        get() = fn.name
-    override val parameters: List<KParameter>
-        get() = fn.parameters
-    override val typeParameters: List<KTypeParameter>
-        get() = fn.typeParameters
-    override val visibility: KVisibility?
-        get() = fn.visibility
+  override val annotations: List<Annotation>
+    get() = fn.annotations
+  override val isAbstract: Boolean
+    get() = fn.isAbstract
+  override val isFinal: Boolean
+    get() = fn.isFinal
+  override val isOpen: Boolean
+    get() = fn.isOpen
+  override val name: String
+    get() = fn.name
+  override val parameters: List<KParameter>
+    get() = fn.parameters
+  override val typeParameters: List<KTypeParameter>
+    get() = fn.typeParameters
+  override val visibility: KVisibility?
+    get() = fn.visibility
 
-    override fun call(vararg args: Any?): T {
-        return fn.call(*args)
-    }
+  override fun call(vararg args: Any?): T {
+    return fn.call(*args)
+  }
 
-    override fun callBy(args: Map<KParameter, Any?>): T {
-        return fn.callBy(args)
-    }
+  override fun callBy(args: Map<KParameter, Any?>): T {
+    return fn.callBy(args)
+  }
 
-
-    // change the return type for swagger to be able to see
-    override val returnType: KType
-        get() = flow.flowLogicType()
-
-
-
+  // change the return type for swagger to be able to see
+  override val returnType: KType
+    get() = flow.flowLogicType()
 
 }
 

@@ -25,89 +25,88 @@ import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
+import io.bluebank.braid.server.util.toCordappName
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 
-
 data class Braid(
-        val port: Int = 8080,
-        val userName: String = "",
-        val password: String = "",
-        val nodeAddress: String = ""
+  val port: Int = 8080,
+  val userName: String = "",
+  val password: String = "",
+  val nodeAddress: String = ""
 ) {
 
-    init {
-        BraidCordaJacksonInit.init()
-        CustomModelConverters.init()
-    }
+  init {
+    BraidCordaJacksonInit.init()
+    CustomModelConverters.init()
+  }
 
-    fun withPort(port: Int): Braid = this.copy(port = port)
+  fun withPort(port: Int): Braid = this.copy(port = port)
 
-    fun withUserName(userName: String): Braid = this.copy(userName = userName)
+  fun withUserName(userName: String): Braid = this.copy(userName = userName)
 
-    fun withPassword(password: String): Braid = this.copy(password = password)
+  fun withPassword(password: String): Braid = this.copy(password = password)
 
-    fun withNodeAddress(nodeAddress: String): Braid = this.copy(nodeAddress = nodeAddress)
+  fun withNodeAddress(nodeAddress: String): Braid = this.copy(nodeAddress = nodeAddress)
 
-    fun withNodeAddress(nodeAddress: NetworkHostAndPort): Braid = this.copy(nodeAddress = nodeAddress.toString())
+  fun withNodeAddress(nodeAddress: NetworkHostAndPort): Braid =
+    this.copy(nodeAddress = nodeAddress.toString())
 
+  fun startServer(): Future<String> {
 
-    fun startServer(): Future<String> {
+    log.info("Starting Braid on port:" + port)
+    val result = Future.future<String>();
 
-        log.info("Starting Braid on port:" + port)
-        val result = Future.future<String>();
+    RPCFactory(userName, password, nodeAddress)
+      .validConnection()
+      .map {
+        val rpc = it
+        BraidConfig()
+          // .withFlow(IssueObligation.Initiator::class)
+          .withPort(port)
+          .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+          .withRestConfig(restConfig(rpc))
+          .bootstrapBraid(null, result.completer())
+      }
 
-        RPCFactory(userName, password, nodeAddress)
-                .validConnection()
-                .map {
-                    val rpc = it
-                    BraidConfig()
-                            // .withFlow(IssueObligation.Initiator::class)
-                            .withPort(port)
-                            .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-                            .withRestConfig(restConfig(rpc))
-                            .bootstrapBraid(null, result.completer())
-                }
+    //addShutdownHook {  }
 
+    return result
+  }
 
-        //addShutdownHook {  }
+  fun restConfig(rpc: CordaRPCOps): RestConfig {
+    return RestConfig()
+      .withPaths {
+        group("network") {
+          get("/network/nodes", NetworkService(rpc)::nodes)
+          get("/network/notaries", NetworkService(rpc)::notaries)
+          get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+          get("/cordapps/flows", FlowService(rpc)::flows)
+          //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
 
-        return result
-    }
-
-    fun restConfig(rpc: CordaRPCOps): RestConfig {
-        return RestConfig()
-                .withPaths {
-                    group("network") {
-                        get("/network/nodes", NetworkService(rpc)::nodes)
-                        get("/network/notaries", NetworkService(rpc)::notaries)
-                        get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
-                        get("/cordapps/flows", FlowService(rpc)::flows)
-                        //      get("/cordapps/flows/:flow", FlowService(rpc)::flowDetails)
-
-
-                        rpcClasses().forEach({
-                            try {
-                                post("/cordapps/flows/${it.java.name}", FlowInitiator(rpc).getInitiator(it))
-                            } catch (e: Throwable) {
-                                log.error("Unable to register flow:${it.java.name}", e);
-                            }
-                        })
-                    }
-                }
-    }
-
+          rpcClasses().forEach { kotlinFlowClass ->
+            val cordappName =
+              kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
+            try {
+              val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
+              println("*** $path")
+              post(path, FlowInitiator(rpc).getInitiator(kotlinFlowClass))
+            } catch (e: Throwable) {
+              log.error("Unable to register flow:${kotlinFlowClass.java.name}", e);
+            }
+          }
+        }
+      }
+  }
 
 }
-
 
 //fun issueObligation(params: IssueObligationInitiatorParameters): Future<SignedTransaction> {
 //    val amount = Amount.parseCurrency(params.amount)
 //    val lender = r.identityService.wellKnownPartyFromX500Name(CordaX500Name.parse(params.lender)) ?: error("lender not found ${params.lender}")
 //    return serviceHub.startFlow(IssueObligation.Initiator(amount, lender,  params.anonymous)).returnValue.toVertxFuture()
 //}
-
 
 private val log = loggerFor<Braid>()

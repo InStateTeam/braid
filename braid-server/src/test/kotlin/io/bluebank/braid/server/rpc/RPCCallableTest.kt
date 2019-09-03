@@ -15,29 +15,26 @@
  */
 package io.bluebank.braid.server.rpc
 
-import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.server.BraidTestFlow
-import io.bluebank.braid.server.flow.flowLogicType
-import net.corda.core.flows.FlowLogic
 import net.corda.core.transactions.SignedTransaction
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.*
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
 import kotlin.reflect.jvm.javaType
 
 class RPCCallableTest {
-    @Test
-   // @Ignore
-    fun shouldBeCallableAndReturnTypeOfFlow() {
+  @Test
+  // @Ignore
+  fun shouldBeCallableAndReturnTypeOfFlow() {
 
-        val flow = BraidTestFlow::class
+    val flow = BraidTestFlow::class
 
-        val rpcCallable = RPCCallable(flow, flow.constructors.iterator().next())
+    val rpcCallable = RPCCallable(flow, flow.constructors.iterator().next())
 
-        assertThat(rpcCallable.returnType.javaType.typeName, `is`(SignedTransaction::class.java.name))
-    }
+    assertThat(
+      rpcCallable.returnType.javaType.typeName,
+      `is`(SignedTransaction::class.java.name)
+    )
+  }
 
 }

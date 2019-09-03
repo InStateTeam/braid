@@ -20,23 +20,26 @@
   ~ limitations under the License.
   -->
 
-<StackPane styleClass="searchField" stylesheets="@../css/corda.css" xmlns="http://javafx.com/javafx/8.0.76-ea"
-           xmlns:fx="http://javafx.com/fxml/1">
-    <padding>
-        <Insets bottom="5"/>
-    </padding>
-    <TextField fx:id="textField" promptText="Filter transactions by originator, contract type..."/>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" styleClass="searchField"
+           stylesheets="@../css/corda.css"
+           xmlns="http://javafx.com/javafx/8.0.76-ea">
+  <padding>
+    <Insets bottom="5"/>
+  </padding>
+  <TextField fx:id="textField"
+             promptText="Filter transactions by originator, contract type..."/>
 
-    <FontAwesomeIconView fx:id="clearButton" glyphName="TIMES_CIRCLE" styleClass="search-clear"
-                         StackPane.alignment="CENTER_RIGHT">
-        <StackPane.margin>
-            <Insets right="10.0"/>
-        </StackPane.margin>
-    </FontAwesomeIconView>
+  <FontAwesomeIconView fx:id="clearButton" glyphName="TIMES_CIRCLE"
+                       styleClass="search-clear"
+                       StackPane.alignment="CENTER_RIGHT">
+    <StackPane.margin>
+      <Insets right="10.0"/>
+    </StackPane.margin>
+  </FontAwesomeIconView>
 
-    <ComboBox fx:id="searchCategory" StackPane.alignment="CENTER_LEFT">
-        <StackPane.margin>
-            <Insets left="1.0"/>
-        </StackPane.margin>
-    </ComboBox>
+  <ComboBox fx:id="searchCategory" StackPane.alignment="CENTER_LEFT">
+    <StackPane.margin>
+      <Insets left="1.0"/>
+    </StackPane.margin>
+  </ComboBox>
 </StackPane>

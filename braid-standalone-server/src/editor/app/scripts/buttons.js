@@ -21,7 +21,7 @@ import Helpers from 'scripts/helpers'
 const helpers = new Helpers();
 
 export default class Buttons {
-  constructor(){
+  constructor() {
     this.onCreateService = this.onCreateService.bind(this);
   }
 
@@ -29,8 +29,8 @@ export default class Buttons {
     const serviceName = $('#newService').val();
     const tooltip = document.querySelector('.tooltip');
     const isValidServiceName = helpers.checkCreatedService(serviceName);
-    if(isValidServiceName){
-      helpers.getServiceScript(serviceName, function() {
+    if(isValidServiceName) {
+      helpers.getServiceScript(serviceName, function () {
         retrieveAndUpdateServices(serviceName);
         $('#newService').val("");
         tooltip.classList.remove('shown');
@@ -38,18 +38,18 @@ export default class Buttons {
     } else {
       helpers.formatTooltip(serviceName)
     }
- }
+  }
 
- onSave(e) {
-  const script = editor.getValue();
-  const service = helpers.getSelectedService();
+  onSave(e) {
+    const script = editor.getValue();
+    const service = helpers.getSelectedService();
 
-  $.post("/api/services/" + service + "/script", script)
-    .done(function() {
+    $.post("/api/services/" + service + "/script", script)
+      .done(function () {
         console.log("saved")
         $('#saveBtn').prop('disabled', true)
       })
-      .fail(function(e) {
+      .fail(function (e) {
         console.log("failed to save", e);
       })
   }
@@ -62,12 +62,10 @@ export default class Buttons {
     const serviceName = helpers.getSelectedService();
     const callValue = "/api/services/" + serviceName;
     $.ajax({
-      url: callValue,
-      method: 'DELETE',
-      success:  () => {
+      url: callValue, method: 'DELETE', success: () => {
         helpers.setSelectedService('');
         retrieveAndUpdateServices('');
       }
     });
-  }  
+  }
 }

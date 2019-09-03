@@ -27,13 +27,16 @@ import kotlin.reflect.KCallable
  *  Nominal implementation of socket together with invocation capability
  */
 class InvocableMockSocket : MockSocket<JsonRPCRequest, JsonRPCResponse>() {
+
   companion object {
     private val nextId = AtomicLong(1)
   }
 
   private val subject = PublishSubject.create<JsonRPCResponse>()
 
-  init { addResponseListener(subject::onNext) }
+  init {
+    addResponseListener(subject::onNext)
+  }
 
   /**
    * the next unique (enough) id
@@ -43,7 +46,6 @@ class InvocableMockSocket : MockSocket<JsonRPCRequest, JsonRPCResponse>() {
   fun <R> invoke(callable: KCallable<R>, vararg params: Any?): R {
     return invoke(nextId(), callable, *params)
   }
-
 
   fun <R> invoke(id: Long, callable: KCallable<R>, vararg params: Any?): R {
     return invoke(id, callable.name, *params)
@@ -93,7 +95,7 @@ class InvocableMockSocket : MockSocket<JsonRPCRequest, JsonRPCResponse>() {
     return result
   }
 
-  private fun <T> setupPipeline(id: Long) : Observable<T> {
+  private fun <T> setupPipeline(id: Long): Observable<T> {
     return subject
       .filter { matchesId(it, id) }
       .takeWhile { it !is JsonRPCCompletedResponse }
@@ -109,6 +111,7 @@ class InvocableMockSocket : MockSocket<JsonRPCRequest, JsonRPCResponse>() {
         it as T
       }
   }
+
   private fun matchesId(
     it: JsonRPCResponse,
     id: Long

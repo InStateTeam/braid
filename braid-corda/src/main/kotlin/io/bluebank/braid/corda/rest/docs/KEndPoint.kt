@@ -28,7 +28,6 @@ import javax.ws.rs.QueryParam
 import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.jvm.javaType
 
 class KEndPoint(
   groupName: String,
@@ -70,7 +69,8 @@ class KEndPoint(
 
   override val consumes: String
     get() {
-      return bodyParameter?.type?.javaTypeIncludingSynthetics()?.mediaType() ?: MediaType.APPLICATION_JSON
+      return bodyParameter?.type?.javaTypeIncludingSynthetics()?.mediaType()
+        ?: MediaType.APPLICATION_JSON
     }
 
   override val parameterTypes: List<Type>
@@ -164,6 +164,5 @@ class KEndPoint(
   override fun toString(): String {
     return "KEndPoint(name='$name', parameters=$parameters, returnType=$returnType)"
   }
-
 
 }

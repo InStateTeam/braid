@@ -388,19 +388,19 @@
       </plugins>
     </pluginManagement>
     <plugins>
-<!--      <plugin>-->
-<!--        <groupId>org.codehaus.mojo</groupId>-->
-<!--        <artifactId>license-maven-plugin</artifactId>-->
-<!--        <version>2.0.0</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>download-licenses</id>-->
-<!--            <goals>-->
-<!--              <goal>download-licenses</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+      <!--      <plugin>-->
+      <!--        <groupId>org.codehaus.mojo</groupId>-->
+      <!--        <artifactId>license-maven-plugin</artifactId>-->
+      <!--        <version>2.0.0</version>-->
+      <!--        <executions>-->
+      <!--          <execution>-->
+      <!--            <id>download-licenses</id>-->
+      <!--            <goals>-->
+      <!--              <goal>download-licenses</goal>-->
+      <!--            </goals>-->
+      <!--          </execution>-->
+      <!--        </executions>-->
+      <!--      </plugin>-->
 
       <plugin>
         <groupId>com.mycila</groupId>
@@ -409,7 +409,8 @@
         <configuration>
           <header>LICENSE</header>
           <excludes>
-            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
+            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*
+            </exclude>
             <exclude>.gradle/**</exclude>
             <exclude>.m2/**</exclude>
             <exclude>**/monaco-editor/**/*</exclude>

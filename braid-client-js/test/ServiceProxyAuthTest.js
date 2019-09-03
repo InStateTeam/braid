@@ -39,7 +39,7 @@ describe('ServiceProxyAuthTest', () => {
 
   it('if we provide the wrong credentials, login fails', (done) => {
     buildServiceProxy(done, proxy => {
-      proxy.login({ username: 'admin', password: 'wrongpassword'})
+      proxy.login({username: 'admin', password: 'wrongpassword'})
         .then(() => {
           throw new Error("should have raised a not authenticated error");
         })

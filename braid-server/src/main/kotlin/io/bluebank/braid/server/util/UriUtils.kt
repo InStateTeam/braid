@@ -15,8 +15,16 @@
  */
 package io.bluebank.braid.server.util
 
-import java.net.URLEncoder
+import java.io.File
+import java.net.URL
 
-fun URLEncoder.utf8(value:String):String{
-    return URLEncoder.encode(value,"UTF-8")
+private val CORDAPP_NAME_RE = "^(.*?)(\\-\\d(\\.\\d)*\\.jar)?\$".toRegex()
+
+fun URL.toCordappName(): String {
+  val fileName = File(this.file).name
+  val matches = CORDAPP_NAME_RE.matchEntire(fileName)
+  return when (matches) {
+    null -> error("parsing of cordapp module location failed: $this")
+    else -> matches.groupValues[1].replace(".jar", "-jar")
+  }
 }
