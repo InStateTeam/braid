@@ -372,7 +372,6 @@ class BraidTest {
     }
   }
 
-  @Ignore
  @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
@@ -398,9 +397,9 @@ class BraidTest {
           context.assertEquals(500, it.statusCode(), it.statusMessage())
 
           it.bodyHandler {
-            val reply = it.toJsonObject()
-            log.info("reply:" + reply.encodePrettily())
-            context.assertThat(reply, notNullValue())
+            val reply = it.toString()
+            log.info("reply:" + reply)
+            context.assertThat(reply, containsString("issuerBaaaaaankPartyRef"))
 
             async.complete()
           }

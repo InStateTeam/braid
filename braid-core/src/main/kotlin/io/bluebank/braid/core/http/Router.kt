@@ -72,7 +72,7 @@ var log = loggerFor<Router>()
 fun HttpServerResponse.end(error: Throwable) {
   val e = if (error is InvocationTargetException) error.targetException else error
   log.warn("returning error to client", e)
-  val message = e.message ?: "Undefined error"
+  val message = e.message?.replace("\n","")?.replace("\r","") ?: "Undefined error"
   this
     .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
     .putHeader(CONTENT_LENGTH, message.length.toString())
