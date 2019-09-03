@@ -28,14 +28,14 @@ import net.corda.core.utilities.NetworkHostAndPort
 import java.util.stream.Collectors.toList
 import javax.ws.rs.QueryParam
 
-class NetworkService(val rpc: CordaRPCOps) {
+class NetworkService(val rpc: RPCFactory) {
   companion object {
     private val log = loggerFor<Braid>()
   }
 
   @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   fun nodeInfo(): SimpleNodeInfo {
-    return rpc.nodeInfo().toSimpleNodeInfo()
+    return rpc.validConnection().nodeInfo().toSimpleNodeInfo()
   }
 
   @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
@@ -52,17 +52,17 @@ class NetworkService(val rpc: CordaRPCOps) {
     return when {
       hostAndPort?.isNotEmpty() ?: false -> {
         val address = NetworkHostAndPort.parse(hostAndPort!!)
-        rpc.networkMapSnapshot().stream()
+        rpc.validConnection().networkMapSnapshot().stream()
           .filter { node -> node.addresses.contains(address) }
           .map { node -> node.toSimpleNodeInfo() }
           .collect(toList())
       }
       x500Name?.isNotEmpty() ?: false -> {
         val x500Name1 = CordaX500Name.parse(x500Name!!)
-        val party = rpc.wellKnownPartyFromX500Name(x500Name1)
-        listOfNotNull(rpc.nodeInfoFromParty(party!!)?.toSimpleNodeInfo())
+        val party = rpc.validConnection().wellKnownPartyFromX500Name(x500Name1)
+        listOfNotNull(rpc.validConnection().nodeInfoFromParty(party!!)?.toSimpleNodeInfo())
       }
-      else -> rpc.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
+      else -> rpc.validConnection().networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
         toList()
       )
     }
@@ -77,11 +77,11 @@ class NetworkService(val rpc: CordaRPCOps) {
   ): List<Party> {
     return when {
       x500Name?.isNotEmpty() ?: false -> listOfNotNull(
-        rpc.notaryPartyFromX500Name(
+        rpc.validConnection().notaryPartyFromX500Name(
           CordaX500Name.parse(x500Name!!)
         )
       )
-      else -> rpc.notaryIdentities()
+      else -> rpc.validConnection().notaryIdentities()
     }
   }
 }

@@ -15,13 +15,15 @@
  */
 package io.bluebank.braid.server
 
-import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.server.rpc.RPCFactory
 import io.swagger.util.Json
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
 import net.corda.core.internal.toTypedArray
+import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.RPCOps
 import java.io.File
 import java.net.URLClassLoader
 import java.util.Arrays.stream
@@ -52,12 +54,11 @@ fun classLoader(args: Array<String>): ClassLoader {
   )
 }
 
-
 class BraidDocsMain(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()) {
   private var restMounter: RestMounter
 
   init {
-    val restConfig = Braid().restConfig(mock(), classLoader)
+    val restConfig = Braid().restConfig(RPCFactory("","",""), classLoader)
     val vertx = Vertx.vertx()
     restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
   }
@@ -68,4 +69,3 @@ class BraidDocsMain(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader
     return swaggerText
   }
 }
-

@@ -17,10 +17,9 @@ package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -47,6 +46,26 @@ class FooFlow(
   override fun call(): Long {
     progressTracker.ping()
     return i.toLong() + l
+  }
+}
+
+class UnboundParameterFooFlow<OldState>(
+  private val i: Int,
+  private val l: Map<String,OldState>
+) : FlowLogic<OldState> {
+
+  override fun call(): OldState {
+    return l.get("key")!!;
+  }
+}
+
+class UnboundFooFlow<OldState>(
+  private val i: Int,
+  private val l: OldState
+) : FlowLogic<OldState> {
+
+  override fun call(): OldState {
+    return l;
   }
 }
 
@@ -86,4 +105,48 @@ class SyntheticConstructorAndTransformerTest {
     val constructor = FooFlow::class.java.preferredConstructor()
     assertThat(constructor.isSynthetic, `is`(false))
   }
+
+  // This seems possible to have unbounded types.
+  @Test
+  fun `that we treat unbound parameters as their base class`() {
+    val constructor = UnboundFooFlow::class.java.preferredConstructor()
+    val fn = trampoline(constructor, emptyMap(), "MyUnboundPayloadName") {
+      constructor.newInstance(*it).call()
+    }
+
+    val json = """
+    {                           
+      "i": 100,
+      "l": { "key":"value" }
+    }
+  """
+
+    val payload = Json.prettyMapper.decodeValue(json, fn)
+    val result = fn.call(payload)
+    assertEquals(mapOf("key" to "value"), result)
+  }
+
+  // not sure if this is possible. It is derived from the failure to synthesise
+  // ContractUpgradeFlow.Initiate
+  @Test
+  @Ignore
+  fun `that we treat parameterised types from their parent class`() {
+    val constructor = UnboundParameterFooFlow::class.java.preferredConstructor()
+    val fn = trampoline(constructor, emptyMap(), "MyUnboundParameterPayloadName") {
+      constructor.newInstance(*it).call()
+    }
+
+    val json = """
+    {
+      "i": 100,
+      "l": { "key":"value" }
+    }
+  """
+
+    val payload = Json.prettyMapper.decodeValue(json, fn)
+    val result = fn.call(payload)
+    assertEquals("value", result)
+  }
+
+
 }

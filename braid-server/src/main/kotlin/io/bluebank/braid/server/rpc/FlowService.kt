@@ -20,21 +20,14 @@ import io.bluebank.braid.server.Braid
 import io.swagger.annotations.ApiOperation
 import net.corda.core.messaging.CordaRPCOps
 
-class FlowService(val rpc: CordaRPCOps) {
+class FlowService(val rpc: RPCFactory) {
   companion object {
     private val log = loggerFor<Braid>()
   }
 
   @ApiOperation(value = "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow\$Authorise\"]")
   fun flows(): List<String> {
-    return rpc.registeredFlows()
+    return rpc.validConnection().registeredFlows()
   }
-
-//    @ApiOperation(value = "Retrieves a list of flow details")
-//    fun flowDetails(@ApiParam(value = "Flow name", example = "net.corda.core.flows.ContractUpgradeFlow\$Authorise") @QueryParam(value = "flow") flow:String): String {
-////        var old
-////        var newState
-////        return rpc.startFlow(ContractUpgradeFlow.Initiate::, old, newState)
-//    }
 
 }

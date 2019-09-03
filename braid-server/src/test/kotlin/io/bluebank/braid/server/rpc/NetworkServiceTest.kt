@@ -44,8 +44,11 @@ class NetworkServiceTest {
       on { networkMapSnapshot() } doReturn asList(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
+    val factory = mock<RPCFactory> {
+      on { validConnection() } doReturn ops
+    }
 
-    val network = NetworkService(ops)
+    val network = NetworkService(factory)
     val simpleInfo = network.nodeInfo()
     assertThat(simpleInfo.addresses, `is`(addresses))
     assertThat(simpleInfo.legalIdentities, `is`(asList()))
