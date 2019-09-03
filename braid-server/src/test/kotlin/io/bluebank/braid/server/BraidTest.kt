@@ -313,7 +313,7 @@ class BraidTest {
                     .put("issuerBankPartyRef", "AABBCC")
 
 
-            log.info("calling put: http://localhost:${port}/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
+            log.info("calling post: http://localhost:${port}/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")
 
             val encodePrettily = json.encodePrettily()
             client.post(port, "localhost", "/api/rest/cordapps/flows/net.corda.finance.flows.CashIssueFlow")

@@ -19,6 +19,9 @@ import io.swagger.converter.ModelConverters
 import io.swagger.jackson.AbstractModelConverter
 import io.swagger.jackson.ModelResolver
 import io.vertx.core.json.Json
+import net.corda.client.jackson.JacksonSupport
+import net.corda.core.transactions.SignedTransaction
+import net.corda.core.transactions.WireTransaction
 import java.security.PublicKey
 
 /**
@@ -26,6 +29,11 @@ import java.security.PublicKey
  */
 object CustomModelConverters {
     init {
+    //    Json.mapper.         setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
+     //   // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
+    //    .setMixInAnnotation(WireTransaction::class.java, JacksonSupport.WireTransactionMixin::class.java)
+
+
         ModelConverters.getInstance().addConverter(CustomModelConverter())
     }
 
