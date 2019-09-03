@@ -548,11 +548,8 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "outputs" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/TransactionStateContractState"
-          }
+        "notary" : {
+          "$ref" : "#/definitions/Party"
         },
         "outputStates" : {
           "type" : "array",
@@ -560,8 +557,11 @@
             "$ref" : "#/definitions/ContractState"
           }
         },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
         },
         "id" : {
           "type" : "string",
@@ -580,17 +580,17 @@
           "type" : "integer",
           "format" : "int32"
         },
-        "zero" : {
-          "type" : "boolean"
-        },
-        "negative" : {
-          "type" : "boolean"
-        },
         "units" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TemporalUnit"
           }
+        },
+        "zero" : {
+          "type" : "boolean"
+        },
+        "negative" : {
+          "type" : "boolean"
         }
       }
     },
@@ -636,15 +636,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
-        },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -673,11 +673,11 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
-        },
         "tx" : {
           "$ref" : "#/definitions/WireTransaction"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -746,10 +746,10 @@
         "duration" : {
           "$ref" : "#/definitions/Duration"
         },
-        "timeBased" : {
+        "dateBased" : {
           "type" : "boolean"
         },
-        "dateBased" : {
+        "timeBased" : {
           "type" : "boolean"
         }
       }
@@ -764,11 +764,11 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "untilTime" : {
+        "midpoint" : {
           "type" : "integer",
           "format" : "int64"
         },
-        "midpoint" : {
+        "untilTime" : {
           "type" : "integer",
           "format" : "int64"
         }
@@ -875,6 +875,18 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        },
+        "merkleTree" : {
+          "$ref" : "#/definitions/MerkleTree"
+        },
         "groupHashes$core" : {
           "type" : "array",
           "items" : {
@@ -911,18 +923,6 @@
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
               "description" : "Base 58 Encoded Secure Hash"
             }
-          }
-        },
-        "merkleTree" : {
-          "$ref" : "#/definitions/MerkleTree"
-        },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
           }
         },
         "availableComponentGroups" : {
@@ -1094,62 +1094,29 @@
         }
       }
     },
-    "Amount" : {
-      "type" : "object",
-      "properties" : {
-        "quantity" : {
-          "type" : "integer",
-          "format" : "int32",
-          "example" : 100,
-          "description" : "total amount in minor units"
-        },
-        "displayTokenSize" : {
-          "type" : "number",
-          "example" : 0.01
-        },
-        "token" : {
-          "type" : "string",
-          "example" : "GBP"
-        },
-        "_tokenType" : {
-          "type" : "string",
-          "example" : "net.corda.core.contracts.Issued"
-        }
-      }
-    },
     "CashPaymentFlowPayload" : {
       "type" : "object",
       "properties" : {
-        "arg0" : {
-          "$ref" : "#/definitions/Amount"
+        "amount" : {
+          "$ref" : "#/definitions/AmountCurrency"
         },
-        "arg1" : {
+        "recipient" : {
           "$ref" : "#/definitions/Party"
         },
-        "arg2" : {
+        "anonymous" : {
           "type" : "boolean"
         },
-        "arg4" : {
+        "issuerConstraint" : {
           "type" : "array",
           "uniqueItems" : true,
           "items" : {
-            "type" : "object"
+            "$ref" : "#/definitions/Party"
           }
         },
-        "arg5" : {
+        "notary" : {
           "$ref" : "#/definitions/Party"
-        },
-        "arg6" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "arg7" : {
-          "$ref" : "#/definitions/DefaultConstructorMarker"
         }
       }
-    },
-    "DefaultConstructorMarker" : {
-      "type" : "object"
     },
     "CashConfiguration" : {
       "type" : "object",

@@ -249,6 +249,15 @@
       <!--</execution>-->
       <!--</executions>-->
       <!--</plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <!-- get parameter names for Braid flows -->
+          <compilerArgument>-parameters</compilerArgument>
+          <testCompilerArgument>-parameters</testCompilerArgument>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <reporting>
