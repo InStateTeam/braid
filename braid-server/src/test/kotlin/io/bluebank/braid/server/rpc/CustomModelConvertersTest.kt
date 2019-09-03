@@ -129,6 +129,19 @@ class CustomModelConvertersTest {
   }
 
   @Test
+  fun `should Correctly Model Currency as string`() {
+    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    println(models)
+
+    val model = models.get("ClassWithTypes")
+    assertThat(models.toString(), model, notNullValue())
+
+    val properties = model?.properties
+    assertThat(properties?.keys, hasItem("currency"))
+    assertThat(properties?.toString(), properties?.get("currency")?.type, equalTo("string"))
+  }
+
+  @Test
   fun `should Correctly Model Issued as string`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
 
@@ -190,7 +203,7 @@ class CustomModelConvertersTest {
     val expected = Amount(100, "GBP")
     val encoded = Json.encode(expected)
 
-    assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":1,\"token\":\"GBP\"}")
+    assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":1,\"token\":\"GBP\",\"_tokenType\":\"java.lang.String\"}")
   }
 
   @Test
@@ -243,6 +256,7 @@ class CustomModelConvertersTest {
   }
 
   data class ClassWithTypes(
+          val currency: Currency,
           val amountCurrency: Amount<Currency>
           , val amountString: Amount<String>
           , val amount: Amount<Any>

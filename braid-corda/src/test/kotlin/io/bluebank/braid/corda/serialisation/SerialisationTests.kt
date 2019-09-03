@@ -28,6 +28,8 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.test.assertEquals
 
 class SerialisationTests {
@@ -44,8 +46,8 @@ class SerialisationTests {
     BraidCordaJacksonInit.init()
   }
 
-  @Ignore
-  @Test
+//  @Ignore
+  @Test     // fails because we cant tell if this is a String or a Currency
   fun `that Amount of String token can be serialised and deserialised`() {
     val expected = Amount(100, "GBP")
     val encoded = Json.encode(expected)
@@ -69,4 +71,15 @@ class SerialisationTests {
     val actual = Json.decodeValue(encoded, Amount::class.java)
     assertEquals(expected, actual)
   }
+
+  @Test
+  fun `that Date should serialized using ISO8601`() {
+    val expected = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse("2019-03-30 12:34:56.567")
+    val encoded = Json.encode(expected)
+    
+    assertEquals("\"2019-03-30T12:34:56.567+0000\"", encoded)
+  }
+
+
+
 }

@@ -45,7 +45,6 @@ class AmountSerializer : StdSerializer<Amount<*>>(Amount::class.java) {
 
       val token = amount.token
       when (token) {
-        is String -> generator.writeStringField(TOKEN_FIELD, token)
         is Currency -> generator.writeStringField(TOKEN_FIELD, token.currencyCode)
         else -> {
           generator.writeObjectField(TOKEN_FIELD, token)
