@@ -74,13 +74,16 @@ class CustomModelConverter : ModelConverter {
             .example("736F6D654279746573")
             .description("Hex encoded Byte Array")
         }
+        if (Currency::class.java.isAssignableFrom(clazz)) {
+          return StringProperty()
+            .example("GBP")
+            .description("3 digit ISO 4217 code of the currency")
+        }
 
         if (Amount::class.java.isAssignableFrom(clazz)) {
           // String and Currency get created as their own types
           val boundType = jsonType.bindings.getBoundType(0)
-          if (boundType != null && (boundType.rawClass.equals(Currency::class.java) || boundType.rawClass.equals(
-              String::class.java
-            ))
+          if (boundType != null && (boundType.rawClass.equals(Currency::class.java))
           ) {
             context?.defineModel(
               "AmountCurrency", ModelImpl()

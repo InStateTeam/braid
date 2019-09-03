@@ -548,6 +548,12 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
+        },
         "outputStates" : {
           "type" : "array",
           "items" : {
@@ -556,12 +562,6 @@
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
-        },
-        "outputs" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/TransactionStateContractState"
-          }
         },
         "id" : {
           "type" : "string",
@@ -636,15 +636,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -740,14 +740,14 @@
     "TemporalUnit" : {
       "type" : "object",
       "properties" : {
-        "timeBased" : {
-          "type" : "boolean"
-        },
         "durationEstimated" : {
           "type" : "boolean"
         },
         "duration" : {
           "$ref" : "#/definitions/Duration"
+        },
+        "timeBased" : {
+          "type" : "boolean"
         },
         "dateBased" : {
           "type" : "boolean"
@@ -875,18 +875,6 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "merkleTree" : {
-          "$ref" : "#/definitions/MerkleTree"
-        },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        },
         "groupHashes$core" : {
           "type" : "array",
           "items" : {
@@ -923,6 +911,18 @@
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
               "description" : "Base 58 Encoded Secure Hash"
             }
+          }
+        },
+        "merkleTree" : {
+          "$ref" : "#/definitions/MerkleTree"
+        },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
           }
         },
         "availableComponentGroups" : {
@@ -1157,36 +1157,18 @@
         "issuableCurrencies" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Currency"
+            "type" : "string",
+            "example" : "GBP",
+            "description" : "3 digit ISO 4217 code of the currency"
           }
         },
         "supportedCurrencies" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Currency"
+            "type" : "string",
+            "example" : "GBP",
+            "description" : "3 digit ISO 4217 code of the currency"
           }
-        }
-      }
-    },
-    "Currency" : {
-      "type" : "object",
-      "properties" : {
-        "currencyCode" : {
-          "type" : "string"
-        },
-        "defaultFractionDigits" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "numericCode" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "displayName" : {
-          "type" : "string"
-        },
-        "symbol" : {
-          "type" : "string"
         }
       }
     },
