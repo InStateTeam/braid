@@ -164,5 +164,4 @@ class KEndPoint(
   override fun toString(): String {
     return "KEndPoint(name='$name', parameters=$parameters, returnType=$returnType)"
   }
-
 }

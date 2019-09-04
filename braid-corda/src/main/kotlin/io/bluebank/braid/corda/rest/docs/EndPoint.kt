@@ -127,10 +127,10 @@ abstract class EndPoint(
       }
     }
 
-  fun addTypes(models: MutableMap<String, Model>) {
-    addType(this.returnType, models)
+  fun addTypes(models: ModelContext) {
+    models.addType(this.returnType)
     this.parameterTypes.forEach {
-      addType(it, models)
+      models.addType(it)
     }
   }
 
@@ -225,24 +225,6 @@ abstract class EndPoint(
         .produces(produces)
         .defaultResponse(Response().schema(responseSchema).description("default response"))
     }
-  }
-
-  private fun addType(type: Type, models: MutableMap<String, Model>) {
-    if (type is ParameterizedType) {
-      if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
-        this.addType(type.actualTypeArguments[0], models)
-      } else {
-        type.actualTypeArguments.forEach {
-          addType(it, models)
-        }
-      }
-    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
-      models += type.createSwaggerModels()
-    }
-  }
-
-  private fun Type.createSwaggerModels(): Map<String, Model> {
-    return ModelConverters.getInstance().readAll(this)
   }
 
   private fun KType.getKType(): KType {

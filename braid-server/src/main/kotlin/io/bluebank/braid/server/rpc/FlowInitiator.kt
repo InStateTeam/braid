@@ -21,7 +21,6 @@ import io.bluebank.braid.core.synth.preferredConstructor
 import io.bluebank.braid.core.synth.trampoline
 import io.vertx.core.Future
 import net.corda.core.flows.FlowLogic
-import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
 import kotlin.reflect.KCallable
@@ -40,9 +39,10 @@ class FlowInitiator(val rpc: RPCFactory) {
       // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
       // and return a Future
       val excludeProgressTracker = it.toMutableList()
-      excludeProgressTracker.removeIf({ l -> l is ProgressTracker })    //todo might have other classes tht aren't in startFlowDynamic
+      excludeProgressTracker.removeIf { l -> l is ProgressTracker }    //todo might have other classes tht aren't in startFlowDynamic
       log.info("About to start $kClass with args: $it")
 
+      @Suppress("UNCHECKED_CAST")
       rpc.validConnection().startFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
