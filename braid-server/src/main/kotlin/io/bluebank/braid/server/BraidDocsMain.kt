@@ -18,17 +18,16 @@ package io.bluebank.braid.server
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.server.rpc.RPCFactory
+import io.bluebank.braid.core.utils.toCordappsClassLoader
+import io.bluebank.braid.core.utils.tryWithClassLoader
+import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactoryStub
 import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
 import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
-import net.corda.core.internal.toTypedArray
 import java.io.File
-import java.net.URLClassLoader
-import java.util.Arrays.stream
 
 private val log = loggerFor<Braid>()
 
@@ -39,30 +38,19 @@ fun main(args: Array<String>) {
 
   val file = File(args[0])
   file.parentFile.mkdirs()
-  val swaggerText = BraidDocsMain(classLoader(args)).swaggerText()
-  log.info(swaggerText)
-  file.writeText(swaggerText)
-  log.info("wrote to:" + file.absolutePath)
-}
-
-fun classLoader(args: Array<String>): ClassLoader {
-  val toArray = stream(args).skip(1).map { File(it).toURI().toURL() }.toTypedArray()
-  return URLClassLoader(
-    toArray,
-    BraidDocsMain::class.java.classLoader
-  )
-}
-
-class BraidDocsMain(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()) {
-  private var restMounter: RestMounter
-
-  init {
-    val restConfig = Braid().restConfig(RPCFactory("", "", ""), classLoader)
-    val vertx = Vertx.vertx()
-    restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+  val cordappsClassLoader = args.toList().drop(1).toCordappsClassLoader()
+  tryWithClassLoader(cordappsClassLoader) {
+    val swaggerText = BraidDocsMain().swaggerText()
+    file.writeText(swaggerText)
   }
+  log.info("wrote to: ${file.absolutePath}")
+}
 
+class BraidDocsMain() {
   fun swaggerText(): String {
+    val restConfig = Braid().restConfig(createRpcFactoryStub())
+    val vertx = Vertx.vertx()
+    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
     val classes = readCordaClasses()
     val models = ModelContext().apply {
       classes.forEach { addType(it) }

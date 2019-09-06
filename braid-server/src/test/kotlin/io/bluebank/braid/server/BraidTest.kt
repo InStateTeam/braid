@@ -41,7 +41,6 @@ import org.hamcrest.CoreMatchers.*
 import org.hamcrest.Matchers.greaterThan
 import org.junit.AfterClass
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
@@ -66,7 +65,6 @@ class BraidTest {
     var port = findFreePort()
     val client = Vertx.vertx().createHttpClient()
     var driverl = Future.succeededFuture("");
-    //var nodeA =
 
     @BeforeClass
     @JvmStatic
@@ -121,10 +119,12 @@ class BraidTest {
       async: Async,
       networkHostAndPort: NetworkHostAndPort
     ): Future<String>? {
-      return Braid().withNodeAddress(networkHostAndPort)
-        .withUserName("user1")
-        .withPassword("test")
-        .withPort(port)
+      return Braid(
+        userName = "user1",
+        password = "test",
+        port = port,
+        nodeAddress = networkHostAndPort
+      )
         .startServer()
         .setHandler {
           async.complete()
@@ -372,7 +372,7 @@ class BraidTest {
     }
   }
 
- @Test
+  @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
 
@@ -382,7 +382,7 @@ class BraidTest {
       val json = JsonObject()
         .put("notary", notary)
         .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-        .put("issuerBaaaaaankPartyRef", JsonObject().put("junk","sdsa"))
+        .put("issuerBaaaaaankPartyRef", JsonObject().put("junk", "sdsa"))
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"

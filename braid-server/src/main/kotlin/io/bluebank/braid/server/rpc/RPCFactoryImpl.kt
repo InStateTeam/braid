@@ -16,34 +16,44 @@
 package io.bluebank.braid.server.rpc
 
 import io.bluebank.braid.core.logging.loggerFor
-import io.vertx.core.Future
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 
-class RPCFactory(
-    userName: String,
-    password: String,
-   nodeAddress: String
-) {
+interface RPCFactory {
+  companion object {
+    fun createRpcFactory(username: String, password: String, nodeAddress: NetworkHostAndPort): RPCFactory =
+      RPCFactoryImpl(userName = username, password = password, nodeAddress = nodeAddress)
 
-  private val rpc: CordaRPCOps by lazy{
+    fun createRpcFactoryStub(): RPCFactory = RPCFactoryStub()
+  }
+
+  fun validConnection(): CordaRPCOps
+}
+
+internal class RPCFactoryStub : RPCFactory {
+  override fun validConnection(): CordaRPCOps {
+    error("not implemented for stub")
+  }
+}
+
+internal class RPCFactoryImpl(
+  userName: String,
+  password: String,
+  nodeAddress: NetworkHostAndPort
+) : RPCFactory {
+
+  private val rpc: CordaRPCOps by lazy {
     log.info("Attempting to connect Braid RPC to:$nodeAddress username:$userName")
-    val client = CordaRPCClient(NetworkHostAndPort.parse(nodeAddress))
+    val client = CordaRPCClient(nodeAddress)
     val connection = client.start(userName, password)
     connection.proxy
   }
 
-  private val log = loggerFor<RPCFactory>()
+  private val log = loggerFor<RPCFactoryImpl>()
 
-
-
-
-
-  fun validConnection(): CordaRPCOps {
+  override fun validConnection(): CordaRPCOps {
     //  todo manage recover and reconnection etc probably with Future class
-
     return rpc
   }
-
 }

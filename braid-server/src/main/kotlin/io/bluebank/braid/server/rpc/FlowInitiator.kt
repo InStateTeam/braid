@@ -26,7 +26,7 @@ import net.corda.core.utilities.ProgressTracker
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(val rpc: RPCFactory) {
+class FlowInitiator(val rpc: RPCFactory, val flowClassLoader: ClassLoader) {
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
@@ -39,15 +39,15 @@ class FlowInitiator(val rpc: RPCFactory) {
       // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
       // and return a Future
       val excludeProgressTracker = it.toMutableList()
-      excludeProgressTracker.removeIf { l -> l is ProgressTracker }    //todo might have other classes tht aren't in startFlowDynamic
+      //todo might have other classes that aren't in startFlowDynamic
+      excludeProgressTracker.removeIf { l -> l is ProgressTracker }
       log.info("About to start $kClass with args: $it")
 
       @Suppress("UNCHECKED_CAST")
       rpc.validConnection().startFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
-      )
-        .returnValue.toObservable().toFuture()
+      ).returnValue.toObservable().toFuture()
     }
 
     return RPCCallable(kClass, fn)
@@ -56,5 +56,4 @@ class FlowInitiator(val rpc: RPCFactory) {
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
     return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
   }
-
 }

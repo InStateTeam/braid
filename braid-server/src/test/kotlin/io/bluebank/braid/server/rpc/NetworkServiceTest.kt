@@ -44,7 +44,7 @@ class NetworkServiceTest {
       on { networkMapSnapshot() } doReturn asList(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
-    val factory = mock<RPCFactory> {
+    val factory = mock<RPCFactoryImpl> {
       on { validConnection() } doReturn ops
     }
 

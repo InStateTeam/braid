@@ -18,9 +18,7 @@ package io.bluebank.braid.server.rpc
 import io.bluebank.braid.server.flow.flowLogicType
 import kotlin.reflect.*
 
-class RPCCallable<T>(val flow: KClass<*>, val fn: KCallable<T>) : KCallable<T> {
-  //    override val isSuspend: Boolean
-//        get() = constructor.isSuspend
+class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<T>) : KCallable<T> {
   override val annotations: List<Annotation>
     get() = fn.annotations
   override val isAbstract: Boolean
@@ -49,7 +47,6 @@ class RPCCallable<T>(val flow: KClass<*>, val fn: KCallable<T>) : KCallable<T> {
   // change the return type for swagger to be able to see
   override val returnType: KType
     get() = flow.flowLogicType()
-
 }
 
 
