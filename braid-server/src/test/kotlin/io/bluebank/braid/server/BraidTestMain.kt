@@ -16,36 +16,24 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.utils.tryWithClassLoader
-import io.bluebank.braid.server.util.PathsClassLoader.cordappsClassLoader
-import io.vertx.core.Future
-import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
-  if (args.size != 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port>")
+  if (args.size < 4) {
+    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val port = Integer.valueOf(args[3])
-  val defaultCordappDirectory = "./cordapps"
-  val classLoader = cordappsClassLoader(defaultCordappDirectory)
-  tryWithClassLoader(classLoader) {
-    Braid(
-      port = port,
-      userName = args[1],
-      password = args[2],
-      nodeAddress = NetworkHostAndPort.parse(args[0])
-    )
-      .startServer()
-      .recover {
-        log.error("Server failed to start:", it)
-        Future.succeededFuture("-1")
-      }.map { openBrowser(port, it) }
-  }
+  val networkAndPort = args[0]
+  val userName = args[1]
+  val password = args[2]
+  val additionalPaths = args.asList().drop(4)
 
-  //connection.notifyServerAndClose()
+  BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
+      .map{
+    openBrowser(port, it)
+  }
 }
 
 private fun openBrowser(port: Int?, it: String?) {
