@@ -48,7 +48,6 @@ class CustomModelConvertersTest {
   fun setUp() {
     BraidCordaJacksonInit.init()
     CustomModelConverters.init()
-
   }
 
   @Test

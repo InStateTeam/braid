@@ -224,51 +224,41 @@
           </execution>
         </executions>
       </plugin>
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-assembly-plugin</artifactId>-->
-<!--        <version>3.1.1</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>dist</id>-->
-<!--            <phase>package</phase>-->
-<!--            <goals>-->
-<!--              <goal>single</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <descriptors>-->
-<!--                <descriptor>src/main/assembly/distribution.xml</descriptor>-->
-<!--              </descriptors>-->
-<!--              <finalName>${project.artifactId}</finalName>-->
-<!--              <appendAssemblyId>false</appendAssemblyId>-->
-<!--              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--          <execution>-->
-<!--            <id>make-assembly</id>-->
-<!--            <phase>package</phase>-->
-<!--            <goals>-->
-<!--              <goal>single</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <archive>-->
-<!--                <manifest>-->
-<!--                  <mainClass>io.bluebank.braid.server.BraidMainKt</mainClass>-->
-<!--                </manifest>-->
-<!--              </archive>-->
-<!--              <descriptorRefs>-->
-<!--                <descriptorRef>jar-with-dependencies</descriptorRef>-->
-<!--              </descriptorRefs>-->
-<!--              <appendAssemblyId>false</appendAssemblyId>-->
-<!--              <finalName>braid-server</finalName>-->
-<!--              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <shadedArtifactAttached>true</shadedArtifactAttached>
+          <createDependencyReducedPom>true</createDependencyReducedPom>
+        </configuration>
+
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer
+                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>io.bluebank.braid.server.Braid</Main-Class>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+              <artifactSet/>
+              <outputFile>${project.build.directory}/${project.artifactId}--fat.jar
+              </outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
           <!-- get parameter names for Braid flows -->
           <compilerArgument>-parameters</compilerArgument>

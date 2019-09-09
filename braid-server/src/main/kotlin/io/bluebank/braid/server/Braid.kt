@@ -62,7 +62,7 @@ data class Braid(
 
   fun restConfig(rpc: RPCFactory): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
-    val flowInitiator = FlowInitiator(rpc, classLoader)
+    val flowInitiator = FlowInitiator(rpc)
     val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
       .withPaths {
@@ -81,7 +81,7 @@ data class Braid(
               log.info("registering: $path")
               post(path, flowInitiator.getInitiator(kotlinFlowClass))
             } catch (e: Throwable) {
-              log.error("Unable to register flow:${kotlinFlowClass.java.name}", e)
+              log.warn("Unable to register flow:${kotlinFlowClass.java.name}", e);
             }
           }
         }
