@@ -90,7 +90,7 @@ data class Braid(
               log.info("registering:" + path)
               post(path, FlowInitiator(rpc).getInitiator(kotlinFlowClass))
             } catch (e: Throwable) {
-              log.error("Unable to register flow:${kotlinFlowClass.java.name}", e);
+              log.warn("Unable to register flow:${kotlinFlowClass.java.name}", e);
             }
           }
         }
