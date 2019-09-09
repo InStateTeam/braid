@@ -22,10 +22,7 @@ import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toCordappName
 import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
-import io.bluebank.braid.server.rpc.FlowInitiator
-import io.bluebank.braid.server.rpc.FlowService
-import io.bluebank.braid.server.rpc.NetworkService
-import io.bluebank.braid.server.rpc.RPCFactory
+import io.bluebank.braid.server.rpc.*
 import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
@@ -70,6 +67,8 @@ data class Braid(
           get("/network/nodes", NetworkService(rpc)::nodes)
           get("/network/notaries", NetworkService(rpc)::notaries)
           get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+          get("/network/vault", VaultService(rpc)::vaultQueryBy)
+
         }
         group("cordapps") {
           get("/cordapps/flows", FlowService(rpc)::flows)

@@ -426,4 +426,31 @@ class BraidTest {
     return result;
   }
 
+
+  @Test
+  fun `should query the vault`(context: TestContext) {
+    val async = context.async()
+
+    log.info("calling get: http://localhost:${port}/api/rest/network/vault")
+    client.get(port, "localhost", "/api/rest/network/vault")
+        .putHeader("Accept", "application/json; charset=utf8")
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val nodes = it.toJsonObject()
+
+            //   val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
+
+            context.assertThat(nodes, notNullValue())
+
+//                        context.assertThat(nodes.getJsonObject(0).getString("owningKey"), equalTo("GfHq2tTVk9z4eXgySzYjYp2YsTewf2FHZCb1Ls31XPzG7Hy2hRUeM8cFaFu4"))
+
+            async.complete()
+          }
+        }
+        .end()
+  }
+
 }
