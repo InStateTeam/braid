@@ -79,7 +79,7 @@ object BraidCordaJacksonInit {
             // Mixins for transaction types to prevent some properties from being serialized
             .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
             // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
-            .setMixInAnnotation(WireTransaction::class.java, JacksonSupport.WireTransactionMixin::class.java)
+            .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
 
             .addSerializer(PublicKey::class.java, PublicKeySerializer())
             .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
