@@ -26,7 +26,7 @@ import net.corda.core.utilities.ProgressTracker
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(val rpc: RPCFactory, val flowClassLoader: ClassLoader) {
+class FlowInitiator(val rpc: RPCFactory) {
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {

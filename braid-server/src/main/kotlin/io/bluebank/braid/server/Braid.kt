@@ -62,7 +62,7 @@ data class Braid(
 
   fun restConfig(rpc: RPCFactory): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
-    val flowInitiator = FlowInitiator(rpc, classLoader)
+    val flowInitiator = FlowInitiator(rpc)
     val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
       .withPaths {
