@@ -248,6 +248,12 @@
       <artifactId>swagger-models</artifactId>
       <version>1.5.23</version>
     </dependency>
+    <dependency>
+      <groupId>net.corda</groupId>
+      <artifactId>corda-core</artifactId>
+      <version>${corda.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
