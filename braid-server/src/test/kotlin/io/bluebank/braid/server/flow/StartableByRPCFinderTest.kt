@@ -15,19 +15,24 @@
  */
 package io.bluebank.braid.server.flow
 
+import io.bluebank.braid.server.util.PathsClassLoader
 import net.corda.core.flows.ContractUpgradeFlow
 import org.hamcrest.CoreMatchers.hasItem
-import org.hamcrest.Matchers.greaterThan
 import org.junit.Assert.assertThat
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.reflect.jvm.jvmName
 
 class StartableByRPCFinderTest {
-
   @Test
-  fun shouldfindClassRPCClass() {
-    var classes = StartableByRPCFinder().findStartableByRPC();
-    assertThat(classes.size, greaterThan(2))
+  fun `should find rpc class`() {
+    val classLoader = PathsClassLoader.cordappsClassLoader(
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+    )
+
+    val classes = StartableByRPCFinder(classLoader).findStartableByRPC()
+    assertTrue("that we can locate the CashExitFlow", classes.any { it.jvmName == "net.corda.finance.flows.CashExitFlow" })
     assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class))
   }
-
 }

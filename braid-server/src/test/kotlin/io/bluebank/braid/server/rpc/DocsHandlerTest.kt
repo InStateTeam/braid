@@ -34,7 +34,7 @@ class DocsHandlerTest {
   @Test
   fun `should Document Dynamic Class`() {
     val docsHandler = DocsHandler()
-    val handler = FlowInitiator(mock()).getInitiator(CashIssueFlow::class)
+    val handler = FlowInitiator(mock(), ClassLoader.getSystemClassLoader()).getInitiator(CashIssueFlow::class)
 
     // need to be able to do this..
     val javaTypeIncludingSynthetics =
@@ -53,7 +53,7 @@ class DocsHandlerTest {
   //@Ignore
   fun `should Escape Inner Class Definition Name`() {
     val docsHandler = DocsHandler()
-    val handler = FlowInitiator(mock()).getInitiator(ContractUpgradeFlow.Authorise::class)
+    val handler = FlowInitiator(mock(), ClassLoader.getSystemClassLoader()).getInitiator(ContractUpgradeFlow.Authorise::class)
 
     // need to be able to do this..
     val javaTypeIncludingSynthetics =

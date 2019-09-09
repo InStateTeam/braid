@@ -130,8 +130,7 @@
       <groupId>net.corda</groupId>
       <artifactId>corda-node-driver</artifactId>
       <version>${corda.version}</version>
-      <scope>test
-      </scope>  <!--somehow withouth this it cannot start corda rpc and also drags in the needed slf4j logging-->
+      <scope>test</scope>  <!-- somehow without this it cannot start corda rpc and also drags in the needed slf4j logging-->
     </dependency>
     <dependency><!--needed  for json serialization-->
       <groupId>net.corda</groupId>

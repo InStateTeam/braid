@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server.util
 
+import io.bluebank.braid.core.utils.toCordappName
 import org.junit.Test
 import java.net.URL
 import kotlin.test.assertEquals

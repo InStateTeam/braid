@@ -15,24 +15,17 @@
  */
 package io.bluebank.braid.server.rpc
 
-import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.server.Braid
 import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.domain.toSimpleNodeInfo
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
-import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 import java.util.stream.Collectors.toList
 import javax.ws.rs.QueryParam
 
 class NetworkService(val rpc: RPCFactory) {
-  companion object {
-    private val log = loggerFor<Braid>()
-  }
-
   @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   fun nodeInfo(): SimpleNodeInfo {
     return rpc.validConnection().nodeInfo().toSimpleNodeInfo()

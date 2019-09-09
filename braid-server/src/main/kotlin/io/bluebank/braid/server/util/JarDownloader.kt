@@ -16,15 +16,23 @@
 package io.bluebank.braid.server.util
 
 import java.io.File
+import java.io.FileOutputStream
 import java.net.URL
+import java.nio.channels.Channels
+import java.nio.file.Files
 
-private val CORDAPP_NAME_RE = "^(.*?)(\\-\\d(\\.\\d)*\\.jar)?\$".toRegex()
-
-fun URL.toCordappName(): String {
-  val fileName = File(this.file).name
-  val matches = CORDAPP_NAME_RE.matchEntire(fileName)
-  return when (matches) {
-    null -> error("parsing of cordapp module location failed: $this")
-    else -> matches.groupValues[1].replace(".jar", "-jar")
+class TempFileDownloader {
+  private val dir = Files.createTempDirectory("delete-me-").toFile().also { it.deleteOnExit() }
+  fun uriToFile(url: URL) : URL {
+    val filename = url.path.let { File(it) }.name
+    val destination = File(dir, filename)
+    if (!destination.exists()) {
+      Channels.newChannel(url.openStream()).use { rbc ->
+        FileOutputStream(destination).use { fos ->
+          fos.channel.transferFrom(rbc, 0, Long.MAX_VALUE);
+        }
+      }
+    }
+    return destination.toURI().toURL()
   }
 }
