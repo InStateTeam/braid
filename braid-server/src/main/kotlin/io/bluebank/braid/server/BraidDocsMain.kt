@@ -18,9 +18,9 @@ package io.bluebank.braid.server
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.utils.toCordappsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactoryStub
+import io.bluebank.braid.server.util.toCordappsClassLoader
 import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
@@ -39,6 +39,8 @@ fun main(args: Array<String>) {
   val file = File(args[0])
   file.parentFile.mkdirs()
   val cordappsClassLoader = args.toList().drop(1).toCordappsClassLoader()
+  // we call so as to initialise model converters etc before replacing the context class loader
+  Braid.init()
   tryWithClassLoader(cordappsClassLoader) {
     val swaggerText = BraidDocsMain().swaggerText()
     file.writeText(swaggerText)

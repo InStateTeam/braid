@@ -16,8 +16,8 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.utils.PathsClassLoader.cordappsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
+import io.bluebank.braid.server.util.PathsClassLoader.cordappsClassLoader
 import io.vertx.core.Future
 import net.corda.core.utilities.NetworkHostAndPort
 

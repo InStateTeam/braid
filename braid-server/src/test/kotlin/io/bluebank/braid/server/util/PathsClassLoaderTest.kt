@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.flow
+package io.bluebank.braid.server.util
 
-import io.bluebank.braid.server.util.PathsClassLoader
-import net.corda.core.flows.ContractUpgradeFlow
-import org.hamcrest.CoreMatchers.hasItem
-import org.junit.Assert.assertThat
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
 import org.junit.Test
-import kotlin.reflect.jvm.jvmName
 
-class StartableByRPCFinderTest {
+class PathsClassLoaderTest {
   @Test
-  fun `should find rpc class`() {
+  fun `that we can load classes from web jars`() {
     val classLoader = PathsClassLoader.cordappsClassLoader(
       "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
       "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
-    )
-
-    val classes = StartableByRPCFinder(classLoader).findStartableByRPC()
-    assertTrue("that we can locate the CashExitFlow", classes.any { it.jvmName == "net.corda.finance.flows.CashExitFlow" })
-    assertThat(classes, hasItem(ContractUpgradeFlow.Authorise::class))
+      )
+    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
+    assertNotNull(clazz)
   }
 }

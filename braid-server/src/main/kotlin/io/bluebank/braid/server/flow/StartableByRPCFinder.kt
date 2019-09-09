@@ -17,13 +17,12 @@ package io.bluebank.braid.server.flow
 
 import io.github.classgraph.ClassGraph
 import net.corda.core.flows.StartableByRPC
-import java.util.stream.Stream
 import kotlin.reflect.KClass
 
 class StartableByRPCFinder(private val classLoader: ClassLoader = Thread.currentThread().contextClassLoader) {
   companion object {
-    fun rpcClasses(classLoader: ClassLoader = Thread.currentThread().contextClassLoader): Stream<KClass<*>> {
-      return StartableByRPCFinder(classLoader).findStartableByRPC().stream()
+    fun rpcClasses(classLoader: ClassLoader = Thread.currentThread().contextClassLoader): List<KClass<*>> {
+      return StartableByRPCFinder(classLoader).findStartableByRPC()
     }
   }
 

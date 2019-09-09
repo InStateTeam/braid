@@ -42,6 +42,9 @@ data class Braid(
       BraidCordaJacksonInit.init()
       CustomModelConverters.init()
     }
+    fun init() {
+      // will on lazy basis invoke the Jackson and ModelConverters init
+    }
   }
 
   fun startServer(): Future<String> {
@@ -60,6 +63,7 @@ data class Braid(
   fun restConfig(rpc: RPCFactory): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
     val flowInitiator = FlowInitiator(rpc, classLoader)
+    val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
       .withPaths {
         group("network") {
@@ -69,7 +73,7 @@ data class Braid(
         }
         group("cordapps") {
           get("/cordapps/flows", FlowService(rpc)::flows)
-          rpcClasses(classLoader).forEach { kotlinFlowClass ->
+          rpcClasses.forEach { kotlinFlowClass ->
             try {
               val cordappName =
                 kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
