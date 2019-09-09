@@ -224,26 +224,26 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <id>dist</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-assembly-plugin</artifactId>-->
+<!--        <version>3.1.1</version>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>dist</id>-->
+<!--            <phase>package</phase>-->
+<!--            <goals>-->
+<!--              <goal>single</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <descriptors>-->
 <!--                <descriptor>src/main/assembly/distribution.xml</descriptor>-->
-              </descriptors>
-              <finalName>${project.artifactId}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>
-            </configuration>
-          </execution>
+<!--              </descriptors>-->
+<!--              <finalName>${project.artifactId}</finalName>-->
+<!--              <appendAssemblyId>false</appendAssemblyId>-->
+<!--              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>-->
+<!--            </configuration>-->
+<!--          </execution>-->
 <!--          <execution>-->
 <!--            <id>make-assembly</id>-->
 <!--            <phase>package</phase>-->
@@ -264,8 +264,8 @@
 <!--              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>-->
 <!--            </configuration>-->
 <!--          </execution>-->
-        </executions>
-      </plugin>
+<!--        </executions>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
