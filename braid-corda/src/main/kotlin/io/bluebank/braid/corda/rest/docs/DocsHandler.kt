@@ -47,10 +47,10 @@ class DocsHandler(
 
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
-  private val models = mutableMapOf<String, Model>()
   private val swagger: Swagger by lazy {
     createSwagger()
   }
+  private val modelContext = ModelContext()
 
   override fun handle(context: RoutingContext) {
     val absoluteURI = URL(context.request().absoluteURI())
@@ -80,7 +80,7 @@ class DocsHandler(
       .consumes(APPLICATION_JSON.toString())
       .produces(APPLICATION_JSON.toString())
       .apply {
-        addAllModels(models)
+        modelContext.addToSwagger(this)
         endpoints.forEach {
           addEndpoint(it)
         }
@@ -106,9 +106,7 @@ class DocsHandler(
         this.path(swaggerPath, path)
         path
       }
-
       val operation = endpoint.toOperation()
-
       when (endpoint.method) {
         GET -> path.get(operation)
         POST -> path.post(operation)
@@ -155,19 +153,7 @@ class DocsHandler(
 
   private fun add(endpoint: EndPoint) {
     endpoints.add(endpoint)
-    endpoint.addTypes(models)
-  }
-
-  private fun Swagger.addAllModels(types: Map<String, Model>): Swagger {
-    types.forEach { name, model ->
-      try {
-        this.model(name, model)
-      } catch (e: Throwable) {
-        log.error("Unable to model class:$name", e)
-        throw RuntimeException("Unable to model class:$name", e)
-      }
-    }
-    return this
+    endpoint.addTypes(modelContext)
   }
 
   fun group(groupId: String, fn: () -> Unit) {

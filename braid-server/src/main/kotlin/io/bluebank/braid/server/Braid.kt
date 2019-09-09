@@ -20,83 +20,73 @@ import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.utils.toCordappName
 import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
 import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
-import io.bluebank.braid.server.util.toCordappName
+import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
-import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.NetworkHostAndPort
 
 data class Braid(
   val port: Int = 8080,
   val userName: String = "",
   val password: String = "",
-  val nodeAddress: String = ""
+  val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080)
 ) {
-
-  init {
-    BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
+  companion object {
+    init {
+      BraidCordaJacksonInit.init()
+      CustomModelConverters.init()
+    }
+    fun init() {
+      // will on lazy basis invoke the Jackson and ModelConverters init
+    }
   }
-
-  fun withPort(port: Int): Braid = this.copy(port = port)
-
-  fun withUserName(userName: String): Braid = this.copy(userName = userName)
-
-  fun withPassword(password: String): Braid = this.copy(password = password)
-
-  fun withNodeAddress(nodeAddress: String): Braid = this.copy(nodeAddress = nodeAddress)
-
-  fun withNodeAddress(nodeAddress: NetworkHostAndPort): Braid =
-    this.copy(nodeAddress = nodeAddress.toString())
 
   fun startServer(): Future<String> {
-
-    log.info("Starting Braid on port:" + port)
-    val result = Future.future<String>();
-
-
-
-    BraidConfig()
-      // .withFlow(IssueObligation.Initiator::class)
-      .withPort(port)
-      .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-      .withRestConfig(restConfig(RPCFactory(userName, password, nodeAddress)))
-      .bootstrapBraid(null, result.completer())
-
-
-    //addShutdownHook {  }
-
-    return result
+      log.info("Starting Braid on port: $port")
+      val result = Future.future<String>()
+      BraidConfig()
+        // .withFlow(IssueObligation.Initiator::class)
+        .withPort(port)
+        .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress)))
+        .bootstrapBraid(null, result)
+      //addShutdownHook {  }
+      return result
   }
 
-  fun restConfig(rpc: RPCFactory,classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()): RestConfig {
+  fun restConfig(rpc: RPCFactory): RestConfig {
+    val classLoader = Thread.currentThread().contextClassLoader
+    val flowInitiator = FlowInitiator(rpc, classLoader)
+    val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
       .withPaths {
         group("network") {
           get("/network/nodes", NetworkService(rpc)::nodes)
           get("/network/notaries", NetworkService(rpc)::notaries)
           get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+        }
+        group("cordapps") {
           get("/cordapps/flows", FlowService(rpc)::flows)
-
-          rpcClasses(classLoader).forEach { kotlinFlowClass ->
-             try {
-               val cordappName = kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
-               val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
-              log.info("registering:" + path)
-              post(path, FlowInitiator(rpc).getInitiator(kotlinFlowClass))
+          rpcClasses.forEach { kotlinFlowClass ->
+            try {
+              val cordappName =
+                kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
+              val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
+              log.info("registering: $path")
+              post(path, flowInitiator.getInitiator(kotlinFlowClass))
             } catch (e: Throwable) {
-              log.error("Unable to register flow:${kotlinFlowClass.java.name}", e);
+              log.error("Unable to register flow:${kotlinFlowClass.java.name}", e)
             }
           }
         }
       }
   }
-
 }
 
 //fun issueObligation(params: IssueObligationInitiatorParameters): Future<SignedTransaction> {

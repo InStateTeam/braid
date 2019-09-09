@@ -16,6 +16,7 @@
 package io.bluebank.braid.core.synth
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.bluebank.braid.core.utils.tryWithClassLoader
 import java.lang.reflect.Constructor
 import java.lang.reflect.Parameter
 import kotlin.reflect.*
@@ -25,7 +26,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   internal val constructor: Constructor<K>,
   className: String = constructor.declaringClass.payloadClassName(),
   private val boundTypes: Map<Class<*>, Any>,
-  classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
+  private val classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
   private val transformer: (Array<Any?>) -> R
 ) : KFunction<R> {
 
@@ -50,9 +51,11 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
 
   fun annotations(): Array<Annotation> = constructor.annotations
   fun invoke(payload: Any): R {
-    val parameterValues =
-      constructor.parameters.map { getFieldValue(payload, it) }.toTypedArray()
-    return transformer(parameterValues)
+    return tryWithClassLoader(classLoader) {
+      val parameterValues =
+        constructor.parameters.map { getFieldValue(payload, it) }.toTypedArray()
+       transformer(parameterValues)
+    }
   }
 
   override val annotations: List<Annotation> = constructor.annotations.toList()

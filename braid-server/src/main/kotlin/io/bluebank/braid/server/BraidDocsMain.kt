@@ -16,56 +16,87 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.rest.RestMounter
+import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.server.rpc.RPCFactory
-import io.swagger.util.Json
+import io.bluebank.braid.core.utils.tryWithClassLoader
+import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactoryStub
+import io.bluebank.braid.server.util.toCordappsClassLoader
+import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
-import net.corda.core.internal.toTypedArray
-import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.RPCOps
+import net.corda.core.CordaInternal
+import net.corda.core.flows.FlowInitiator
+import net.corda.core.flows.FlowLogic
 import java.io.File
-import java.net.URLClassLoader
-import java.util.Arrays.stream
-
 
 private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
-
-  if (args.size < 1) {
+  if (args.isEmpty()) {
     throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val file = File(args[0])
   file.parentFile.mkdirs()
-
-  val swaggerText = BraidDocsMain(classLoader(args)).swaggerText()
-  log.info(swaggerText)
-  file.writeText(swaggerText)
-  log.info("wrote to:" + file.absolutePath)
+  val cordappsClassLoader = args.toList().drop(1).toCordappsClassLoader()
+  // we call so as to initialise model converters etc before replacing the context class loader
+  Braid.init()
+  tryWithClassLoader(cordappsClassLoader) {
+    val swaggerText = BraidDocsMain().swaggerText()
+    file.writeText(swaggerText)
+  }
+  log.info("wrote to: ${file.absolutePath}")
 }
 
-fun classLoader(args: Array<String>): ClassLoader {
-  val toArray = stream(args).skip(1).map { File(it).toURI().toURL() }.toTypedArray()
-  return URLClassLoader(
-          toArray,
-          BraidDocsMain::class.java.getClassLoader()
-  )
-}
-
-class BraidDocsMain(classLoader: ClassLoader? = ClassLoader.getSystemClassLoader()) {
-  private var restMounter: RestMounter
-
-  init {
-    val restConfig = Braid().restConfig(RPCFactory("","",""), classLoader)
+class BraidDocsMain() {
+  fun swaggerText(): String {
+    val restConfig = Braid().restConfig(createRpcFactoryStub())
     val vertx = Vertx.vertx()
-    restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+    val classes = readCordaClasses()
+    val models = ModelContext().apply {
+      classes.forEach { addType(it) }
+    }
+    val swagger = restMounter.docsHandler.createSwagger()
+    models.addToSwagger(swagger)
+    return io.swagger.util.Json.pretty().writeValueAsString(swagger)
   }
 
-  fun swaggerText(): String {
-    val swagger = restMounter.docsHandler.createSwagger()
-    val swaggerText = Json.pretty().writeValueAsString(swagger)
-    return swaggerText
+  private fun readCordaClasses(): List<Class<out Any>> {
+    val res = ClassGraph()
+      .enableClassInfo()
+      .enableAnnotationInfo()
+      .addClassLoader(ClassLoader.getSystemClassLoader())
+      .whitelistPackages("net.corda")
+      .blacklistPackages(
+        "net.corda.internal",
+        "net.corda.client",
+        "net.corda.core.internal",
+        "net.corda.nodeapi.internal",
+        "net.corda.serialization.internal",
+        "net.corda.testing",
+        "net.corda.common.configuration.parsing.internal",
+        "net.corda.finance.internal",
+        "net.corda.common.validation.internal",
+        "net.corda.client.rpc.internal",
+        "net.corda.core.cordapp"
+      )
+      .scan()
+
+    val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
+    val isCompanionClass = Regex(".*\\$" + "Companion")::matches
+    val isKotlinFileClass = Regex(".*Kt$")::matches
+    return res.allClasses
+      .filter {
+        !it.hasAnnotation(CordaInternal::class.java.name) &&
+          !it.isInterface &&
+          !it.isAbstract &&
+          !it.extendsSuperclass(FlowLogic::class.java.name) &&
+          !it.extendsSuperclass(FlowInitiator::class.java.name) &&
+          !isFunctionName(it.name) &&
+          !isCompanionClass(it.name) &&
+          !isKotlinFileClass(it.name)
+      }
+      .map { it.loadClass() }
   }
 }

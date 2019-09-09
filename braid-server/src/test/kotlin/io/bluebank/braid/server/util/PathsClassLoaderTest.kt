@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.server.util
 
-import kotlin.reflect.KParameter
-import kotlin.reflect.KType
+import org.junit.Assert.assertNotNull
+import org.junit.Test
 
-class BodyKParameter(
-  override val annotations: List<Annotation>,
-  override val index: Int,
-  override val isOptional: Boolean,
-  override val isVararg: Boolean,
-  override val kind: KParameter.Kind,
-  override val name: String?,
-  override val type: KType
-) : KParameter
+class PathsClassLoaderTest {
+  @Test
+  fun `that we can load classes from web jars`() {
+    val classLoader = PathsClassLoader.cordappsClassLoader(
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+      )
+    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
+    assertNotNull(clazz)
+  }
+}

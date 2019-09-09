@@ -125,9 +125,15 @@ private fun SignatureVisitor.writeSignature(type: java.lang.reflect.Type) {
     is ParameterizedType -> writeParameterizedTypeSignature(type)
     is Class<*> -> writeClassTypeSignature(type)
     is WildcardType -> writeWildCardTypeSignature(type)
-    else -> error("unhandled type:" + type)
+    is TypeVariable<*> -> writeTypeVariableSignature(type)
+    else -> error("unhandled type: $type")
   }
 }
+
+private fun <D : GenericDeclaration> SignatureVisitor.writeTypeVariableSignature(type: TypeVariable<D>) {
+  visitTypeVariable(type.name)
+}
+
 
 private fun SignatureVisitor.writeWildCardTypeSignature(type: WildcardType) {
   when {

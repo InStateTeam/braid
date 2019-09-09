@@ -18,7 +18,6 @@ package io.bluebank.braid.server.rpc
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.server.Braid
 import io.swagger.annotations.ApiOperation
-import net.corda.core.messaging.CordaRPCOps
 
 class FlowService(val rpc: RPCFactory) {
   companion object {

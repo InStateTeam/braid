@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.flow
+package io.bluebank.braid.core.utils
 
-import net.corda.core.flows.FlowLogic
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.full.allSupertypes
-
-fun KClass<*>.flowLogicType(): KType {
-  return allSupertypes.stream()
-    .filter { it.classifier?.equals(FlowLogic::class)!! }
-    .findFirst()
-    .get()
-    .arguments
-    .get(0)
-    .type!!
+fun <R> tryWithClassLoader(classLoader: ClassLoader, fn: () -> R): R {
+  val cachedClassLoader = Thread.currentThread().contextClassLoader
+  Thread.currentThread().contextClassLoader = classLoader
+  return try {
+    fn()
+  } finally {
+    Thread.currentThread().contextClassLoader = cachedClassLoader
+  }
 }
