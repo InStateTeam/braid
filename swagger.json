@@ -630,6 +630,12 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "outputStates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContractState"
+          }
+        },
         "notary" : {
           "$ref" : "#/definitions/Party"
         },
@@ -637,12 +643,6 @@
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
-          }
-        },
-        "outputStates" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ContractState"
           }
         },
         "id" : {
@@ -664,15 +664,15 @@
         "negative" : {
           "type" : "boolean"
         },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "units" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TemporalUnit"
           }
+        },
+        "nano": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -820,14 +820,14 @@
     "TemporalUnit" : {
       "type" : "object",
       "properties" : {
+        "dateBased": {
+          "type": "boolean"
+        },
         "timeBased" : {
           "type" : "boolean"
         },
         "duration" : {
           "$ref" : "#/definitions/Duration"
-        },
-        "dateBased" : {
-          "type" : "boolean"
         },
         "durationEstimated" : {
           "type" : "boolean"
@@ -837,20 +837,20 @@
     "TimeWindow" : {
       "type" : "object",
       "properties" : {
+        "length": {
+          "$ref": "#/definitions/Duration"
+        },
         "fromTime" : {
           "type" : "integer",
           "format" : "int64"
         },
-        "untilTime" : {
+        "midpoint": {
           "type" : "integer",
           "format" : "int64"
         },
-        "midpoint" : {
+        "untilTime": {
           "type" : "integer",
           "format" : "int64"
-        },
-        "length" : {
-          "$ref" : "#/definitions/Duration"
         }
       }
     },
@@ -1673,15 +1673,15 @@
     "NullPublicKey" : {
       "type" : "object",
       "properties" : {
-        "algorithm" : {
-          "type" : "string"
-        },
         "encoded" : {
           "type" : "array",
           "items" : {
             "type" : "string",
             "format" : "byte"
           }
+        },
+        "algorithm": {
+          "type": "string"
         },
         "format" : {
           "type" : "string"
@@ -1714,15 +1714,15 @@
         "alias" : {
           "type" : "string"
         },
-        "algorithm" : {
-          "type" : "string"
-        },
         "encoded" : {
           "type" : "array",
           "items" : {
             "type" : "string",
             "format" : "byte"
           }
+        },
+        "algorithm": {
+          "type": "string"
         },
         "format" : {
           "type" : "string"
@@ -1741,14 +1741,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1764,14 +1764,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1781,14 +1781,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1798,14 +1798,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1834,14 +1834,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1857,14 +1857,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -1874,14 +1874,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -2185,9 +2185,6 @@
         "type" : {
           "type" : "string"
         },
-        "encodings" : {
-          "$ref" : "#/definitions/IteratorString"
-        },
         "certificates" : {
           "type" : "array",
           "items" : {
@@ -2200,6 +2197,9 @@
             "type" : "string",
             "format" : "byte"
           }
+        },
+        "encodings": {
+          "$ref": "#/definitions/IteratorString"
         }
       }
     },
@@ -2259,20 +2259,20 @@
         "timeoutEnabled" : {
           "type" : "boolean"
         },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
         "stateMachine" : {
           "$ref" : "#/definitions/FlowStateMachineObject"
         },
         "serviceHub" : {
           "$ref" : "#/definitions/ServiceHub"
         },
+        "runId": {
+          "$ref": "#/definitions/StateMachineRunId"
+        },
+        "ourIdentityAndCert": {
+          "$ref": "#/definitions/PartyAndCertificate"
+        },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2293,10 +2293,10 @@
     "CordaFuture" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled": {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done": {
           "type" : "boolean"
         }
       }
@@ -2304,10 +2304,10 @@
     "CordaFutureObject" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled": {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done": {
           "type" : "boolean"
         }
       }
@@ -2315,10 +2315,10 @@
     "CordaFutureVoid" : {
       "type" : "object",
       "properties" : {
-        "done" : {
-          "type" : "boolean"
+        "cancelled": {
+          "type": "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -2326,9 +2326,11 @@
     "Cordapp" : {
       "type" : "object",
       "properties" : {
-        "targetPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
+        "contractClassNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "initiatedFlows" : {
           "type" : "array"
@@ -2336,17 +2338,29 @@
         "rpcFlows" : {
           "type" : "array"
         },
-        "serializationCustomSerializers" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
-          }
+        "serviceFlows": {
+          "type": "array"
+        },
+        "schedulableFlows": {
+          "type": "array"
         },
         "customSchemas" : {
           "type" : "array",
           "uniqueItems" : true,
           "items" : {
             "$ref" : "#/definitions/MappedSchema"
+          }
+        },
+        "serializationWhitelists": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SerializationWhitelist"
+          }
+        },
+        "serializationCustomSerializers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SerializationCustomSerializerObjectObject"
           }
         },
         "allFlows" : {
@@ -2366,26 +2380,12 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "contractClassNames" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "serviceFlows" : {
-          "type" : "array"
-        },
-        "schedulableFlows" : {
-          "type" : "array"
-        },
-        "serializationWhitelists" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/SerializationWhitelist"
-          }
-        },
         "name" : {
           "type" : "string"
+        },
+        "minimumPlatformVersion": {
+          "type": "integer",
+          "format": "int32"
         },
         "services" : {
           "type" : "array"
@@ -2393,7 +2393,7 @@
         "info" : {
           "$ref" : "#/definitions/Info"
         },
-        "minimumPlatformVersion" : {
+        "targetPlatformVersion": {
           "type" : "integer",
           "format" : "int32"
         }
@@ -2434,17 +2434,17 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
+        "serviceHub": {
+          "$ref": "#/definitions/ServiceHub"
+        },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert": {
+          "$ref": "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2457,17 +2457,17 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
         "serviceHub" : {
           "$ref" : "#/definitions/ServiceHub"
         },
+        "runId": {
+          "$ref": "#/definitions/StateMachineRunId"
+        },
+        "ourIdentityAndCert": {
+          "$ref": "#/definitions/PartyAndCertificate"
+        },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2477,15 +2477,6 @@
     "FlowStateMachine" : {
       "type" : "object",
       "properties" : {
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
-        },
-        "resultFuture" : {
-          "$ref" : "#/definitions/CordaFutureObject"
-        },
-        "ourSenderUUID" : {
-          "type" : "string"
-        },
         "context" : {
           "$ref" : "#/definitions/InvocationContext"
         },
@@ -2498,23 +2489,23 @@
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
         },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
+        "logic" : {
+          "$ref" : "#/definitions/FlowLogicObject"
+        },
+        "resultFuture" : {
+          "$ref" : "#/definitions/CordaFutureObject"
+        },
+        "ourSenderUUID" : {
+          "type" : "string"
+        },
+        "logger": {
+          "$ref": "#/definitions/Logger"
         }
       }
     },
-    "FlowStateMachineObject" : {
-      "type" : "object",
-      "properties" : {
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
-        },
-        "resultFuture" : {
-          "$ref" : "#/definitions/CordaFutureObject"
-        },
-        "ourSenderUUID" : {
-          "type" : "string"
-        },
+    "FlowStateMachineObject": {
+      "type": "object",
+      "properties": {
         "context" : {
           "$ref" : "#/definitions/InvocationContext"
         },
@@ -2526,6 +2517,15 @@
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
+        },
+        "logic": {
+          "$ref": "#/definitions/FlowLogicObject"
+        },
+        "resultFuture": {
+          "$ref": "#/definitions/CordaFutureObject"
+        },
+        "ourSenderUUID": {
+          "type": "string"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2535,9 +2535,6 @@
     "IdentityService" : {
       "type" : "object",
       "properties" : {
-        "trustAnchor" : {
-          "$ref" : "#/definitions/TrustAnchor"
-        },
         "trustRoot" : {
           "$ref" : "#/definitions/X509Certificate"
         },
@@ -2546,6 +2543,9 @@
         },
         "allIdentities" : {
           "$ref" : "#/definitions/IterablePartyAndCertificate"
+        },
+        "trustAnchor": {
+          "$ref": "#/definitions/TrustAnchor"
         }
       }
     },
@@ -2946,11 +2946,11 @@
         "appContext" : {
           "$ref" : "#/definitions/CordappContext"
         },
-        "validatedTransactions" : {
-          "$ref" : "#/definitions/TransactionStorage"
+        "vaultService": {
+          "$ref": "#/definitions/VaultService"
         },
-        "transactionVerifierService" : {
-          "$ref" : "#/definitions/TransactionVerifierService"
+        "networkMapCache": {
+          "$ref": "#/definitions/NetworkMapCache"
         },
         "contractUpgradeService" : {
           "$ref" : "#/definitions/ContractUpgradeService"
@@ -2961,11 +2961,11 @@
         "keyManagementService" : {
           "$ref" : "#/definitions/KeyManagementService"
         },
-        "vaultService" : {
-          "$ref" : "#/definitions/VaultService"
+        "validatedTransactions": {
+          "$ref": "#/definitions/TransactionStorage"
         },
-        "networkMapCache" : {
-          "$ref" : "#/definitions/NetworkMapCache"
+        "transactionVerifierService": {
+          "$ref": "#/definitions/TransactionVerifierService"
         },
         "identityService" : {
           "$ref" : "#/definitions/IdentityService"
@@ -2999,14 +2999,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3084,20 +3084,6 @@
         "issuerX500Principal" : {
           "$ref" : "#/definitions/X500Principal"
         },
-        "signature" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "basicConstraints" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "serialNumber" : {
-          "type" : "integer"
-        },
         "notBefore" : {
           "type" : "string",
           "format" : "date-time"
@@ -3105,13 +3091,6 @@
         "notAfter" : {
           "type" : "string",
           "format" : "date-time"
-        },
-        "tbscertificate" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
         },
         "sigAlgName" : {
           "type" : "string"
@@ -3144,12 +3123,6 @@
             "type" : "boolean"
           }
         },
-        "extendedKeyUsage" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
         "subjectAlternativeNames" : {
           "type" : "array",
           "items" : {
@@ -3172,15 +3145,35 @@
           "type" : "integer",
           "format" : "int32"
         },
+        "signature": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "basicConstraints": {
+          "type": "integer",
+          "format": "int32"
+        },
         "issuerDN" : {
           "$ref" : "#/definitions/Principal"
         },
         "subjectDN" : {
           "$ref" : "#/definitions/Principal"
         },
-        "criticalExtensionOIDs" : {
+        "serialNumber": {
+          "type": "integer"
+        },
+        "tbscertificate": {
           "type" : "array",
-          "uniqueItems" : true,
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "extendedKeyUsage": {
+          "type": "array",
           "items" : {
             "type" : "string"
           }
@@ -3190,6 +3183,13 @@
           "uniqueItems" : true,
           "items" : {
             "type" : "string"
+          }
+        },
+        "criticalExtensionOIDs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
           }
         },
         "encoded" : {
@@ -3208,11 +3208,11 @@
     "ZoneId" : {
       "type" : "object",
       "properties" : {
-        "id" : {
-          "type" : "string"
-        },
         "rules" : {
           "$ref" : "#/definitions/ZoneRules"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -3240,22 +3240,22 @@
         "offsetAfter" : {
           "$ref" : "#/definitions/ZoneOffset"
         },
-        "duration" : {
-          "$ref" : "#/definitions/Duration"
-        },
-        "instant" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
         "gap" : {
-          "type" : "boolean"
-        },
-        "overlap" : {
           "type" : "boolean"
         },
         "dateTimeAfter" : {
           "type" : "string",
           "format" : "date-time"
+        },
+        "duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "overlap": {
+          "type": "boolean"
+        },
+        "instant": {
+          "type": "integer",
+          "format": "int64"
         },
         "dateTimeBefore" : {
           "type" : "string",
@@ -3325,14 +3325,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3342,14 +3342,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3359,14 +3359,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3472,14 +3472,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3489,14 +3489,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3506,14 +3506,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -3759,11 +3759,11 @@
         "failure" : {
           "type" : "boolean"
         },
+        "success": {
+          "type": "boolean"
+        },
         "orThrow" : {
           "type" : "object"
-        },
-        "success" : {
-          "type" : "boolean"
         }
       }
     },
@@ -3773,11 +3773,11 @@
         "failure" : {
           "type" : "boolean"
         },
-        "orThrow" : {
-          "type" : "object"
-        },
         "success" : {
           "type" : "boolean"
+        },
+        "orThrow": {
+          "type": "object"
         }
       }
     },
@@ -4845,14 +4845,23 @@
         "whitelist" : {
           "$ref" : "#/definitions/ClassWhitelist"
         },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "encoding": {
+          "$ref": "#/definitions/SerializationEncoding"
+        },
+        "encodingWhitelist": {
+          "$ref": "#/definitions/EncodingWhitelist"
+        },
         "preferredSerializationVersion" : {
           "$ref" : "#/definitions/ByteSequence"
         },
         "deserializationClassLoader" : {
           "$ref" : "#/definitions/ClassLoader"
-        },
-        "encodingWhitelist" : {
-          "$ref" : "#/definitions/EncodingWhitelist"
         },
         "objectReferencesEnabled" : {
           "type" : "boolean"
@@ -4876,15 +4885,6 @@
           "items" : {
             "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
           }
-        },
-        "properties" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "object"
-          }
-        },
-        "encoding" : {
-          "$ref" : "#/definitions/SerializationEncoding"
         }
       }
     },
@@ -4921,15 +4921,6 @@
         "whitelist" : {
           "$ref" : "#/definitions/ClassWhitelist"
         },
-        "deserializationClassLoader" : {
-          "$ref" : "#/definitions/ClassLoader"
-        },
-        "encodingWhitelist" : {
-          "$ref" : "#/definitions/EncodingWhitelist"
-        },
-        "objectReferencesEnabled" : {
-          "type" : "boolean"
-        },
         "properties" : {
           "type" : "object",
           "additionalProperties" : {
@@ -4938,6 +4929,15 @@
         },
         "encoding" : {
           "$ref" : "#/definitions/SerializationEncoding"
+        },
+        "encodingWhitelist": {
+          "$ref": "#/definitions/EncodingWhitelist"
+        },
+        "deserializationClassLoader": {
+          "$ref": "#/definitions/ClassLoader"
+        },
+        "objectReferencesEnabled": {
+          "type": "boolean"
         }
       }
     },
@@ -5135,7 +5135,7 @@
       "type" : "object",
       "properties" : {
         "issuer" : {
-          "$ref" : "#/definitions/Issuer"
+          "$ref": "#/definitions/PartyAndReference"
         },
         "product" : {
           "type" : "object"
@@ -5315,14 +5315,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5332,14 +5332,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5349,14 +5349,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5366,14 +5366,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5546,14 +5546,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5563,14 +5563,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5580,14 +5580,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5674,14 +5674,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5691,14 +5691,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes": {
+          "$ref": "#/definitions/ObservableChange"
         }
       }
     },
@@ -5922,17 +5922,17 @@
     "AnnotatedMember" : {
       "type" : "object",
       "properties" : {
-        "member" : {
-          "$ref" : "#/definitions/Member"
-        },
-        "fullName" : {
-          "type" : "string"
-        },
         "typeContext" : {
           "$ref" : "#/definitions/TypeResolutionContext"
         },
         "allAnnotations" : {
           "$ref" : "#/definitions/AnnotationMap"
+        },
+        "member": {
+          "$ref": "#/definitions/Member"
+        },
+        "fullName": {
+          "type": "string"
         },
         "name" : {
           "type" : "string"
@@ -5994,6 +5994,33 @@
     "JavaType" : {
       "type" : "object",
       "properties" : {
+        "interface": {
+          "type": "boolean"
+        },
+        "primitive": {
+          "type": "boolean"
+        },
+        "interfaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JavaType"
+          }
+        },
+        "abstract": {
+          "type": "boolean"
+        },
+        "genericSignature": {
+          "type": "string"
+        },
+        "final": {
+          "type": "boolean"
+        },
+        "containerType": {
+          "type": "boolean"
+        },
+        "javaLangObject": {
+          "type": "boolean"
+        },
         "concrete" : {
           "type" : "boolean"
         },
@@ -6021,35 +6048,8 @@
         "bindings" : {
           "$ref" : "#/definitions/TypeBindings"
         },
-        "interface" : {
-          "type" : "boolean"
-        },
-        "primitive" : {
-          "type" : "boolean"
-        },
-        "interfaces" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/JavaType"
-          }
-        },
-        "abstract" : {
-          "type" : "boolean"
-        },
-        "genericSignature" : {
-          "type" : "string"
-        },
-        "final" : {
-          "type" : "boolean"
-        },
-        "containerType" : {
-          "type" : "boolean"
-        },
         "superClass" : {
           "$ref" : "#/definitions/JavaType"
-        },
-        "javaLangObject" : {
-          "type" : "boolean"
         },
         "valueHandler" : {
           "type" : "object"
@@ -6186,11 +6186,11 @@
     "ObjectIdInfo" : {
       "type" : "object",
       "properties" : {
+        "propertyName": {
+          "$ref": "#/definitions/PropertyName"
+        },
         "alwaysAsId" : {
           "type" : "boolean"
-        },
-        "propertyName" : {
-          "$ref" : "#/definitions/PropertyName"
         }
       }
     },
@@ -6220,11 +6220,11 @@
     "PropertyMetadata" : {
       "type" : "object",
       "properties" : {
-        "description" : {
-          "type" : "string"
-        },
         "defaultValue" : {
           "type" : "string"
+        },
+        "required": {
+          "type": "boolean"
         },
         "mergeInfo" : {
           "$ref" : "#/definitions/MergeInfo"
@@ -6237,25 +6237,25 @@
           "type" : "string",
           "enum" : [ "SET", "SKIP", "FAIL", "AS_EMPTY", "DEFAULT" ]
         },
+        "description": {
+          "type": "string"
+        },
         "index" : {
           "type" : "integer",
           "format" : "int32"
-        },
-        "required" : {
-          "type" : "boolean"
         }
       }
     },
     "PropertyName" : {
       "type" : "object",
       "properties" : {
+        "namespace": {
+          "type": "string"
+        },
         "empty" : {
           "type" : "boolean"
         },
         "simpleName" : {
-          "type" : "string"
-        },
-        "namespace" : {
           "type" : "string"
         }
       }
@@ -6269,6 +6269,9 @@
         "type" : {
           "$ref" : "#/definitions/JavaType"
         },
+        "wrapperName": {
+          "$ref": "#/definitions/PropertyName"
+        },
         "objectIdInfo" : {
           "$ref" : "#/definitions/ObjectIdInfo"
         },
@@ -6277,12 +6280,6 @@
         },
         "member" : {
           "$ref" : "#/definitions/AnnotatedMember"
-        },
-        "fullName" : {
-          "$ref" : "#/definitions/PropertyName"
-        },
-        "wrapperName" : {
-          "$ref" : "#/definitions/PropertyName"
         },
         "ignorable" : {
           "type" : "boolean"
@@ -6304,11 +6301,14 @@
         "injectableValueId" : {
           "type" : "object"
         },
-        "metadata" : {
-          "$ref" : "#/definitions/PropertyMetadata"
+        "fullName": {
+          "$ref": "#/definitions/PropertyName"
         },
         "required" : {
           "type" : "boolean"
+        },
+        "metadata": {
+          "$ref": "#/definitions/PropertyMetadata"
         },
         "virtual" : {
           "type" : "boolean"
@@ -6343,12 +6343,12 @@
         "typeIdResolver" : {
           "$ref" : "#/definitions/TypeIdResolver"
         },
+        "propertyName": {
+          "type": "string"
+        },
         "typeInclusion" : {
           "type" : "string",
           "enum" : [ "PROPERTY", "WRAPPER_OBJECT", "WRAPPER_ARRAY", "EXTERNAL_PROPERTY", "EXISTING_PROPERTY" ]
-        },
-        "propertyName" : {
-          "type" : "string"
         }
       }
     },
@@ -6370,11 +6370,11 @@
     "CalendarSerializer" : {
       "type" : "object",
       "properties" : {
+        "delegatee": {
+          "$ref": "#/definitions/JsonSerializerObject"
+        },
         "unwrappingSerializer" : {
           "type" : "boolean"
-        },
-        "delegatee" : {
-          "$ref" : "#/definitions/JsonSerializerObject"
         }
       }
     },
@@ -6389,11 +6389,11 @@
     "JsonSerializerObject" : {
       "type" : "object",
       "properties" : {
+        "delegatee": {
+          "$ref": "#/definitions/JsonSerializerObject"
+        },
         "unwrappingSerializer" : {
           "type" : "boolean"
-        },
-        "delegatee" : {
-          "$ref" : "#/definitions/JsonSerializerObject"
         }
       }
     },
@@ -6434,11 +6434,11 @@
     "ExpressionSerializer" : {
       "type" : "object",
       "properties" : {
-        "unwrappingSerializer" : {
-          "type" : "boolean"
-        },
         "delegatee" : {
           "$ref" : "#/definitions/JsonSerializerObject"
+        },
+        "unwrappingSerializer": {
+          "type": "boolean"
         }
       }
     },
@@ -6649,10 +6649,10 @@
         "file" : {
           "type" : "string"
         },
-        "reason" : {
-          "type" : "string"
+        "message": {
+          "type": "string"
         },
-        "message" : {
+        "reason" : {
           "type" : "string"
         },
         "otherFile" : {
@@ -6805,9 +6805,9 @@
           "type" : "string"
         },
         "message" : {
-          "type" : "string"
+          "type": "string"
         },
-        "originalMessage" : {
+        "originalMessage": {
           "type" : "string"
         },
         "localizedMessage" : {

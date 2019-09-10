@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.server.rpc
 
-
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.converter.ModelConverters
@@ -166,7 +165,6 @@ class CustomModelConvertersTest {
 
   }
 
-
   @Test
   @Ignore  // now serialize many parts
   fun `should Strip out SignedTransaction Exclusions`() {
@@ -188,7 +186,6 @@ class CustomModelConvertersTest {
 
   }
 
-
   @Test
   fun `that OpaqueBytes can be serialised and deserialised`() {
     val expected = OpaqueBytes("someBytes".toByteArray())
@@ -202,7 +199,10 @@ class CustomModelConvertersTest {
     val expected = Amount(100, "GBP")
     val encoded = Json.encode(expected)
 
-    assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":1,\"token\":\"GBP\",\"_tokenType\":\"java.lang.String\"}")
+    assertEquals(
+      encoded,
+      "{\"quantity\":100,\"displayTokenSize\":1,\"token\":\"GBP\",\"_tokenType\":\"java.lang.String\"}"
+    )
   }
 
   @Test
@@ -255,22 +255,22 @@ class CustomModelConvertersTest {
   }
 
   data class ClassWithTypes(
-          val currency: Currency,
-          val amountCurrency: Amount<Currency>
-          , val amountString: Amount<String>
-          , val amount: Amount<Any>
-          , val party: Party
-          , val bytes: OpaqueBytes
-          , val hash: SecureHash
-          , val issuedString: Issued<String>
-          , val issuedCurrency: Issued<Currency>
-          , val issued: Issued<IssuedType>
-          , val signed: SignedTransaction
-          , val wire: WireTransaction
+    val currency: Currency,
+    val amountCurrency: Amount<Currency>
+    , val amountString: Amount<String>
+    , val amount: Amount<Any>
+    , val party: Party
+    , val bytes: OpaqueBytes
+    , val hash: SecureHash
+    , val issuedString: Issued<String>
+    , val issuedCurrency: Issued<Currency>
+    , val issued: Issued<IssuedType>
+    , val signed: SignedTransaction
+    , val wire: WireTransaction
   )
 
   data class IssuedType(
-          val value: String
+    val value: String
   )
 
 }
