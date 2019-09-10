@@ -15,19 +15,17 @@
  */
 package io.bluebank.braid.corda.rest
 
-import io.swagger.models.Contact
 import io.swagger.models.Scheme
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import java.net.URI
 
 data class RestConfig(
-  val serviceName: String = DEFAULT_SERVICE_NAME,
-  val description: String = DEFAULT_DESCRIPTION,
+  val swaggerInfo: SwaggerInfo = SwaggerInfo(),
+
   val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
   val apiPath: String = DEFAULT_API_PATH,
   val swaggerPath: String = DEFAULT_SWAGGER_PATH,
-  val contact: Contact = DEFAULT_CONTACT,
   val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
   internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
   val debugMode: Boolean = false,
@@ -35,12 +33,9 @@ data class RestConfig(
 ) {
 
   companion object {
-    const val DEFAULT_SERVICE_NAME = ""
-    const val DEFAULT_DESCRIPTION = ""
     const val DEFAULT_HOST_AND_PORT_URI = "http://localhost:8080"
     const val DEFAULT_API_PATH = "/api/rest"
     const val DEFAULT_SWAGGER_PATH = "/"
-    val DEFAULT_CONTACT: Contact = Contact()
     val DEFAULT_AUTH_PROVIDER: AuthProvider? = null
     val DEFAULT_AUTH_SCHEMA = AuthSchema.None
   }
@@ -54,10 +49,10 @@ data class RestConfig(
   }
 
   @Suppress("unused")
-  fun withServiceName(value: String) = this.copy(serviceName = value)
+  fun withServiceName(value: String) = this.withSwaggerInfo(swaggerInfo.withServiceName(value))
 
   @Suppress("unused")
-  fun withDescription(value: String) = this.copy(description = value)
+  fun withDescription(value: String) = this.withSwaggerInfo(swaggerInfo.withDescription(value))
 
   fun withHostAndPortUri(value: String) = this.copy(hostAndPortUri = value)
   @Suppress("unused")
@@ -67,7 +62,14 @@ data class RestConfig(
   fun withSwaggerPath(value: String) = this.copy(swaggerPath = value)
 
   @Suppress("unused")
-  fun withContact(value: Contact) = this.copy(contact = value)
+  @Deprecated("please use other withContact method")
+  fun withContact(value: io.swagger.models.Contact) = this.withContact(ContactInfo()
+      .email(value.email)
+          .name(value.name)
+          .url(value.url))
+
+  @Suppress("unused")
+  fun withContact(value: ContactInfo) = this.withSwaggerInfo(swaggerInfo.withContact(value))
 
   internal fun withAuth(value: AuthProvider?) = this.copy(authProvider = value)
   @Suppress("unused")
@@ -78,6 +80,9 @@ data class RestConfig(
 
   @Suppress("unused")
   fun withAuthSchema(authSchema: AuthSchema) = this.copy(authSchema = authSchema)
+
+  @Suppress("unused")
+  fun withSwaggerInfo(swaggerInfo: SwaggerInfo) = this.copy(swaggerInfo = swaggerInfo)
 
   @Suppress("unused")
   fun withDebugMode() = this.copy(debugMode = true)

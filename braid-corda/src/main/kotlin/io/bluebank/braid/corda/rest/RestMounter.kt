@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.rest.docs.DocsHandler
+import io.bluebank.braid.corda.rest.docs.DocsHandlerV2
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.Vertx

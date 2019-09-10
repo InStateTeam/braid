@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.rest.docs
+package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
-import io.swagger.converter.ModelConverters
-import io.swagger.models.Model
-import io.swagger.models.Swagger
+import io.swagger.v3.oas.models.OpenAPI
+
+import io.swagger.v3.core.converter.ModelConverters
+import io.swagger.v3.oas.models.media.Schema
+
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 
-class ModelContext {
-  private val mutableModels = mutableMapOf<String, Model>()
-  val models: Map<String, Model> get() = mutableModels
+class ModelContextV3 {
+  private val mutableModels = mutableMapOf<String, Schema<*>>()
+  val models: Map<String, Schema<*>> get() = mutableModels
 
   fun addType(type: Type) {
+    // todo move to CustomModelConverter
     if (type is ParameterizedType) {
       if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
         this.addType(type.actualTypeArguments[0])
@@ -44,16 +47,16 @@ class ModelContext {
     }
   }
 
-  fun addToSwagger(swagger: Swagger): Swagger {
+  fun addToSwagger(openApi: OpenAPI): OpenAPI {
     models.forEach { (name, model) ->
       try {
-        swagger.model(name, model)
+        openApi.schema(name, model)
       } catch (e: Throwable) {
         log.error("Unable to model class:$name", e)
         throw RuntimeException("Unable to model class:$name", e)
       }
     }
-    return swagger
+    return openApi
   }
 
   private fun Type.isBinary(): Boolean {
@@ -66,10 +69,10 @@ class ModelContext {
     }
   }
 
-  private fun Type.createSwaggerModels(): Map<String, Model> {
+  private fun Type.createSwaggerModels(): Map<String, Schema<*>> {
     return ModelConverters.getInstance().readAll(this)
   }
 
-      var log = loggerFor<ModelContext>()
+      var log = loggerFor<ModelContextV3>()
 
 }

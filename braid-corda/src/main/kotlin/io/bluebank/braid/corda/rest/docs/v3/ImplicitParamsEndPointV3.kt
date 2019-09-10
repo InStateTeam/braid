@@ -1,0 +1,166 @@
+/**
+ * Copyright 2018 Royal Bank of Scotland
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.bluebank.braid.corda.rest.docs.v3
+
+
+
+import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+
+
+import io.swagger.v3.oas.models.parameters.Parameter
+import io.swagger.v3.oas.models.parameters.PathParameter
+import io.swagger.v3.oas.models.parameters.QueryParameter
+
+import io.swagger.v3.oas.models.parameters.RequestBody
+
+import io.vertx.core.http.HttpMethod
+import io.vertx.ext.web.RoutingContext
+import java.lang.reflect.Type
+import kotlin.reflect.KAnnotatedElement
+
+class ImplicitParamsEndPointV3(
+  groupName: String,
+  protected: Boolean,
+  method: HttpMethod,
+  path: String,
+  fn: (RoutingContext) -> Unit
+) : EndPointV3(groupName, protected, method, path) {
+
+  private val annotated = (fn as KAnnotatedElement)
+  override val annotations: List<Annotation> = annotated.annotations
+
+  private val implicitParams: List<io.swagger.v3.oas.annotations.Parameter> =
+    annotations.filter {
+      it is io.swagger.v3.oas.annotations.Parameters
+        || it is io.swagger.v3.oas.annotations.Parameter }
+      .flatMap {
+        when (it) {
+          is io.swagger.v3.oas.annotations.Parameters -> it.value.toList()
+          is io.swagger.v3.oas.annotations.Parameter -> listOf(it)
+          else -> throw IllegalArgumentException()
+        }
+      }
+
+  override val parameterTypes: List<Type>
+    get() = implicitParams.map {
+      it.dataTypeClass.java
+    }
+
+  override val returnType: Type
+    get() = annotations.filter { it is ApiOperation }.map { it as ApiOperation }.map {
+      it.response.java
+    }.firstOrNull()
+      ?: Unit::class.java
+
+  private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
+  private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }
+  private val bodyParam = annotations.filter {
+    it is io.swagger.v3.oas.annotations.parameters.RequestBody
+  }
+
+  override fun mapBodyParameter(): RequestBody? {
+    return bodyParam?.getSwaggerParameter() as RequestBody?
+  }
+
+  override fun mapQueryParameters(): List<QueryParameter> {
+    return queryParams.map { queryParam ->
+      queryParam.getSwaggerParameter() as QueryParameter
+    }
+  }
+
+  override fun mapPathParameters(): List<PathParameter> {
+    return pathParams.map { pathParam ->
+      pathParam.getSwaggerParameter() as PathParameter
+    }
+  }
+
+//  private fun BodyParameter.setExamples(parameter: io.swagger.v3.oas.annotations.Parameter): BodyParameter {
+//    this.examples = parameter.examples.map { it.mediaType to it.value }.toMap()
+//    return this
+//  }
+
+  private fun io.swagger.v3.oas.annotations.Parameter.getSwaggerParameter(): Parameter {
+    val ip = this
+    return when (`in`) {
+      ParameterIn.QUERY -> {
+        QueryParameter()
+            .example(ip.example)
+            .description(ip.description)
+            .schema(ip.schema.implementation.ty.getSwaggerProperty())
+
+            .apply {
+          setProperty(ip.getDataType().getSwaggerProperty())
+          setDefaultValue(ip.defaultValue)
+          setExample(ip.firstExample())
+          type(ip.type)
+        }
+      }
+      ParameterIn.PATH -> {
+        PathParameter().apply {
+          setProperty(ip.getDataType().getSwaggerProperty())
+          setDefaultValue(ip.defaultValue)
+          setExample(ip.firstExample())
+          type(ip.type)
+        }
+      }
+//      "body" -> {
+//        BodyParameter().apply {
+//          schema = ip.getDataType().getSchema()
+//          setExamples(ip)
+//        }
+//      }
+      ParameterIn.HEADER -> {
+        HeaderParameter().apply {
+          setProperty(ip.getDataType().getSwaggerProperty())
+          setDefaultValue(ip.defaultValue)
+          setExample(ip.firstExample())
+          type(ip.type)
+        }
+      }
+      ParameterIn. -> {
+        @Suppress("USELESS_CAST")
+        FormParameter().apply {
+          setProperty(ip.getDataType().getSwaggerProperty())
+          setDefaultValue(ip.defaultValue)
+          setExample(ip.firstExample())
+          type(ip.type)
+        } as Parameter // required to resolve the when statement to the correct type - Kotlin compiler bug?
+      }
+      else -> {
+        throw IllegalArgumentException("unknown parameter type $paramType")
+      }
+    }.apply {
+      name = ip.name
+      required = ip.required
+    }
+  }
+
+  private fun io.swagger.v3.oas.annotations.Parameter.getDataType(): Type {
+    return when {
+      this.dataType != "" -> Class.forName(this.dataType)
+      else -> this.dataTypeClass.java
+    }
+  }
+
+  private fun io.swagger.v3.oas.annotations.Parameter.firstExample(): String {
+    return when {
+      example != "" -> example
+      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
+      else -> ""
+    }
+  }
+}

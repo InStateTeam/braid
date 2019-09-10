@@ -108,7 +108,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.swagger.v3</groupId>
+      <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core</artifactId>
       <exclusions>
         <exclusion>

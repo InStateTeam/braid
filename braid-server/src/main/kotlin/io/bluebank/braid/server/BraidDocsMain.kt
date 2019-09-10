@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.corda.rest.DocsHandlerFactory
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.core.logging.loggerFor
@@ -51,15 +52,14 @@ fun main(args: Array<String>) {
 class BraidDocsMain() {
   fun swaggerText(): String {
     val restConfig = Braid().restConfig(createRpcFactoryStub())
+
+    // todo replace with DocsHandlerFactory(restConfig).createDocsHandler()
     val vertx = Vertx.vertx()
     val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
     val classes = readCordaClasses()
-    val models = ModelContext().apply {
-      classes.forEach { addType(it) }
-    }
-    val swagger = restMounter.docsHandler.createSwagger()
-    models.addToSwagger(swagger)
-    return io.swagger.util.Json.pretty().writeValueAsString(swagger)
+
+    classes.forEach { restMounter.docsHandler.addType(it) }
+    return restMounter.docsHandler.swagger()
   }
 
   private fun readCordaClasses(): List<Class<out Any>> {

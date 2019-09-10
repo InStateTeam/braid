@@ -13,57 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.rest.docs.v3
+package io.bluebank.braid.corda.rest.docs
 
 import io.bluebank.braid.corda.rest.SwaggerInfo
-import io.bluebank.braid.corda.rest.docs.DocsHandler
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.corda.rest.toSwaggerPath
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
-import io.swagger.models.Scheme
-
+import io.swagger.models.*
+import io.swagger.models.auth.SecuritySchemeDefinition
 import io.swagger.util.Json
-
-import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.PathItem
-import io.swagger.v3.oas.models.info.Contact
-import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.security.SecurityRequirement
-import io.swagger.v3.oas.models.servers.Server
-
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import java.net.URL
-import java.util.Arrays.asList
 import kotlin.reflect.KCallable
 
-class DocsHandlerV3(
+class DocsHandlerV2(
     private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
+    private val scheme: Scheme = Scheme.HTTPS,
 
-    private val auth: String? = null,
     private val basePath: String = "http://localhost:8080",
+    private val auth: SecuritySchemeDefinition? = null,
     private val debugMode: Boolean = false
 ) : DocsHandler {
 
   companion object {
-    var log = loggerFor<DocsHandlerV3>()
+    var log = loggerFor<DocsHandlerV2>()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }
 
   private var currentGroupName: String = ""
-  private val endpoints = mutableListOf<EndPointV3>()
-  private val swagger: OpenAPI by lazy {
+  private val endpoints = mutableListOf<EndPoint>()
+  private val swagger: Swagger by lazy {
     createSwagger()
   }
-  private val modelContext = ModelContextV3()
+  private val modelContext = ModelContext()
 
   override fun handle(context: RoutingContext) {
-    swagger.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json","")))
+    val absoluteURI = URL(context.request().absoluteURI())
+    swagger.host = absoluteURI.authority
     val output =
         Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
     context.response()
@@ -77,20 +68,21 @@ class DocsHandlerV3(
     return io.swagger.util.Json.pretty().writeValueAsString(createSwagger())
   }
 
-  fun createSwagger(): OpenAPI {
+  fun createSwagger(): Swagger {
     val url = URL(basePath)
     val info = createSwaggerInfo()
-    return OpenAPI()
+    return Swagger()
         .info(info)
-        .addServersItem(Server().url(url.toExternalForm()))
-        // hopefully under server above .basePath(url.path)
+        .host(url.host + ":" + url.port)
+        .basePath(url.path)
         .apply {
           if (auth != null) {
-            addSecurityItem(SecurityRequirement()
-                .addList(SECURITY_DEFINITION_NAME, asList(auth)))  //todo what are the auth schemes for V3
+            securityDefinition(SECURITY_DEFINITION_NAME, auth)
           }
         }
-       // may be covered under server? .schema(scheme)
+        .scheme(scheme)
+        .consumes(APPLICATION_JSON.toString())
+        .produces(APPLICATION_JSON.toString())
         .apply {
           modelContext.addToSwagger(this)
           endpoints.forEach {
@@ -111,13 +103,13 @@ class DocsHandlerV3(
     return info
   }
 
-  private fun OpenAPI.addEndpoint(endpoint: EndPointV3) {
+  private fun Swagger.addEndpoint(endpoint: EndPoint) {
     try {
       val swaggerPath = endpoint.path.toSwaggerPath()
       val path = if (this.paths != null && this.paths.contains(swaggerPath)) {
         paths[swaggerPath]!!
       } else {
-        val path = PathItem()
+        val path = Path()
         this.path(swaggerPath, path)
         path
       }
@@ -142,7 +134,7 @@ class DocsHandlerV3(
       path: String,
       handler: KCallable<Response>
   ) {
-    val endpoint = EndPointV3.create(
+    val endpoint = EndPoint.create(
         groupName,
         protected,
         method,
@@ -162,11 +154,11 @@ class DocsHandlerV3(
       path: String,
       handler: (RoutingContext) -> Unit
   ) {
-    val endpoint = EndPointV3.create(groupName, protected, method, path, handler)
+    val endpoint = EndPoint.create(groupName, protected, method, path, handler)
     add(endpoint)
   }
 
-  private fun add(endpoint: EndPointV3) {
+  private fun add(endpoint: EndPoint) {
     endpoints.add(endpoint)
     endpoint.addTypes(modelContext)
   }

@@ -141,7 +141,7 @@ abstract class EndPoint(
     operation.parameters = toSwaggerParams()
     operation.tag(groupName)
     if (protected) {
-      operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
+      operation.addSecurity(DocsHandlerV2.SECURITY_DEFINITION_NAME, listOf())
     }
     operation.addResponse("200", operation.responses["default"])
     operation.addResponse("500", Response().description("server failure"))
@@ -189,6 +189,7 @@ abstract class EndPoint(
   protected fun Type.getSwaggerProperty(): Property {
     val actualType = this.actualType()
     try {
+      // todo move to CustomModelConverter and resolve there rather than here
       return if (actualType.isBinary()) {
         BinaryProperty()
       } else {
