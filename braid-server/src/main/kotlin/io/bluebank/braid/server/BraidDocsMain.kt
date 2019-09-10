@@ -86,7 +86,7 @@ class BraidDocsMain() {
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
     val isKotlinFileClass = Regex(".*Kt$")::matches
-    return res.allClasses
+    return res.allClasses.asSequence()
       .filter {
         !it.hasAnnotation(CordaInternal::class.java.name) &&
           !it.isInterface &&
@@ -98,5 +98,6 @@ class BraidDocsMain() {
           !isKotlinFileClass(it.name)
       }
       .map { it.loadClass() }
+      .toList()
   }
 }
