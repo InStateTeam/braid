@@ -25,26 +25,33 @@ private val log = loggerFor<BraidMain>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <swaggerVersion> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val networkAndPort = args[0]
   val userName = args[1]
   val password = args[2]
   val port = Integer.valueOf(args[3])
-  val additionalPaths = args.asList().drop(4)
-  BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
+  val swaggerVersion = Integer.valueOf(args[4])
+  val additionalPaths = args.asList().drop(5)
+  BraidMain().start(networkAndPort, userName, password, port,swaggerVersion, additionalPaths)
 }
 
 class BraidMain {
 
-  fun start(networkAndPort: String,userName: String, password: String, port: Int, additionalPaths: List<String>): Future<String> {
+  fun start(networkAndPort: String,
+            userName: String,
+            password: String,
+            port: Int,
+            swaggerVersion: Int,
+            additionalPaths: List<String>): Future<String> {
     val classLoader = additionalPaths.toCordappsClassLoader()
     return tryWithClassLoader(classLoader) {
       Braid(
           port = port,
           userName = userName,
           password = password,
+          swaggerVersion = swaggerVersion,
           nodeAddress = NetworkHostAndPort.parse(networkAndPort)
       )
           .startServer()

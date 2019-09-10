@@ -17,6 +17,8 @@ package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.DocsHandlerV2
+import io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3
+import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.swagger.models.auth.ApiKeyAuthDefinition
 import io.swagger.models.auth.BasicAuthDefinition
 import io.swagger.models.auth.In
@@ -29,13 +31,22 @@ class DocsHandlerFactory(
 ) {
 
   fun createDocsHandler(): DocsHandler {
-    return DocsHandlerV2(
-        swaggerInfo = config.swaggerInfo,
-        scheme = config.scheme,
-        debugMode = config.debugMode,
-        basePath = "${config.hostAndPortUri}/$path/",
-        auth = getSecuritySchemeDefinition()
-    )
+    when(config.swaggerVersion) {
+      3 -> return DocsHandlerV3(
+          swaggerInfo = config.swaggerInfo,
+          debugMode = config.debugMode,
+          basePath = "${config.hostAndPortUri}/$path/",
+          auth = null ///todo auth
+      )
+      2 -> return DocsHandlerV2(
+          swaggerInfo = config.swaggerInfo,
+          scheme = config.scheme,
+          debugMode = config.debugMode,
+          basePath = "${config.hostAndPortUri}/$path/",
+          auth = getSecuritySchemeDefinition()
+      )
+      else -> TODO("Unknown swagger version ${config.swaggerVersion}")
+    }
   }
 
   private fun getSecuritySchemeDefinition(): SecuritySchemeDefinition? {

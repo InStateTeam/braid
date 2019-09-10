@@ -26,6 +26,7 @@ data class RestConfig(
   val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
   val apiPath: String = DEFAULT_API_PATH,
   val swaggerPath: String = DEFAULT_SWAGGER_PATH,
+  val swaggerVersion: Int = 2,
   val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
   internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
   val debugMode: Boolean = false,
@@ -60,6 +61,9 @@ data class RestConfig(
 
   @Suppress("unused")
   fun withSwaggerPath(value: String) = this.copy(swaggerPath = value)
+
+  @Suppress("unused")
+  fun withSwaggerVersion(value: Int) = this.copy(swaggerVersion = value)
 
   @Suppress("unused")
   @Deprecated("please use other withContact method")

@@ -33,7 +33,7 @@ class StartableByRPCFinder(private val classLoader: ClassLoader = Thread.current
       .addClassLoader(classLoader)
       .scan()
       .getClassesWithAnnotation(StartableByRPC::class.qualifiedName).names.map {
-      classLoader.loadClass(it).kotlin
-    }
+        classLoader.loadClass(it).kotlin
+      }
   }
 }

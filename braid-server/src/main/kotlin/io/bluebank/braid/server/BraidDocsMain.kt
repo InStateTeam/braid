@@ -15,9 +15,7 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.rest.DocsHandlerFactory
 import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactoryStub
@@ -34,24 +32,26 @@ private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> <swaggerVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val file = File(args[0])
+  val swaggerVersion = Integer.parseInt(args[1])
+  val jarUrls = args.toList().drop(2)
+
   file.parentFile.mkdirs()
-  val cordappsClassLoader = args.toList().drop(1).toCordappsClassLoader()
   // we call so as to initialise model converters etc before replacing the context class loader
   Braid.init()
-  tryWithClassLoader(cordappsClassLoader) {
-    val swaggerText = BraidDocsMain().swaggerText()
+  tryWithClassLoader(jarUrls.toCordappsClassLoader()) {
+    val swaggerText = BraidDocsMain().swaggerText(swaggerVersion)
     file.writeText(swaggerText)
   }
   log.info("wrote to: ${file.absolutePath}")
 }
 
 class BraidDocsMain() {
-  fun swaggerText(): String {
-    val restConfig = Braid().restConfig(createRpcFactoryStub())
+  fun swaggerText(swaggerVersion: Int = 2): String {
+    val restConfig = Braid().restConfig(createRpcFactoryStub(), swaggerVersion)
 
     // todo replace with DocsHandlerFactory(restConfig).createDocsHandler()
     val vertx = Vertx.vertx()

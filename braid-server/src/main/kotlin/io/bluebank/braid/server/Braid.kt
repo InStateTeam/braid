@@ -21,15 +21,12 @@ import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toCordappName
-import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
 import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
 import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
 import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactory
-import io.bluebank.braid.server.util.PathsClassLoader
-import io.bluebank.braid.server.util.toCordappsClassLoader
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
@@ -38,7 +35,8 @@ data class Braid(
   val port: Int = 8080,
   val userName: String = "",
   val password: String = "",
-  val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080)
+  val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
+  val swaggerVersion: Int = 2
 ) {
   companion object {
     init {
@@ -57,17 +55,18 @@ data class Braid(
         // .withFlow(IssueObligation.Initiator::class)
         .withPort(port)
         .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress)))
+        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), swaggerVersion))
         .bootstrapBraid(null, result)
       //addShutdownHook {  }
       return result
   }
 
-  fun restConfig(rpc: RPCFactory): RestConfig {
+  fun restConfig(rpc: RPCFactory, swaggerVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
     val flowInitiator = FlowInitiator(rpc)
     val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
+        .withSwaggerVersion(swaggerVersion)
       .withPaths {
         group("network") {
           get("/network/nodes", NetworkService(rpc)::nodes)

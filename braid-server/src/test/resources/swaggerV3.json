@@ -1156,14 +1156,14 @@
             "$ref" : "#/definitions/ContractState"
           }
         },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
         },
         "id" : {
           "type" : "string",
@@ -1238,15 +1238,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -1275,11 +1275,11 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "tx" : {
-          "$ref" : "#/definitions/WireTransaction"
-        },
         "coreTransaction" : {
           "$ref" : "#/definitions/CoreTransaction"
+        },
+        "tx" : {
+          "$ref" : "#/definitions/WireTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -1349,15 +1349,15 @@
         "length" : {
           "$ref" : "#/definitions/Duration"
         },
+        "fromTime" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
         "untilTime" : {
           "type" : "integer",
           "format" : "int64"
         },
         "midpoint" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "fromTime" : {
           "type" : "integer",
           "format" : "int64"
         }
@@ -1430,15 +1430,6 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        },
         "merkleTree" : {
           "$ref" : "#/definitions/MerkleTree"
         },
@@ -1478,6 +1469,15 @@
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
               "description" : "Base 58 Encoded Secure Hash"
             }
+          }
+        },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
           }
         },
         "availableComponentGroups" : {
@@ -1928,17 +1928,17 @@
         "timeoutEnabled" : {
           "type" : "boolean"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
-        "stateMachine" : {
-          "$ref" : "#/definitions/FlowStateMachineObject"
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "stateMachine" : {
+          "$ref" : "#/definitions/FlowStateMachineObject"
+        },
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
@@ -2004,11 +2004,22 @@
         "info" : {
           "$ref" : "#/definitions/Info"
         },
+        "targetPlatformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "minimumPlatformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
         "contractClassNames" : {
           "type" : "array",
           "items" : {
             "type" : "string"
           }
+        },
+        "initiatedFlows" : {
+          "type" : "array"
         },
         "rpcFlows" : {
           "type" : "array"
@@ -2017,9 +2028,6 @@
           "type" : "array"
         },
         "schedulableFlows" : {
-          "type" : "array"
-        },
-        "initiatedFlows" : {
           "type" : "array"
         },
         "serializationWhitelists" : {
@@ -2057,14 +2065,6 @@
         "jarHash" : {
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
-        },
-        "targetPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "minimumPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
         }
       }
     },
@@ -2103,14 +2103,14 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
@@ -2126,14 +2126,14 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
@@ -2158,6 +2158,9 @@
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
         },
+        "logic" : {
+          "$ref" : "#/definitions/FlowLogicObject"
+        },
         "logger" : {
           "$ref" : "#/definitions/Logger"
         },
@@ -2166,9 +2169,6 @@
         },
         "ourSenderUUID" : {
           "type" : "string"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
         }
       }
     },
@@ -2187,6 +2187,9 @@
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
         },
+        "logic" : {
+          "$ref" : "#/definitions/FlowLogicObject"
+        },
         "logger" : {
           "$ref" : "#/definitions/Logger"
         },
@@ -2195,9 +2198,6 @@
         },
         "ourSenderUUID" : {
           "type" : "string"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
         }
       }
     },
@@ -2227,10 +2227,10 @@
         "version" : {
           "type" : "string"
         },
-        "vendor" : {
+        "licence" : {
           "type" : "string"
         },
-        "licence" : {
+        "vendor" : {
           "type" : "string"
         }
       }
@@ -2329,22 +2329,22 @@
     "NetworkMapCache" : {
       "type" : "object",
       "properties" : {
-        "notaryIdentities" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Party"
-          }
+        "nodeReady" : {
+          "$ref" : "#/definitions/CordaFutureVoid"
         },
         "changed" : {
           "$ref" : "#/definitions/ObservableMapChange"
-        },
-        "nodeReady" : {
-          "$ref" : "#/definitions/CordaFutureVoid"
         },
         "allNodes" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/NodeInfo"
+          }
+        },
+        "notaryIdentities" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Party"
           }
         }
       }
@@ -2609,32 +2609,32 @@
     "ServiceHub" : {
       "type" : "object",
       "properties" : {
-        "contractUpgradeService" : {
-          "$ref" : "#/definitions/ContractUpgradeService"
-        },
-        "myInfo" : {
-          "$ref" : "#/definitions/NodeInfo"
-        },
         "validatedTransactions" : {
           "$ref" : "#/definitions/TransactionStorage"
         },
         "transactionVerifierService" : {
           "$ref" : "#/definitions/TransactionVerifierService"
         },
+        "contractUpgradeService" : {
+          "$ref" : "#/definitions/ContractUpgradeService"
+        },
+        "myInfo" : {
+          "$ref" : "#/definitions/NodeInfo"
+        },
         "keyManagementService" : {
           "$ref" : "#/definitions/KeyManagementService"
+        },
+        "vaultService" : {
+          "$ref" : "#/definitions/VaultService"
+        },
+        "clock" : {
+          "$ref" : "#/definitions/Clock"
         },
         "networkMapCache" : {
           "$ref" : "#/definitions/NetworkMapCache"
         },
         "appContext" : {
           "$ref" : "#/definitions/CordappContext"
-        },
-        "clock" : {
-          "$ref" : "#/definitions/Clock"
-        },
-        "vaultService" : {
-          "$ref" : "#/definitions/VaultService"
         },
         "networkParametersService" : {
           "$ref" : "#/definitions/NetworkParametersService"
@@ -2764,16 +2764,6 @@
           "type" : "integer",
           "format" : "int32"
         },
-        "issuerDN" : {
-          "$ref" : "#/definitions/Principal"
-        },
-        "subjectDN" : {
-          "$ref" : "#/definitions/Principal"
-        },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "notBefore" : {
           "type" : "string",
           "format" : "date-time"
@@ -2847,6 +2837,16 @@
             "type" : "string"
           }
         },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "issuerDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
+        "subjectDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
         "nonCriticalExtensionOIDs" : {
           "type" : "array",
           "uniqueItems" : true,
@@ -2913,6 +2913,10 @@
           "type" : "integer",
           "format" : "int64"
         },
+        "dateTimeBefore" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
         "duration" : {
           "$ref" : "#/definitions/Duration"
         },
@@ -2923,10 +2927,6 @@
           "type" : "boolean"
         },
         "dateTimeAfter" : {
-          "type" : "string",
-          "format" : "date-time"
-        },
-        "dateTimeBefore" : {
           "type" : "string",
           "format" : "date-time"
         }
@@ -2971,9 +2971,6 @@
     "ZoneRules" : {
       "type" : "object",
       "properties" : {
-        "fixedOffset" : {
-          "type" : "boolean"
-        },
         "transitions" : {
           "type" : "array",
           "items" : {
@@ -2985,6 +2982,9 @@
           "items" : {
             "$ref" : "#/definitions/ZoneOffsetTransitionRule"
           }
+        },
+        "fixedOffset" : {
+          "type" : "boolean"
         }
       }
     },
@@ -3428,11 +3428,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "failure" : {
-          "type" : "boolean"
-        },
         "orThrow" : {
           "type" : "object"
+        },
+        "failure" : {
+          "type" : "boolean"
         }
       }
     },
@@ -3442,11 +3442,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "failure" : {
-          "type" : "boolean"
-        },
         "orThrow" : {
           "type" : "object"
+        },
+        "failure" : {
+          "type" : "boolean"
         }
       }
     },
@@ -4520,6 +4520,9 @@
         "encoding" : {
           "$ref" : "#/definitions/SerializationEncoding"
         },
+        "whitelist" : {
+          "$ref" : "#/definitions/ClassWhitelist"
+        },
         "preferredSerializationVersion" : {
           "$ref" : "#/definitions/ByteSequence"
         },
@@ -4551,9 +4554,6 @@
           "items" : {
             "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
           }
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
         }
       }
     },
@@ -4596,6 +4596,9 @@
         "encoding" : {
           "$ref" : "#/definitions/SerializationEncoding"
         },
+        "whitelist" : {
+          "$ref" : "#/definitions/ClassWhitelist"
+        },
         "deserializationClassLoader" : {
           "$ref" : "#/definitions/ClassLoader"
         },
@@ -4604,9 +4607,6 @@
         },
         "objectReferencesEnabled" : {
           "type" : "boolean"
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
         }
       }
     },
@@ -4805,13 +4805,13 @@
         "value" : {
           "type" : "object"
         },
+        "onNext" : {
+          "type" : "boolean"
+        },
         "onError" : {
           "type" : "boolean"
         },
         "onCompleted" : {
-          "type" : "boolean"
-        },
-        "onNext" : {
           "type" : "boolean"
         }
       }
@@ -4829,13 +4829,13 @@
         "value" : {
           "type" : "object"
         },
+        "onNext" : {
+          "type" : "boolean"
+        },
         "onError" : {
           "type" : "boolean"
         },
         "onCompleted" : {
-          "type" : "boolean"
-        },
-        "onNext" : {
           "type" : "boolean"
         }
       }
