@@ -1,8 +1,8 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 //import io.swagger.v3.oas.models.OpenAPI
-import com.nhaarman.mockito_kotlin.notNull
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.json.Json
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -14,10 +14,11 @@ class DocsHandlerV3Test {
 
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
-    val createSwagger = docs.createSwagger()
+    val openApi = docs.createSwagger()
 
 
-    val path = createSwagger.paths.get("path")
+    val path = openApi.paths.get("path")
+    println(Json.encodePrettily(openApi))
     assertThat(path, notNullValue())
   }
 

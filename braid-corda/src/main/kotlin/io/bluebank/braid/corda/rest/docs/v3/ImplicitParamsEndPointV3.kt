@@ -19,13 +19,11 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.swagger.annotations.ApiOperation
 import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.MediaType
+import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.parameters.*
 
-
-import io.swagger.v3.oas.models.parameters.Parameter
-import io.swagger.v3.oas.models.parameters.PathParameter
-import io.swagger.v3.oas.models.parameters.QueryParameter
-
-import io.swagger.v3.oas.models.parameters.RequestBody
 
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
@@ -56,9 +54,13 @@ class ImplicitParamsEndPointV3(
       }
 
   override val parameterTypes: List<Type>
+    //todo add array schema
     get() = implicitParams.map {
-      it.dataTypeClass.java
-    }
+      it.content
+          .map { it.schema.allOf + it.schema.anyOf + it.schema.oneOf + it.schema.implementation }
+          .flatMap { it.asIterable() }
+          .map { it.java }
+    }.flatMap { it.asIterable() }
 
   override val returnType: Type
     get() = annotations.filter { it is ApiOperation }.map { it as ApiOperation }.map {
@@ -68,23 +70,24 @@ class ImplicitParamsEndPointV3(
 
   private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
   private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }
-  private val bodyParam = annotations.filter {
-    it is io.swagger.v3.oas.annotations.parameters.RequestBody
-  }
+  private val bodyParam = annotations
+      .filter {it is io.swagger.v3.oas.annotations.parameters.RequestBody}
+      .map { it as io.swagger.v3.oas.annotations.parameters.RequestBody }
+      .firstOrNull()
 
   override fun mapBodyParameter(): RequestBody? {
-    return bodyParam?.getSwaggerParameter() as RequestBody?
+    return bodyParam?.toModel() as RequestBody?
   }
 
   override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { queryParam ->
-      queryParam.getSwaggerParameter() as QueryParameter
+      queryParam.toModel() as QueryParameter
     }
   }
 
   override fun mapPathParameters(): List<PathParameter> {
     return pathParams.map { pathParam ->
-      pathParam.getSwaggerParameter() as PathParameter
+      pathParam.toModel() as PathParameter
     }
   }
 
@@ -93,74 +96,55 @@ class ImplicitParamsEndPointV3(
 //    return this
 //  }
 
-  private fun io.swagger.v3.oas.annotations.Parameter.getSwaggerParameter(): Parameter {
+  private fun io.swagger.v3.oas.annotations.parameters.RequestBody.toModel(): RequestBody {
+    return RequestBody()
+        .description(description)
+        .required(required)
+        .content(content.firstOrNull()?.toModel())
+  }
+
+  private fun io.swagger.v3.oas.annotations.media.Content.toModel(): Content {
+     return Content()
+         .addMediaType(this.mediaType,MediaType().schema(this.schema.toModel()))
+  }
+
+
+  private fun io.swagger.v3.oas.annotations.media.Schema.toModel(): Schema<*> {
+     return  Schema<Any>()
+
+  }
+
+  private fun io.swagger.v3.oas.annotations.Parameter.toModel(): Parameter {
     val ip = this
-    return when (`in`) {
-      ParameterIn.QUERY -> {
-        QueryParameter()
-            .example(ip.example)
-            .description(ip.description)
-            .schema(ip.schema.implementation.ty.getSwaggerProperty())
-
-            .apply {
-          setProperty(ip.getDataType().getSwaggerProperty())
-          setDefaultValue(ip.defaultValue)
-          setExample(ip.firstExample())
-          type(ip.type)
-        }
-      }
-      ParameterIn.PATH -> {
-        PathParameter().apply {
-          setProperty(ip.getDataType().getSwaggerProperty())
-          setDefaultValue(ip.defaultValue)
-          setExample(ip.firstExample())
-          type(ip.type)
-        }
-      }
-//      "body" -> {
-//        BodyParameter().apply {
-//          schema = ip.getDataType().getSchema()
-//          setExamples(ip)
-//        }
-//      }
-      ParameterIn.HEADER -> {
-        HeaderParameter().apply {
-          setProperty(ip.getDataType().getSwaggerProperty())
-          setDefaultValue(ip.defaultValue)
-          setExample(ip.firstExample())
-          type(ip.type)
-        }
-      }
-      ParameterIn. -> {
-        @Suppress("USELESS_CAST")
-        FormParameter().apply {
-          setProperty(ip.getDataType().getSwaggerProperty())
-          setDefaultValue(ip.defaultValue)
-          setExample(ip.firstExample())
-          type(ip.type)
-        } as Parameter // required to resolve the when statement to the correct type - Kotlin compiler bug?
-      }
-      else -> {
-        throw IllegalArgumentException("unknown parameter type $paramType")
-      }
-    }.apply {
-      name = ip.name
-      required = ip.required
+    val parameter= when (ip.`in`) {
+      ParameterIn.QUERY -> QueryParameter()
+      ParameterIn.PATH -> PathParameter()
+      ParameterIn.HEADER -> HeaderParameter()
+      ParameterIn.COOKIE -> CookieParameter()
+      ParameterIn.DEFAULT -> TODO()
     }
-  }
 
-  private fun io.swagger.v3.oas.annotations.Parameter.getDataType(): Type {
-    return when {
-      this.dataType != "" -> Class.forName(this.dataType)
-      else -> this.dataTypeClass.java
-    }
-  }
+      return parameter
+          .example(ip.example)
+          .description(ip.description)
+          .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
 
-  private fun io.swagger.v3.oas.annotations.Parameter.firstExample(): String {
-    return when {
-      example != "" -> example
-      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
-      else -> ""
     }
-  }
+
+
+//  private fun io.swagger.v3.oas.annotations.Parameter.getDataType(): Type {
+//    return when {
+//      this.dataType != "" -> Class.forName(this.dataType)
+//      else -> this.dataTypeClass.java
+//    }
+//  }
+//
+//  private fun io.swagger.v3.oas.annotations.Parameter.firstExample(): String {
+//    return when {
+//      example != "" -> example
+//      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
+//      else -> ""
+//    }
+//  }
+
 }
