@@ -202,6 +202,7 @@ class ControlledService {
   }
 
   fun cancellableStream(): Observable<Int> {
+    @Suppress("DEPRECATION")
     return Observable.create<Int> {
       var next = 1
       while (!it.isUnsubscribed) {

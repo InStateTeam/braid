@@ -17,29 +17,23 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.SwaggerInfo
 import io.bluebank.braid.corda.rest.docs.DocsHandler
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.corda.rest.toSwaggerPath
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
-import io.swagger.models.Scheme
-
 import io.swagger.util.Json
-
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.servers.Server
-
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import java.net.URL
-import java.util.Arrays.asList
 import kotlin.reflect.KCallable
 
 class DocsHandlerV3(
@@ -79,36 +73,36 @@ class DocsHandlerV3(
 
   fun createSwagger(): OpenAPI {
     val url = URL(basePath)
-    val info = createSwaggerInfo()
     return OpenAPI()
-        .info(info)
-        .addServersItem(Server().url(url.toExternalForm()))
+      .apply {
+        info(createSwaggerInfo())
+        addServersItem(Server().url(url.toExternalForm()))
         // hopefully under server above .basePath(url.path)
-        .apply {
-          if (auth != null) {
-            addSecurityItem(SecurityRequirement()
-                .addList(SECURITY_DEFINITION_NAME, asList(auth)))  //todo what are the auth schemes for V3
-          }
+        if (auth != null) {
+          addSecurityItem(
+            SecurityRequirement().addList(
+              SECURITY_DEFINITION_NAME,
+              mutableListOf(auth)
+            )
+          )  // TODO: what are the auth schemes for V3
         }
-       // may be covered under server? .schema(scheme)
-        .apply {
-          modelContext.addToSwagger(this)
-          endpoints.forEach {
-            addEndpoint(it)
-          }
+        // may be covered under server? .schema(scheme)
+        modelContext.addToSwagger(this)
+        endpoints.forEach {
+          addEndpoint(it)
         }
+      }
   }
 
-  private fun createSwaggerInfo(): Info? {
-    val info = Info()
-        .version(swaggerInfo.version)
-        .title(swaggerInfo.serviceName)
-        .description(swaggerInfo.description)
-        .contact(Contact()
-            .name(swaggerInfo.contact.name)
-            .email(swaggerInfo.contact.email)
-            .url(swaggerInfo.contact.url))
-    return info
+  private fun createSwaggerInfo() = Info().apply {
+    version(swaggerInfo.version)
+    title(swaggerInfo.serviceName)
+    description(swaggerInfo.description)
+    contact(Contact().apply {
+      name(swaggerInfo.contact.name)
+      email(swaggerInfo.contact.email)
+      url(swaggerInfo.contact.url)
+    })
   }
 
   private fun OpenAPI.addEndpoint(endpoint: EndPointV3) {

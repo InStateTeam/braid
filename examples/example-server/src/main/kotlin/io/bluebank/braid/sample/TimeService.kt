@@ -47,6 +47,7 @@ class TimeService(private val vertx: Vertx) {
     description = "return a stream of time updates"
   )
   fun time(): Observable<String> {
+    @Suppress("DEPRECATION")
     return Observable.create { subscriber ->
       val consumer = vertx.eventBus().consumer<String>("time")
       consumer.handler {

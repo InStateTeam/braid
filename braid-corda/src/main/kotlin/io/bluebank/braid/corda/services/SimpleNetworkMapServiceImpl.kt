@@ -77,7 +77,7 @@ class SimpleNetworkMapServiceImpl(
   }
 
   override fun state(): Observable<Any> {
-
+    @Suppress("DEPRECATION")
     return Observable.create { subscriber ->
       val dataFeed = services.networkMapCache.track()
       services.transaction {

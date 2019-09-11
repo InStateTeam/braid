@@ -76,7 +76,7 @@ class ImplicitParamsEndPointV3(
       .firstOrNull()
 
   override fun mapBodyParameter(): RequestBody? {
-    return bodyParam?.toModel() as RequestBody?
+    return bodyParam?.toModel()
   }
 
   override fun mapQueryParameters(): List<QueryParameter> {
