@@ -19,22 +19,19 @@ import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
-
+import io.swagger.v3.core.converter.AnnotatedType
+import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
-
+import io.swagger.v3.core.util.PrimitiveType
 import io.swagger.v3.oas.models.Operation
+import io.swagger.v3.oas.models.media.BinarySchema
+import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
-
-
-import io.swagger.v3.core.converter.ModelConverters
-import io.swagger.v3.oas.models.media.BinarySchema
-import io.swagger.v3.oas.models.media.Content
-
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
@@ -100,7 +97,6 @@ abstract class EndPointV3(
     annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
 
-
   val description: String
     get() {
       return methodDescription?.description?.nonEmptyOrNull()
@@ -135,17 +131,18 @@ abstract class EndPointV3(
 
   fun toOperation(): Operation {
     val operation = Operation()
-        // todo .consumes(consumes)
-    .description(description)
-        .parameters(toSwaggerParams())
-        .requestBody(mapBodyParameter())
-        .addTagsItem(groupName)
+      // todo .consumes(consumes)
+      .description(description)
+      .parameters(toSwaggerParams())
+      .requestBody(mapBodyParameter())
+      .addTagsItem(groupName)
 
     if (protected) {
       operation.addSecurityItem(SecurityRequirement().addList(DocsHandlerV3.SECURITY_DEFINITION_NAME, listOf()))
     }
 
-    operation.responses(ApiResponses()
+    operation.responses(
+      ApiResponses()
         .addApiResponse("200", response())
         .addApiResponse("500", ApiResponse().description("server failure"))
     )
@@ -159,9 +156,9 @@ abstract class EndPointV3(
   protected abstract fun mapPathParameters(): List<Parameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
-        val pathParams = mapPathParameters()
-        val queryParams = mapQueryParameters()
-        return pathParams + queryParams
+    val pathParams = mapPathParameters()
+    val queryParams = mapQueryParameters()
+    return pathParams + queryParams
   }
 
   protected fun KType.getSwaggerProperty(): ResolvedSchema {
@@ -178,17 +175,30 @@ abstract class EndPointV3(
 
   protected fun Type.getSwaggerProperty(): ResolvedSchema {
     val actualType = this.actualType()
-    try {
+    return try {
       // todo move to CustomModelConverter and resolve there
-    return if (actualType.isBinary()) {
-      val resolvedSchema = ResolvedSchema()
-      resolvedSchema.schema= BinarySchema()
-      resolvedSchema
-      } else {
-         ModelConverters.getInstance().readAllAsResolvedSchema(actualType)
+      when {
+        actualType.isBinary() -> {
+          val resolvedSchema = ResolvedSchema()
+          resolvedSchema.schema = BinarySchema()
+          resolvedSchema
+        }
+        else -> {
+          val result =
+            ModelConverters.getInstance().readAllAsResolvedSchema(AnnotatedType(actualType).resolveAsRef(true))
+          when {
+            result?.schema == null -> {
+              val schema = PrimitiveType.createProperty(actualType)
+              ResolvedSchema().apply {
+                this.schema = schema
+              }
+            }
+            else -> result
+          }
+        }
       }
     } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type:" + actualType)
+      throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
   }
 
@@ -202,10 +212,14 @@ abstract class EndPointV3(
     } else {
       val responseSchema = returnType.getSwaggerProperty()
       return ApiResponse()
-                .content(Content()
-                    .addMediaType( MediaType.APPLICATION_JSON, io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema))
-                )
-
+        .description("")
+        .content(
+          Content()
+            .addMediaType(
+              MediaType.APPLICATION_JSON,
+              io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
+            )
+        )
 
     }
   }
@@ -218,6 +232,9 @@ abstract class EndPointV3(
     }
   }
 
+  /**
+   * @return true iff Type is for binary data
+   */
   private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,

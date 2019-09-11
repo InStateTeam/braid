@@ -125,7 +125,7 @@ class DocsHandlerV3(
         OPTIONS, HEAD, TRACE, CONNECT, OTHER -> TODO("Implement ${endpoint.method.name}")
       }
     } catch (e: Throwable) {
-      log.warn("Unable to add endpoint:$endpoint : " + e.message)
+      log.warn("Unable to add endpoint $endpoint : ${e.message}")
     }
   }
 

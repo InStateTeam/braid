@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.rest
+package io.bluebank.braid.corda.rest.docs.v3
 
-import io.vertx.ext.unit.junit.VertxUnitRunner
-import org.junit.runner.RunWith
+import io.bluebank.braid.corda.rest.AbstractRestMounterTest
 
-@Suppress("DEPRECATION")
-@RunWith(VertxUnitRunner::class)
-class RestMounterTest : AbstractRestMounterTest(openApiVersion = 2)
-
+class RestMounterV3Test : AbstractRestMounterTest(openApiVersion = 3)

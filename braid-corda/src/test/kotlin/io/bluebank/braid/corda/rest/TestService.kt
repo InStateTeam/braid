@@ -17,25 +17,14 @@
 
 package io.bluebank.braid.corda.rest
 
-import io.bluebank.braid.corda.BraidConfig
-import io.bluebank.braid.corda.BraidServer
-import io.bluebank.braid.core.http.HttpServerConfig
-import io.bluebank.braid.core.security.JWTUtils
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.*
 import io.vertx.core.Future
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AuthProvider
-import io.vertx.ext.auth.jwt.JWTAuth
-import io.vertx.ext.auth.jwt.JWTOptions
 import io.vertx.ext.web.RoutingContext
-import java.io.File
-import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import javax.ws.rs.HeaderParam
 import javax.ws.rs.core.Context
@@ -99,7 +88,7 @@ class TestService {
   }
 
   fun willFail(): String {
-    throw RuntimeException("total fail!")
+    throw RuntimeException("on purpose failure")
   }
 
   fun headerListOfStrings(@HeaderParam(X_HEADER_LIST_STRING) value: List<String>): List<String> {
@@ -135,106 +124,6 @@ class TestService {
     assert(mediaType == null)
 
     return headers.getRequestHeader(X_HEADER_LIST_STRING).map { it.toInt() }
-  }
-}
-
-class TestServiceApp(port: Int, private val service: TestService) {
-  companion object {
-    const val SWAGGER_ROOT = "/swagger"
-    const val REST_API_ROOT = "/"
-    @JvmStatic
-    fun main(args: Array<String>) {
-      TestServiceApp(8080, TestService())
-    }
-  }
-
-  private val tempJKS = File.createTempFile("temp-", ".jceks")!!
-  private val jwtSecret = "secret"
-  private lateinit var jwtAuth: JWTAuth
-
-  val server: BraidServer
-
-  init {
-    val thisObj = this
-    server = BraidConfig()
-      .withPort(port)
-      .withService(service)
-      .withAuthConstructor(this::createAuthProvider)
-      .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
-      .withRestConfig(RestConfig()
-          .withServiceName("my-service")
-        .withAuthSchema(AuthSchema.Token)
-        .withSwaggerPath(SWAGGER_ROOT)
-        .withApiPath(REST_API_ROOT)
-        .withDebugMode()
-        .withPaths {
-          group("General Ledger") {
-            unprotected {
-              get("/hello-async", service::sayHelloAsync)
-              get("/quiet-async-void", service::quietAsyncVoid)
-              get("/quiet-async-unit", service::quietAsyncUnit)
-              get("/quiet-unit", service::quietUnit)
-              post("/login", thisObj::login)
-              get("/hello", service::sayHello)
-              get("/buffer", service::getBuffer)
-              get("/bytearray", service::getByteArray)
-              get("/bytebuf", service::getByteBuf)
-              get("/bytebuffer", service::getByteBuffer)
-              post("/doublebuffer", service::doubleBuffer)
-              post("/custom", service::somethingCustom)
-              get("/stringlist", service::returnsListOfStuff)
-              get("/willfail", service::willFail)
-              get("/headers/list/string", service::headerListOfStrings)
-              get("/headers/list/int", service::headerListOfInt)
-              get("/headers", service::headers)
-              get("/headers/optional", service::optionalHeader)
-              get("/headers/non-optional", service::nonOptionalHeader)
-            }
-            protected {
-              post("/echo", service::echo)
-            }
-          }
-        })
-      .bootstrapBraid(TestAppServiceHub())
-  }
-
-  fun whenReady(): Future<String> = server.whenReady()
-  fun shutdown() = server.shutdown()
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  fun login(request: LoginRequest): String {
-    if (request == LoginRequest("sa", "admin")) {
-      @Suppress("DEPRECATION")
-      return jwtAuth.generateToken(
-        JsonObject().put("user", request.user),
-        JWTOptions().setExpiresInMinutes(24 * 60)
-      )
-    } else {
-      throw RuntimeException("failed to authenticate")
-    }
-  }
-
-  private fun createAuthProvider(vertx: Vertx): AuthProvider {
-    ensureJWTKeyStoreExists()
-    @Suppress("DEPRECATION")
-    return JWTAuth.create(
-      vertx, JsonObject().put(
-        "keyStore", JsonObject()
-          .put("path", tempJKS.absolutePath)
-          .put("type", "jceks")
-          .put("password", jwtSecret)
-      )
-    ).apply {
-      jwtAuth = this
-    }
-  }
-
-  private fun ensureJWTKeyStoreExists() {
-    val ks = JWTUtils.createSimpleJWTKeyStore(jwtSecret)
-    FileOutputStream(tempJKS.absoluteFile).use {
-      ks.store(it, jwtSecret.toCharArray())
-      it.flush()
-    }
   }
 }
 

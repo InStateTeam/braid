@@ -18,7 +18,6 @@ package io.bluebank.braid.corda.rest
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.DocsHandlerV2
 import io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3
-import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.swagger.models.auth.ApiKeyAuthDefinition
 import io.swagger.models.auth.BasicAuthDefinition
 import io.swagger.models.auth.In
@@ -31,7 +30,7 @@ class DocsHandlerFactory(
 ) {
 
   fun createDocsHandler(): DocsHandler {
-    when(config.swaggerVersion) {
+    when (config.openApiVersion) {
       3 -> return DocsHandlerV3(
           swaggerInfo = config.swaggerInfo,
           debugMode = config.debugMode,
@@ -45,7 +44,7 @@ class DocsHandlerFactory(
           basePath = "${config.hostAndPortUri}/$path/",
           auth = getSecuritySchemeDefinition()
       )
-      else -> TODO("Unknown swagger version ${config.swaggerVersion}")
+      else -> TODO("Unknown OpenAPI version ${config.openApiVersion}")
     }
   }
 

@@ -66,7 +66,7 @@ data class Braid(
     val flowInitiator = FlowInitiator(rpc)
     val rpcClasses = rpcClasses(classLoader)
     return RestConfig()
-        .withSwaggerVersion(swaggerVersion)
+      .withOpenApiVersion(swaggerVersion)
       .withPaths {
         group("network") {
           get("/network/nodes", NetworkService(rpc)::nodes)
