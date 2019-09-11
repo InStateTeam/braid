@@ -32,12 +32,12 @@ class OpenAPITest{
   @Test
   fun `should generate types`() {
     val schema = ModelConverters.getInstance().readAllAsResolvedSchema(Foo::class.java)
-    
+
     assertThat(schema.schema.name,equalTo("Foo"))
     assertThat(schema.referencedSchemas["Bar"], notNullValue())
   }
 
- @Test
+  @Test
   fun `should generate binary properties`() {
     val schema = ModelConverters.getInstance().readAllAsResolvedSchema(Foo::class.java)
 
@@ -45,7 +45,19 @@ class OpenAPITest{
     assertThat(schema.referencedSchemas.get("Bar"), notNullValue())
   }
 
-
+  @Test
+  fun `see how Reader works`() {
+    val cls = String::class.java
+    val type = TypeFactory.defaultInstance().constructType(cls);
+    val bd = Json.mapper().serializationConfig.introspect<BeanDescription>(type)
+    val service = TestService()
+    val method = service::headerListOfStrings
+    method.parameters.map { param ->
+      val type = param.type.javaType
+      val result = ModelConverters.getInstance().resolveAsResolvedSchema(AnnotatedType(type).resolveAsRef(true))
+      println(result)
+    }
+  }
 
   data class Foo (val bar: Bar)
   data class Bar(val name: String)
