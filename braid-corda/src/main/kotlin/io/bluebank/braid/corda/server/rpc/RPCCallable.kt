@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.rpc
 
-import io.bluebank.braid.server.flow.flowLogicType
+import io.bluebank.braid.corda.server.flow.flowLogicType
 import kotlin.reflect.*
 
 class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<T>) : KCallable<T> {

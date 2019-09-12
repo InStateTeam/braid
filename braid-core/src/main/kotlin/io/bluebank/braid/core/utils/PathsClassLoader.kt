@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.util
+package io.bluebank.braid.core.utils
 
 import java.io.File
 import java.net.URI
 import java.net.URLClassLoader
 
 object PathsClassLoader {
-  private val tempFileDownloader = TempFileDownloader()
+  private val tempFileDownloader = JarDownloader()
 
-  fun cordappsClassLoader(vararg paths: String) =
-    cordappsClassLoader(paths.toList())
+  fun jarsClassLoader(vararg jarPaths: String) =
+    jarsClassLoader(jarPaths.toList())
 
-  fun cordappsClassLoader(args: Collection<String>): ClassLoader {
-    val urls = args.asSequence().map {
+  fun jarsClassLoader(jarPaths: Collection<String>): ClassLoader {
+    val urls = jarPaths.asSequence().map {
       try {
         // attempt to download the file if available
         tempFileDownloader.uriToFile(URI(it).toURL())
@@ -39,6 +39,6 @@ object PathsClassLoader {
   }
 }
 
-fun List<String>.toCordappsClassLoader(): ClassLoader {
-  return PathsClassLoader.cordappsClassLoader(this.toList())
+fun List<String>.toJarsClassLoader(): ClassLoader {
+  return PathsClassLoader.jarsClassLoader(this.toList())
 }

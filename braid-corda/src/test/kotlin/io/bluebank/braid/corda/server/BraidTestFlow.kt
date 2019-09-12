@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.util
+package io.bluebank.braid.corda.server
 
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import net.corda.core.contracts.Amount
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.StartableByRPC
+import net.corda.core.transactions.SignedTransaction
+import java.util.*
 
-class PathsClassLoaderTest {
-  @Test
-  fun `that we can load classes from web jars`() {
-    val classLoader = PathsClassLoader.cordappsClassLoader(
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
-      )
-    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
-    assertNotNull(clazz)
+@StartableByRPC
+class BraidTestFlow(
+  amount: Amount<Currency>,
+  issuerBankPartyRef: net.corda.core.utilities.OpaqueBytes,
+  notary: net.corda.core.identity.Party
+)
+
+  : FlowLogic<SignedTransaction>() {
+
+  override fun call(): SignedTransaction {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 }

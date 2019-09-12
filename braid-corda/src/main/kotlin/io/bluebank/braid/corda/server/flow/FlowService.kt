@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.flow
 
-import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.server.Braid
+import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.swagger.annotations.ApiOperation
 
 class FlowService(val rpc: RPCFactory) {
-  companion object {
-    private val log = loggerFor<Braid>()
-  }
-
   @ApiOperation(value = "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow\$Authorise\"]")
   fun flows(): List<String> {
     return rpc.validConnection().registeredFlows()
   }
-
 }

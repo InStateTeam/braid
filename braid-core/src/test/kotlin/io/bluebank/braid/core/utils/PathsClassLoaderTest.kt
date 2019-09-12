@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.util
+package io.bluebank.braid.core.utils
 
-import io.vertx.ext.unit.TestContext
-import org.hamcrest.Matcher
-import org.hamcrest.StringDescription
+import org.junit.Assert.assertNotNull
+import org.junit.Test
 
-fun <T> TestContext.assertThat(actual: T, matcher: Matcher<in T>, reason: String = "") {
-
-  if (!matcher.matches(actual)) {
-    val description = StringDescription()
-      .appendText(reason)
-      .appendDescriptionOf(matcher)
-      .appendText(" but was:")
-    matcher.describeMismatch(actual, description)
-    this.fail(description.toString())
+class PathsClassLoaderTest {
+  @Test
+  fun `that we can load classes from web jars`() {
+    val classLoader = PathsClassLoader.jarsClassLoader(
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+      )
+    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
+    assertNotNull(clazz)
   }
 }

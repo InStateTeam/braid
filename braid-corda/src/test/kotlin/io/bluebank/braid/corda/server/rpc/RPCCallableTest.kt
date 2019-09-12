@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.server.rpc
 
-import net.corda.core.contracts.Amount
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.StartableByRPC
+import io.bluebank.braid.corda.server.BraidTestFlow
 import net.corda.core.transactions.SignedTransaction
-import java.util.*
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Test
+import kotlin.reflect.jvm.javaType
 
-@StartableByRPC
-class BraidTestFlow(
-  amount: Amount<Currency>,
-  issuerBankPartyRef: net.corda.core.utilities.OpaqueBytes,
-  notary: net.corda.core.identity.Party
-)
+class RPCCallableTest {
+  @Test
+  // @Ignore
+  fun shouldBeCallableAndReturnTypeOfFlow() {
 
-  : FlowLogic<SignedTransaction>() {
+    val flow = BraidTestFlow::class
 
-  override fun call(): SignedTransaction {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    val rpcCallable = RPCCallable(flow, flow.constructors.iterator().next())
+
+    assertThat(
+      rpcCallable.returnType.javaType.typeName,
+      `is`(SignedTransaction::class.java.name)
+    )
   }
 
 }

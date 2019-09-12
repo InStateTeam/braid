@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.rpc
 
 import com.nhaarman.mockito_kotlin.mock
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
+import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.core.synth.preferredConstructor
 import io.vertx.core.http.HttpMethod
 import net.corda.core.flows.ContractUpgradeFlow
@@ -27,7 +28,6 @@ import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
 import org.junit.Ignore
 import org.junit.Test
 import java.lang.reflect.Constructor

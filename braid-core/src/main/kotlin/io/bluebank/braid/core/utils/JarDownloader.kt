@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.util
+package io.bluebank.braid.core.utils
 
 import java.io.File
 import java.io.FileOutputStream
@@ -21,7 +21,7 @@ import java.net.URL
 import java.nio.channels.Channels
 import java.nio.file.Files
 
-class TempFileDownloader {
+class JarDownloader {
   private val dir = Files.createTempDirectory("delete-me-").toFile().also { it.deleteOnExit() }
   fun uriToFile(url: URL) : URL {
     val filename = url.path.let { File(it) }.name

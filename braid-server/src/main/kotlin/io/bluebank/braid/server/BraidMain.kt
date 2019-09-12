@@ -15,9 +15,10 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.corda.server.Braid
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
-import io.bluebank.braid.server.util.toCordappsClassLoader
 import io.vertx.core.Future
 import net.corda.core.utilities.NetworkHostAndPort
 
@@ -39,7 +40,7 @@ fun main(args: Array<String>) {
 class BraidMain {
 
   fun start(networkAndPort: String,userName: String, password: String, port: Int, additionalPaths: List<String>): Future<String> {
-    val classLoader = additionalPaths.toCordappsClassLoader()
+    val classLoader = additionalPaths.toJarsClassLoader()
     return tryWithClassLoader(classLoader) {
       Braid(
           port = port,

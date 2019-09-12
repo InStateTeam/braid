@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.flow
+package io.bluebank.braid.corda.server.flow
 
 import io.github.classgraph.ClassGraph
 import net.corda.core.flows.StartableByRPC

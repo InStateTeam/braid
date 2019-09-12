@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.rpc
 
 import io.swagger.converter.ModelConverters
 import net.corda.core.flows.ContractUpgradeFlow

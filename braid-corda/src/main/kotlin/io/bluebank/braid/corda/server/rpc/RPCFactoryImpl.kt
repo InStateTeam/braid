@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.rpc
 
 import io.bluebank.braid.core.logging.loggerFor
 import net.corda.client.rpc.CordaRPCClient
@@ -23,9 +23,14 @@ import net.corda.core.utilities.NetworkHostAndPort
 interface RPCFactory {
   companion object {
     fun createRpcFactory(username: String, password: String, nodeAddress: NetworkHostAndPort): RPCFactory =
-      RPCFactoryImpl(userName = username, password = password, nodeAddress = nodeAddress)
+      RPCFactoryImpl(
+        userName = username,
+        password = password,
+        nodeAddress = nodeAddress
+      )
 
-    fun createRpcFactoryStub(): RPCFactory = RPCFactoryStub()
+    fun createRpcFactoryStub(): RPCFactory =
+      RPCFactoryStub()
   }
 
   fun validConnection(): CordaRPCOps

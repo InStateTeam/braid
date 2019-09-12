@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.flow
 
+import io.bluebank.braid.corda.server.rpc.RPCCallable
 import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor

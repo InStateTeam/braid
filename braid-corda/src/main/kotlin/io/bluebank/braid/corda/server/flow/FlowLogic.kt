@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.server.flow
 
-import io.bluebank.braid.server.BraidTestFlow
-import net.corda.core.transactions.SignedTransaction
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Test
-import kotlin.reflect.jvm.javaType
+import net.corda.core.flows.FlowLogic
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.allSupertypes
 
-class RPCCallableTest {
-  @Test
-  // @Ignore
-  fun shouldBeCallableAndReturnTypeOfFlow() {
-
-    val flow = BraidTestFlow::class
-
-    val rpcCallable = RPCCallable(flow, flow.constructors.iterator().next())
-
-    assertThat(
-      rpcCallable.returnType.javaType.typeName,
-      `is`(SignedTransaction::class.java.name)
-    )
-  }
-
+fun KClass<*>.flowLogicType(): KType {
+  return allSupertypes.stream()
+    .filter { it.classifier?.equals(FlowLogic::class)!! }
+    .findFirst()
+    .get()
+    .arguments
+    .get(0)
+    .type!!
 }

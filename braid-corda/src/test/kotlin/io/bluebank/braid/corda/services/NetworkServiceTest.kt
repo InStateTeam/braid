@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.rpc
+package io.bluebank.braid.corda.services
 
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
-import io.bluebank.braid.corda.services.CordaServicesAdapter
 import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.NodeInfo
 import net.corda.core.utilities.NetworkHostAndPort
@@ -44,8 +43,8 @@ class NetworkServiceTest {
       on { networkMapSnapshot() } doReturn listOf(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
-    val network = NetworkService(ops)
-    val simpleInfo = network.nodeInfo()
+    val network = SimpleNetworkMapService(ops)
+    val simpleInfo = network.myNodeInfo()
     assertThat(simpleInfo.addresses, `is`(addresses))
     assertThat(simpleInfo.legalIdentities, `is`(asList()))
   }

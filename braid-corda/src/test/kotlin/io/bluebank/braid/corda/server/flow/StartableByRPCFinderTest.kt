@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.flow
+package io.bluebank.braid.corda.server.flow
 
-import io.bluebank.braid.server.util.PathsClassLoader
+import io.bluebank.braid.core.utils.PathsClassLoader
 import net.corda.core.flows.ContractUpgradeFlow
 import org.hamcrest.CoreMatchers.hasItem
 import org.junit.Assert.assertThat
@@ -26,7 +26,7 @@ import kotlin.reflect.jvm.jvmName
 class StartableByRPCFinderTest {
   @Test
   fun `should find rpc class`() {
-    val classLoader = PathsClassLoader.cordappsClassLoader(
+    val classLoader = PathsClassLoader.jarsClassLoader(
       "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
       "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
     )

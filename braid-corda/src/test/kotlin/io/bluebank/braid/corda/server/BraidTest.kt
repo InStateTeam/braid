@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.server
 
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.core.socket.findFreePort
-import io.bluebank.braid.server.util.assertThat
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -142,7 +141,7 @@ class BraidTest {
   fun shouldListNetworkNodes(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
     client.get(port, "localhost", "/api/rest/network/nodes")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -172,7 +171,7 @@ class BraidTest {
   fun shouldListNetworkNodesByHostAndPort(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
     client.get(port, "localhost", "/api/rest/network/nodes?host-and-port=localhost:10004")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -205,7 +204,7 @@ class BraidTest {
   fun shouldListNetworkNodesByX509Name(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/nodes")
+    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
     client.get(
       port,
       "localhost",
@@ -242,7 +241,7 @@ class BraidTest {
   fun shouldListSelf(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/nodes/self")
+    log.info("calling get: http://localhost:$port/api/rest/network/nodes/self")
     client.get(port, "localhost", "/api/rest/network/nodes/self")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -273,7 +272,7 @@ class BraidTest {
   fun shouldListNetworkNotaries(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/notaries")
+    log.info("calling get: http://localhost:$port/api/rest/network/notaries")
     client.get(port, "localhost", "/api/rest/network/notaries")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -302,7 +301,7 @@ class BraidTest {
   fun shouldListFlows(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/cordapps/flows")
+    log.info("calling get: http://localhost:$port/api/rest/cordapps/flows")
     client.get(port, "localhost", "/api/rest/cordapps/flows")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)

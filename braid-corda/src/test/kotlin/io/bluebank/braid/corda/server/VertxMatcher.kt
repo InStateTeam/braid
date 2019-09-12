@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.flow
+package io.bluebank.braid.corda.server
 
-import net.corda.core.flows.FlowLogic
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.full.allSupertypes
+import io.vertx.ext.unit.TestContext
+import org.hamcrest.Matcher
+import org.hamcrest.StringDescription
 
-fun KClass<*>.flowLogicType(): KType {
-  return allSupertypes.stream()
-    .filter { it.classifier?.equals(FlowLogic::class)!! }
-    .findFirst()
-    .get()
-    .arguments
-    .get(0)
-    .type!!
+fun <T> TestContext.assertThat(actual: T, matcher: Matcher<in T>, reason: String = "") {
+  if (!matcher.matches(actual)) {
+    val description = StringDescription()
+      .appendText(reason)
+      .appendDescriptionOf(matcher)
+      .appendText(" but was:")
+    matcher.describeMismatch(actual, description)
+    this.fail(description.toString())
+  }
 }
