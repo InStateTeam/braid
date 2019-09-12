@@ -31,12 +31,18 @@ fun main(args: Array<String>) {
 
   val file = File(args[0])
   file.parentFile.mkdirs()
-  val cordappsClassLoader = args.toList().drop(1).toJarsClassLoader()
+  val jars = args.toList().drop(1)
+  val swaggerText = generateSwaggerText(jars)
+  file.writeText(swaggerText)
+  log.info("wrote to: ${file.absolutePath}")
+}
+
+internal fun generateSwaggerText(jars: List<String>): String {
+  val cordappsClassLoader = jars.toJarsClassLoader()
   // we call so as to initialise model converters etc before replacing the context class loader
   Braid.init()
-  tryWithClassLoader(cordappsClassLoader) {
-    val swaggerText = BraidDocsMain().swaggerText()
-    file.writeText(swaggerText)
+  val swaggerText = tryWithClassLoader(cordappsClassLoader) {
+    BraidDocsMain().swaggerText()
   }
-  log.info("wrote to: ${file.absolutePath}")
+  return swaggerText
 }
