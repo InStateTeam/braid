@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server.rpc
 
+import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.synth.preferredConstructor
@@ -26,7 +27,7 @@ import net.corda.core.utilities.ProgressTracker
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(val rpc: RPCFactory) {
+class FlowInitiator(private val flowStarter: FlowStarterAdapter) {
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
@@ -44,7 +45,7 @@ class FlowInitiator(val rpc: RPCFactory) {
       log.info("About to start $kClass with args: $it")
 
       @Suppress("UNCHECKED_CAST")
-      rpc.validConnection().startFlowDynamic(
+      flowStarter.startFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
       ).returnValue.toObservable().toFuture()

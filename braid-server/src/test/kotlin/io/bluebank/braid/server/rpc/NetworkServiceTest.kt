@@ -17,8 +17,8 @@ package io.bluebank.braid.server.rpc
 
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
+import io.bluebank.braid.corda.services.CordaServicesAdapter
 import net.corda.core.identity.PartyAndCertificate
-import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.node.NodeInfo
 import net.corda.core.utilities.NetworkHostAndPort
 import org.hamcrest.CoreMatchers.`is`
@@ -38,17 +38,13 @@ class NetworkServiceTest {
     val partyAndCertificate = mock<PartyAndCertificate> { }
 
     val addresses = asList(NetworkHostAndPort.parse("localhost:123"))
-    val legalIdentitiesAndCerts = asList<PartyAndCertificate>(partyAndCertificate)
+    val legalIdentitiesAndCerts = listOf(partyAndCertificate)
     val nodeInfo = NodeInfo(addresses, legalIdentitiesAndCerts, 1, 2)
-    val ops = mock<CordaRPCOps> {
-      on { networkMapSnapshot() } doReturn asList(nodeInfo)
+    val ops = mock<CordaServicesAdapter> {
+      on { networkMapSnapshot() } doReturn listOf(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
-    val factory = mock<RPCFactoryImpl> {
-      on { validConnection() } doReturn ops
-    }
-
-    val network = NetworkService(factory)
+    val network = NetworkService(ops)
     val simpleInfo = network.nodeInfo()
     assertThat(simpleInfo.addresses, `is`(addresses))
     assertThat(simpleInfo.legalIdentities, `is`(asList()))

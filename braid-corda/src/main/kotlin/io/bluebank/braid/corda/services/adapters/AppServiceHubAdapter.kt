@@ -17,11 +17,19 @@ package io.bluebank.braid.corda.services.adapters
 
 import com.google.common.primitives.Primitives
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
-import io.bluebank.braid.corda.services.FlowStarter
+import io.bluebank.braid.corda.services.CordaServicesAdapter
+import io.bluebank.braid.corda.services.transaction
 import net.corda.core.flows.FlowLogic
+import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
 import net.corda.core.internal.uncheckedCast
+import net.corda.core.messaging.DataFeed
 import net.corda.core.messaging.FlowHandle
 import net.corda.core.node.AppServiceHub
+import net.corda.core.node.NodeInfo
+import net.corda.core.node.services.NetworkMapCache
+import net.corda.core.utilities.NetworkHostAndPort
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
@@ -30,11 +38,61 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.jvm.javaConstructor
 
-fun AppServiceHub.asFlowStarter(): FlowStarter {
+fun AppServiceHub.toCordaServicesAdapter(): CordaServicesAdapter {
   return AppServiceHubAdapter(this)
 }
 
-class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : FlowStarter {
+class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : CordaServicesAdapter {
+  override fun getNodeByLegalName(name: CordaX500Name): NodeInfo? {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.getNodeByLegalName(name)
+    }
+  }
+
+  override fun getNodeByAddress(hostAndPort: NetworkHostAndPort): NodeInfo? {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.getNodeByAddress(hostAndPort)
+    }
+  }
+
+  override fun track(): DataFeed<List<NodeInfo>, NetworkMapCache.MapChange> {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.track()
+    }
+  }
+
+  override fun notaryPartyFromX500Name(x500Name: CordaX500Name): Party? {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.getNotary(x500Name)
+    }
+  }
+
+  override fun nodeInfo(): NodeInfo {
+    return serviceHub.myInfo
+  }
+
+  override fun notaryIdentities(): List<Party> {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.notaryIdentities
+    }
+  }
+
+  override fun networkMapSnapshot(): List<NodeInfo> {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.allNodes
+    }
+  }
+
+  override fun wellKnownPartyFromX500Name(x500Name: CordaX500Name): Party? {
+    return serviceHub.identityService.wellKnownPartyFromX500Name(x500Name)
+  }
+
+  override fun nodeInfoFromParty(party: AbstractParty): NodeInfo? {
+    return serviceHub.transaction {
+      serviceHub.networkMapCache.getNodeByLegalIdentity(party)
+    }
+  }
+
   override fun <T> startFlowDynamic(
     logicType: Class<out FlowLogic<T>>,
     vararg args: Any?

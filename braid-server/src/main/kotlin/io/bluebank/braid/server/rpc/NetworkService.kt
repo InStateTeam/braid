@@ -15,8 +15,9 @@
  */
 package io.bluebank.braid.server.rpc
 
-import io.bluebank.braid.server.domain.SimpleNodeInfo
-import io.bluebank.braid.server.domain.toSimpleNodeInfo
+import io.bluebank.braid.corda.services.NetworkMapServiceAdapter
+import io.bluebank.braid.corda.services.SimpleNodeInfo
+import io.bluebank.braid.corda.services.toSimpleNodeInfo
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import net.corda.core.identity.CordaX500Name
@@ -25,10 +26,10 @@ import net.corda.core.utilities.NetworkHostAndPort
 import java.util.stream.Collectors.toList
 import javax.ws.rs.QueryParam
 
-class NetworkService(val rpc: RPCFactory) {
+class NetworkService(private val networkMapServiceAdapter: NetworkMapServiceAdapter) {
   @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   fun nodeInfo(): SimpleNodeInfo {
-    return rpc.validConnection().nodeInfo().toSimpleNodeInfo()
+    return networkMapServiceAdapter.nodeInfo().toSimpleNodeInfo()
   }
 
   @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
@@ -45,17 +46,17 @@ class NetworkService(val rpc: RPCFactory) {
     return when {
       hostAndPort?.isNotEmpty() ?: false -> {
         val address = NetworkHostAndPort.parse(hostAndPort!!)
-        rpc.validConnection().networkMapSnapshot().stream()
+        networkMapServiceAdapter.networkMapSnapshot().stream()
           .filter { node -> node.addresses.contains(address) }
           .map { node -> node.toSimpleNodeInfo() }
           .collect(toList())
       }
       x500Name?.isNotEmpty() ?: false -> {
         val x500Name1 = CordaX500Name.parse(x500Name!!)
-        val party = rpc.validConnection().wellKnownPartyFromX500Name(x500Name1)
-        listOfNotNull(rpc.validConnection().nodeInfoFromParty(party!!)?.toSimpleNodeInfo())
+        val party = networkMapServiceAdapter.wellKnownPartyFromX500Name(x500Name1)
+        listOfNotNull(networkMapServiceAdapter.nodeInfoFromParty(party!!)?.toSimpleNodeInfo())
       }
-      else -> rpc.validConnection().networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
+      else -> networkMapServiceAdapter.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
         toList()
       )
     }
@@ -70,11 +71,11 @@ class NetworkService(val rpc: RPCFactory) {
   ): List<Party> {
     return when {
       x500Name?.isNotEmpty() ?: false -> listOfNotNull(
-        rpc.validConnection().notaryPartyFromX500Name(
+        networkMapServiceAdapter.notaryPartyFromX500Name(
           CordaX500Name.parse(x500Name!!)
         )
       )
-      else -> rpc.validConnection().notaryIdentities()
+      else -> networkMapServiceAdapter.notaryIdentities()
     }
   }
 }

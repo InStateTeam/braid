@@ -18,18 +18,16 @@ package io.bluebank.braid.server
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toCordappName
-import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.bluebank.braid.server.flow.StartableByRPCFinder.Companion.rpcClasses
 import io.bluebank.braid.server.rpc.FlowInitiator
 import io.bluebank.braid.server.rpc.FlowService
-import io.bluebank.braid.server.rpc.NetworkService
 import io.bluebank.braid.server.rpc.RPCFactory
 import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactory
-import io.bluebank.braid.server.util.PathsClassLoader
-import io.bluebank.braid.server.util.toCordappsClassLoader
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
@@ -65,14 +63,17 @@ data class Braid(
 
   fun restConfig(rpc: RPCFactory): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
-    val flowInitiator = FlowInitiator(rpc)
+
+    val cordaServicesAdapter = rpc.validConnection().toCordaServicesAdapter()
+    val flowInitiator = FlowInitiator(cordaServicesAdapter)
     val rpcClasses = rpcClasses(classLoader)
+    val networkService = SimpleNetworkMapService(cordaServicesAdapter)
     return RestConfig()
       .withPaths {
         group("network") {
-          get("/network/nodes", NetworkService(rpc)::nodes)
-          get("/network/notaries", NetworkService(rpc)::notaries)
-          get("/network/nodes/self", NetworkService(rpc)::nodeInfo)
+          get("/network/nodes", networkService::nodes)
+          get("/network/notaries", networkService::notaries)
+          get("/network/nodes/self", networkService::myNodeInfo)
         }
         group("cordapps") {
           get("/cordapps/flows", FlowService(rpc)::flows)

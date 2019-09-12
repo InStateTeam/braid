@@ -17,8 +17,8 @@ package io.bluebank.braid.server
 
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.core.socket.findFreePort
-import io.bluebank.braid.server.domain.SimpleNodeInfo
 import io.bluebank.braid.server.util.assertThat
 import io.vertx.core.Future
 import io.vertx.core.Vertx

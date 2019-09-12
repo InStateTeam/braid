@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server.domain
+package io.bluebank.braid.corda.services
 
-import net.corda.core.identity.Party
-import net.corda.core.node.NodeInfo
-import net.corda.core.utilities.NetworkHostAndPort
+import net.corda.core.flows.FlowLogic
+import net.corda.core.messaging.FlowHandle
 
-data class SimpleNodeInfo(
-  val addresses: List<NetworkHostAndPort>,
-  val legalIdentities: List<Party>
-)
-
-fun NodeInfo.toSimpleNodeInfo(): SimpleNodeInfo {
-  return SimpleNodeInfo(this.addresses, this.legalIdentities)
+/**
+ * interface for starting a flow either within the node or via Corda RPC
+ */
+interface FlowStarterAdapter {
+  fun <T> startFlowDynamic(
+    logicType: Class<out FlowLogic<T>>,
+    vararg args: Any?
+  ): FlowHandle<T>
 }
