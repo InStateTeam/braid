@@ -15,12 +15,8 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.utils.toJarsClassLoader
-import io.bluebank.braid.core.utils.tryWithClassLoader
-import io.vertx.core.Future
-import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<BraidMain>()
 
@@ -35,24 +31,4 @@ fun main(args: Array<String>) {
   val port = Integer.valueOf(args[3])
   val additionalPaths = args.asList().drop(4)
   BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
-}
-
-class BraidMain {
-
-  fun start(networkAndPort: String,userName: String, password: String, port: Int, additionalPaths: List<String>): Future<String> {
-    val classLoader = additionalPaths.toJarsClassLoader()
-    return tryWithClassLoader(classLoader) {
-      Braid(
-          port = port,
-          userName = userName,
-          password = password,
-          nodeAddress = NetworkHostAndPort.parse(networkAndPort)
-      )
-          .startServer()
-          .recover {
-            log.error("Server failed to start:", it)
-            Future.succeededFuture("-1")
-          }
-    }
-  }
 }

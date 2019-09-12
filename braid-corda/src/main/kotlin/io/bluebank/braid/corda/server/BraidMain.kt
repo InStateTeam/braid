@@ -13,30 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.server
 
-import io.bluebank.braid.corda.server.Braid
-import io.bluebank.braid.corda.server.BraidDocsMain
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
-import java.io.File
+import io.vertx.core.Future
+import net.corda.core.utilities.NetworkHostAndPort
 
-private val log = loggerFor<Braid>()
+private val log = loggerFor<BraidMain>()
 
-fun main(args: Array<String>) {
-  if (args.isEmpty()) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> [<cordaAppJar1> <cordAppJar2> ....]")
+class BraidMain {
+
+  fun start(
+    networkAndPort: String,
+    userName: String,
+    password: String,
+    port: Int,
+    additionalPaths: List<String>
+  ): Future<String> {
+    val classLoader = additionalPaths.toJarsClassLoader()
+    return tryWithClassLoader(classLoader) {
+      Braid(
+        port = port,
+        userName = userName,
+        password = password,
+        nodeAddress = NetworkHostAndPort.parse(networkAndPort)
+      )
+        .startServer()
+        .recover {
+          log.error("Server failed to start:", it)
+          Future.succeededFuture("-1")
+        }
+    }
   }
-
-  val file = File(args[0])
-  file.parentFile.mkdirs()
-  val cordappsClassLoader = args.toList().drop(1).toJarsClassLoader()
-  // we call so as to initialise model converters etc before replacing the context class loader
-  Braid.init()
-  tryWithClassLoader(cordappsClassLoader) {
-    val swaggerText = BraidDocsMain().swaggerText()
-    file.writeText(swaggerText)
-  }
-  log.info("wrote to: ${file.absolutePath}")
 }
