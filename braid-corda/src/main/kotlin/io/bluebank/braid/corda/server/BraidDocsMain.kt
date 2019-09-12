@@ -1,0 +1,79 @@
+/**
+ * Copyright 2018 Royal Bank of Scotland
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.bluebank.braid.corda.server
+
+import io.bluebank.braid.corda.rest.RestMounter
+import io.bluebank.braid.corda.rest.docs.ModelContext
+import io.bluebank.braid.corda.server.rpc.RPCFactory
+import io.github.classgraph.ClassGraph
+import io.vertx.core.Vertx
+import io.vertx.ext.web.impl.RouterImpl
+import net.corda.core.CordaInternal
+import net.corda.core.flows.FlowInitiator
+import net.corda.core.flows.FlowLogic
+
+class BraidDocsMain() {
+  /**
+   * @param openApiVersion - 2 or 3
+   */
+  fun swaggerText(openApiVersion: Int): String {
+    val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
+    val vertx = Vertx.vertx()
+    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+    val classes = readCordaClasses()
+    classes.forEach { restMounter.docsHandler.addType(it) }
+    return restMounter.docsHandler.swagger()
+  }
+
+  private fun readCordaClasses(): List<Class<out Any>> {
+    val res = ClassGraph()
+      .enableClassInfo()
+      .enableAnnotationInfo()
+      .addClassLoader(ClassLoader.getSystemClassLoader())
+      .whitelistPackages("net.corda")
+      .blacklistPackages(
+        "net.corda.internal",
+        "net.corda.client",
+        "net.corda.core.internal",
+        "net.corda.nodeapi.internal",
+        "net.corda.serialization.internal",
+        "net.corda.testing",
+        "net.corda.common.configuration.parsing.internal",
+        "net.corda.finance.internal",
+        "net.corda.common.validation.internal",
+        "net.corda.client.rpc.internal",
+        "net.corda.core.cordapp"
+      )
+      .scan()
+
+    val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
+    val isCompanionClass = Regex(".*\\$" + "Companion")::matches
+    val isKotlinFileClass = Regex(".*Kt$")::matches
+    return res.allClasses.asSequence()
+      .filter {
+        !it.hasAnnotation(CordaInternal::class.java.name) &&
+          !it.isInterface &&
+          !it.isAbstract &&
+          !it.extendsSuperclass(FlowLogic::class.java.name) &&
+          !it.extendsSuperclass(FlowInitiator::class.java.name) &&
+          !isFunctionName(it.name) &&
+          !isCompanionClass(it.name) &&
+          !isKotlinFileClass(it.name)
+      }
+      .map { it.loadClass() }
+      .toList()
+  }
+}

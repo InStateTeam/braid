@@ -33,7 +33,7 @@ import rx.Observable
 import java.lang.reflect.Constructor
 
 class CordaFlowServiceExecutor(
-  private val services: FlowStarter,
+  private val services: FlowStarterAdapter,
   val config: BraidConfig
 ) : ServiceExecutor {
 

@@ -20,7 +20,8 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import java.net.URI
 
-data class RestConfig(
+data class
+RestConfig(
   val swaggerInfo: SwaggerInfo = SwaggerInfo(),
 
   val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,

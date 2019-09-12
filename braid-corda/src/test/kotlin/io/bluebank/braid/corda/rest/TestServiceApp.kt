@@ -30,7 +30,7 @@ import java.io.FileOutputStream
 
 class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 2) {
   companion object {
-    const val SWAGGER_ROOT = "/swagger"
+    const val SWAGGER_ROOT = ""
     const val REST_API_ROOT = "/"
     @JvmStatic
     fun main(args: Array<String>) {

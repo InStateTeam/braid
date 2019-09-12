@@ -50,16 +50,13 @@ class CustomModelConverter : ModelConverter {
     try {
       val jsonType = Json.mapper().constructType(type)
       if (jsonType != null) {
-        val clazz = jsonType.getRawClass()
+        val clazz = jsonType.rawClass
         if (PublicKey::class.java.isAssignableFrom(clazz)) {
           return StringProperty()
             .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
             .description("Base 58 Encoded Public Key")
         }
-        if (SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(
-            clazz
-          )
-        ) {
+        if (SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz)) {
           return StringProperty()
             .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
             .description("Base 58 Encoded Secure Hash")
@@ -83,7 +80,7 @@ class CustomModelConverter : ModelConverter {
         if (Amount::class.java.isAssignableFrom(clazz)) {
           // String and Currency get created as their own types
           val boundType = jsonType.bindings.getBoundType(0)
-          if (boundType != null && (boundType.rawClass.equals(Currency::class.java))
+          if (boundType != null && (boundType.rawClass == Currency::class.java)
           ) {
             context?.defineModel(
               "AmountCurrency", ModelImpl()
@@ -118,14 +115,12 @@ class CustomModelConverter : ModelConverter {
         if (Issued::class.java.isAssignableFrom(clazz)) {
           // String and Currency get created as their own types
           val boundType = jsonType.bindings.getBoundType(0)
-          if (boundType != null && (boundType.rawClass.equals(Currency::class.java) || boundType.rawClass.equals(
-              String::class.java
-            ))
+          if (boundType != null && (boundType.rawClass == Currency::class.java || boundType.rawClass == String::class.java)
           ) {
             context?.defineModel(
               "IssuedCurrency", ModelImpl()
                 .type("object")
-                .property("issuer", RefProperty("Issuer"))
+                .property("issuer", RefProperty("PartyAndReference"))
                 .property(
                   "product",
                   resolveProperty(boundType, context, annotations, chain)
@@ -135,7 +130,7 @@ class CustomModelConverter : ModelConverter {
           } else {
             val model = ModelImpl()
               .type("object")
-              .property("issuer", RefProperty("Issuer"))
+              .property("issuer", RefProperty("PartyAndReference"))
               .property(
                 "product",
                 resolveProperty(boundType, context, annotations, chain)
@@ -147,9 +142,8 @@ class CustomModelConverter : ModelConverter {
           }
         }
       }
-
     } catch (e: Throwable) {
-      log.error("Unable to parse:" + type, e)
+      log.error("Unable to parse: $type", e)
     }
 
     return chain?.next()?.resolveProperty(type, context, annotations, chain)
