@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.core.utils
 
-import io.bluebank.braid.corda.server.BraidMain
-import io.bluebank.braid.core.logging.loggerFor
+import org.junit.Assert.assertNotNull
+import org.junit.Test
 
-private val log = loggerFor<BraidMain>()
-
-fun main(args: Array<String>) {
-  if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> [<cordaAppJar1> <cordAppJar2> ....]")
+class PathsClassLoaderTest {
+  @Test
+  fun `that we can load classes from web jars`() {
+    val classLoader = PathsClassLoader.jarsClassLoader(
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+      )
+    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
+    assertNotNull(clazz)
   }
-
-  val networkAndPort = args[0]
-  val userName = args[1]
-  val password = args[2]
-  val port = Integer.valueOf(args[3])
-  val additionalPaths = args.asList().drop(4)
-  BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
 }
