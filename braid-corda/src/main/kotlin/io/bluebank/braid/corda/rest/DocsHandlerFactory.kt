@@ -34,14 +34,14 @@ class DocsHandlerFactory(
       3 -> return DocsHandlerV3(
           swaggerInfo = config.swaggerInfo,
           debugMode = config.debugMode,
-          basePath = "${config.hostAndPortUri}/$path/",
+        basePath = "${config.hostAndPortUri}/$path",
           auth = null ///todo auth
       )
       2 -> return DocsHandlerV2(
           swaggerInfo = config.swaggerInfo,
           scheme = config.scheme,
           debugMode = config.debugMode,
-          basePath = "${config.hostAndPortUri}/$path/",
+        basePath = "${config.hostAndPortUri}/$path",
           auth = getSecuritySchemeDefinition()
       )
       else -> TODO("Unknown OpenAPI version ${config.openApiVersion}")
