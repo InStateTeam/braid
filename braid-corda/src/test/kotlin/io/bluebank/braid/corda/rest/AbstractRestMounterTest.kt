@@ -38,6 +38,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   private val port = findFreePort()
   private val service = TestServiceApp(port = port, service = TestService(), openApiVersion = openApiVersion)
+  private val client = service.server.vertx.createHttpClient()
 
   @Before
   fun before(context: TestContext) {
@@ -46,12 +47,12 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   @After
   fun after() {
+    client.close()
     service.shutdown()
   }
 
   @Test
   fun `test that we can mount rest endpoints and access via swagger`(context: TestContext) {
-    val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     log.info("calling GET ${TestServiceApp.SWAGGER_ROOT}/swagger.json")
     client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json") { httpResponse ->
@@ -291,7 +292,6 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   @Test
   fun `test that method that fails returns all headers`(context: TestContext) {
-    val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
       .exceptionHandler(context::fail)
@@ -312,7 +312,6 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   @Test
   fun `that map of numbers to numbers can be mapped to map of string to string`(context: TestContext) {
-    val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     val result = mapOf(1 to 1, 2 to 2, 3 to 3)
     val expected = result.map {
@@ -333,7 +332,6 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   @Test
   fun `that map of strings to list of numbers can be mapped to map of string to list of strings`(context: TestContext) {
-    val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     val result = mapOf(1 to listOf(1, 2, 3), 2 to listOf(4, 5, 6), 3 to listOf(7, 8, 9))
     val expected = result.map { entry ->
