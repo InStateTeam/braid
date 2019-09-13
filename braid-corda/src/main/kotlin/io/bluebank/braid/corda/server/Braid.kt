@@ -65,7 +65,7 @@ data class Braid(
   fun restConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
 
-    val cordaServicesAdapter = rpc.validConnection().toCordaServicesAdapter()
+    val cordaServicesAdapter = rpc.toCordaServicesAdapter()
     val flowInitiator = FlowInitiator(cordaServicesAdapter)
     val rpcClasses = rpcClasses(classLoader)
     val networkService = SimpleNetworkMapService(cordaServicesAdapter)

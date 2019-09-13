@@ -17,11 +17,9 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
-import io.swagger.v3.oas.models.OpenAPI
-
 import io.swagger.v3.core.converter.ModelConverters
+import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.Schema
-
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.ParameterizedType
@@ -73,6 +71,6 @@ class ModelContextV3 {
     return ModelConverters.getInstance().readAll(this)
   }
 
-      var log = loggerFor<ModelContextV3>()
+  var log = loggerFor<ModelContextV3>()
 
 }

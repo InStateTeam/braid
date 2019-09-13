@@ -16,7 +16,6 @@
 package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
@@ -24,6 +23,7 @@ import io.vertx.ext.web.impl.RouterImpl
 import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
+import net.corda.core.serialization.CordaSerializable
 
 class BraidDocsMain() {
   /**
@@ -64,7 +64,8 @@ class BraidDocsMain() {
     val isKotlinFileClass = Regex(".*Kt$")::matches
     return res.allClasses.asSequence()
       .filter {
-        !it.hasAnnotation(CordaInternal::class.java.name) &&
+        it.hasAnnotation(CordaSerializable::class.java.name) &&
+          !it.hasAnnotation(CordaInternal::class.java.name) &&
           !it.isInterface &&
           !it.isAbstract &&
           !it.extendsSuperclass(FlowLogic::class.java.name) &&

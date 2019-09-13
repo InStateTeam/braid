@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.services.adapters
 
+import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.services.CordaServicesAdapter
 import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.AbstractParty
@@ -26,6 +27,10 @@ import net.corda.core.messaging.FlowHandle
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
 import net.corda.core.utilities.NetworkHostAndPort
+
+fun RPCFactory.toCordaServicesAdapter(): CordaServicesAdapter {
+  return RPCFactoryCordaServicesAdapter(this)
+}
 
 fun CordaRPCOps.toCordaServicesAdapter(): CordaServicesAdapter {
   return CordaRpcOpsAdapter(this)
