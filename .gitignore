@@ -14,3 +14,4 @@ build/**
 node_modules/
 target
 **/dependency-reduced-pom.xml
+**/.node
