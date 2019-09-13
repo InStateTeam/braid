@@ -113,8 +113,8 @@
                   <fileset dir="." includes="**/package.json"/>
                 </replaceregexp>
                 <replaceregexp
-                  match="&quot;braid-corda-client&quot;: &quot;[^&quot;]*&quot;"
-                  replace="&quot;braid-corda-client&quot;: &quot;${project.version}&quot;">
+                    match="&quot;braid-corda-client&quot;: &quot;[^&quot;]*&quot;"
+                    replace="&quot;braid-corda-client&quot;: &quot;${project.version}&quot;">
                   <fileset dir="." includes="**/package.json"/>
                 </replaceregexp>
               </target>
@@ -128,7 +128,17 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
+                <exec executable="cmd" dir="${project.basedir}" failonerror="true" osfamily="windows">
+                  <arg value="/c"/>
+                  <arg value="gradlew"/>
+                  <arg value="clean"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="unix">
+                  <arg value="clean"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="mac">
                   <arg value="clean"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
@@ -143,7 +153,18 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
+                <exec executable="cmd" dir="${project.basedir}" failonerror="true" osfamily="windows">
+                  <arg value="cmd"/>
+                  <arg value="/c"/>
+                  <arg value="gradlew"/>
+                  <arg value="test"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="unix">
+                  <arg value="test"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="mac">
                   <arg value="test"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
@@ -158,7 +179,17 @@
             </goals>
             <configuration>
               <target>
-                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true">
+                <exec executable="cmd" dir="${project.basedir}" failonerror="true" osfamily="windows">
+                  <arg value="/c"/>
+                  <arg value="gradlew"/>
+                  <arg value="deployNodes"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="unix">
+                  <arg value="deployNodes"/>
+                  <arg value="-Pext.braid_version=${project.version}"/>
+                </exec>
+                <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="mac">
                   <arg value="deployNodes"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
