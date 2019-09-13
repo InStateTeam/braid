@@ -126,6 +126,16 @@ class TestService {
 
     return headers.getRequestHeader(X_HEADER_LIST_STRING).map { it.toInt() }
   }
+
+  fun mapNumbersToStrings(numbers: Map<Int, Int>): Map<String, String> {
+    return numbers.map { it.key.toString() to it.value.toString() }.toMap()
+  }
+
+  fun mapMapOfNumbersToMapOfStrings(data: Map<String, List<Int>>): Map<String, List<String>> {
+    return data.map { entry ->
+      entry.key to entry.value.map { it.toString() }
+    }.toMap()
+  }
 }
 
 data class LoginRequest(

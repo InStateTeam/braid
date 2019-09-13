@@ -81,6 +81,8 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
                 get("/headers", service::headers)
                 get("/headers/optional", service::optionalHeader)
                 get("/headers/non-optional", service::nonOptionalHeader)
+                post("/map-numbers-to-string", service::mapNumbersToStrings)
+                post("/map-list-of-numbers-to-map-of-list-of-string", service::mapMapOfNumbersToMapOfStrings)
               }
               protected {
                 post("/echo", service::echo)

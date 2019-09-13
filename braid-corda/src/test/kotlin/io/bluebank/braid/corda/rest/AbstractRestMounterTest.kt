@@ -290,7 +290,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
   }
 
   @Test
-  fun testThatMethodThatFailsReturnsAllHeaders(context: TestContext) {
+  fun `test that method that fails returns all headers`(context: TestContext) {
     val client = service.server.vertx.createHttpClient()
     val async1 = context.async()
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
@@ -309,4 +309,47 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       }
       .end()
   }
+
+  @Test
+  fun `that map of numbers to numbers can be mapped to map of string to string`(context: TestContext) {
+    val client = service.server.vertx.createHttpClient()
+    val async1 = context.async()
+    val result = mapOf(1 to 1, 2 to 2, 3 to 3)
+    val expected = result.map {
+      it.key.toString() to it.value.toString()
+    }.toMap()
+    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/map-numbers-to-string")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        context.assertEquals(200, response.statusCode())
+        response.bodyHandler { buffer ->
+          val result = Json.decodeValue(buffer.toString(), Map::class.java)
+          context.assertEquals(expected, result)
+          async1.complete()
+        }
+      }
+      .end(Json.encode(result))
+  }
+
+  @Test
+  fun `that map of strings to list of numbers can be mapped to map of string to list of strings`(context: TestContext) {
+    val client = service.server.vertx.createHttpClient()
+    val async1 = context.async()
+    val result = mapOf(1 to listOf(1, 2, 3), 2 to listOf(4, 5, 6), 3 to listOf(7, 8, 9))
+    val expected = result.map { entry ->
+      entry.key.toString() to entry.value.map { value -> value.toString() }
+    }.toMap()
+    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/map-list-of-numbers-to-map-of-list-of-string")
+      .exceptionHandler(context::fail)
+      .handler { response ->
+        context.assertEquals(200, response.statusCode())
+        response.bodyHandler { buffer ->
+          val result = Json.decodeValue(buffer.toString(), Map::class.java)
+          context.assertEquals(expected, result)
+          async1.complete()
+        }
+      }
+      .end(Json.encode(result))
+  }
+
 }
