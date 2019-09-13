@@ -87,7 +87,6 @@
     }
     swaggerJsonPath += 'swagger.json';
     const apiLocation = location.protocol + '//' + location.host + swaggerJsonPath;
-    console.log("serving api from location:", apiLocation);
     // Build a system
     const ui = SwaggerUIBundle({
       url: apiLocation,

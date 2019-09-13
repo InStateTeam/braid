@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Swagger UI</title>
     <link rel="stylesheet" type="text/css" href="./swagger-ui-dist/swagger-ui.css" >
+    <link rel="stylesheet" type="text/css" href="./themes/theme-newspaper.css">
     <link rel="icon" type="image/png" href="./swagger-ui-dist/favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="swagger-ui-dist/favicon-16x16.png" sizes="16x16" />
     <style>
@@ -44,7 +45,6 @@
       }
       swaggerJsonPath += 'swagger.json';
       const apiLocation = location.protocol + '//' + location.host + swaggerJsonPath;
-      console.log("serving api from location:", apiLocation);
 
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
