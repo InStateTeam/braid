@@ -21,12 +21,13 @@ import io.bluebank.braid.corda.rest.toSwaggerPath
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
-import io.swagger.util.Json
+import io.swagger.v3.core.util.Json
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
@@ -37,11 +38,11 @@ import java.net.URL
 import kotlin.reflect.KCallable
 
 class DocsHandlerV3(
-    private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
+  private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
 
-    private val auth: String? = null,
-    private val basePath: String = "http://localhost:8080",
-    private val debugMode: Boolean = false
+  private val auth: SecurityScheme? = null,
+  private val basePath: String = "http://localhost:8080",
+  private val debugMode: Boolean = false
 ) : DocsHandler {
 
   companion object {
@@ -57,9 +58,9 @@ class DocsHandlerV3(
   private val modelContext = ModelContextV3()
 
   override fun handle(context: RoutingContext) {
-    swagger.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json","")))
-    val output =
-        Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
+    val openApi = if (debugMode) createSwagger() else swagger
+    openApi.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json", "")))
+    val output = Json.mapper().writeValueAsString(openApi)
     context.response()
         .setStatusCode(HttpResponseStatus.OK.code())
         .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
@@ -68,7 +69,7 @@ class DocsHandlerV3(
   }
 
   override fun swagger(): String {
-    return io.swagger.util.Json.pretty().writeValueAsString(createSwagger())
+    return Json.mapper().writeValueAsString(createSwagger())
   }
 
   fun createSwagger(): OpenAPI {
@@ -79,18 +80,11 @@ class DocsHandlerV3(
         addServersItem(Server().url(url.toExternalForm()))
         // hopefully under server above .basePath(url.path)
         if (auth != null) {
-          addSecurityItem(
-            SecurityRequirement().addList(
-              SECURITY_DEFINITION_NAME,
-              mutableListOf(auth)
-            )
-          )  // TODO: what are the auth schemes for V3
+          getOrCreateComponents().securitySchemes = mapOf(SECURITY_DEFINITION_NAME to auth)
         }
         // may be covered under server? .schema(scheme)
         modelContext.addToSwagger(this)
-        endpoints.forEach {
-          addEndpoint(it)
-        }
+        endpoints.forEach { addEndpoint(it) }
       }
   }
 
@@ -173,5 +167,12 @@ class DocsHandlerV3(
   override fun addType(type: Type) {
     modelContext.addType(type)
   }
+}
+
+private fun OpenAPI.getOrCreateComponents(): Components {
+  if (components == null) {
+    components = Components()
+  }
+  return components
 }
 

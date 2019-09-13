@@ -22,33 +22,53 @@ import io.swagger.models.auth.ApiKeyAuthDefinition
 import io.swagger.models.auth.BasicAuthDefinition
 import io.swagger.models.auth.In
 import io.swagger.models.auth.SecuritySchemeDefinition
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.vertx.core.http.HttpHeaders
 
 class DocsHandlerFactory(
-    val config: RestConfig,
-    val path: String = config.apiPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
+  val config: RestConfig,
+  val path: String = config.apiPath.trim().dropWhile { it == '/' }.dropLastWhile { it == '/' }
 ) {
 
   fun createDocsHandler(): DocsHandler {
     when (config.openApiVersion) {
       3 -> return DocsHandlerV3(
-          swaggerInfo = config.swaggerInfo,
-          debugMode = config.debugMode,
+        swaggerInfo = config.swaggerInfo,
+        debugMode = config.debugMode,
         basePath = "${config.hostAndPortUri}/$path",
-          auth = null ///todo auth
+        auth = getV3SecurityType()
       )
       2 -> return DocsHandlerV2(
-          swaggerInfo = config.swaggerInfo,
-          scheme = config.scheme,
-          debugMode = config.debugMode,
+        swaggerInfo = config.swaggerInfo,
+        scheme = config.scheme,
+        debugMode = config.debugMode,
         basePath = "${config.hostAndPortUri}/$path",
-          auth = getSecuritySchemeDefinition()
+        auth = getV2SecuritySchemeDefinition()
       )
-      else -> TODO("Unknown OpenAPI version ${config.openApiVersion}")
+      else -> error("Unknown OpenAPI version ${config.openApiVersion}")
     }
   }
 
-  private fun getSecuritySchemeDefinition(): SecuritySchemeDefinition? {
+  private fun getV3SecurityType(): SecurityScheme? {
+    return when (config.authSchema) {
+      AuthSchema.Basic -> {
+        SecurityScheme().apply {
+          scheme = "basic"
+          type = SecurityScheme.Type.HTTP
+        }
+      }
+      AuthSchema.Token -> {
+        SecurityScheme().apply {
+          scheme = "bearer"
+          type = SecurityScheme.Type.HTTP
+          bearerFormat = "JWT"
+        }
+      }
+      AuthSchema.None -> null
+    }
+  }
+
+  private fun getV2SecuritySchemeDefinition(): SecuritySchemeDefinition? {
     return when (config.authSchema) {
       AuthSchema.Basic -> {
         BasicAuthDefinition()
