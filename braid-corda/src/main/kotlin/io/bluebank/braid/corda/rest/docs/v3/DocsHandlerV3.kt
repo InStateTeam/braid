@@ -69,7 +69,7 @@ class DocsHandlerV3(
   }
 
   override fun swagger(): String {
-    return Json.mapper().writeValueAsString(createSwagger())
+    return Json.pretty().writeValueAsString(createSwagger())
   }
 
   fun createSwagger(): OpenAPI {
