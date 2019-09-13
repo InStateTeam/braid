@@ -60,7 +60,7 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
           .withDebugMode()
           .withOpenApiVersion(openApiVersion)
           .withPaths {
-            group("General Ledger") {
+            group("Test Service") {
               unprotected {
                 get("/hello-async", service::sayHelloAsync)
                 get("/quiet-async-void", service::quietAsyncVoid)
