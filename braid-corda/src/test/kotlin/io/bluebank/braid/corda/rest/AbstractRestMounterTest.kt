@@ -313,8 +313,8 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
   @Test
   fun `that map of numbers to numbers can be mapped to map of string to string`(context: TestContext) {
     val async1 = context.async()
-    val result = mapOf(1 to 1, 2 to 2, 3 to 3)
-    val expected = result.map {
+    val request = mapOf(1 to 1, 2 to 2, 3 to 3)
+    val expected = request.map {
       it.key.toString() to it.value.toString()
     }.toMap()
     client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/map-numbers-to-string")
@@ -327,7 +327,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
           async1.complete()
         }
       }
-      .end(Json.encode(result))
+      .end(Json.encode(request))
   }
 
   @Test

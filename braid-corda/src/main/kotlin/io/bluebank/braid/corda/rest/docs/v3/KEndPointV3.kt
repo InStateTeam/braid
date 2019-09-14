@@ -39,8 +39,9 @@ class KEndPointV3(
   val name: String,
   val parameters: List<KParameter>,
   override val returnType: Type,
-  override val annotations: List<Annotation>
-) : EndPointV3(groupName, protected, method, path) {
+  override val annotations: List<Annotation>,
+  modelContext: ModelContextV3
+) : EndPointV3(groupName, protected, method, path, modelContext) {
 
   init {
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations

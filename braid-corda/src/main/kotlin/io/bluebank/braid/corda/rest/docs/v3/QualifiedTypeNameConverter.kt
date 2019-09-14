@@ -13,24 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.rest
+package io.bluebank.braid.corda.rest.docs.v3
 
-data class ContactInfo(
-  val name: String? = null,
-  val url: String? = null,
-  val email: String? = null
-) {
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.swagger.v3.core.jackson.ModelResolver
 
-  fun name(name: String): ContactInfo {
-    return copy(name = name)
-  }
-
-  fun url(url: String): ContactInfo {
-    return copy(url = url)
-  }
-
-  fun email(email: String): ContactInfo {
-    return copy(email = email)
-  }
-
-}
+class QualifiedTypeNameConverter(mapper: ObjectMapper) : ModelResolver(mapper, QualifiedTypeNameResolver())

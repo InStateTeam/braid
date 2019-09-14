@@ -18,7 +18,6 @@ package io.bluebank.braid.corda.rest.docs.v3
 import io.bluebank.braid.corda.rest.SwaggerInfo
 import io.bluebank.braid.corda.rest.docs.DocsHandler
 import io.bluebank.braid.corda.rest.toSwaggerPath
-import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.v3.core.util.Json
@@ -33,6 +32,7 @@ import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
+import net.corda.core.utilities.contextLogger
 import java.lang.reflect.Type
 import java.net.URL
 import kotlin.reflect.KCallable
@@ -46,7 +46,7 @@ class DocsHandlerV3(
 ) : DocsHandler {
 
   companion object {
-    var log = loggerFor<DocsHandlerV3>()
+    private val log = contextLogger()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }
 
@@ -62,10 +62,10 @@ class DocsHandlerV3(
     openApi.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json", "")))
     val output = Json.mapper().writeValueAsString(openApi)
     context.response()
-        .setStatusCode(HttpResponseStatus.OK.code())
-        .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-        .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
-        .end(output)
+      .setStatusCode(HttpResponseStatus.OK.code())
+      .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+      .end(output)
   }
 
   override fun swagger(): String {
@@ -116,7 +116,7 @@ class DocsHandlerV3(
         PUT -> path.put(operation)
         DELETE -> path.delete(operation)
         PATCH -> path.patch(operation)
-        OPTIONS, HEAD, TRACE, CONNECT, OTHER -> TODO("Implement ${endpoint.method.name}")
+        OPTIONS, HEAD, TRACE, CONNECT, OTHER -> error("HTTP method not implemented: ${endpoint.method.name}")
       }
     } catch (e: Throwable) {
       log.warn("Unable to add endpoint $endpoint : ${e.message}")
@@ -124,39 +124,39 @@ class DocsHandlerV3(
   }
 
   override fun <Response> add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: KCallable<Response>
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: KCallable<Response>
   ) {
     val endpoint = EndPointV3.create(
-        groupName,
-        protected,
-        method,
-        path,
-        handler.name,
-        handler.parameters,
-        handler.returnType,
-        handler.annotations
+      groupName,
+      protected,
+      method,
+      path,
+      handler.name,
+      handler.parameters,
+      handler.returnType,
+      handler.annotations,
+      modelContext
     )
     add(endpoint)
   }
 
   override fun add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: (RoutingContext) -> Unit
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: (RoutingContext) -> Unit
   ) {
-    val endpoint = EndPointV3.create(groupName, protected, method, path, handler)
+    val endpoint = EndPointV3.create(groupName, protected, method, path, handler, modelContext)
     add(endpoint)
   }
 
   private fun add(endpoint: EndPointV3) {
     endpoints.add(endpoint)
-    endpoint.addTypes(modelContext)
   }
 
   fun group(groupId: String, fn: () -> Unit) {

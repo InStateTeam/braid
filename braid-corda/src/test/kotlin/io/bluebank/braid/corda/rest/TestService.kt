@@ -136,6 +136,8 @@ class TestService {
       entry.key to entry.value.map { it.toString() }
     }.toMap()
   }
+
+  fun sum(request: SumRequest): SumResponse = SumResponse(request.lhs + request.rhs, request.nonce)
 }
 
 data class LoginRequest(
@@ -147,4 +149,9 @@ data class LoginRequest(
     example = "admin"
   ) val password: String
 )
+
+abstract class AbstractRequest(val nonce: Int)
+abstract class AbstractResult(val nonce: Int)
+class SumRequest(val lhs: Int, val rhs: Int, nonce: Int) : AbstractRequest(nonce)
+class SumResponse(val value: Int, nonce: Int) : AbstractResult(nonce)
 

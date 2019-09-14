@@ -15,33 +15,50 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
+import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
+import io.swagger.v3.core.converter.ResolvedSchema
+import io.swagger.v3.core.util.Json
+import io.swagger.v3.core.util.PrimitiveType
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.media.BinarySchema
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
+import net.corda.core.utilities.contextLogger
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 
 class ModelContextV3 {
+  companion object {
+    private val log = contextLogger()
+    private val binaryResolvedSchema = ResolvedSchema().apply { schema = BinarySchema() }
+  }
+
   private val mutableModels = mutableMapOf<String, Schema<*>>()
   val models: Map<String, Schema<*>> get() = mutableModels
+  private val modelConverters = ModelConverters().apply {
+    addConverter(QualifiedTypeNameConverter(Json.mapper()))
+  }
 
-  fun addType(type: Type) {
+  fun addType(type: Type): ResolvedSchema {
     // todo move to CustomModelConverter
-    if (type is ParameterizedType) {
-      if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
-        this.addType(type.actualTypeArguments[0])
-      } else {
-        type.actualTypeArguments.forEach {
-          addType(it)
+    val actualType = type.actualType()
+    return try {
+      when {
+        actualType.isBinary() -> binaryResolvedSchema
+        else -> {
+          actualType.createSwaggerModels()?.also {
+            mutableModels += it.referencedSchemas
+          } ?: ResolvedSchema().apply {
+            this.schema = PrimitiveType.createProperty(actualType)
+          }
         }
       }
-    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
-      mutableModels += type.createSwaggerModels()
+    } catch (e: Throwable) {
+      throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
   }
 
@@ -67,10 +84,15 @@ class ModelContextV3 {
     }
   }
 
-  private fun Type.createSwaggerModels(): Map<String, Schema<*>> {
-    return ModelConverters.getInstance().readAll(this)
+  private fun Type.createSwaggerModels(): ResolvedSchema? {
+    return modelConverters.resolveAsResolvedSchema(AnnotatedType(this).resolveAsRef(true))
   }
 
-  var log = loggerFor<ModelContextV3>()
-
+  private fun Type.actualType(): Type {
+    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
+      this.actualTypeArguments[0]
+    } else {
+      this
+    }
+  }
 }
