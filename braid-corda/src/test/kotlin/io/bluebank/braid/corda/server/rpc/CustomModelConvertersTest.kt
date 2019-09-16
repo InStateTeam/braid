@@ -239,7 +239,6 @@ class CustomModelConvertersTest {
   fun `should Correctly Model Party as owning key string`() {
 
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
 
     val properties = models.get("Party")?.properties
     assertThat(properties?.size, equalTo(2))
@@ -252,6 +251,24 @@ class CustomModelConvertersTest {
       properties?.get("owningKey")?.type,
       equalTo("string")
     )
+  }
+
+ @Test
+  fun `should Serialize Classes`() {
+   val encode = Json.encode(ClassWithTypes::class.java)
+   assertThat(encode, equalTo("\"io.bluebank.braid.corda.server.rpc.CustomModelConvertersTest\$ClassWithTypes\""))
+ }
+
+ @Test
+  fun `should Correctly Model Class as string`() {
+
+    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+   
+    val properties = models.get("ClassWithTypes")?.properties
+    val classType = properties?.get("clazz")
+    assertThat(properties?.toString(), classType, notNullValue())
+    assertThat(properties?.toString(), classType?.type, equalTo("string"))
+
   }
 
   data class ClassWithTypes(
@@ -267,6 +284,7 @@ class CustomModelConvertersTest {
     , val issued: Issued<IssuedType>
     , val signed: SignedTransaction
     , val wire: WireTransaction
+    , val clazz: Class<*>
   )
 
   data class IssuedType(

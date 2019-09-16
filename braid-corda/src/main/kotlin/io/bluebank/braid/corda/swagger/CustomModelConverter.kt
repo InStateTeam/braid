@@ -56,6 +56,11 @@ class CustomModelConverter : ModelConverter {
             .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
             .description("Base 58 Encoded Public Key")
         }
+        if (Class::class.java.isAssignableFrom(clazz)) {
+          return StringProperty()
+            .example("java.lang.Object")
+            .description("Java class name")
+        }
         if (SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz)) {
           return StringProperty()
             .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
