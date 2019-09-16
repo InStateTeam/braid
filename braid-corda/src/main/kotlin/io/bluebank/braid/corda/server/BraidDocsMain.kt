@@ -16,7 +16,6 @@
 package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
@@ -24,57 +23,59 @@ import io.vertx.ext.web.impl.RouterImpl
 import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
+import net.corda.core.serialization.CordaSerializable
 
 class BraidDocsMain() {
-  fun swaggerText(): String {
-    val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub())
+  /**
+   * @param openApiVersion - 2 or 3
+   */
+  fun swaggerText(openApiVersion: Int): String {
+    val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
     val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+
     val classes = readCordaClasses()
-    val models = ModelContext().apply {
-      classes.forEach { addType(it) }
-    }
-    val swagger = restMounter.docsHandler.createSwagger()
-    models.addToSwagger(swagger)
-    return io.swagger.util.Json.pretty().writeValueAsString(swagger)
+    classes.forEach { restMounter.docsHandler.addType(it) }
+    return restMounter.docsHandler.swagger()
   }
 
   private fun readCordaClasses(): List<Class<out Any>> {
     val res = ClassGraph()
-      .enableClassInfo()
-      .enableAnnotationInfo()
-      .addClassLoader(ClassLoader.getSystemClassLoader())
-      .whitelistPackages("net.corda")
-      .blacklistPackages(
-        "net.corda.internal",
-        "net.corda.client",
-        "net.corda.core.internal",
-        "net.corda.nodeapi.internal",
-        "net.corda.serialization.internal",
-        "net.corda.testing",
-        "net.corda.common.configuration.parsing.internal",
-        "net.corda.finance.internal",
-        "net.corda.common.validation.internal",
-        "net.corda.client.rpc.internal",
-        "net.corda.core.cordapp"
-      )
-      .scan()
+        .enableClassInfo()
+        .enableAnnotationInfo()
+        .addClassLoader(ClassLoader.getSystemClassLoader())
+        .whitelistPackages("net.corda")
+        .blacklistPackages(
+            "net.corda.internal",
+            "net.corda.client",
+            "net.corda.core.internal",
+            "net.corda.nodeapi.internal",
+            "net.corda.serialization.internal",
+            "net.corda.testing",
+            "net.corda.common.configuration.parsing.internal",
+            "net.corda.finance.internal",
+            "net.corda.common.validation.internal",
+            "net.corda.client.rpc.internal",
+            "net.corda.core.cordapp"
+        )
+        .scan()
 
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
     val isKotlinFileClass = Regex(".*Kt$")::matches
     return res.allClasses.asSequence()
-      .filter {
-        !it.hasAnnotation(CordaInternal::class.java.name) &&
-          !it.isInterface &&
-          !it.isAbstract &&
-          !it.extendsSuperclass(FlowLogic::class.java.name) &&
-          !it.extendsSuperclass(FlowInitiator::class.java.name) &&
-          !isFunctionName(it.name) &&
-          !isCompanionClass(it.name) &&
-          !isKotlinFileClass(it.name)
-      }
-      .map { it.loadClass() }
-      .toList()
+        .filter {
+              it.hasAnnotation(CordaSerializable::class.java.name) &&
+              !it.hasAnnotation(CordaInternal::class.java.name) &&
+              !it.isInterface &&
+              !it.isAbstract &&
+              !it.extendsSuperclass(FlowLogic::class.java.name) &&
+              !it.extendsSuperclass(FlowInitiator::class.java.name) &&
+              !isFunctionName(it.name) &&
+              !isCompanionClass(it.name) &&
+              !isKotlinFileClass(it.name)
+        }
+        .map { it.loadClass() }
+        .toList()
   }
 }

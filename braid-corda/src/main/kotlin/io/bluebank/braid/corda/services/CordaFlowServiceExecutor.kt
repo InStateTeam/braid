@@ -70,12 +70,10 @@ class CordaFlowServiceExecutor(
     return if (constructor == null) {
       Observable.error(MethodDoesNotExist(request.method))
     } else {
+      @Suppress("DEPRECATION")
       return Observable.create { subscriber ->
         try {
           val params = request.mapParams(constructor)
-          @Suppress("UNCHECKED_CAST")
-          val flow = constructor.newInstance(*params) as FlowLogic<Any>
-
           services.startFlowDynamic(clazz, *params).returnValue
             .toObservable().subscribe({ item ->
               subscriber.onNext(item)

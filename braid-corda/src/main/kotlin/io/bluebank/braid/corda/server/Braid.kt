@@ -36,7 +36,8 @@ data class Braid(
   val port: Int = 8080,
   val userName: String = "",
   val password: String = "",
-  val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080)
+  val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
+  val openApiVersion: Int = 2
 ) {
   companion object {
     init {
@@ -55,13 +56,13 @@ data class Braid(
         // .withFlow(IssueObligation.Initiator::class)
         .withPort(port)
         .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress)))
+        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion))
         .bootstrapBraid(null, result)
       //addShutdownHook {  }
       return result
   }
 
-  fun restConfig(rpc: RPCFactory): RestConfig {
+  fun restConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
@@ -69,6 +70,7 @@ data class Braid(
     val rpcClasses = rpcClasses(classLoader)
     val networkService = SimpleNetworkMapService(cordaServicesAdapter)
     return RestConfig()
+      .withOpenApiVersion(openApiVersion)
       .withPaths {
         group("network") {
           get("/network/nodes", networkService::nodes)

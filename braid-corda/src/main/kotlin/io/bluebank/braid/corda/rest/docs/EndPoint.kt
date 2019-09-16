@@ -141,7 +141,7 @@ abstract class EndPoint(
     operation.parameters = toSwaggerParams()
     operation.tag(groupName)
     if (protected) {
-      operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
+      operation.addSecurity(DocsHandlerV2.SECURITY_DEFINITION_NAME, listOf())
     }
     operation.addResponse("200", operation.responses["default"])
     operation.addResponse("500", Response().description("server failure"))
@@ -189,13 +189,14 @@ abstract class EndPoint(
   protected fun Type.getSwaggerProperty(): Property {
     val actualType = this.actualType()
     try {
+      // todo move to CustomModelConverter and resolve there rather than here
       return if (actualType.isBinary()) {
         BinaryProperty()
       } else {
         ModelConverters.getInstance().readAsProperty(actualType)
       }
     } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type:" + actualType)
+      throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
   }
 
@@ -235,6 +236,9 @@ abstract class EndPoint(
     }
   }
 
+  /**
+   * @return true iff the type is binary data
+   */
   private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,

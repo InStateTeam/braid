@@ -21,12 +21,23 @@ import org.junit.Test
 
 class BraidDocsMainKtTest {
   @Test
-  fun `that we can generate a swagger definition`() {
+  fun `that we can generate a swagger definition V2`() {
     val jars = listOf(
       "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
       "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
     )
-    val swagger = generateSwaggerText(jars)
+    val swagger = generateSwaggerText(2, jars)
+    val json = JsonObject(swagger)
+    assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
+  }
+
+  @Test
+  fun `that we can generate a swagger definition for V3`() {
+    val jars = listOf(
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+    )
+    val swagger = generateSwaggerText(3, jars)
     val json = JsonObject(swagger)
     assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
   }

@@ -26,7 +26,7 @@ class SockJsSocketImpl(private val sockJS: SockJSSocket) :
   AbstractSocket<Buffer, Buffer>(), SockJSSocketWrapper {
 
   companion object {
-    val log = loggerFor<SockJsSocketImpl>()
+    private val log = loggerFor<SockJsSocketImpl>()
   }
 
   init {

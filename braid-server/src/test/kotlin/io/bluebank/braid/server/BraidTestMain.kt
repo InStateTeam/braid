@@ -23,16 +23,17 @@ private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
-  val port = Integer.valueOf(args[3])
   val networkAndPort = args[0]
   val userName = args[1]
   val password = args[2]
-  val additionalPaths = args.asList().drop(4)
+  val port = Integer.valueOf(args[3])
+  val openApiVersion = Integer.valueOf(args[4])
+  val additionalPaths = args.asList().drop(5)
 
-  BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
+  BraidMain().start(networkAndPort, userName, password, port, openApiVersion,additionalPaths)
       .map{
     openBrowser(port, it)
   }

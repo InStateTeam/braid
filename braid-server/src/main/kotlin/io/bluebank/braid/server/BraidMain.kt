@@ -15,20 +15,25 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.corda.server.Braid
 import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.utils.tryWithClassLoader
+import io.vertx.core.Future
+import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<BraidMain>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val networkAndPort = args[0]
   val userName = args[1]
   val password = args[2]
   val port = Integer.valueOf(args[3])
-  val additionalPaths = args.asList().drop(4)
-  BraidMain().start(networkAndPort, userName, password, port, additionalPaths)
+  val openApiVersion = Integer.valueOf(args[4])
+  val additionalPaths = args.asList().drop(5)
+  BraidMain().start(networkAndPort, userName, password, port,openApiVersion, additionalPaths)
 }

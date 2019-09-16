@@ -144,14 +144,14 @@ class SwaggerTest {
   }
 
   private fun MutableMap<String, Model>.readType(type: Type): MutableMap<String, Model> {
-    ModelConverters.getInstance().readAll(type).forEach { k, v ->
+    ModelConverters.getInstance().readAll(type).forEach { (k, v) ->
       this[k] = v
     }
     return this
   }
 
   private fun Swagger.addAllModels(types: Map<String, Model>): Swagger {
-    types.forEach { name, model ->
+    types.forEach { (name, model) ->
       this.model(name, model)
     }
     return this

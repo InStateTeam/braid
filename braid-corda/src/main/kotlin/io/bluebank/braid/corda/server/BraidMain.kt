@@ -30,6 +30,7 @@ class BraidMain {
     userName: String,
     password: String,
     port: Int,
+    openApiVersion: Int,
     additionalPaths: List<String>
   ): Future<String> {
     val classLoader = additionalPaths.toJarsClassLoader()
@@ -38,7 +39,8 @@ class BraidMain {
         port = port,
         userName = userName,
         password = password,
-        nodeAddress = NetworkHostAndPort.parse(networkAndPort)
+        nodeAddress = NetworkHostAndPort.parse(networkAndPort),
+        openApiVersion = openApiVersion
       )
         .startServer()
         .recover {

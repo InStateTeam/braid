@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
@@ -48,7 +49,7 @@ class ModelContext {
       try {
         swagger.model(name, model)
       } catch (e: Throwable) {
-        DocsHandler.log.error("Unable to model class:$name", e)
+        log.error("Unable to model class:$name", e)
         throw RuntimeException("Unable to model class:$name", e)
       }
     }
@@ -67,5 +68,9 @@ class ModelContext {
 
   private fun Type.createSwaggerModels(): Map<String, Model> {
     return ModelConverters.getInstance().readAll(this)
+  }
+
+  companion object {
+    private val log = loggerFor<ModelContext>()
   }
 }

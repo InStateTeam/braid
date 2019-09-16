@@ -15,10 +15,17 @@
  */
 package io.bluebank.braid.corda.server.rpc
 
+import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.converter.ModelConverters
+import io.swagger.models.properties.ArrayProperty
+import io.swagger.models.properties.StringProperty
 import net.corda.core.flows.ContractUpgradeFlow
+import net.corda.core.node.services.vault.QueryCriteria
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
@@ -39,6 +46,8 @@ class ModelConvertersTest {
     val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
     println(readAsProperty)
   }
+
+
 
   @Test
   @Ignore // todo make ModelConverter for UpgradedContract

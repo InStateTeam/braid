@@ -107,6 +107,7 @@ class JavascriptExecutor(private val vertx: Vertx, private val name: String) :
   }
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
+    @Suppress("DEPRECATION")
     return create { subscriber ->
       try {
         checkMethodExists(request.method)

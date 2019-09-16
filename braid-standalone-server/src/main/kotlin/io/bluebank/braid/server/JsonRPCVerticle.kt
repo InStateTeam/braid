@@ -51,7 +51,7 @@ class JsonRPCVerticle(
 ) : AbstractVerticle() {
 
   companion object {
-    val logger = loggerFor<JsonRPCVerticle>()
+    private val logger = loggerFor<JsonRPCVerticle>()
   }
 
   val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
