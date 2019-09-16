@@ -16,7 +16,11 @@
 package io.bluebank.braid.corda.server.rpc
 
 import io.swagger.converter.ModelConverters
+import io.swagger.models.properties.ArrayProperty
+import io.swagger.models.properties.StringProperty
 import net.corda.core.flows.ContractUpgradeFlow
+import net.corda.core.node.services.vault.QueryCriteria
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Ignore
@@ -38,6 +42,17 @@ class ModelConvertersTest {
     val java = ContractUpgradeFlow.Initiate::class.java
     val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
     println(readAsProperty)
+  }
+
+
+  // swagger 3 error for Semantic error at definitions.FungibleAssetQueryCriteria.properties.contractStateTypes
+  @Test
+  fun testModelFungibleAssetQueryCriteria() {
+    val java = QueryCriteria.FungibleAssetQueryCriteria::class.java
+    val read = ModelConverters.getInstance().readAll(java)
+    val model = read.get("FungibleAssetQueryCriteria")
+    val types = model?.properties?.get("contractStateTypes") as ArrayProperty
+    assertThat(types.items is StringProperty, equalTo(true))
   }
 
   @Test

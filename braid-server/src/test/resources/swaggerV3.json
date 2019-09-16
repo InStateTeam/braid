@@ -1004,14 +1004,14 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "notary" : {
+          "$ref" : "#/definitions/Party"
         },
         "outputStates" : {
           "type" : "array",
@@ -1032,10 +1032,6 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "units" : {
           "type" : "array",
           "items" : {
@@ -1047,6 +1043,10 @@
         },
         "negative" : {
           "type" : "boolean"
+        },
+        "nano" : {
+          "type" : "integer",
+          "format" : "int32"
         }
       }
     },
@@ -1122,15 +1122,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -1159,11 +1159,11 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
-        },
         "tx" : {
           "$ref" : "#/definitions/WireTransaction"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -1306,15 +1306,6 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        },
         "merkleTree" : {
           "$ref" : "#/definitions/MerkleTree"
         },
@@ -1354,6 +1345,15 @@
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
               "description" : "Base 58 Encoded Secure Hash"
             }
+          }
+        },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
           }
         },
         "availableComponentGroups" : {
@@ -1595,10 +1595,10 @@
     "CordaFuture" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -1606,10 +1606,10 @@
     "CordaFutureObject" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -1871,11 +1871,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "failure" : {
-          "type" : "boolean"
-        },
         "orThrow" : {
           "type" : "object"
+        },
+        "failure" : {
+          "type" : "boolean"
         }
       }
     },
@@ -1885,11 +1885,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "failure" : {
-          "type" : "boolean"
-        },
         "orThrow" : {
           "type" : "object"
+        },
+        "failure" : {
+          "type" : "boolean"
         }
       }
     },

@@ -100,6 +100,7 @@
     <slf4j.version>1.7.25</slf4j.version>
     <nexus-staging.version>1.6.8</nexus-staging.version>
     <swagger.version>2.0.9</swagger.version>
+    <node.dir>${user.home}/.node</node.dir>
   </properties>
 
   <modules>
