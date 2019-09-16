@@ -394,12 +394,6 @@
         }
       }
     },
-    "Utils" : {
-      "type" : "object"
-    },
-    "ConcurrencyUtils" : {
-      "type" : "object"
-    },
     "Actor" : {
       "type" : "object",
       "properties" : {
@@ -565,33 +559,35 @@
         }
       }
     },
-    "DefaultImpls" : {
-      "type" : "object"
-    },
-    "Amount" : {
+    "LinearPointer" : {
       "type" : "object",
       "properties" : {
-        "quantity" : {
-          "type" : "integer",
-          "format" : "int32",
-          "example" : 100,
-          "description" : "total amount in minor units"
-        },
-        "displayTokenSize" : {
-          "type" : "number",
-          "example" : 0.01
-        },
-        "token" : {
-          "type" : "string",
-          "example" : "GBP"
-        },
-        "_tokenType" : {
-          "type" : "string",
-          "example" : "net.corda.core.contracts.Issued"
+        "pointer" : {
+          "$ref" : "#/definitions/UniqueIdentifier"
         }
       }
     },
-    "InsufficientBalanceException" : {
+    "UniqueIdentifier" : {
+      "type" : "object",
+      "properties" : {
+        "externalId" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string",
+          "format" : "uuid"
+        }
+      }
+    },
+    "StaticPointer" : {
+      "type" : "object",
+      "properties" : {
+        "pointer" : {
+          "$ref" : "#/definitions/StateRef"
+        }
+      }
+    },
+    "InvalidAttachmentException" : {
       "type" : "object",
       "properties" : {
         "cause" : {
@@ -610,8 +606,13 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "amountMissing" : {
-          "$ref" : "#/definitions/Amount"
+        "txId" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
+        "attachmentHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "errorId" : {
           "type" : "integer",
@@ -681,159 +682,6 @@
         }
       }
     },
-    "LinearPointer" : {
-      "type" : "object",
-      "properties" : {
-        "pointer" : {
-          "$ref" : "#/definitions/UniqueIdentifier"
-        }
-      }
-    },
-    "UniqueIdentifier" : {
-      "type" : "object",
-      "properties" : {
-        "externalId" : {
-          "type" : "string"
-        },
-        "id" : {
-          "type" : "string",
-          "format" : "uuid"
-        }
-      }
-    },
-    "ReferencedStateAndRef" : {
-      "type" : "object",
-      "properties" : {
-        "stateAndRef" : {
-          "$ref" : "#/definitions/StateAndRefContractState"
-        }
-      }
-    },
-    "StateAndRefContractState" : {
-      "type" : "object",
-      "properties" : {
-        "state" : {
-          "$ref" : "#/definitions/TransactionStateContractState"
-        },
-        "ref" : {
-          "$ref" : "#/definitions/StateRef"
-        }
-      }
-    },
-    "SourceAndAmount" : {
-      "type" : "object",
-      "properties" : {
-        "source" : {
-          "type" : "object"
-        },
-        "amount" : {
-          "$ref" : "#/definitions/Amount"
-        },
-        "ref" : {
-          "type" : "object"
-        }
-      }
-    },
-    "StaticPointer" : {
-      "type" : "object",
-      "properties" : {
-        "pointer" : {
-          "$ref" : "#/definitions/StateRef"
-        }
-      }
-    },
-    "UnknownParametersException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "hash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "InvalidAttachmentException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "txId" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "attachmentHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
     "PackageOwnershipException" : {
       "type" : "object",
       "properties" : {
@@ -888,65 +736,6 @@
         }
       }
     },
-    "AddressFormatException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "ByteArrayOutputStream" : {
-      "type" : "object"
-    },
-    "State" : {
-      "type" : "object",
-      "properties" : {
-        "buffer" : {
-          "$ref" : "#/definitions/ByteArrayOutputStream"
-        },
-        "verifyKey" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Public Key"
-        }
-      }
-    },
-    "NullPublicKey" : {
-      "type" : "object",
-      "properties" : {
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "format" : {
-          "type" : "string"
-        },
-        "algorithm" : {
-          "type" : "string"
-        }
-      }
-    },
     "SHA256" : {
       "type" : "object",
       "properties" : {
@@ -966,33 +755,6 @@
           }
         }
       }
-    },
-    "AliasPrivateKey" : {
-      "type" : "object",
-      "properties" : {
-        "alias" : {
-          "type" : "string"
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "format" : {
-          "type" : "string"
-        },
-        "algorithm" : {
-          "type" : "string"
-        },
-        "destroyed" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "Instances" : {
-      "type" : "object"
     },
     "APPROVING" : {
       "type" : "object",
@@ -1076,6 +838,98 @@
         },
         "modification" : {
           "type" : "object"
+        }
+      }
+    },
+    "COLLECTING" : {
+      "type" : "object",
+      "properties" : {
+        "label" : {
+          "type" : "string"
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
+        },
+        "extraAuditData" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "BROADCASTING" : {
+      "type" : "object",
+      "properties" : {
+        "label" : {
+          "type" : "string"
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
+        },
+        "extraAuditData" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "NOTARISING" : {
+      "type" : "object",
+      "properties" : {
+        "label" : {
+          "type" : "string"
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
+        },
+        "extraAuditData" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "FlowInfo" : {
+      "type" : "object",
+      "properties" : {
+        "flowVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "appName" : {
+          "type" : "string"
+        }
+      }
+    },
+    "IllegalFlowLogicException" : {
+      "type" : "object",
+      "properties" : {
+        "cause" : {
+          "$ref" : "#/definitions/Throwable"
+        },
+        "stackTrace" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/StackTraceElement"
+          }
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string"
+        },
+        "localizedMessage" : {
+          "type" : "string"
+        },
+        "suppressed" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Throwable"
+          }
         }
       }
     },
@@ -1178,15 +1032,15 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "zero" : {
           "type" : "boolean"
         },
         "negative" : {
           "type" : "boolean"
+        },
+        "nano" : {
+          "type" : "integer",
+          "format" : "int32"
         },
         "units" : {
           "type" : "array",
@@ -1202,6 +1056,36 @@
         "hash" : {
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
+        }
+      }
+    },
+    "NotarisationPayload" : {
+      "type" : "object",
+      "properties" : {
+        "transaction" : {
+          "type" : "object"
+        },
+        "requestSignature" : {
+          "$ref" : "#/definitions/NotarisationRequestSignature"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
+        },
+        "signedTransaction" : {
+          "$ref" : "#/definitions/SignedTransaction"
+        }
+      }
+    },
+    "NotarisationRequestSignature" : {
+      "type" : "object",
+      "properties" : {
+        "digitalSignature" : {
+          "type" : "string",
+          "description" : "Hex encoded Byte Array"
+        },
+        "platformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
         }
       }
     },
@@ -1275,11 +1159,17 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
+        "notaryChangeTx" : {
+          "$ref" : "#/definitions/NotaryChangeWireTransaction"
+        },
+        "notaryChangeTransaction" : {
+          "type" : "boolean"
         },
         "tx" : {
           "$ref" : "#/definitions/WireTransaction"
+        },
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -1308,12 +1198,6 @@
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
             "description" : "Base 58 Encoded Public Key"
           }
-        },
-        "notaryChangeTx" : {
-          "$ref" : "#/definitions/NotaryChangeWireTransaction"
-        },
-        "notaryChangeTransaction" : {
-          "type" : "boolean"
         },
         "missingSigners" : {
           "type" : "array",
@@ -1349,25 +1233,17 @@
         "length" : {
           "$ref" : "#/definitions/Duration"
         },
-        "fromTime" : {
+        "untilTime" : {
           "type" : "integer",
           "format" : "int64"
         },
-        "untilTime" : {
+        "fromTime" : {
           "type" : "integer",
           "format" : "int64"
         },
         "midpoint" : {
           "type" : "integer",
           "format" : "int64"
-        }
-      }
-    },
-    "UpgradeTx" : {
-      "type" : "object",
-      "properties" : {
-        "stx" : {
-          "$ref" : "#/definitions/SignedTransaction"
         }
       }
     },
@@ -1497,206 +1373,6 @@
         }
       }
     },
-    "COLLECTING" : {
-      "type" : "object",
-      "properties" : {
-        "label" : {
-          "type" : "string"
-        },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
-        "extraAuditData" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string"
-          }
-        }
-      }
-    },
-    "ContractUpgradeFlow" : {
-      "type" : "object"
-    },
-    "DataVendingFlow$WhenMappings" : {
-      "type" : "object"
-    },
-    "BROADCASTING" : {
-      "type" : "object",
-      "properties" : {
-        "label" : {
-          "type" : "string"
-        },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
-        "extraAuditData" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string"
-          }
-        }
-      }
-    },
-    "NOTARISING" : {
-      "type" : "object",
-      "properties" : {
-        "label" : {
-          "type" : "string"
-        },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
-        "extraAuditData" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string"
-          }
-        }
-      }
-    },
-    "FlowException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "FlowInfo" : {
-      "type" : "object",
-      "properties" : {
-        "flowVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "appName" : {
-          "type" : "string"
-        }
-      }
-    },
-    "FlowStackSnapshot" : {
-      "type" : "object",
-      "properties" : {
-        "time" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "flowClass" : {
-          "type" : "string"
-        },
-        "stackFrames" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Frame"
-          }
-        }
-      }
-    },
-    "Frame" : {
-      "type" : "object",
-      "properties" : {
-        "stackTraceElement" : {
-          "$ref" : "#/definitions/StackTraceElement"
-        },
-        "stackObjects" : {
-          "type" : "array",
-          "items" : {
-            "type" : "object"
-          }
-        }
-      }
-    },
-    "IllegalFlowLogicException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "type" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "NotarisationPayload" : {
-      "type" : "object",
-      "properties" : {
-        "transaction" : {
-          "type" : "object"
-        },
-        "requestSignature" : {
-          "$ref" : "#/definitions/NotarisationRequestSignature"
-        },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
-        },
-        "signedTransaction" : {
-          "$ref" : "#/definitions/SignedTransaction"
-        }
-      }
-    },
-    "NotarisationRequestSignature" : {
-      "type" : "object",
-      "properties" : {
-        "digitalSignature" : {
-          "type" : "string",
-          "description" : "Hex encoded Byte Array"
-        },
-        "platformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        }
-      }
-    },
     "NotarisationRequest" : {
       "type" : "object",
       "properties" : {
@@ -1792,1202 +1468,6 @@
     "WrongNotary" : {
       "type" : "object"
     },
-    "NotaryError" : {
-      "type" : "object"
-    },
-    "NotaryException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "error" : {
-          "$ref" : "#/definitions/NotaryError"
-        },
-        "txId" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "NotaryFlow" : {
-      "type" : "object"
-    },
-    "AttachmentStorage" : {
-      "type" : "object"
-    },
-    "CertPath" : {
-      "type" : "object",
-      "properties" : {
-        "type" : {
-          "type" : "string"
-        },
-        "certificates" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Certificate"
-          }
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "encodings" : {
-          "$ref" : "#/definitions/IteratorString"
-        }
-      }
-    },
-    "CertStore" : {
-      "type" : "object",
-      "properties" : {
-        "provider" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string"
-          }
-        },
-        "type" : {
-          "type" : "string"
-        },
-        "certStoreParameters" : {
-          "$ref" : "#/definitions/CertStoreParameters"
-        }
-      }
-    },
-    "CertStoreParameters" : {
-      "type" : "object"
-    },
-    "Certificate" : {
-      "type" : "object",
-      "properties" : {
-        "type" : {
-          "type" : "string"
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "publicKey" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Public Key"
-        }
-      }
-    },
-    "ClassLoader" : {
-      "type" : "object",
-      "properties" : {
-        "parent" : {
-          "$ref" : "#/definitions/ClassLoader"
-        }
-      }
-    },
-    "Client" : {
-      "type" : "object",
-      "properties" : {
-        "progressTracker" : {
-          "$ref" : "#/definitions/ProgressTracker"
-        },
-        "timeoutEnabled" : {
-          "type" : "boolean"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "stateMachine" : {
-          "$ref" : "#/definitions/FlowStateMachineObject"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
-        "ourIdentity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
-        }
-      }
-    },
-    "Clock" : {
-      "type" : "object",
-      "properties" : {
-        "zone" : {
-          "$ref" : "#/definitions/ZoneId"
-        }
-      }
-    },
-    "ContractUpgradeService" : {
-      "type" : "object"
-    },
-    "CordaFuture" : {
-      "type" : "object",
-      "properties" : {
-        "done" : {
-          "type" : "boolean"
-        },
-        "cancelled" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "CordaFutureObject" : {
-      "type" : "object",
-      "properties" : {
-        "done" : {
-          "type" : "boolean"
-        },
-        "cancelled" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "CordaFutureVoid" : {
-      "type" : "object",
-      "properties" : {
-        "done" : {
-          "type" : "boolean"
-        },
-        "cancelled" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "Cordapp" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "services" : {
-          "type" : "array"
-        },
-        "info" : {
-          "$ref" : "#/definitions/Info"
-        },
-        "targetPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "minimumPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "contractClassNames" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "initiatedFlows" : {
-          "type" : "array"
-        },
-        "rpcFlows" : {
-          "type" : "array"
-        },
-        "serviceFlows" : {
-          "type" : "array"
-        },
-        "schedulableFlows" : {
-          "type" : "array"
-        },
-        "serializationWhitelists" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/SerializationWhitelist"
-          }
-        },
-        "serializationCustomSerializers" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
-          }
-        },
-        "customSchemas" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "$ref" : "#/definitions/MappedSchema"
-          }
-        },
-        "allFlows" : {
-          "type" : "array"
-        },
-        "jarPath" : {
-          "type" : "string",
-          "format" : "url"
-        },
-        "cordappClasses" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "jarHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        }
-      }
-    },
-    "CordappConfig" : {
-      "type" : "object"
-    },
-    "CordappContext" : {
-      "type" : "object",
-      "properties" : {
-        "cordapp" : {
-          "$ref" : "#/definitions/Cordapp"
-        },
-        "attachmentId" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "classLoader" : {
-          "$ref" : "#/definitions/ClassLoader"
-        },
-        "config" : {
-          "$ref" : "#/definitions/CordappConfig"
-        }
-      }
-    },
-    "CordappProvider" : {
-      "type" : "object",
-      "properties" : {
-        "appContext" : {
-          "$ref" : "#/definitions/CordappContext"
-        }
-      }
-    },
-    "FlowLogic" : {
-      "type" : "object",
-      "properties" : {
-        "progressTracker" : {
-          "$ref" : "#/definitions/ProgressTracker"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
-        "ourIdentity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
-        }
-      }
-    },
-    "FlowLogicObject" : {
-      "type" : "object",
-      "properties" : {
-        "progressTracker" : {
-          "$ref" : "#/definitions/ProgressTracker"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
-        "ourIdentity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
-        }
-      }
-    },
-    "FlowStateMachine" : {
-      "type" : "object",
-      "properties" : {
-        "context" : {
-          "$ref" : "#/definitions/InvocationContext"
-        },
-        "id" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
-        "ourIdentity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
-        },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
-        },
-        "resultFuture" : {
-          "$ref" : "#/definitions/CordaFutureObject"
-        },
-        "ourSenderUUID" : {
-          "type" : "string"
-        }
-      }
-    },
-    "FlowStateMachineObject" : {
-      "type" : "object",
-      "properties" : {
-        "context" : {
-          "$ref" : "#/definitions/InvocationContext"
-        },
-        "id" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
-        "ourIdentity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
-        },
-        "logger" : {
-          "$ref" : "#/definitions/Logger"
-        },
-        "resultFuture" : {
-          "$ref" : "#/definitions/CordaFutureObject"
-        },
-        "ourSenderUUID" : {
-          "type" : "string"
-        }
-      }
-    },
-    "IdentityService" : {
-      "type" : "object",
-      "properties" : {
-        "caCertStore" : {
-          "$ref" : "#/definitions/CertStore"
-        },
-        "allIdentities" : {
-          "$ref" : "#/definitions/IterablePartyAndCertificate"
-        },
-        "trustRoot" : {
-          "$ref" : "#/definitions/X509Certificate"
-        },
-        "trustAnchor" : {
-          "$ref" : "#/definitions/TrustAnchor"
-        }
-      }
-    },
-    "Info" : {
-      "type" : "object",
-      "properties" : {
-        "shortName" : {
-          "type" : "string"
-        },
-        "version" : {
-          "type" : "string"
-        },
-        "licence" : {
-          "type" : "string"
-        },
-        "vendor" : {
-          "type" : "string"
-        }
-      }
-    },
-    "Iterable" : {
-      "type" : "object"
-    },
-    "IterableClass" : {
-      "type" : "object"
-    },
-    "IterablePartyAndCertificate" : {
-      "type" : "object"
-    },
-    "Iterator" : {
-      "type" : "object"
-    },
-    "IteratorString" : {
-      "type" : "object"
-    },
-    "KeyManagementService" : {
-      "type" : "object",
-      "properties" : {
-        "keys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        }
-      }
-    },
-    "LocalTime" : {
-      "type" : "object",
-      "properties" : {
-        "hour" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "minute" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "second" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
-        }
-      }
-    },
-    "Logger" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "traceEnabled" : {
-          "type" : "boolean"
-        },
-        "debugEnabled" : {
-          "type" : "boolean"
-        },
-        "infoEnabled" : {
-          "type" : "boolean"
-        },
-        "warnEnabled" : {
-          "type" : "boolean"
-        },
-        "errorEnabled" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "MappedSchema" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "migrationResource" : {
-          "type" : "string"
-        },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "mappedTypes" : {
-          "$ref" : "#/definitions/IterableClass"
-        }
-      }
-    },
-    "NetworkMapCache" : {
-      "type" : "object",
-      "properties" : {
-        "nodeReady" : {
-          "$ref" : "#/definitions/CordaFutureVoid"
-        },
-        "changed" : {
-          "$ref" : "#/definitions/ObservableMapChange"
-        },
-        "allNodes" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/NodeInfo"
-          }
-        },
-        "notaryIdentities" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Party"
-          }
-        }
-      }
-    },
-    "NetworkParameters" : {
-      "type" : "object",
-      "properties" : {
-        "minimumPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "notaries" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/NotaryInfo"
-          }
-        },
-        "maxMessageSize" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "maxTransactionSize" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "modifiedTime" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "epoch" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "whitelistedContractImplementations" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-              "description" : "Base 58 Encoded Secure Hash"
-            }
-          }
-        },
-        "eventHorizon" : {
-          "$ref" : "#/definitions/Duration"
-        },
-        "packageOwnership" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        }
-      }
-    },
-    "NetworkParametersService" : {
-      "type" : "object",
-      "properties" : {
-        "defaultHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
-        "currentHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        }
-      }
-    },
-    "NodeInfo" : {
-      "type" : "object",
-      "properties" : {
-        "addresses" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/NetworkHostAndPort"
-          }
-        },
-        "legalIdentitiesAndCerts" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/PartyAndCertificate"
-          }
-        },
-        "platformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "serial" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "legalIdentities" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Party"
-          }
-        }
-      }
-    },
-    "NotaryInfo" : {
-      "type" : "object",
-      "properties" : {
-        "identity" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "validating" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "ObservableInteger" : {
-      "type" : "object"
-    },
-    "ObservableListPairIntegerString" : {
-      "type" : "object"
-    },
-    "ObservableMapChange" : {
-      "type" : "object"
-    },
-    "ObservableSignedTransaction" : {
-      "type" : "object"
-    },
-    "ObservableUpdateContractState" : {
-      "type" : "object"
-    },
-    "Pair" : {
-      "type" : "object",
-      "properties" : {
-        "first" : {
-          "type" : "object"
-        },
-        "second" : {
-          "type" : "object"
-        }
-      }
-    },
-    "PairIntegerStep" : {
-      "type" : "object",
-      "properties" : {
-        "first" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "second" : {
-          "$ref" : "#/definitions/Step"
-        }
-      }
-    },
-    "PairIntegerString" : {
-      "type" : "object",
-      "properties" : {
-        "first" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "second" : {
-          "type" : "string"
-        }
-      }
-    },
-    "PartyAndCertificate" : {
-      "type" : "object",
-      "properties" : {
-        "certificate" : {
-          "$ref" : "#/definitions/X509Certificate"
-        },
-        "party" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "certPath" : {
-          "$ref" : "#/definitions/CertPath"
-        },
-        "name" : {
-          "type" : "string",
-          "description" : "CordaX500Name encoded Party"
-        },
-        "owningKey" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Public Key"
-        }
-      }
-    },
-    "Principal" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        }
-      }
-    },
-    "ProgressTracker" : {
-      "type" : "object",
-      "properties" : {
-        "steps" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Step"
-          }
-        },
-        "stepIndex" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "stepsTreeIndex" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "parent" : {
-          "$ref" : "#/definitions/ProgressTracker"
-        },
-        "currentStep" : {
-          "$ref" : "#/definitions/Step"
-        },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
-        "stepsTreeIndexChanges" : {
-          "$ref" : "#/definitions/ObservableInteger"
-        },
-        "allStepsLabels" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/PairIntegerString"
-          }
-        },
-        "stepsTreeChanges" : {
-          "$ref" : "#/definitions/ObservableListPairIntegerString"
-        },
-        "hasEnded" : {
-          "type" : "boolean"
-        },
-        "currentStepRecursive" : {
-          "$ref" : "#/definitions/Step"
-        },
-        "topLevelTracker" : {
-          "$ref" : "#/definitions/ProgressTracker"
-        },
-        "allSteps" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/PairIntegerStep"
-          }
-        }
-      }
-    },
-    "SerializationCustomSerializer" : {
-      "type" : "object"
-    },
-    "SerializationCustomSerializerObjectObject" : {
-      "type" : "object"
-    },
-    "SerializationWhitelist" : {
-      "type" : "object",
-      "properties" : {
-        "whitelist" : {
-          "type" : "array"
-        }
-      }
-    },
-    "ServiceHub" : {
-      "type" : "object",
-      "properties" : {
-        "validatedTransactions" : {
-          "$ref" : "#/definitions/TransactionStorage"
-        },
-        "transactionVerifierService" : {
-          "$ref" : "#/definitions/TransactionVerifierService"
-        },
-        "contractUpgradeService" : {
-          "$ref" : "#/definitions/ContractUpgradeService"
-        },
-        "myInfo" : {
-          "$ref" : "#/definitions/NodeInfo"
-        },
-        "keyManagementService" : {
-          "$ref" : "#/definitions/KeyManagementService"
-        },
-        "vaultService" : {
-          "$ref" : "#/definitions/VaultService"
-        },
-        "clock" : {
-          "$ref" : "#/definitions/Clock"
-        },
-        "networkMapCache" : {
-          "$ref" : "#/definitions/NetworkMapCache"
-        },
-        "appContext" : {
-          "$ref" : "#/definitions/CordappContext"
-        },
-        "networkParametersService" : {
-          "$ref" : "#/definitions/NetworkParametersService"
-        },
-        "attachments" : {
-          "$ref" : "#/definitions/AttachmentStorage"
-        },
-        "identityService" : {
-          "$ref" : "#/definitions/IdentityService"
-        },
-        "networkParameters" : {
-          "$ref" : "#/definitions/NetworkParameters"
-        },
-        "cordappProvider" : {
-          "$ref" : "#/definitions/CordappProvider"
-        }
-      }
-    },
-    "StateMachineRunId" : {
-      "type" : "object",
-      "properties" : {
-        "uuid" : {
-          "type" : "string",
-          "format" : "uuid"
-        }
-      }
-    },
-    "Step" : {
-      "type" : "object",
-      "properties" : {
-        "label" : {
-          "type" : "string"
-        },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
-        "extraAuditData" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "string"
-          }
-        }
-      }
-    },
-    "TransactionStorage" : {
-      "type" : "object",
-      "properties" : {
-        "updates" : {
-          "$ref" : "#/definitions/ObservableSignedTransaction"
-        }
-      }
-    },
-    "TransactionVerifierService" : {
-      "type" : "object"
-    },
-    "TrustAnchor" : {
-      "type" : "object",
-      "properties" : {
-        "trustedCert" : {
-          "$ref" : "#/definitions/X509Certificate"
-        },
-        "ca" : {
-          "$ref" : "#/definitions/X500Principal"
-        },
-        "caname" : {
-          "type" : "string"
-        },
-        "capublicKey" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Public Key"
-        },
-        "nameConstraints" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        }
-      }
-    },
-    "VaultService" : {
-      "type" : "object",
-      "properties" : {
-        "updates" : {
-          "$ref" : "#/definitions/ObservableUpdateContractState"
-        },
-        "rawUpdates" : {
-          "$ref" : "#/definitions/ObservableUpdateContractState"
-        }
-      }
-    },
-    "X500Principal" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        }
-      }
-    },
-    "X509Certificate" : {
-      "type" : "object",
-      "properties" : {
-        "type" : {
-          "type" : "string"
-        },
-        "subjectX500Principal" : {
-          "$ref" : "#/definitions/X500Principal"
-        },
-        "issuerX500Principal" : {
-          "$ref" : "#/definitions/X500Principal"
-        },
-        "signature" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "basicConstraints" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "notBefore" : {
-          "type" : "string",
-          "format" : "date-time"
-        },
-        "notAfter" : {
-          "type" : "string",
-          "format" : "date-time"
-        },
-        "sigAlgName" : {
-          "type" : "string"
-        },
-        "sigAlgOID" : {
-          "type" : "string"
-        },
-        "sigAlgParams" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "issuerUniqueID" : {
-          "type" : "array",
-          "items" : {
-            "type" : "boolean"
-          }
-        },
-        "subjectUniqueID" : {
-          "type" : "array",
-          "items" : {
-            "type" : "boolean"
-          }
-        },
-        "keyUsage" : {
-          "type" : "array",
-          "items" : {
-            "type" : "boolean"
-          }
-        },
-        "subjectAlternativeNames" : {
-          "type" : "array",
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
-          }
-        },
-        "issuerAlternativeNames" : {
-          "type" : "array",
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
-          }
-        },
-        "serialNumber" : {
-          "type" : "integer"
-        },
-        "tbscertificate" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "extendedKeyUsage" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "issuerDN" : {
-          "$ref" : "#/definitions/Principal"
-        },
-        "subjectDN" : {
-          "$ref" : "#/definitions/Principal"
-        },
-        "nonCriticalExtensionOIDs" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "criticalExtensionOIDs" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string"
-          }
-        },
-        "encoded" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "publicKey" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Public Key"
-        }
-      }
-    },
-    "ZoneId" : {
-      "type" : "object",
-      "properties" : {
-        "id" : {
-          "type" : "string"
-        },
-        "rules" : {
-          "$ref" : "#/definitions/ZoneRules"
-        }
-      }
-    },
-    "ZoneOffset" : {
-      "type" : "object",
-      "properties" : {
-        "totalSeconds" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "id" : {
-          "type" : "string"
-        },
-        "rules" : {
-          "$ref" : "#/definitions/ZoneRules"
-        }
-      }
-    },
-    "ZoneOffsetTransition" : {
-      "type" : "object",
-      "properties" : {
-        "offsetBefore" : {
-          "$ref" : "#/definitions/ZoneOffset"
-        },
-        "offsetAfter" : {
-          "$ref" : "#/definitions/ZoneOffset"
-        },
-        "instant" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "dateTimeBefore" : {
-          "type" : "string",
-          "format" : "date-time"
-        },
-        "duration" : {
-          "$ref" : "#/definitions/Duration"
-        },
-        "gap" : {
-          "type" : "boolean"
-        },
-        "overlap" : {
-          "type" : "boolean"
-        },
-        "dateTimeAfter" : {
-          "type" : "string",
-          "format" : "date-time"
-        }
-      }
-    },
-    "ZoneOffsetTransitionRule" : {
-      "type" : "object",
-      "properties" : {
-        "month" : {
-          "type" : "string",
-          "enum" : [ "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER" ]
-        },
-        "timeDefinition" : {
-          "type" : "string",
-          "enum" : [ "UTC", "WALL", "STANDARD" ]
-        },
-        "standardOffset" : {
-          "$ref" : "#/definitions/ZoneOffset"
-        },
-        "offsetBefore" : {
-          "$ref" : "#/definitions/ZoneOffset"
-        },
-        "offsetAfter" : {
-          "$ref" : "#/definitions/ZoneOffset"
-        },
-        "dayOfWeek" : {
-          "type" : "string",
-          "enum" : [ "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY" ]
-        },
-        "dayOfMonthIndicator" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "localTime" : {
-          "$ref" : "#/definitions/LocalTime"
-        },
-        "midnightEndOfDay" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "ZoneRules" : {
-      "type" : "object",
-      "properties" : {
-        "transitions" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ZoneOffsetTransition"
-          }
-        },
-        "transitionRules" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ZoneOffsetTransitionRule"
-          }
-        },
-        "fixedOffset" : {
-          "type" : "boolean"
-        }
-      }
-    },
     "REQUESTING" : {
       "type" : "object",
       "properties" : {
@@ -3035,94 +1515,6 @@
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
-          }
-        }
-      }
-    },
-    "StackFrameDataToken" : {
-      "type" : "object",
-      "properties" : {
-        "className" : {
-          "type" : "string"
-        }
-      }
-    },
-    "StateReplacementException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "UnexpectedFlowEndException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
           }
         }
       }
@@ -3186,79 +1578,6 @@
         }
       }
     },
-    "IdentityUtils" : {
-      "type" : "object"
-    },
-    "ClientRpcSslOptions" : {
-      "type" : "object",
-      "properties" : {
-        "trustStorePath" : {
-          "$ref" : "#/definitions/Path"
-        },
-        "trustStorePassword" : {
-          "type" : "string"
-        },
-        "trustStoreProvider" : {
-          "type" : "string"
-        }
-      }
-    },
-    "FileSystem" : {
-      "type" : "object",
-      "properties" : {
-        "separator" : {
-          "type" : "string"
-        },
-        "readOnly" : {
-          "type" : "boolean"
-        },
-        "open" : {
-          "type" : "boolean"
-        },
-        "rootDirectories" : {
-          "$ref" : "#/definitions/IterablePath"
-        },
-        "fileStores" : {
-          "$ref" : "#/definitions/IterableFileStore"
-        },
-        "userPrincipalLookupService" : {
-          "$ref" : "#/definitions/UserPrincipalLookupService"
-        }
-      }
-    },
-    "IterableFileStore" : {
-      "type" : "object"
-    },
-    "IterablePath" : {
-      "type" : "object"
-    },
-    "Path" : {
-      "type" : "object",
-      "properties" : {
-        "parent" : {
-          "$ref" : "#/definitions/Path"
-        },
-        "absolute" : {
-          "type" : "boolean"
-        },
-        "root" : {
-          "$ref" : "#/definitions/Path"
-        },
-        "fileSystem" : {
-          "$ref" : "#/definitions/FileSystem"
-        },
-        "fileName" : {
-          "$ref" : "#/definitions/Path"
-        },
-        "nameCount" : {
-          "type" : "integer",
-          "format" : "int32"
-        }
-      }
-    },
-    "UserPrincipalLookupService" : {
-      "type" : "object"
-    },
     "DataFeed" : {
       "type" : "object",
       "properties" : {
@@ -3273,6 +1592,28 @@
     "ObservableObject" : {
       "type" : "object"
     },
+    "CordaFuture" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "CordaFutureObject" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        }
+      }
+    },
     "FlowHandleImpl" : {
       "type" : "object",
       "properties" : {
@@ -3281,6 +1622,15 @@
         },
         "returnValue" : {
           "$ref" : "#/definitions/CordaFutureObject"
+        }
+      }
+    },
+    "StateMachineRunId" : {
+      "type" : "object",
+      "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "format" : "uuid"
         }
       }
     },
@@ -3330,8 +1680,101 @@
         }
       }
     },
+    "ObservableInteger" : {
+      "type" : "object"
+    },
+    "ObservableListPairIntegerString" : {
+      "type" : "object"
+    },
     "ObservableString" : {
       "type" : "object"
+    },
+    "Pair" : {
+      "type" : "object",
+      "properties" : {
+        "first" : {
+          "type" : "object"
+        },
+        "second" : {
+          "type" : "object"
+        }
+      }
+    },
+    "PairIntegerString" : {
+      "type" : "object",
+      "properties" : {
+        "first" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "second" : {
+          "type" : "string"
+        }
+      }
+    },
+    "NetworkParameters" : {
+      "type" : "object",
+      "properties" : {
+        "minimumPlatformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "notaries" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/NotaryInfo"
+          }
+        },
+        "maxMessageSize" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "maxTransactionSize" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "modifiedTime" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "epoch" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "whitelistedContractImplementations" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+              "description" : "Base 58 Encoded Secure Hash"
+            }
+          }
+        },
+        "eventHorizon" : {
+          "$ref" : "#/definitions/Duration"
+        },
+        "packageOwnership" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        }
+      }
+    },
+    "NotaryInfo" : {
+      "type" : "object",
+      "properties" : {
+        "identity" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "validating" : {
+          "type" : "boolean"
+        }
+      }
     },
     "ParametersUpdateInfo" : {
       "type" : "object",
@@ -3450,35 +1893,261 @@
         }
       }
     },
-    "ZoneVersionTooLowException" : {
+    "CertPath" : {
       "type" : "object",
       "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
+        "type" : {
+          "type" : "string"
         },
-        "stackTrace" : {
+        "certificates" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
+            "$ref" : "#/definitions/Certificate"
           }
         },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
+        "encoded" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Throwable"
+            "type" : "string",
+            "format" : "byte"
           }
+        },
+        "encodings" : {
+          "$ref" : "#/definitions/IteratorString"
+        }
+      }
+    },
+    "Certificate" : {
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "type" : "string"
+        },
+        "encoded" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "publicKey" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Public Key"
+        }
+      }
+    },
+    "Iterator" : {
+      "type" : "object"
+    },
+    "IteratorString" : {
+      "type" : "object"
+    },
+    "NodeInfo" : {
+      "type" : "object",
+      "properties" : {
+        "addresses" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/NetworkHostAndPort"
+          }
+        },
+        "legalIdentitiesAndCerts" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/PartyAndCertificate"
+          }
+        },
+        "platformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "serial" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "legalIdentities" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Party"
+          }
+        }
+      }
+    },
+    "PartyAndCertificate" : {
+      "type" : "object",
+      "properties" : {
+        "certificate" : {
+          "$ref" : "#/definitions/X509Certificate"
+        },
+        "party" : {
+          "$ref" : "#/definitions/Party"
+        },
+        "certPath" : {
+          "$ref" : "#/definitions/CertPath"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "CordaX500Name encoded Party"
+        },
+        "owningKey" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Public Key"
+        }
+      }
+    },
+    "Principal" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "X500Principal" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "encoded" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        }
+      }
+    },
+    "X509Certificate" : {
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "type" : "string"
+        },
+        "subjectX500Principal" : {
+          "$ref" : "#/definitions/X500Principal"
+        },
+        "issuerX500Principal" : {
+          "$ref" : "#/definitions/X500Principal"
+        },
+        "signature" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "basicConstraints" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "serialNumber" : {
+          "type" : "integer"
+        },
+        "tbscertificate" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "extendedKeyUsage" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "notBefore" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "notAfter" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "sigAlgName" : {
+          "type" : "string"
+        },
+        "sigAlgOID" : {
+          "type" : "string"
+        },
+        "sigAlgParams" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "issuerUniqueID" : {
+          "type" : "array",
+          "items" : {
+            "type" : "boolean"
+          }
+        },
+        "subjectUniqueID" : {
+          "type" : "array",
+          "items" : {
+            "type" : "boolean"
+          }
+        },
+        "keyUsage" : {
+          "type" : "array",
+          "items" : {
+            "type" : "boolean"
+          }
+        },
+        "subjectAlternativeNames" : {
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        },
+        "issuerAlternativeNames" : {
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "issuerDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
+        "subjectDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
+        "criticalExtensionOIDs" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "nonCriticalExtensionOIDs" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "encoded" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        },
+        "publicKey" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Public Key"
         }
       }
     },
@@ -3493,99 +2162,8 @@
         }
       }
     },
-    "DistributedNode" : {
-      "type" : "object",
-      "properties" : {
-        "party" : {
-          "$ref" : "#/definitions/Party"
-        }
-      }
-    },
-    "SingleNode" : {
-      "type" : "object",
-      "properties" : {
-        "party" : {
-          "$ref" : "#/definitions/Party"
-        },
-        "addresses" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/NetworkHostAndPort"
-          }
-        }
-      }
-    },
-    "StatesNotAvailableException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "UnknownAnonymousPartyException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
+    "Iterable" : {
+      "type" : "object"
     },
     "IterableStateAndRefContractState" : {
       "type" : "object"
@@ -3605,12 +2183,6 @@
           "$ref" : "#/definitions/AttachmentConstraint"
         }
       }
-    },
-    "Vault$ConstraintInfo$Companion$WhenMappings" : {
-      "type" : "object"
-    },
-    "Vault$ConstraintInfo$WhenMappings" : {
-      "type" : "object"
     },
     "Page" : {
       "type" : "object",
@@ -3640,6 +2212,17 @@
           "items" : {
             "type" : "object"
           }
+        }
+      }
+    },
+    "StateAndRefContractState" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "$ref" : "#/definitions/TransactionStateContractState"
+        },
+        "ref" : {
+          "$ref" : "#/definitions/StateRef"
         }
       }
     },
@@ -3717,49 +2300,6 @@
         },
         "empty" : {
           "type" : "boolean"
-        }
-      }
-    },
-    "Vault$Update$WhenMappings" : {
-      "type" : "object"
-    },
-    "VaultQueryException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "originalErrorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
         }
       }
     },
@@ -4016,14 +2556,6 @@
       "properties" : {
         "expression" : {
           "$ref" : "#/definitions/CriteriaExpressionObjectBoolean"
-        }
-      }
-    },
-    "FieldInfo" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
         }
       }
     },
@@ -4330,9 +2862,6 @@
         }
       }
     },
-    "QueryCriteriaUtils" : {
-      "type" : "object"
-    },
     "Sort" : {
       "type" : "object",
       "properties" : {
@@ -4375,27 +2904,6 @@
       "properties" : {
         "attribute" : {
           "$ref" : "#/definitions/Attribute"
-        }
-      }
-    },
-    "CommonSchema" : {
-      "type" : "object"
-    },
-    "CommonSchemaV1" : {
-      "type" : "object",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "migrationResource" : {
-          "type" : "string"
-        },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "mappedTypes" : {
-          "$ref" : "#/definitions/IterableClass"
         }
       }
     },
@@ -4465,165 +2973,6 @@
         }
       }
     },
-    "MappedSchemaValidator" : {
-      "type" : "object"
-    },
-    "SchemaCrossReferenceReport" : {
-      "type" : "object"
-    },
-    "ByteSequence" : {
-      "type" : "object",
-      "properties" : {
-        "offset" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "size" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "bytes" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        }
-      }
-    },
-    "ClassWhitelist" : {
-      "type" : "object"
-    },
-    "EncodingWhitelist" : {
-      "type" : "object"
-    },
-    "ObjectWithCompatibleContext" : {
-      "type" : "object",
-      "properties" : {
-        "obj" : {
-          "type" : "object"
-        },
-        "context" : {
-          "$ref" : "#/definitions/SerializationContext"
-        }
-      }
-    },
-    "SerializationContext" : {
-      "type" : "object",
-      "properties" : {
-        "properties" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "object"
-          }
-        },
-        "encoding" : {
-          "$ref" : "#/definitions/SerializationEncoding"
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
-        },
-        "preferredSerializationVersion" : {
-          "$ref" : "#/definitions/ByteSequence"
-        },
-        "deserializationClassLoader" : {
-          "$ref" : "#/definitions/ClassLoader"
-        },
-        "encodingWhitelist" : {
-          "$ref" : "#/definitions/EncodingWhitelist"
-        },
-        "objectReferencesEnabled" : {
-          "type" : "boolean"
-        },
-        "lenientCarpenterEnabled" : {
-          "type" : "boolean"
-        },
-        "carpenterDisabled" : {
-          "type" : "boolean"
-        },
-        "preventDataLoss" : {
-          "type" : "boolean"
-        },
-        "useCase" : {
-          "type" : "string",
-          "enum" : [ "P2P", "RPCServer", "RPCClient", "Storage", "Testing" ]
-        },
-        "customSerializers" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
-          }
-        }
-      }
-    },
-    "SerializationEncoding" : {
-      "type" : "object"
-    },
-    "AttachmentURLStreamHandlerFactory" : {
-      "type" : "object"
-    },
-    "AttachmentsClassLoader" : {
-      "type" : "object",
-      "properties" : {
-        "parent" : {
-          "$ref" : "#/definitions/ClassLoader"
-        },
-        "params" : {
-          "$ref" : "#/definitions/NetworkParameters"
-        },
-        "urls" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "url"
-          }
-        }
-      }
-    },
-    "AttachmentsClassLoaderBuilder" : {
-      "type" : "object"
-    },
-    "CheckpointSerializationContext" : {
-      "type" : "object",
-      "properties" : {
-        "properties" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "object"
-          }
-        },
-        "encoding" : {
-          "$ref" : "#/definitions/SerializationEncoding"
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
-        },
-        "deserializationClassLoader" : {
-          "$ref" : "#/definitions/ClassLoader"
-        },
-        "encodingWhitelist" : {
-          "$ref" : "#/definitions/EncodingWhitelist"
-        },
-        "objectReferencesEnabled" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "CheckpointSerializationDefaults" : {
-      "type" : "object",
-      "properties" : {
-        "checkpoint_CONTEXT" : {
-          "$ref" : "#/definitions/CheckpointSerializationContext"
-        },
-        "checkpoint_SERIALIZER" : {
-          "$ref" : "#/definitions/CheckpointSerializer"
-        }
-      }
-    },
-    "CheckpointSerializer" : {
-      "type" : "object"
-    },
     "FilteredComponent" : {
       "type" : "object",
       "properties" : {
@@ -4634,6 +2983,18 @@
         "nonce" : {
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
+        }
+      }
+    },
+    "PairIntegerStep" : {
+      "type" : "object",
+      "properties" : {
+        "first" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "second" : {
+          "$ref" : "#/definitions/Step"
         }
       }
     },
@@ -4648,6 +3009,78 @@
         },
         "newStep" : {
           "$ref" : "#/definitions/Step"
+        }
+      }
+    },
+    "ProgressTracker" : {
+      "type" : "object",
+      "properties" : {
+        "steps" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Step"
+          }
+        },
+        "stepIndex" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "stepsTreeIndex" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "parent" : {
+          "$ref" : "#/definitions/ProgressTracker"
+        },
+        "currentStep" : {
+          "$ref" : "#/definitions/Step"
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
+        },
+        "stepsTreeIndexChanges" : {
+          "$ref" : "#/definitions/ObservableInteger"
+        },
+        "allStepsLabels" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/PairIntegerString"
+          }
+        },
+        "stepsTreeChanges" : {
+          "$ref" : "#/definitions/ObservableListPairIntegerString"
+        },
+        "hasEnded" : {
+          "type" : "boolean"
+        },
+        "currentStepRecursive" : {
+          "$ref" : "#/definitions/Step"
+        },
+        "topLevelTracker" : {
+          "$ref" : "#/definitions/ProgressTracker"
+        },
+        "allSteps" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/PairIntegerStep"
+          }
+        }
+      }
+    },
+    "Step" : {
+      "type" : "object",
+      "properties" : {
+        "label" : {
+          "type" : "string"
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
+        },
+        "extraAuditData" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          }
         }
       }
     },
@@ -4676,382 +3109,6 @@
         },
         "parent" : {
           "$ref" : "#/definitions/Step"
-        }
-      }
-    },
-    "BrokerRpcSslOptions" : {
-      "type" : "object",
-      "properties" : {
-        "keyStorePath" : {
-          "$ref" : "#/definitions/Path"
-        },
-        "keyStorePassword" : {
-          "type" : "string"
-        }
-      }
-    },
-    "RPCApi" : {
-      "type" : "object",
-      "properties" : {
-        "rpc_CLIENT_BINDING_REMOVAL_FILTER_EXPRESSION" : {
-          "type" : "string"
-        },
-        "rpc_CLIENT_BINDING_ADDITION_FILTER_EXPRESSION" : {
-          "type" : "string"
-        }
-      }
-    },
-    "RPCApi$ClientToServer$Companion$WhenMappings" : {
-      "type" : "object"
-    },
-    "ObservablesClosed" : {
-      "type" : "object",
-      "properties" : {
-        "ids" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/InvocationId"
-          }
-        }
-      }
-    },
-    "RpcRequest" : {
-      "type" : "object",
-      "properties" : {
-        "clientAddress" : {
-          "$ref" : "#/definitions/SimpleString"
-        },
-        "methodName" : {
-          "type" : "string"
-        },
-        "serialisedArguments" : {
-          "type" : "string",
-          "description" : "Hex encoded Byte Array"
-        },
-        "replyId" : {
-          "$ref" : "#/definitions/InvocationId"
-        },
-        "sessionId" : {
-          "$ref" : "#/definitions/SessionId"
-        },
-        "externalTrace" : {
-          "$ref" : "#/definitions/Trace"
-        },
-        "impersonatedActor" : {
-          "$ref" : "#/definitions/Actor"
-        }
-      }
-    },
-    "SimpleString" : {
-      "type" : "object",
-      "properties" : {
-        "data" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "empty" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "RpcRequestOrObservableIdKey" : {
-      "type" : "object"
-    },
-    "RPCApi$ServerToClient$Companion$WhenMappings" : {
-      "type" : "object"
-    },
-    "FailedToDeserializeReply" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "id" : {
-          "$ref" : "#/definitions/InvocationId"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "Notification" : {
-      "type" : "object",
-      "properties" : {
-        "kind" : {
-          "type" : "string",
-          "enum" : [ "OnNext", "OnError", "OnCompleted" ]
-        },
-        "throwable" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "value" : {
-          "type" : "object"
-        },
-        "onNext" : {
-          "type" : "boolean"
-        },
-        "onError" : {
-          "type" : "boolean"
-        },
-        "onCompleted" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "NotificationObject" : {
-      "type" : "object",
-      "properties" : {
-        "kind" : {
-          "type" : "string",
-          "enum" : [ "OnNext", "OnError", "OnCompleted" ]
-        },
-        "throwable" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "value" : {
-          "type" : "object"
-        },
-        "onNext" : {
-          "type" : "boolean"
-        },
-        "onError" : {
-          "type" : "boolean"
-        },
-        "onCompleted" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "Observation" : {
-      "type" : "object",
-      "properties" : {
-        "id" : {
-          "$ref" : "#/definitions/InvocationId"
-        },
-        "content" : {
-          "$ref" : "#/definitions/NotificationObject"
-        },
-        "deduplicationIdentity" : {
-          "type" : "string"
-        }
-      }
-    },
-    "RpcReply" : {
-      "type" : "object",
-      "properties" : {
-        "id" : {
-          "$ref" : "#/definitions/InvocationId"
-        },
-        "result" : {
-          "$ref" : "#/definitions/TryObject"
-        },
-        "deduplicationIdentity" : {
-          "type" : "string"
-        }
-      }
-    },
-    "DuplicateAttachmentException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "file" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "reason" : {
-          "type" : "string"
-        },
-        "otherFile" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "DuplicateContractClassException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "InternalNodeException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "errorId" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "NonRpcFlowException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "OutdatedNetworkParameterHashException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
-        }
-      }
-    },
-    "RejectedCommandException" : {
-      "type" : "object",
-      "properties" : {
-        "cause" : {
-          "$ref" : "#/definitions/Throwable"
-        },
-        "stackTrace" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/StackTraceElement"
-          }
-        },
-        "originalExceptionClassName" : {
-          "type" : "string"
-        },
-        "message" : {
-          "type" : "string"
-        },
-        "originalMessage" : {
-          "type" : "string"
-        },
-        "localizedMessage" : {
-          "type" : "string"
-        },
-        "suppressed" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Throwable"
-          }
         }
       }
     }

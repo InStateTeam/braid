@@ -939,10 +939,10 @@
             "format" : "byte"
           }
         },
-        "format" : {
+        "algorithm" : {
           "type" : "string"
         },
-        "algorithm" : {
+        "format" : {
           "type" : "string"
         }
       }
@@ -980,10 +980,10 @@
             "format" : "byte"
           }
         },
-        "format" : {
+        "algorithm" : {
           "type" : "string"
         },
-        "algorithm" : {
+        "format" : {
           "type" : "string"
         },
         "destroyed" : {
@@ -1000,14 +1000,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1023,14 +1023,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1040,14 +1040,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1057,14 +1057,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1150,6 +1150,12 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "outputs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TransactionStateContractState"
+          }
+        },
         "outputStates" : {
           "type" : "array",
           "items" : {
@@ -1158,12 +1164,6 @@
         },
         "notary" : {
           "$ref" : "#/definitions/Party"
-        },
-        "outputs" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/TransactionStateContractState"
-          }
         },
         "id" : {
           "type" : "string",
@@ -1178,9 +1178,11 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "nano" : {
-          "type" : "integer",
-          "format" : "int32"
+        "units" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TemporalUnit"
+          }
         },
         "zero" : {
           "type" : "boolean"
@@ -1188,11 +1190,9 @@
         "negative" : {
           "type" : "boolean"
         },
-        "units" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/TemporalUnit"
-          }
+        "nano" : {
+          "type" : "integer",
+          "format" : "int32"
         }
       }
     },
@@ -1238,15 +1238,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
-        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
+        },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -1329,17 +1329,17 @@
     "TemporalUnit" : {
       "type" : "object",
       "properties" : {
-        "timeBased" : {
-          "type" : "boolean"
-        },
-        "duration" : {
-          "$ref" : "#/definitions/Duration"
-        },
         "dateBased" : {
           "type" : "boolean"
         },
         "durationEstimated" : {
           "type" : "boolean"
+        },
+        "timeBased" : {
+          "type" : "boolean"
+        },
+        "duration" : {
+          "$ref" : "#/definitions/Duration"
         }
       }
     },
@@ -1349,15 +1349,15 @@
         "length" : {
           "$ref" : "#/definitions/Duration"
         },
+        "fromTime" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
         "untilTime" : {
           "type" : "integer",
           "format" : "int64"
         },
         "midpoint" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "fromTime" : {
           "type" : "integer",
           "format" : "int64"
         }
@@ -1430,18 +1430,6 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
-          }
-        },
-        "merkleTree" : {
-          "$ref" : "#/definitions/MerkleTree"
-        },
         "groupHashes$core" : {
           "type" : "array",
           "items" : {
@@ -1480,6 +1468,18 @@
             }
           }
         },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        },
+        "merkleTree" : {
+          "$ref" : "#/definitions/MerkleTree"
+        },
         "availableComponentGroups" : {
           "type" : "array",
           "items" : {
@@ -1503,14 +1503,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1526,14 +1526,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1543,14 +1543,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -1928,20 +1928,20 @@
         "timeoutEnabled" : {
           "type" : "boolean"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
+        "runId" : {
+          "$ref" : "#/definitions/StateMachineRunId"
         },
         "stateMachine" : {
           "$ref" : "#/definitions/FlowStateMachineObject"
         },
-        "runId" : {
-          "$ref" : "#/definitions/StateMachineRunId"
-        },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
+        },
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -1962,10 +1962,10 @@
     "CordaFuture" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -1973,10 +1973,10 @@
     "CordaFutureObject" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -1984,10 +1984,10 @@
     "CordaFutureVoid" : {
       "type" : "object",
       "properties" : {
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         },
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         }
       }
@@ -2004,6 +2004,14 @@
         "info" : {
           "$ref" : "#/definitions/Info"
         },
+        "targetPlatformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "minimumPlatformVersion" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
         "contractClassNames" : {
           "type" : "array",
           "items" : {
@@ -2013,13 +2021,13 @@
         "rpcFlows" : {
           "type" : "array"
         },
+        "initiatedFlows" : {
+          "type" : "array"
+        },
         "serviceFlows" : {
           "type" : "array"
         },
         "schedulableFlows" : {
-          "type" : "array"
-        },
-        "initiatedFlows" : {
           "type" : "array"
         },
         "serializationWhitelists" : {
@@ -2057,14 +2065,6 @@
         "jarHash" : {
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
-        },
-        "targetPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "minimumPlatformVersion" : {
-          "type" : "integer",
-          "format" : "int32"
         }
       }
     },
@@ -2103,17 +2103,17 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
+        },
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2126,17 +2126,17 @@
         "progressTracker" : {
           "$ref" : "#/definitions/ProgressTracker"
         },
-        "ourIdentityAndCert" : {
-          "$ref" : "#/definitions/PartyAndCertificate"
-        },
         "runId" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
+        "ourIdentityAndCert" : {
+          "$ref" : "#/definitions/PartyAndCertificate"
         },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
+        },
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
         },
         "logger" : {
           "$ref" : "#/definitions/Logger"
@@ -2152,23 +2152,23 @@
         "id" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
         },
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
+        },
         "logger" : {
           "$ref" : "#/definitions/Logger"
+        },
+        "logic" : {
+          "$ref" : "#/definitions/FlowLogicObject"
         },
         "resultFuture" : {
           "$ref" : "#/definitions/CordaFutureObject"
         },
         "ourSenderUUID" : {
           "type" : "string"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
         }
       }
     },
@@ -2181,29 +2181,32 @@
         "id" : {
           "$ref" : "#/definitions/StateMachineRunId"
         },
-        "serviceHub" : {
-          "$ref" : "#/definitions/ServiceHub"
-        },
         "ourIdentity" : {
           "$ref" : "#/definitions/Party"
         },
+        "serviceHub" : {
+          "$ref" : "#/definitions/ServiceHub"
+        },
         "logger" : {
           "$ref" : "#/definitions/Logger"
+        },
+        "logic" : {
+          "$ref" : "#/definitions/FlowLogicObject"
         },
         "resultFuture" : {
           "$ref" : "#/definitions/CordaFutureObject"
         },
         "ourSenderUUID" : {
           "type" : "string"
-        },
-        "logic" : {
-          "$ref" : "#/definitions/FlowLogicObject"
         }
       }
     },
     "IdentityService" : {
       "type" : "object",
       "properties" : {
+        "trustAnchor" : {
+          "$ref" : "#/definitions/TrustAnchor"
+        },
         "caCertStore" : {
           "$ref" : "#/definitions/CertStore"
         },
@@ -2212,9 +2215,6 @@
         },
         "trustRoot" : {
           "$ref" : "#/definitions/X509Certificate"
-        },
-        "trustAnchor" : {
-          "$ref" : "#/definitions/TrustAnchor"
         }
       }
     },
@@ -2329,22 +2329,22 @@
     "NetworkMapCache" : {
       "type" : "object",
       "properties" : {
-        "notaryIdentities" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Party"
-          }
+        "nodeReady" : {
+          "$ref" : "#/definitions/CordaFutureVoid"
         },
         "changed" : {
           "$ref" : "#/definitions/ObservableMapChange"
-        },
-        "nodeReady" : {
-          "$ref" : "#/definitions/CordaFutureVoid"
         },
         "allNodes" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/NodeInfo"
+          }
+        },
+        "notaryIdentities" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Party"
           }
         }
       }
@@ -2609,9 +2609,6 @@
     "ServiceHub" : {
       "type" : "object",
       "properties" : {
-        "contractUpgradeService" : {
-          "$ref" : "#/definitions/ContractUpgradeService"
-        },
         "myInfo" : {
           "$ref" : "#/definitions/NodeInfo"
         },
@@ -2621,20 +2618,23 @@
         "transactionVerifierService" : {
           "$ref" : "#/definitions/TransactionVerifierService"
         },
+        "clock" : {
+          "$ref" : "#/definitions/Clock"
+        },
         "keyManagementService" : {
           "$ref" : "#/definitions/KeyManagementService"
+        },
+        "contractUpgradeService" : {
+          "$ref" : "#/definitions/ContractUpgradeService"
+        },
+        "vaultService" : {
+          "$ref" : "#/definitions/VaultService"
         },
         "networkMapCache" : {
           "$ref" : "#/definitions/NetworkMapCache"
         },
         "appContext" : {
           "$ref" : "#/definitions/CordappContext"
-        },
-        "clock" : {
-          "$ref" : "#/definitions/Clock"
-        },
-        "vaultService" : {
-          "$ref" : "#/definitions/VaultService"
         },
         "networkParametersService" : {
           "$ref" : "#/definitions/NetworkParametersService"
@@ -2645,11 +2645,11 @@
         "identityService" : {
           "$ref" : "#/definitions/IdentityService"
         },
-        "networkParameters" : {
-          "$ref" : "#/definitions/NetworkParameters"
-        },
         "cordappProvider" : {
           "$ref" : "#/definitions/CordappProvider"
+        },
+        "networkParameters" : {
+          "$ref" : "#/definitions/NetworkParameters"
         }
       }
     },
@@ -2668,14 +2668,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -2770,10 +2770,6 @@
         "subjectDN" : {
           "$ref" : "#/definitions/Principal"
         },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "notBefore" : {
           "type" : "string",
           "format" : "date-time"
@@ -2847,6 +2843,10 @@
             "type" : "string"
           }
         },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
         "nonCriticalExtensionOIDs" : {
           "type" : "array",
           "uniqueItems" : true,
@@ -2913,9 +2913,6 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "duration" : {
-          "$ref" : "#/definitions/Duration"
-        },
         "gap" : {
           "type" : "boolean"
         },
@@ -2925,6 +2922,9 @@
         "dateTimeAfter" : {
           "type" : "string",
           "format" : "date-time"
+        },
+        "duration" : {
+          "$ref" : "#/definitions/Duration"
         },
         "dateTimeBefore" : {
           "type" : "string",
@@ -2952,10 +2952,6 @@
         "offsetAfter" : {
           "$ref" : "#/definitions/ZoneOffset"
         },
-        "dayOfWeek" : {
-          "type" : "string",
-          "enum" : [ "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY" ]
-        },
         "dayOfMonthIndicator" : {
           "type" : "integer",
           "format" : "int32"
@@ -2965,6 +2961,10 @@
         },
         "midnightEndOfDay" : {
           "type" : "boolean"
+        },
+        "dayOfWeek" : {
+          "type" : "string",
+          "enum" : [ "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY" ]
         }
       }
     },
@@ -2994,14 +2994,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -3011,14 +3011,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -3028,14 +3028,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -3141,14 +3141,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -3158,14 +3158,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -3175,14 +3175,14 @@
         "label" : {
           "type" : "string"
         },
-        "changes" : {
-          "$ref" : "#/definitions/ObservableChange"
-        },
         "extraAuditData" : {
           "type" : "object",
           "additionalProperties" : {
             "type" : "string"
           }
+        },
+        "changes" : {
+          "$ref" : "#/definitions/ObservableChange"
         }
       }
     },
@@ -4520,6 +4520,9 @@
         "encoding" : {
           "$ref" : "#/definitions/SerializationEncoding"
         },
+        "whitelist" : {
+          "$ref" : "#/definitions/ClassWhitelist"
+        },
         "preferredSerializationVersion" : {
           "$ref" : "#/definitions/ByteSequence"
         },
@@ -4551,9 +4554,6 @@
           "items" : {
             "$ref" : "#/definitions/SerializationCustomSerializerObjectObject"
           }
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
         }
       }
     },
@@ -4596,6 +4596,9 @@
         "encoding" : {
           "$ref" : "#/definitions/SerializationEncoding"
         },
+        "whitelist" : {
+          "$ref" : "#/definitions/ClassWhitelist"
+        },
         "deserializationClassLoader" : {
           "$ref" : "#/definitions/ClassLoader"
         },
@@ -4604,9 +4607,6 @@
         },
         "objectReferencesEnabled" : {
           "type" : "boolean"
-        },
-        "whitelist" : {
-          "$ref" : "#/definitions/ClassWhitelist"
         }
       }
     },
@@ -4805,13 +4805,13 @@
         "value" : {
           "type" : "object"
         },
+        "onNext" : {
+          "type" : "boolean"
+        },
         "onError" : {
           "type" : "boolean"
         },
         "onCompleted" : {
-          "type" : "boolean"
-        },
-        "onNext" : {
           "type" : "boolean"
         }
       }
@@ -4829,13 +4829,13 @@
         "value" : {
           "type" : "object"
         },
+        "onNext" : {
+          "type" : "boolean"
+        },
         "onError" : {
           "type" : "boolean"
         },
         "onCompleted" : {
-          "type" : "boolean"
-        },
-        "onNext" : {
           "type" : "boolean"
         }
       }

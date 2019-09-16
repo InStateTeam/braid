@@ -16,8 +16,8 @@
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
-import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
-import io.bluebank.braid.corda.services.adapters.asFlowStarter
+import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
@@ -121,15 +121,15 @@ class CordaSockJSHandler private constructor(
 
     private fun createNetworkMapService(
       services: AppServiceHub,
-      config: BraidConfig
+      @Suppress("UNUSED_PARAMETER") config: BraidConfig
     ): ServiceExecutor =
-      ConcreteServiceExecutor(SimpleNetworkMapServiceImpl(services, config))
+      ConcreteServiceExecutor(SimpleNetworkMapService(services.toCordaServicesAdapter()))
 
     private fun createFlowService(
       services: AppServiceHub,
       config: BraidConfig
     ): ServiceExecutor =
-      CordaFlowServiceExecutor(services.asFlowStarter(), config)
+      CordaFlowServiceExecutor(services.toCordaServicesAdapter(), config)
   }
 
   private val authProvider = config.authConstructor?.invoke(vertx)

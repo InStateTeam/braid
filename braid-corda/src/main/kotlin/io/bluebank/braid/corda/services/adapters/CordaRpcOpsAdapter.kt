@@ -15,16 +15,68 @@
  */
 package io.bluebank.braid.corda.services.adapters
 
-import io.bluebank.braid.corda.services.FlowStarter
+import io.bluebank.braid.corda.server.rpc.RPCFactory
+import io.bluebank.braid.corda.services.CordaServicesAdapter
 import net.corda.core.flows.FlowLogic
+import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.messaging.DataFeed
 import net.corda.core.messaging.FlowHandle
+import net.corda.core.node.NodeInfo
+import net.corda.core.node.services.NetworkMapCache
+import net.corda.core.utilities.NetworkHostAndPort
 
-fun CordaRPCOps.asFlowStarter(): FlowStarter {
+fun RPCFactory.toCordaServicesAdapter(): CordaServicesAdapter {
+  return RPCFactoryCordaServicesAdapter(this)
+}
+
+fun CordaRPCOps.toCordaServicesAdapter(): CordaServicesAdapter {
   return CordaRpcOpsAdapter(this)
 }
 
-class CordaRpcOpsAdapter(private val cordaRpcOps: CordaRPCOps) : FlowStarter {
+class CordaRpcOpsAdapter(private val cordaRpcOps: CordaRPCOps) : CordaServicesAdapter {
+  override fun getNodeByLegalName(name: CordaX500Name): NodeInfo? {
+    return cordaRpcOps.networkMapSnapshot().firstOrNull { nodeInfo ->
+      nodeInfo.legalIdentities.map { identity -> identity.name }.contains(name)
+    }
+  }
+
+  override fun getNodeByAddress(hostAndPort: NetworkHostAndPort): NodeInfo? {
+    return cordaRpcOps.networkMapSnapshot().firstOrNull {
+      it.addresses.contains(hostAndPort)
+    }
+  }
+
+  override fun track(): DataFeed<List<NodeInfo>, NetworkMapCache.MapChange> {
+    return cordaRpcOps.networkMapFeed()
+  }
+
+  override fun notaryPartyFromX500Name(x500Name: CordaX500Name): Party? {
+    return cordaRpcOps.notaryPartyFromX500Name(x500Name)
+  }
+
+  override fun nodeInfo(): NodeInfo {
+    return cordaRpcOps.nodeInfo()
+  }
+
+  override fun notaryIdentities(): List<Party> {
+    return cordaRpcOps.notaryIdentities()
+  }
+
+  override fun networkMapSnapshot(): List<NodeInfo> {
+    return cordaRpcOps.networkMapSnapshot()
+  }
+
+  override fun wellKnownPartyFromX500Name(x500Name: CordaX500Name): Party? {
+    return cordaRpcOps.wellKnownPartyFromX500Name(x500Name)
+  }
+
+  override fun nodeInfoFromParty(party: AbstractParty): NodeInfo? {
+    return cordaRpcOps.nodeInfoFromParty(party)
+  }
+
   override fun <T> startFlowDynamic(
     logicType: Class<out FlowLogic<T>>,
     vararg args: Any?

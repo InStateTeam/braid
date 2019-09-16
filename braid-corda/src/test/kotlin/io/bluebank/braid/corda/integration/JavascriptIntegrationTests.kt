@@ -27,6 +27,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JavascriptIntegrationTests {
+
   companion object {
     private val log = loggerFor<JavascriptIntegrationTests>()
     private val javascriptLogger = LoggerFactory.getLogger("javascript-logger")

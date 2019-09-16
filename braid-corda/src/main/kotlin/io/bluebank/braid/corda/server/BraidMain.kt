@@ -13,27 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.server
 
-import io.bluebank.braid.corda.server.Braid
-import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.vertx.core.Future
 import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<BraidMain>()
 
-fun main(args: Array<String>) {
-  if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <swaggerVersion> [<cordaAppJar1> <cordAppJar2> ....]")
-  }
+class BraidMain {
 
-  val networkAndPort = args[0]
-  val userName = args[1]
-  val password = args[2]
-  val port = Integer.valueOf(args[3])
-  val swaggerVersion = Integer.valueOf(args[4])
-  val additionalPaths = args.asList().drop(5)
-  BraidMain().start(networkAndPort, userName, password, port,swaggerVersion, additionalPaths)
+  fun start(networkAndPort: String,
+            userName: String,
+            password: String,
+            port: Int,
+            swaggerVersion: Int,
+            additionalPaths: List<String>): Future<String> {
+    val classLoader = additionalPaths.toJarsClassLoader()
+    return tryWithClassLoader(classLoader) {
+      Braid(
+          port = port,
+          userName = userName,
+          password = password,
+          swaggerVersion = swaggerVersion,
+          nodeAddress = NetworkHostAndPort.parse(networkAndPort)
+      )
+          .startServer()
+          .recover {
+            log.error("Server failed to start:", it)
+            Future.succeededFuture("-1")
+          }
+    }
+  }
 }
