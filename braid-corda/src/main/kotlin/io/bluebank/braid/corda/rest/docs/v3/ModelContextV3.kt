@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.netty.buffer.ByteBuf
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
@@ -41,6 +42,7 @@ class ModelContextV3 {
   val models: Map<String, Schema<*>> get() = mutableModels
   private val modelConverters = ModelConverters().apply {
     addConverter(QualifiedTypeNameConverter(Json.mapper()))
+    addConverter(CustomModelConverterV3())
   }
 
   fun addType(type: Type): ResolvedSchema {

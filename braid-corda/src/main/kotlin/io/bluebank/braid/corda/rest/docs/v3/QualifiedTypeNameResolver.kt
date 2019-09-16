@@ -24,6 +24,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 class QualifiedTypeNameResolver : TypeNameResolver() {
 
   override fun nameForClass(cls: Class<*>, options: MutableSet<Options>): String {
+    return simplerClassName(cls, options).replace("$","_")
+  }
+
+  private fun simplerClassName(cls: Class<*>, options: MutableSet<Options>): String {
     val className = when {
       cls.name.startsWith("java.") -> cls.simpleName
       else -> cls.name

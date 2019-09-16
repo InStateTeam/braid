@@ -41,7 +41,7 @@ class DocsHandlerV2(
 ) : DocsHandler {
 
   companion object {
-    var log = loggerFor<DocsHandlerV2>()
+    private val log = loggerFor<DocsHandlerV2>()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }
 

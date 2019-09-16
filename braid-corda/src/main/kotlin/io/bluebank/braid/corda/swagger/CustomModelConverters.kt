@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger
 
+import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.swagger.converter.ModelConverters
 
 /**
@@ -23,7 +24,8 @@ import io.swagger.converter.ModelConverters
 object CustomModelConverters {
 
   init {
-    ModelConverters.getInstance().addConverter(CustomModelConverter())
+    ModelConverters.getInstance().addConverter(CustomModelConverterV2())
+    io.swagger.v3.core.converter.ModelConverters.getInstance().addConverter(CustomModelConverterV3())
   }
 
   fun init() {

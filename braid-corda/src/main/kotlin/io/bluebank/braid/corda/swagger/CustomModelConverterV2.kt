@@ -23,6 +23,7 @@ import io.swagger.models.properties.*
 import io.swagger.util.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
+import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.OpaqueBytes
@@ -37,9 +38,11 @@ import java.util.*
  * to be used when calling BraidCordaJacksonInit.init()
  *
  */
-class CustomModelConverter : ModelConverter {
+class CustomModelConverterV2 : ModelConverter {
 
-  var log = loggerFor<CustomModelConverter>()
+  companion object {
+    private val log = loggerFor<CustomModelConverterV2>()
+  }
 
   override fun resolveProperty(
     type: Type?,
@@ -124,18 +127,16 @@ class CustomModelConverter : ModelConverter {
           ) {
             context?.defineModel(
               "IssuedCurrency", ModelImpl()
+                .name("IssuedCurrency")
                 .type("object")
-                .property("issuer", RefProperty("PartyAndReference"))
-                .property(
-                  "product",
-                  resolveProperty(boundType, context, annotations, chain)
-                )
+                .property("issuer", resolveProperty(PartyAndReference::class.java,context,annotations,chain))
+                .property("product",       resolveProperty(boundType, context, annotations, chain))
             )
             return RefProperty("IssuedCurrency")
           } else {
             val model = ModelImpl()
               .type("object")
-              .property("issuer", RefProperty("PartyAndReference"))
+              .property("issuer", resolveProperty(PartyAndReference::class.java,context,annotations,chain))
               .property(
                 "product",
                 resolveProperty(boundType, context, annotations, chain)

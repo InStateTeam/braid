@@ -70,6 +70,7 @@ class ModelContext {
     return ModelConverters.getInstance().readAll(this)
   }
 
-      var log = loggerFor<ModelContext>()
-
+  companion object {
+    private val log = loggerFor<ModelContext>()
+  }
 }

@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.server.rpc
+package io.bluebank.braid.corda.swagger.v3
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.swagger.ClassWithTypes
 import io.bluebank.braid.corda.swagger.CustomModelConverters
-import io.swagger.converter.ModelConverters
+import io.swagger.v3.core.converter.ModelConverters
+import io.swagger.v3.core.converter.ResolvedSchema
+import io.swagger.v3.core.jackson.ModelResolver
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
-import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.Party
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
@@ -35,23 +34,26 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
-import java.util.*
 import kotlin.test.assertEquals
 
-class CustomModelConvertersTest {
+class CustomModelConvertersV3Test {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
   }
 
+  private val converter = ModelConverters().apply {
+    addConverter(ModelResolver(Json.mapper))
+    addConverter(CustomModelConverterV3())
+  }
+  
   @Before
   fun setUp() {
     BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
   }
 
   @Test
   fun `should Correctly Model Amount`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
     assertThat(models.toString(), models.get("Amount"), notNullValue())
@@ -79,7 +81,7 @@ class CustomModelConvertersTest {
 
   @Test
   fun `should Correctly Model AmountCurrency and AmountString`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
     val model = models.get("AmountCurrency")
@@ -102,7 +104,7 @@ class CustomModelConvertersTest {
 
   @Test
   fun `should Correctly Model OpaqueBytes as string`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
     val model = models.get("ClassWithTypes")
@@ -115,7 +117,7 @@ class CustomModelConvertersTest {
 
   @Test
   fun `should Correctly Model SecureHash as string`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
     val model = models.get("ClassWithTypes")
@@ -128,7 +130,7 @@ class CustomModelConvertersTest {
 
   @Test
   fun `should Correctly Model Currency as string`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
     val model = models.get("ClassWithTypes")
@@ -141,18 +143,19 @@ class CustomModelConvertersTest {
 
   @Test
   fun `should Correctly Model Issued as string`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
 
     val model = models.get("Issued")
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
-    assertThat(properties?.toString(), properties?.get("issuer")?.type, equalTo("ref"))
+    val issuer = properties?.get("issuer")
+    assertThat(properties?.toString(), issuer?.type, equalTo("object"))
 
     assertThat(
       properties?.toString(),
       properties?.get("product")?.type,
-      equalTo("ref")
+      equalTo("object")
     )     // used to be object. shoul dit be?
     assertThat(
       properties?.toString(),
@@ -168,7 +171,7 @@ class CustomModelConvertersTest {
   @Test
   @Ignore  // now serialize many parts
   fun `should Strip out SignedTransaction Exclusions`() {
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
 
     val model = models.get("SignedTransaction")
     assertThat(models.toString(), model, notNullValue())
@@ -238,7 +241,7 @@ class CustomModelConvertersTest {
   @Test
   fun `should Correctly Model Party as owning key string`() {
 
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
 
     val properties = models.get("Party")?.properties
     assertThat(properties?.size, equalTo(2))
@@ -256,13 +259,13 @@ class CustomModelConvertersTest {
  @Test
   fun `should Serialize Classes`() {
    val encode = Json.encode(ClassWithTypes::class.java)
-   assertThat(encode, equalTo("\"io.bluebank.braid.corda.server.rpc.CustomModelConvertersTest\$ClassWithTypes\""))
+   assertThat(encode, equalTo("\"io.bluebank.braid.corda.swagger.ClassWithTypes\""))
  }
 
  @Test
   fun `should Correctly Model Class as string`() {
 
-    val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
+    val models = converter.readAll(ClassWithTypes::class.java)
    
     val properties = models.get("ClassWithTypes")?.properties
     val classType = properties?.get("clazz")
@@ -270,22 +273,6 @@ class CustomModelConvertersTest {
     assertThat(properties?.toString(), classType?.type, equalTo("string"))
 
   }
-
-  data class ClassWithTypes(
-    val currency: Currency,
-    val amountCurrency: Amount<Currency>
-    , val amountString: Amount<String>
-    , val amount: Amount<Any>
-    , val party: Party
-    , val bytes: OpaqueBytes
-    , val hash: SecureHash
-    , val issuedString: Issued<String>
-    , val issuedCurrency: Issued<Currency>
-    , val issued: Issued<IssuedType>
-    , val signed: SignedTransaction
-    , val wire: WireTransaction
-    , val clazz: Class<*>
-  )
 
   data class IssuedType(
     val value: String

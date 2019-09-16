@@ -56,15 +56,15 @@ import java.util.Arrays.asList
 class BraidTest {
 
   companion object {
-    var log = loggerFor<BraidTest>()
+    private val log = loggerFor<BraidTest>()
 
-    val user = User("user1", "test", permissions = setOf("ALL"))
-    val bankA = CordaX500Name("BankA", "", "GB")
-    val bankB = CordaX500Name("BankB", "", "US")
+    private val user = User("user1", "test", permissions = setOf("ALL"))
+    private val bankA = CordaX500Name("BankA", "", "GB")
+    private val bankB = CordaX500Name("BankB", "", "US")
 
-    var port = findFreePort()
-    val client = Vertx.vertx().createHttpClient()
-    var driverl = Future.succeededFuture("");
+    private var port = findFreePort()
+    private val client = Vertx.vertx().createHttpClient()
+    private val driverl = Future.succeededFuture("");
 
     @BeforeClass
     @JvmStatic
