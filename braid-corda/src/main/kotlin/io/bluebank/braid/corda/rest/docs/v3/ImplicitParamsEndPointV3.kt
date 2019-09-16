@@ -35,8 +35,9 @@ class ImplicitParamsEndPointV3(
   protected: Boolean,
   method: HttpMethod,
   path: String,
-  fn: (RoutingContext) -> Unit
-) : EndPointV3(groupName, protected, method, path) {
+  fn: (RoutingContext) -> Unit,
+  modelContextV3: ModelContextV3
+) : EndPointV3(groupName, protected, method, path, modelContextV3) {
 
   private val annotated = (fn as KAnnotatedElement)
   override val annotations: List<Annotation> = annotated.annotations
@@ -76,7 +77,7 @@ class ImplicitParamsEndPointV3(
       .firstOrNull()
 
   override fun mapBodyParameter(): RequestBody? {
-    return bodyParam?.toModel() as RequestBody?
+    return bodyParam?.toModel()
   }
 
   override fun mapQueryParameters(): List<QueryParameter> {
@@ -146,5 +147,4 @@ class ImplicitParamsEndPointV3(
 //      else -> ""
 //    }
 //  }
-
 }

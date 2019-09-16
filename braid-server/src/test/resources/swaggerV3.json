@@ -7,7 +7,7 @@
     "contact" : { }
   },
   "host" : "localhost:8080",
-  "basePath" : "/api/rest/",
+  "basePath" : "/api/rest",
   "schemes" : [ "http" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
@@ -1004,11 +1004,8 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "outputStates" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/ContractState"
-          }
+        "notary" : {
+          "$ref" : "#/definitions/Party"
         },
         "outputs" : {
           "type" : "array",
@@ -1016,8 +1013,11 @@
             "$ref" : "#/definitions/TransactionStateContractState"
           }
         },
-        "notary" : {
-          "$ref" : "#/definitions/Party"
+        "outputStates" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/ContractState"
+          }
         },
         "id" : {
           "type" : "string",
@@ -1032,12 +1032,6 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "zero" : {
-          "type" : "boolean"
-        },
-        "negative" : {
-          "type" : "boolean"
-        },
         "nano" : {
           "type" : "integer",
           "format" : "int32"
@@ -1047,6 +1041,12 @@
           "items" : {
             "$ref" : "#/definitions/TemporalUnit"
           }
+        },
+        "zero" : {
+          "type" : "boolean"
+        },
+        "negative" : {
+          "type" : "boolean"
         }
       }
     },
@@ -1122,15 +1122,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "networkParametersHash" : {
+          "type" : "string",
+          "description" : "Base 58 Encoded Secure Hash"
+        },
         "outputs" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/TransactionStateContractState"
           }
-        },
-        "networkParametersHash" : {
-          "type" : "string",
-          "description" : "Base 58 Encoded Secure Hash"
         },
         "outputStates" : {
           "type" : "array",
@@ -1159,17 +1159,11 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
-        "notaryChangeTx" : {
-          "$ref" : "#/definitions/NotaryChangeWireTransaction"
-        },
-        "notaryChangeTransaction" : {
-          "type" : "boolean"
+        "coreTransaction" : {
+          "$ref" : "#/definitions/CoreTransaction"
         },
         "tx" : {
           "$ref" : "#/definitions/WireTransaction"
-        },
-        "coreTransaction" : {
-          "$ref" : "#/definitions/CoreTransaction"
         },
         "inputs" : {
           "type" : "array",
@@ -1198,6 +1192,12 @@
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
             "description" : "Base 58 Encoded Public Key"
           }
+        },
+        "notaryChangeTx" : {
+          "$ref" : "#/definitions/NotaryChangeWireTransaction"
+        },
+        "notaryChangeTransaction" : {
+          "type" : "boolean"
         },
         "missingSigners" : {
           "type" : "array",
@@ -1237,11 +1237,11 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "fromTime" : {
+        "midpoint" : {
           "type" : "integer",
           "format" : "int64"
         },
-        "midpoint" : {
+        "fromTime" : {
           "type" : "integer",
           "format" : "int64"
         }
@@ -1306,6 +1306,15 @@
           "type" : "string",
           "description" : "Base 58 Encoded Secure Hash"
         },
+        "requiredSigningKeys" : {
+          "type" : "array",
+          "uniqueItems" : true,
+          "items" : {
+            "type" : "string",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
+            "description" : "Base 58 Encoded Public Key"
+          }
+        },
         "merkleTree" : {
           "$ref" : "#/definitions/MerkleTree"
         },
@@ -1345,15 +1354,6 @@
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
               "description" : "Base 58 Encoded Secure Hash"
             }
-          }
-        },
-        "requiredSigningKeys" : {
-          "type" : "array",
-          "uniqueItems" : true,
-          "items" : {
-            "type" : "string",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE",
-            "description" : "Base 58 Encoded Public Key"
           }
         },
         "availableComponentGroups" : {
@@ -1595,10 +1595,10 @@
     "CordaFuture" : {
       "type" : "object",
       "properties" : {
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         },
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         }
       }
@@ -1606,10 +1606,10 @@
     "CordaFutureObject" : {
       "type" : "object",
       "properties" : {
-        "cancelled" : {
+        "done" : {
           "type" : "boolean"
         },
-        "done" : {
+        "cancelled" : {
           "type" : "boolean"
         }
       }
@@ -1871,11 +1871,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "orThrow" : {
-          "type" : "object"
-        },
         "failure" : {
           "type" : "boolean"
+        },
+        "orThrow" : {
+          "type" : "object"
         }
       }
     },
@@ -1885,11 +1885,11 @@
         "success" : {
           "type" : "boolean"
         },
-        "orThrow" : {
-          "type" : "object"
-        },
         "failure" : {
           "type" : "boolean"
+        },
+        "orThrow" : {
+          "type" : "object"
         }
       }
     },
@@ -2041,6 +2041,12 @@
           "type" : "integer",
           "format" : "int32"
         },
+        "issuerDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
+        "subjectDN" : {
+          "$ref" : "#/definitions/Principal"
+        },
         "serialNumber" : {
           "type" : "integer"
         },
@@ -2056,6 +2062,10 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32"
         },
         "notBefore" : {
           "type" : "string",
@@ -2113,16 +2123,6 @@
               "type" : "object"
             }
           }
-        },
-        "version" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "issuerDN" : {
-          "$ref" : "#/definitions/Principal"
-        },
-        "subjectDN" : {
-          "$ref" : "#/definitions/Principal"
         },
         "criticalExtensionOIDs" : {
           "type" : "array",

@@ -37,6 +37,7 @@ internal class ObservableInvocationStrategy(
     private val log = loggerFor<ObservableInvocationStrategy>()
   }
 
+  @Suppress("DEPRECATION")
   private val result: Observable<Any> = Observable.create<Any>(this::onSubscribe)
   private val subscribers = ConcurrentHashMap<Long, Subscriber<Any>>()
 

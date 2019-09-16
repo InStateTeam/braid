@@ -37,7 +37,7 @@ data class Braid(
   val userName: String = "",
   val password: String = "",
   val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
-  val swaggerVersion: Int = 2
+  val openApiVersion: Int = 2
 ) {
   companion object {
     init {
@@ -56,13 +56,13 @@ data class Braid(
         // .withFlow(IssueObligation.Initiator::class)
         .withPort(port)
         .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), swaggerVersion))
+        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion))
         .bootstrapBraid(null, result)
       //addShutdownHook {  }
       return result
   }
 
-  fun restConfig(rpc: RPCFactory, swaggerVersion: Int = 2): RestConfig {
+  fun restConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
@@ -70,7 +70,7 @@ data class Braid(
     val rpcClasses = rpcClasses(classLoader)
     val networkService = SimpleNetworkMapService(cordaServicesAdapter)
     return RestConfig()
-        .withSwaggerVersion(swaggerVersion)
+      .withOpenApiVersion(openApiVersion)
       .withPaths {
         group("network") {
           get("/network/nodes", networkService::nodes)

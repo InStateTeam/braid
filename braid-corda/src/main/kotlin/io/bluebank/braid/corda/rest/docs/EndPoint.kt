@@ -196,7 +196,7 @@ abstract class EndPoint(
         ModelConverters.getInstance().readAsProperty(actualType)
       }
     } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type:" + actualType)
+      throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
   }
 
@@ -236,6 +236,9 @@ abstract class EndPoint(
     }
   }
 
+  /**
+   * @return true iff the type is binary data
+   */
   private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,

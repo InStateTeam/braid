@@ -26,17 +26,25 @@ private val log = loggerFor<Braid>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> <swaggerVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val file = File(args[0])
-  val swaggerVersion = Integer.parseInt(args[1])
-  val jarUrls = args.toList().drop(2)
+  val openApiVersion = Integer.parseInt(args[1])
 
   file.parentFile.mkdirs()
-  // we call so as to initialise model converters etc before replacing the context class loader
-  val swagger = BraidDocsMain().generateSwaggerForJars(jarUrls, swaggerVersion)
-  file.writeText(swagger)
+  val jars = args.toList().drop(2)
+  val swaggerText = generateSwaggerText(openApiVersion, jars)
+  file.writeText(swaggerText)
   log.info("wrote to: ${file.absolutePath}")
 }
 
+internal fun generateSwaggerText(openApiVersion: Int, jars: List<String>): String {
+  val cordappsClassLoader = jars.toJarsClassLoader()
+  // we call so as to initialise model converters etc before replacing the context class loader
+  Braid.init()
+  val swaggerText = tryWithClassLoader(cordappsClassLoader) {
+    BraidDocsMain().swaggerText(openApiVersion)
+  }
+  return swaggerText
+}

@@ -19,22 +19,15 @@ import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
-
 import io.swagger.v3.core.converter.ResolvedSchema
-
 import io.swagger.v3.oas.models.Operation
+import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
-
-
-import io.swagger.v3.core.converter.ModelConverters
-import io.swagger.v3.oas.models.media.BinarySchema
-import io.swagger.v3.oas.models.media.Content
-
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
@@ -51,7 +44,8 @@ abstract class EndPointV3(
   private val groupName: String,
   val protected: Boolean,
   val method: HttpMethod,
-  val path: String
+  val path: String,
+  private val modelContext: ModelContextV3
 ) {
 
   companion object {
@@ -63,7 +57,8 @@ abstract class EndPointV3(
       name: String,
       parameters: List<KParameter>,
       returnType: KType,
-      annotations: List<Annotation>
+      annotations: List<Annotation>,
+      modelContext: ModelContextV3
     ): EndPointV3 {
       return KEndPointV3(
         groupName,
@@ -73,8 +68,9 @@ abstract class EndPointV3(
         name,
         parameters,
         returnType.javaTypeIncludingSynthetics(),
-        annotations
-      )
+        annotations,
+        modelContext
+      ).resolveTypes()
     }
 
     fun create(
@@ -82,9 +78,10 @@ abstract class EndPointV3(
       protected: Boolean,
       method: HttpMethod,
       path: String,
-      fn: RoutingContext.() -> Unit
+      fn: RoutingContext.() -> Unit,
+      modelContext: ModelContextV3
     ): EndPointV3 {
-      return ImplicitParamsEndPointV3(groupName, protected, method, path, fn)
+      return ImplicitParamsEndPointV3(groupName, protected, method, path, fn, modelContext).resolveTypes()
     }
   }
 
@@ -99,7 +96,6 @@ abstract class EndPointV3(
   private val methodDescription: MethodDescription? by lazy {
     annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
-
 
   val description: String
     get() {
@@ -126,30 +122,31 @@ abstract class EndPointV3(
 //      }
 //    }
 
-  fun addTypes(models: ModelContextV3) {
-    models.addType(this.returnType)
+  internal fun resolveTypes(): EndPointV3 {
+    modelContext.addType(this.returnType)
     this.parameterTypes.forEach {
-      models.addType(it)
+      modelContext.addType(it)
     }
+    return this
   }
 
   fun toOperation(): Operation {
     val operation = Operation()
-        // todo .consumes(consumes)
-    .description(description)
-        .parameters(toSwaggerParams())
-        .requestBody(mapBodyParameter())
-        .addTagsItem(groupName)
+      // todo .consumes(consumes)
+      .description(description)
+      .parameters(toSwaggerParams())
+      .requestBody(mapBodyParameter())
+      .addTagsItem(groupName)
 
     if (protected) {
       operation.addSecurityItem(SecurityRequirement().addList(DocsHandlerV3.SECURITY_DEFINITION_NAME, listOf()))
     }
 
-    operation.responses(ApiResponses()
+    operation.responses(
+      ApiResponses()
         .addApiResponse("200", response())
         .addApiResponse("500", ApiResponse().description("server failure"))
     )
-
 
     return operation
   }
@@ -159,9 +156,9 @@ abstract class EndPointV3(
   protected abstract fun mapPathParameters(): List<Parameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
-        val pathParams = mapPathParameters()
-        val queryParams = mapQueryParameters()
-        return pathParams + queryParams
+    val pathParams = mapPathParameters()
+    val queryParams = mapQueryParameters()
+    return pathParams + queryParams
   }
 
   protected fun KType.getSwaggerProperty(): ResolvedSchema {
@@ -172,25 +169,7 @@ abstract class EndPointV3(
     return getSwaggerProperty().schema
   }
 
-  protected fun Type.getSchema(): Schema<*> {
-    return getSwaggerProperty().schema
-  }
-
-  protected fun Type.getSwaggerProperty(): ResolvedSchema {
-    val actualType = this.actualType()
-    try {
-      // todo move to CustomModelConverter and resolve there
-    return if (actualType.isBinary()) {
-      val resolvedSchema = ResolvedSchema()
-      resolvedSchema.schema= BinarySchema()
-      resolvedSchema
-      } else {
-         ModelConverters.getInstance().readAllAsResolvedSchema(actualType)
-      }
-    } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type:" + actualType)
-    }
-  }
+  protected fun Type.getSwaggerProperty(): ResolvedSchema = modelContext.addType(this)
 
   private fun response(): ApiResponse {
     val actualReturnType = returnType.actualType()
@@ -202,11 +181,14 @@ abstract class EndPointV3(
     } else {
       val responseSchema = returnType.getSwaggerProperty()
       return ApiResponse()
-                .content(Content()
-                    .addMediaType( MediaType.APPLICATION_JSON, io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema))
-                )
-
-
+        .description("")
+        .content(
+          Content()
+            .addMediaType(
+              MediaType.APPLICATION_JSON,
+              io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
+            )
+        )
     }
   }
 
@@ -218,6 +200,9 @@ abstract class EndPointV3(
     }
   }
 
+  /**
+   * @return true iff Type is for binary data
+   */
   private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,
@@ -239,7 +224,7 @@ abstract class EndPointV3(
 
   private fun Type.actualType(): Type {
     return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
-      this.actualTypeArguments[0]
+      actualTypeArguments[0]
     } else {
       this
     }

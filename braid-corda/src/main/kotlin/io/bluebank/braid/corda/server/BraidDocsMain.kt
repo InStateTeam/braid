@@ -15,43 +15,28 @@
  */
 package io.bluebank.braid.corda.server
 
-import io.bluebank.braid.corda.rest.DocsHandlerFactory
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.rpc.RPCFactory
-import io.bluebank.braid.core.utils.toJarsClassLoader
-import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
 import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.StartableByRPC
 import net.corda.core.serialization.CordaSerializable
 
 class BraidDocsMain() {
-  init {
-    Braid.init()
-  }
-
-  fun generateSwaggerForJars(jarUrls: List<String>, swaggerVersion: Int = 2): String {
-    return tryWithClassLoader(jarUrls.toJarsClassLoader()) {
-      swaggerText(swaggerVersion)
-    }
-  }
-
-  fun swaggerText(swaggerVersion: Int = 2): String {
-    val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub(), swaggerVersion)
-
-    // todo replace with DocsHandlerFactory(restConfig).createDocsHandler()
+  /**
+   * @param openApiVersion - 2 or 3
+   */
+  fun swaggerText(openApiVersion: Int): String {
+    val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
     val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
 
     val classes = readCordaClasses()
     classes.forEach { restMounter.docsHandler.addType(it) }
-
-    val swagger = restMounter.docsHandler.swagger()
-    return swagger
+    return restMounter.docsHandler.swagger()
   }
 
   private fun readCordaClasses(): List<Class<out Any>> {
@@ -78,11 +63,10 @@ class BraidDocsMain() {
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
     val isKotlinFileClass = Regex(".*Kt$")::matches
-    return res
-        .getClassesWithAnnotation(CordaSerializable::class.qualifiedName)
-        .asSequence()
+    return res.allClasses.asSequence()
         .filter {
-          !it.hasAnnotation(CordaInternal::class.java.name) &&
+              it.hasAnnotation(CordaSerializable::class.java.name) &&
+              !it.hasAnnotation(CordaInternal::class.java.name) &&
               !it.isInterface &&
               !it.isAbstract &&
               !it.extendsSuperclass(FlowLogic::class.java.name) &&

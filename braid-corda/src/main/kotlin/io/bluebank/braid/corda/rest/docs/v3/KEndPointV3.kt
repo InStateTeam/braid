@@ -18,14 +18,11 @@ package io.bluebank.braid.corda.rest.docs.v3
 import io.bluebank.braid.corda.rest.Paths
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.parameterName
-
+import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.parameters.PathParameter
 import io.swagger.v3.oas.models.parameters.QueryParameter
 import io.swagger.v3.oas.models.parameters.RequestBody
-
-import io.swagger.v3.oas.models.media.Content
-
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import java.lang.reflect.Type
@@ -42,8 +39,9 @@ class KEndPointV3(
   val name: String,
   val parameters: List<KParameter>,
   override val returnType: Type,
-  override val annotations: List<Annotation>
-) : EndPointV3(groupName, protected, method, path) {
+  override val annotations: List<Annotation>,
+  modelContext: ModelContextV3
+) : EndPointV3(groupName, protected, method, path, modelContext) {
 
   init {
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
@@ -72,8 +70,6 @@ class KEndPointV3(
     }
   }
 
-
-
   override val parameterTypes: List<Type>
     get() = parameters.map { it.type.javaTypeIncludingSynthetics() }
 
@@ -82,14 +78,14 @@ class KEndPointV3(
       val swaggerProperty = param.type.getSwaggerProperty()
       val p = PathParameter()
         .name(param.parameterName())
-          .schema(swaggerProperty.schema)
-         // .example()
-        //.property(swaggerProperty)
-        //.type(swaggerProperty.type)
-    // todo migrate to V3
+        .schema(swaggerProperty.schema)
+      // .example()
+      //.property(swaggerProperty)
+      //.type(swaggerProperty.type)
+      // todo migrate to V3
       //  applyDefaultValueAnnotation(param, p)
-    //  applyApiParamDocs(param, p)
-    //  applyRequiredAndVarArg(param, p)
+      //  applyApiParamDocs(param, p)
+      //  applyRequiredAndVarArg(param, p)
       p
     }
   }
@@ -146,19 +142,20 @@ class KEndPointV3(
   override fun mapBodyParameter(): RequestBody? {
     return bodyParameter?.let {
       RequestBody()
-          .required(true)
-          .description(bodyParameter.name)
-          .content(Content()
-              .addMediaType(MediaType.APPLICATION_JSON,
+        .required(true)
+        .description(bodyParameter.name)
+        .content(
+          Content()
+            .addMediaType(
+              MediaType.APPLICATION_JSON,
               io.swagger.v3.oas.models.media.MediaType()
-                  .schema(bodyParameter.type.getSchema())
-                  .example(example(bodyParameter))
-              )
-          )
+                .schema(bodyParameter.type.getSchema())
+                .example(example(bodyParameter))
+            )
+        )
 
-
-      }
     }
+  }
 
   private fun example(parameter: KParameter): String? {
     return parameter.findAnnotation<io.swagger.v3.oas.annotations.Parameter>()?.example

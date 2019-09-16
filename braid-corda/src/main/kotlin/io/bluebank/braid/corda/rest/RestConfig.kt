@@ -20,13 +20,14 @@ import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import java.net.URI
 
-data class RestConfig(
+data class
+RestConfig(
   val swaggerInfo: SwaggerInfo = SwaggerInfo(),
 
   val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
   val apiPath: String = DEFAULT_API_PATH,
   val swaggerPath: String = DEFAULT_SWAGGER_PATH,
-  val swaggerVersion: Int = 2,
+  val openApiVersion: Int = 2,
   val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
   internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
   val debugMode: Boolean = false,
@@ -63,7 +64,7 @@ data class RestConfig(
   fun withSwaggerPath(value: String) = this.copy(swaggerPath = value)
 
   @Suppress("unused")
-  fun withSwaggerVersion(value: Int) = this.copy(swaggerVersion = value)
+  fun withOpenApiVersion(value: Int) = this.copy(openApiVersion = value)
 
   @Suppress("unused")
   @Deprecated("please use other withContact method")

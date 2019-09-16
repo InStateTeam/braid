@@ -19,11 +19,16 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.channels.Channels
-import java.nio.file.Files
 
 class JarDownloader {
-  private val dir = Files.createTempDirectory("delete-me-").toFile().also { it.deleteOnExit() }
-  fun uriToFile(url: URL) : URL {
+  private val dir by lazy {
+    val homeDir = System.getProperty("user.home")
+    File("$homeDir/.downloaded-cordapps").also {
+      it.mkdirs()
+    }
+  }
+
+  fun uriToFile(url: URL): URL {
     val filename = url.path.let { File(it) }.name
     val destination = File(dir, filename)
     if (!destination.exists()) {

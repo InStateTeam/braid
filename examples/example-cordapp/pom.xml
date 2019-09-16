@@ -113,8 +113,8 @@
                   <fileset dir="." includes="**/package.json"/>
                 </replaceregexp>
                 <replaceregexp
-                    match="&quot;braid-corda-client&quot;: &quot;[^&quot;]*&quot;"
-                    replace="&quot;braid-corda-client&quot;: &quot;${project.version}&quot;">
+                  match="&quot;braid-corda-client&quot;: &quot;[^&quot;]*&quot;"
+                  replace="&quot;braid-corda-client&quot;: &quot;${project.version}&quot;">
                   <fileset dir="." includes="**/package.json"/>
                 </replaceregexp>
               </target>

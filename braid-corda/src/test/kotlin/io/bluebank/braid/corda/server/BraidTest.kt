@@ -51,6 +51,7 @@ import java.util.Arrays.asList
  *          -DcordaStarted=true and CordaStandalone in the background if you want this test to run fastish.
  * Otherwise it takes about 45 seconds or more to run.
  */
+@Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
 class BraidTest {
 

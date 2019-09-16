@@ -25,26 +25,28 @@ private val log = loggerFor<BraidMain>()
 
 class BraidMain {
 
-  fun start(networkAndPort: String,
-            userName: String,
-            password: String,
-            port: Int,
-            swaggerVersion: Int,
-            additionalPaths: List<String>): Future<String> {
+  fun start(
+    networkAndPort: String,
+    userName: String,
+    password: String,
+    port: Int,
+    openApiVersion: Int,
+    additionalPaths: List<String>
+  ): Future<String> {
     val classLoader = additionalPaths.toJarsClassLoader()
     return tryWithClassLoader(classLoader) {
       Braid(
-          port = port,
-          userName = userName,
-          password = password,
-          swaggerVersion = swaggerVersion,
-          nodeAddress = NetworkHostAndPort.parse(networkAndPort)
+        port = port,
+        userName = userName,
+        password = password,
+        nodeAddress = NetworkHostAndPort.parse(networkAndPort),
+        openApiVersion = openApiVersion
       )
-          .startServer()
-          .recover {
-            log.error("Server failed to start:", it)
-            Future.succeededFuture("-1")
-          }
+        .startServer()
+        .recover {
+          log.error("Server failed to start:", it)
+          Future.succeededFuture("-1")
+        }
     }
   }
 }

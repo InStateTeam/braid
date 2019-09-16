@@ -17,41 +17,36 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.SwaggerInfo
 import io.bluebank.braid.corda.rest.docs.DocsHandler
-import io.bluebank.braid.corda.rest.docs.ModelContext
 import io.bluebank.braid.corda.rest.toSwaggerPath
-import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
-import io.swagger.models.Scheme
-
-import io.swagger.util.Json
-
+import io.swagger.v3.core.util.Json
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.PathItem
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
-
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
+import net.corda.core.utilities.contextLogger
 import java.lang.reflect.Type
 import java.net.URL
-import java.util.Arrays.asList
 import kotlin.reflect.KCallable
 
 class DocsHandlerV3(
-    private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
+  private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
 
-    private val auth: String? = null,
-    private val basePath: String = "http://localhost:8080",
-    private val debugMode: Boolean = false
+  private val auth: SecurityScheme? = null,
+  private val basePath: String = "http://localhost:8080",
+  private val debugMode: Boolean = false
 ) : DocsHandler {
 
   companion object {
-    var log = loggerFor<DocsHandlerV3>()
+    private val log = contextLogger()
     internal const val SECURITY_DEFINITION_NAME = "Authorization"
   }
 
@@ -63,52 +58,45 @@ class DocsHandlerV3(
   private val modelContext = ModelContextV3()
 
   override fun handle(context: RoutingContext) {
-    swagger.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json","")))
-    val output =
-        Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
+    val openApi = if (debugMode) createSwagger() else swagger
+    openApi.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json", "")))
+    val output = Json.mapper().writeValueAsString(openApi)
     context.response()
-        .setStatusCode(HttpResponseStatus.OK.code())
-        .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-        .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
-        .end(output)
+      .setStatusCode(HttpResponseStatus.OK.code())
+      .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+      .end(output)
   }
 
   override fun swagger(): String {
-    return io.swagger.util.Json.pretty().writeValueAsString(createSwagger())
+    return Json.pretty().writeValueAsString(createSwagger())
   }
 
   fun createSwagger(): OpenAPI {
     val url = URL(basePath)
-    val info = createSwaggerInfo()
     return OpenAPI()
-        .info(info)
-        .addServersItem(Server().url(url.toExternalForm()))
+      .apply {
+        info(createSwaggerInfo())
+        addServersItem(Server().url(url.toExternalForm()))
         // hopefully under server above .basePath(url.path)
-        .apply {
-          if (auth != null) {
-            addSecurityItem(SecurityRequirement()
-                .addList(SECURITY_DEFINITION_NAME, asList(auth)))  //todo what are the auth schemes for V3
-          }
+        if (auth != null) {
+          getOrCreateComponents().securitySchemes = mapOf(SECURITY_DEFINITION_NAME to auth)
         }
-       // may be covered under server? .schema(scheme)
-        .apply {
-          modelContext.addToSwagger(this)
-          endpoints.forEach {
-            addEndpoint(it)
-          }
-        }
+        // may be covered under server? .schema(scheme)
+        modelContext.addToSwagger(this)
+        endpoints.forEach { addEndpoint(it) }
+      }
   }
 
-  private fun createSwaggerInfo(): Info? {
-    val info = Info()
-        .version(swaggerInfo.version)
-        .title(swaggerInfo.serviceName)
-        .description(swaggerInfo.description)
-        .contact(Contact()
-            .name(swaggerInfo.contact.name)
-            .email(swaggerInfo.contact.email)
-            .url(swaggerInfo.contact.url))
-    return info
+  private fun createSwaggerInfo() = Info().apply {
+    version(swaggerInfo.version)
+    title(swaggerInfo.serviceName)
+    description(swaggerInfo.description)
+    contact(Contact().apply {
+      name(swaggerInfo.contact.name)
+      email(swaggerInfo.contact.email)
+      url(swaggerInfo.contact.url)
+    })
   }
 
   private fun OpenAPI.addEndpoint(endpoint: EndPointV3) {
@@ -128,47 +116,47 @@ class DocsHandlerV3(
         PUT -> path.put(operation)
         DELETE -> path.delete(operation)
         PATCH -> path.patch(operation)
-        OPTIONS, HEAD, TRACE, CONNECT, OTHER -> TODO("Implement ${endpoint.method.name}")
+        OPTIONS, HEAD, TRACE, CONNECT, OTHER -> error("HTTP method not implemented: ${endpoint.method.name}")
       }
     } catch (e: Throwable) {
-      log.warn("Unable to add endpoint:$endpoint : " + e.message)
+      log.warn("Unable to add endpoint $endpoint : ${e.message}")
     }
   }
 
   override fun <Response> add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: KCallable<Response>
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: KCallable<Response>
   ) {
     val endpoint = EndPointV3.create(
-        groupName,
-        protected,
-        method,
-        path,
-        handler.name,
-        handler.parameters,
-        handler.returnType,
-        handler.annotations
+      groupName,
+      protected,
+      method,
+      path,
+      handler.name,
+      handler.parameters,
+      handler.returnType,
+      handler.annotations,
+      modelContext
     )
     add(endpoint)
   }
 
   override fun add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: (RoutingContext) -> Unit
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: (RoutingContext) -> Unit
   ) {
-    val endpoint = EndPointV3.create(groupName, protected, method, path, handler)
+    val endpoint = EndPointV3.create(groupName, protected, method, path, handler, modelContext)
     add(endpoint)
   }
 
   private fun add(endpoint: EndPointV3) {
     endpoints.add(endpoint)
-    endpoint.addTypes(modelContext)
   }
 
   fun group(groupId: String, fn: () -> Unit) {
@@ -179,5 +167,12 @@ class DocsHandlerV3(
   override fun addType(type: Type) {
     modelContext.addType(type)
   }
+}
+
+private fun OpenAPI.getOrCreateComponents(): Components {
+  if (components == null) {
+    components = Components()
+  }
+  return components
 }
 
