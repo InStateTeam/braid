@@ -127,20 +127,16 @@ class CustomModelConverterV2 : ModelConverter {
           ) {
             context?.defineModel(
               "IssuedCurrency", ModelImpl()
-                .name("IssuedCurrency")
                 .type("object")
-                .property("issuer", resolveProperty(PartyAndReference::class.java,context,annotations,chain))
-                .property("product",       resolveProperty(boundType, context, annotations, chain))
+                .property("product",     context?.resolveProperty(boundType, annotations))
+                .property("issuer",      context?.resolveProperty(PartyAndReference::class.java,annotations))
             )
             return RefProperty("IssuedCurrency")
           } else {
             val model = ModelImpl()
               .type("object")
-              .property("issuer", resolveProperty(PartyAndReference::class.java,context,annotations,chain))
-              .property(
-                "product",
-                resolveProperty(boundType, context, annotations, chain)
-              )
+              .property("product", context?.resolveProperty(boundType, annotations)  )
+                .property("issuer", context?.resolveProperty(PartyAndReference::class.java,annotations))
               .property("_productType", StringProperty().example("java.util.Currency"))
             context?.defineModel("Issued", model)
 
@@ -152,7 +148,11 @@ class CustomModelConverterV2 : ModelConverter {
       log.error("Unable to parse: $type", e)
     }
 
-    return chain?.next()?.resolveProperty(type, context, annotations, chain)
+    return try {
+      chain?.next()?.resolveProperty(type, context, annotations, chain)
+    } catch (e: Exception) {
+      throw RuntimeException("Unable to resolve type:$type",e )
+    }
   }
 
   override fun resolve(

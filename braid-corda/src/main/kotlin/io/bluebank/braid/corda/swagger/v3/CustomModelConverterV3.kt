@@ -112,13 +112,13 @@ class CustomModelConverterV3 : ModelConverter {
           ) {
             return ObjectSchema()
                 .name("IssuedCurrency")
-                .addProperties("issuer", resolve(AnnotatedType(PartyAndReference::class.java), context, chain))
-                .addProperties("product", resolve(AnnotatedType(boundType), context, chain))
+                .addProperties("issuer", context.resolve(AnnotatedType(PartyAndReference::class.java)))
+                .addProperties("product", context.resolve(AnnotatedType(boundType)))
           } else {
             return ObjectSchema()
                 .name("Issued")
-                .addProperties("issuer", resolve(AnnotatedType(PartyAndReference::class.java), context, chain))
-                .addProperties("product", resolve(AnnotatedType(boundType), context, chain))
+                .addProperties("issuer", context.resolve(AnnotatedType(PartyAndReference::class.java)))
+                .addProperties("product", context.resolve(AnnotatedType(boundType)))
                 .addProperties("_productType", StringSchema().example("java.util.Currency"))
 
           }
@@ -128,7 +128,11 @@ class CustomModelConverterV3 : ModelConverter {
       log.error("Unable to parse: $type", e)
     }
 
-    return chain?.next()?.resolve(type, context, chain)
+    return try {
+      chain.next().resolve(type, context, chain)
+    } catch (e: Exception) {
+      throw RuntimeException("Unable to resolve type:$type",e )
+    }
   }
 
 
