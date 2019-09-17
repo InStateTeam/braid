@@ -346,6 +346,7 @@
   "components" : {
     "schemas" : {
       "io.bluebank.braid.corda.services.SimpleNodeInfo" : {
+        "required" : [ "addresses", "legalIdentities" ],
         "type" : "object",
         "properties" : {
           "addresses" : {
@@ -363,21 +364,23 @@
         }
       },
       "net.corda.core.identity.Party" : {
+        "required" : [ "name", "owningKey" ],
         "type" : "object",
         "properties" : {
-          "owningKey" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Public Key",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "name" : {
             "type" : "string",
             "description" : "CordaX500Name encoded Party",
             "example" : "O=Bank A, L=London, C=GB"
+          },
+          "owningKey" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Public Key",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
       "net.corda.core.utilities.NetworkHostAndPort" : {
+        "required" : [ "host", "port" ],
         "type" : "object",
         "properties" : {
           "host" : {
@@ -417,6 +420,7 @@
         }
       },
       "net.corda.core.contracts.StateRef" : {
+        "required" : [ "index", "txhash" ],
         "type" : "object",
         "properties" : {
           "txhash" : {
@@ -431,6 +435,7 @@
         }
       },
       "net.corda.core.contracts.TransactionStateObject" : {
+        "required" : [ "contract", "data" ],
         "type" : "object",
         "properties" : {
           "data" : {
@@ -460,6 +465,7 @@
         }
       },
       "net.corda.core.contracts.ContractState" : {
+        "required" : [ "participants" ],
         "type" : "object",
         "properties" : {
           "participants" : {
@@ -482,6 +488,7 @@
         }
       },
       "net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState" : {
+        "required" : [ "contract" ],
         "type" : "object",
         "properties" : {
           "data" : {
@@ -503,6 +510,7 @@
         }
       },
       "net.corda.core.identity.AbstractParty" : {
+        "required" : [ "owningKey" ],
         "type" : "object",
         "properties" : {
           "owningKey" : {
@@ -512,103 +520,8 @@
           }
         }
       },
-      "net.corda.core.contracts.CommandObject" : {
-        "type" : "object",
-        "properties" : {
-          "value" : {
-            "type" : "object"
-          },
-          "signers" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Public Key",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          }
-        }
-      },
-      "net.corda.core.contracts.TimeWindow" : {
-        "type" : "object",
-        "properties" : {
-          "length" : {
-            "type" : "object",
-            "properties" : {
-              "seconds" : {
-                "type" : "integer",
-                "format" : "int64"
-              },
-              "nano" : {
-                "type" : "integer",
-                "format" : "int32"
-              },
-              "units" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "timeBased" : {
-                      "type" : "boolean"
-                    },
-                    "dateBased" : {
-                      "type" : "boolean"
-                    },
-                    "durationEstimated" : {
-                      "type" : "boolean"
-                    }
-                  }
-                }
-              },
-              "zero" : {
-                "type" : "boolean"
-              },
-              "negative" : {
-                "type" : "boolean"
-              }
-            }
-          },
-          "fromTime" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "midpoint" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "untilTime" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }
-      },
-      "net.corda.core.crypto.MerkleTree" : {
-        "type" : "object",
-        "properties" : {
-          "hash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          }
-        }
-      },
-      "net.corda.core.transactions.ComponentGroup" : {
-        "type" : "object",
-        "properties" : {
-          "groupIndex" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "components" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
-            }
-          }
-        }
-      },
       "net.corda.core.transactions.CoreTransaction" : {
+        "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
           "inputs" : {
@@ -631,63 +544,11 @@
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
-          "outputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
-            }
-          },
           "outputStates" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          }
-        }
-      },
-      "net.corda.core.transactions.NotaryChangeWireTransaction" : {
-        "type" : "object",
-        "properties" : {
-          "inputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "references" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
-          "newNotary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
-          "serializedComponents" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
-            }
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "networkParametersHash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
           "outputs" : {
             "type" : "array",
@@ -695,23 +556,18 @@
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
             }
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
+          "id" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
       "net.corda.core.transactions.SignedTransaction" : {
+        "required" : [ "missingSigners", "notaryChangeTransaction", "references", "signatures" ],
         "type" : "object",
         "properties" : {
-          "txBits" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
-          },
-          "sigs" : {
+          "signatures" : {
             "type" : "array",
             "items" : {
               "type" : "string",
@@ -719,22 +575,8 @@
               "example" : "736F6D654279746573"
             }
           },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "coreTransaction" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
-          "tx" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.WireTransaction"
-          },
-          "inputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
           },
           "references" : {
             "type" : "array",
@@ -742,25 +584,10 @@
               "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
             }
           },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
           "networkParametersHash" : {
             "type" : "string",
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "requiredSigningKeys" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Public Key",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "notaryChangeTx" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.NotaryChangeWireTransaction"
           },
           "notaryChangeTransaction" : {
             "type" : "boolean"
@@ -772,135 +599,6 @@
               "type" : "string",
               "description" : "Base 58 Encoded Public Key",
               "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          }
-        }
-      },
-      "net.corda.core.transactions.WireTransaction" : {
-        "type" : "object",
-        "properties" : {
-          "attachments" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Secure Hash",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "inputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "references" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "outputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
-            }
-          },
-          "commands" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.CommandObject"
-            }
-          },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
-          "timeWindow" : {
-            "$ref" : "#/components/schemas/net.corda.core.contracts.TimeWindow"
-          },
-          "networkParametersHash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "componentGroups" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.transactions.ComponentGroup"
-            }
-          },
-          "privacySalt" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "requiredSigningKeys" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Public Key",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "merkleTree" : {
-            "$ref" : "#/components/schemas/net.corda.core.crypto.MerkleTree"
-          },
-          "groupHashes$core" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Secure Hash",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "groupsMerkleRoots$core" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Secure Hash",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "availableComponentNonces$core" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string",
-                "description" : "Base 58 Encoded Secure Hash",
-                "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-              }
-            }
-          },
-          "availableComponentHashes$core" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string",
-                "description" : "Base 58 Encoded Secure Hash",
-                "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-              }
-            }
-          },
-          "availableComponentGroups" : {
-            "type" : "array",
-            "items" : {
-              "type" : "array",
-              "items" : {
-                "type" : "object"
-              }
-            }
-          },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           }
         }
@@ -917,6 +615,7 @@
         }
       },
       "AmountCurrency" : {
+        "required" : [ "displayTokenSize", "quantity", "token" ],
         "type" : "object",
         "properties" : {
           "quantity" : {
@@ -1011,6 +710,7 @@
         }
       },
       "net.corda.finance.internal.CashConfiguration" : {
+        "required" : [ "issuableCurrencies", "supportedCurrencies" ],
         "type" : "object",
         "properties" : {
           "issuableCurrencies" : {
@@ -1035,6 +735,7 @@
         "type" : "object"
       },
       "net.corda.core.context.Actor" : {
+        "required" : [ "owningLegalIdentity" ],
         "type" : "object",
         "properties" : {
           "id" : {
@@ -1051,6 +752,7 @@
         }
       },
       "net.corda.core.context.Actor_Id" : {
+        "required" : [ "value" ],
         "type" : "object",
         "properties" : {
           "value" : {
@@ -1059,6 +761,7 @@
         }
       },
       "net.corda.core.context.AuthServiceId" : {
+        "required" : [ "value" ],
         "type" : "object",
         "properties" : {
           "value" : {
@@ -1101,36 +804,39 @@
         }
       },
       "net.corda.core.context.Trace_InvocationId" : {
+        "required" : [ "timestamp", "value" ],
         "type" : "object",
         "properties" : {
           "value" : {
             "type" : "string"
           },
-          "entityType" : {
-            "type" : "string"
-          },
           "timestamp" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "entityType" : {
+            "type" : "string"
           }
         }
       },
       "net.corda.core.context.Trace_SessionId" : {
+        "required" : [ "timestamp", "value" ],
         "type" : "object",
         "properties" : {
           "value" : {
             "type" : "string"
           },
-          "entityType" : {
-            "type" : "string"
-          },
           "timestamp" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "entityType" : {
+            "type" : "string"
           }
         }
       },
       "net.corda.core.context.InvocationOrigin_Peer" : {
+        "required" : [ "party" ],
         "type" : "object",
         "properties" : {
           "party" : {
@@ -1157,6 +863,7 @@
         }
       },
       "net.corda.core.contracts.ScheduledStateRef" : {
+        "required" : [ "scheduledAt" ],
         "type" : "object",
         "properties" : {
           "ref" : {
@@ -1169,6 +876,7 @@
         }
       },
       "net.corda.core.context.InvocationOrigin_Service" : {
+        "required" : [ "owningLegalIdentity", "serviceClassName" ],
         "type" : "object",
         "properties" : {
           "serviceClassName" : {
@@ -1185,6 +893,7 @@
         "type" : "object"
       },
       "net.corda.core.contracts.AmountTransfer" : {
+        "required" : [ "destination", "quantityDelta", "source", "token" ],
         "type" : "object",
         "properties" : {
           "quantityDelta" : {
@@ -1197,6 +906,7 @@
         }
       },
       "net.corda.core.contracts.LinearPointer" : {
+        "required" : [ "type" ],
         "type" : "object",
         "properties" : {
           "pointer" : {
@@ -1210,6 +920,7 @@
         }
       },
       "net.corda.core.contracts.UniqueIdentifier" : {
+        "required" : [ "id" ],
         "type" : "object",
         "properties" : {
           "externalId" : {
@@ -1222,6 +933,7 @@
         }
       },
       "net.corda.core.contracts.StaticPointer" : {
+        "required" : [ "type" ],
         "type" : "object",
         "properties" : {
           "pointer" : {
@@ -1235,6 +947,7 @@
         }
       },
       "net.corda.core.contracts.TransactionState" : {
+        "required" : [ "contract" ],
         "type" : "object",
         "properties" : {
           "data" : {
@@ -1256,8 +969,19 @@
         }
       },
       "net.corda.core.contracts.TransactionVerificationException_InvalidAttachmentException" : {
+        "required" : [ "attachmentHash", "txId" ],
         "type" : "object",
         "properties" : {
+          "txId" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "attachmentHash" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
           "cause" : {
             "type" : "object",
             "properties" : {
@@ -1361,16 +1085,6 @@
           "originalErrorId" : {
             "type" : "integer",
             "format" : "int64"
-          },
-          "txId" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "attachmentHash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
           "errorId" : {
             "type" : "integer",
@@ -1426,8 +1140,25 @@
         }
       },
       "net.corda.core.contracts.TransactionVerificationException_PackageOwnershipException" : {
+        "required" : [ "attachmentHash", "invalidClassName", "packageName", "txId" ],
         "type" : "object",
         "properties" : {
+          "txId" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "attachmentHash" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "invalidClassName" : {
+            "type" : "string"
+          },
+          "packageName" : {
+            "type" : "string"
+          },
           "cause" : {
             "type" : "object",
             "properties" : {
@@ -1532,22 +1263,6 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "txId" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "attachmentHash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "invalidClassName" : {
-            "type" : "string"
-          },
-          "packageName" : {
-            "type" : "string"
-          },
           "errorId" : {
             "type" : "integer",
             "format" : "int64"
@@ -1602,6 +1317,7 @@
         }
       },
       "net.corda.core.flows.AbstractStateReplacementFlow_Acceptor_Companion_APPROVING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1622,6 +1338,7 @@
         "type" : "object"
       },
       "net.corda.core.flows.AbstractStateReplacementFlow_Acceptor_Companion_VERIFYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1639,6 +1356,7 @@
         }
       },
       "net.corda.core.flows.AbstractStateReplacementFlow_Instigator_Companion_NOTARY" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1656,6 +1374,7 @@
         }
       },
       "net.corda.core.flows.AbstractStateReplacementFlow_Instigator_Companion_SIGNING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1673,6 +1392,7 @@
         }
       },
       "net.corda.core.flows.AbstractStateReplacementFlow_Proposal" : {
+        "required" : [ "modification" ],
         "type" : "object",
         "properties" : {
           "stateRef" : {
@@ -1684,6 +1404,7 @@
         }
       },
       "net.corda.core.flows.CollectSignaturesFlow_Companion_COLLECTING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1701,6 +1422,7 @@
         }
       },
       "net.corda.core.flows.CollectSignaturesFlow_Companion_VERIFYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1718,6 +1440,7 @@
         }
       },
       "net.corda.core.flows.FinalityFlow_Companion_BROADCASTING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1735,6 +1458,7 @@
         }
       },
       "net.corda.core.flows.FinalityFlow_Companion_NOTARISING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -1752,6 +1476,7 @@
         }
       },
       "net.corda.core.flows.FlowInfo" : {
+        "required" : [ "appName", "flowVersion" ],
         "type" : "object",
         "properties" : {
           "flowVersion" : {
@@ -1764,8 +1489,16 @@
         }
       },
       "net.corda.core.flows.IllegalFlowLogicException" : {
+        "required" : [ "type" ],
         "type" : "object",
         "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "msg" : {
+            "type" : "string",
+            "writeOnly" : true
+          },
           "cause" : {
             "type" : "object",
             "properties" : {
@@ -1863,9 +1596,6 @@
               }
             }
           },
-          "type" : {
-            "type" : "string"
-          },
           "message" : {
             "type" : "string"
           },
@@ -1913,9 +1643,10 @@
         }
       },
       "net.corda.core.flows.NotarisationPayload" : {
+        "required" : [ "transaction" ],
         "type" : "object",
         "properties" : {
-          "value" : {
+          "transaction" : {
             "type" : "object"
           },
           "requestSignature" : {
@@ -1930,6 +1661,7 @@
         }
       },
       "net.corda.core.flows.NotarisationRequestSignature" : {
+        "required" : [ "digitalSignature", "platformVersion" ],
         "type" : "object",
         "properties" : {
           "digitalSignature" : {
@@ -1944,22 +1676,24 @@
         }
       },
       "net.corda.core.flows.NotarisationRequest" : {
+        "required" : [ "statesToConsume", "transactionId" ],
         "type" : "object",
         "properties" : {
-          "transactionId" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "statesToConsume" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
             }
+          },
+          "transactionId" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
       "net.corda.core.flows.NotarisationResponse" : {
+        "required" : [ "signatures" ],
         "type" : "object",
         "properties" : {
           "signatures" : {
@@ -1973,6 +1707,7 @@
         }
       },
       "net.corda.core.flows.NotaryError_Conflict" : {
+        "required" : [ "consumedStates", "txId" ],
         "type" : "object",
         "properties" : {
           "txId" : {
@@ -1989,6 +1724,7 @@
         }
       },
       "net.corda.core.flows.StateConsumptionDetails" : {
+        "required" : [ "hashOfTransactionId", "type" ],
         "type" : "object",
         "properties" : {
           "hashOfTransactionId" : {
@@ -2003,6 +1739,7 @@
         }
       },
       "net.corda.core.flows.NotaryError_General" : {
+        "required" : [ "cause" ],
         "type" : "object",
         "properties" : {
           "cause" : {
@@ -2081,6 +1818,7 @@
         }
       },
       "net.corda.core.flows.NotaryError_RequestSignatureInvalid" : {
+        "required" : [ "cause" ],
         "type" : "object",
         "properties" : {
           "cause" : {
@@ -2158,7 +1896,25 @@
           }
         }
       },
+      "net.corda.core.contracts.TimeWindow" : {
+        "type" : "object",
+        "properties" : {
+          "midpoint" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "fromTime" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "untilTime" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "net.corda.core.flows.NotaryError_TimeWindowInvalid" : {
+        "required" : [ "currentTime" ],
         "type" : "object",
         "properties" : {
           "currentTime" : {
@@ -2171,6 +1927,7 @@
         }
       },
       "net.corda.core.flows.NotaryError_TransactionInvalid" : {
+        "required" : [ "cause" ],
         "type" : "object",
         "properties" : {
           "cause" : {
@@ -2252,6 +2009,7 @@
         "type" : "object"
       },
       "net.corda.core.flows.NotaryFlow_Client_Companion_REQUESTING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2269,6 +2027,7 @@
         }
       },
       "net.corda.core.flows.NotaryFlow_Client_Companion_VALIDATING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2286,6 +2045,7 @@
         }
       },
       "net.corda.core.flows.SignTransactionFlow_Companion_RECEIVING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2303,6 +2063,7 @@
         }
       },
       "net.corda.core.flows.SignTransactionFlow_Companion_SIGNING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2320,6 +2081,7 @@
         }
       },
       "net.corda.core.flows.SignTransactionFlow_Companion_VERIFYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2337,6 +2099,7 @@
         }
       },
       "net.corda.core.flows.WaitTimeUpdate" : {
+        "required" : [ "waitTime" ],
         "type" : "object",
         "properties" : {
           "waitTime" : {
@@ -2378,6 +2141,7 @@
         }
       },
       "net.corda.core.flows.WithReferencedStatesFlow_Companion_ATTEMPT" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2395,6 +2159,7 @@
         }
       },
       "net.corda.core.flows.WithReferencedStatesFlow_Companion_RETRYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2412,6 +2177,7 @@
         }
       },
       "net.corda.core.flows.WithReferencedStatesFlow_Companion_SUCCESS" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -2429,6 +2195,7 @@
         }
       },
       "net.corda.core.messaging.DataFeed" : {
+        "required" : [ "snapshot" ],
         "type" : "object",
         "properties" : {
           "snapshot" : {
@@ -2445,15 +2212,16 @@
       "net.corda.core.concurrent.CordaFutureObject" : {
         "type" : "object",
         "properties" : {
-          "done" : {
+          "cancelled" : {
             "type" : "boolean"
           },
-          "cancelled" : {
+          "done" : {
             "type" : "boolean"
           }
         }
       },
       "net.corda.core.flows.StateMachineRunId" : {
+        "required" : [ "uuid" ],
         "type" : "object",
         "properties" : {
           "uuid" : {
@@ -2474,6 +2242,7 @@
         }
       },
       "kotlin.PairIntegerString" : {
+        "required" : [ "first", "second" ],
         "type" : "object",
         "properties" : {
           "first" : {
@@ -2486,6 +2255,7 @@
         }
       },
       "net.corda.core.messaging.DataFeedIntegerInteger" : {
+        "required" : [ "snapshot" ],
         "type" : "object",
         "properties" : {
           "snapshot" : {
@@ -2498,6 +2268,7 @@
         }
       },
       "net.corda.core.messaging.DataFeedListKotlin.PairIntegerStringListKotlin.PairIntegerString" : {
+        "required" : [ "snapshot" ],
         "type" : "object",
         "properties" : {
           "snapshot" : {
@@ -2541,6 +2312,7 @@
         "type" : "object"
       },
       "net.corda.core.messaging.ParametersUpdateInfo" : {
+        "required" : [ "description", "hash", "updateDeadline" ],
         "type" : "object",
         "properties" : {
           "hash" : {
@@ -2561,6 +2333,7 @@
         }
       },
       "net.corda.core.node.NetworkParameters" : {
+        "required" : [ "epoch", "eventHorizon", "maxMessageSize", "maxTransactionSize", "minimumPlatformVersion", "modifiedTime", "notaries", "packageOwnership", "whitelistedContractImplementations" ],
         "type" : "object",
         "properties" : {
           "minimumPlatformVersion" : {
@@ -2647,6 +2420,7 @@
         }
       },
       "net.corda.core.node.NotaryInfo" : {
+        "required" : [ "validating" ],
         "type" : "object",
         "properties" : {
           "identity" : {
@@ -2669,6 +2443,7 @@
         }
       },
       "net.corda.core.messaging.DataFeedStringString" : {
+        "required" : [ "snapshot" ],
         "type" : "object",
         "properties" : {
           "snapshot" : {
@@ -2680,6 +2455,7 @@
         }
       },
       "net.corda.core.messaging.StateMachineInfo" : {
+        "required" : [ "flowLogicClassName" ],
         "type" : "object",
         "properties" : {
           "id" : {
@@ -2700,6 +2476,7 @@
         }
       },
       "net.corda.core.messaging.StateMachineTransactionMapping" : {
+        "required" : [ "transactionId" ],
         "type" : "object",
         "properties" : {
           "stateMachineRunId" : {
@@ -2735,13 +2512,14 @@
         }
       },
       "net.corda.core.utilities.TryObject" : {
+        "required" : [ "failure", "orThrow", "success" ],
         "type" : "object",
         "properties" : {
-          "success" : {
-            "type" : "boolean"
-          },
           "orThrow" : {
             "type" : "object"
+          },
+          "success" : {
+            "type" : "boolean"
           },
           "failure" : {
             "type" : "boolean"
@@ -2749,8 +2527,50 @@
         }
       },
       "net.corda.core.identity.PartyAndCertificate" : {
+        "required" : [ "certPath", "certificate", "name", "owningKey" ],
         "type" : "object",
         "properties" : {
+          "certPath" : {
+            "type" : "object",
+            "properties" : {
+              "type" : {
+                "type" : "string"
+              },
+              "certificates" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "type" : {
+                      "type" : "string"
+                    },
+                    "encoded" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "string",
+                        "format" : "byte"
+                      }
+                    },
+                    "publicKey" : {
+                      "type" : "string",
+                      "description" : "Base 58 Encoded Public Key",
+                      "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+                    }
+                  }
+                }
+              },
+              "encoded" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              },
+              "encodings" : {
+                "type" : "object"
+              }
+            }
+          },
           "certificate" : {
             "type" : "object",
             "properties" : {
@@ -2789,26 +2609,6 @@
                   "name" : {
                     "type" : "string"
                   }
-                }
-              },
-              "version" : {
-                "type" : "integer",
-                "format" : "int32"
-              },
-              "serialNumber" : {
-                "type" : "integer"
-              },
-              "tbscertificate" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "extendedKeyUsage" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
                 }
               },
               "notBefore" : {
@@ -2868,14 +2668,34 @@
                   }
                 }
               },
-              "criticalExtensionOIDs" : {
-                "uniqueItems" : true,
+              "version" : {
+                "type" : "integer",
+                "format" : "int32"
+              },
+              "serialNumber" : {
+                "type" : "integer"
+              },
+              "tbscertificate" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              },
+              "extendedKeyUsage" : {
                 "type" : "array",
                 "items" : {
                   "type" : "string"
                 }
               },
               "nonCriticalExtensionOIDs" : {
+                "uniqueItems" : true,
+                "type" : "array",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "criticalExtensionOIDs" : {
                 "uniqueItems" : true,
                 "type" : "array",
                 "items" : {
@@ -2899,47 +2719,6 @@
           "party" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
-          "certPath" : {
-            "type" : "object",
-            "properties" : {
-              "type" : {
-                "type" : "string"
-              },
-              "certificates" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "type" : {
-                      "type" : "string"
-                    },
-                    "encoded" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "string",
-                        "format" : "byte"
-                      }
-                    },
-                    "publicKey" : {
-                      "type" : "string",
-                      "description" : "Base 58 Encoded Public Key",
-                      "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-                    }
-                  }
-                }
-              },
-              "encoded" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "encodings" : {
-                "type" : "object"
-              }
-            }
-          },
           "name" : {
             "type" : "string",
             "description" : "CordaX500Name encoded Party",
@@ -2953,6 +2732,7 @@
         }
       },
       "net.corda.core.node.NodeInfo" : {
+        "required" : [ "addresses", "legalIdentities", "legalIdentitiesAndCerts", "platformVersion", "serial" ],
         "type" : "object",
         "properties" : {
           "addresses" : {
@@ -3011,6 +2791,7 @@
         }
       },
       "net.corda.core.node.services.Vault" : {
+        "required" : [ "states" ],
         "type" : "object",
         "properties" : {
           "states" : {
@@ -3038,6 +2819,7 @@
         }
       },
       "net.corda.core.node.services.Vault_Page" : {
+        "required" : [ "otherResults", "stateTypes", "states", "statesMetadata", "totalStatesAvailable" ],
         "type" : "object",
         "properties" : {
           "states" : {
@@ -3069,6 +2851,7 @@
         }
       },
       "net.corda.core.node.services.Vault_StateMetadata" : {
+        "required" : [ "contractStateClassName", "recordedTime", "status" ],
         "type" : "object",
         "properties" : {
           "ref" : {
@@ -3109,6 +2892,7 @@
         }
       },
       "net.corda.core.node.services.Vault_Update" : {
+        "required" : [ "consumed", "empty", "produced", "references", "type" ],
         "type" : "object",
         "properties" : {
           "consumed" : {
@@ -3177,10 +2961,16 @@
           "signersCondition" : {
             "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateListPublicKey"
           },
+          "isSignedCondition" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateBoolean"
+          },
           "versionCondition" : {
             "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateInteger"
           }
         }
+      },
+      "net.corda.core.node.services.vault.ColumnPredicateBoolean" : {
+        "type" : "object"
       },
       "net.corda.core.node.services.vault.ColumnPredicateInstant" : {
         "type" : "object"
@@ -3209,6 +2999,7 @@
         }
       },
       "net.corda.core.node.services.vault.AttachmentSort" : {
+        "required" : [ "columns" ],
         "type" : "object",
         "properties" : {
           "columns" : {
@@ -3220,6 +3011,7 @@
         }
       },
       "net.corda.core.node.services.vault.AttachmentSort_AttachmentSortColumn" : {
+        "required" : [ "direction", "sortAttribute" ],
         "type" : "object",
         "properties" : {
           "sortAttribute" : {
@@ -3236,6 +3028,7 @@
         "type" : "object"
       },
       "net.corda.core.node.services.vault.Column" : {
+        "required" : [ "declaringClass", "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -3249,6 +3042,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_AggregateFunction" : {
+        "required" : [ "type" ],
         "type" : "object",
         "properties" : {
           "type" : {
@@ -3258,6 +3052,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Between" : {
+        "required" : [ "rightFromLiteral", "rightToLiteral" ],
         "type" : "object",
         "properties" : {
           "rightToLiteral" : {
@@ -3266,6 +3061,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison" : {
+        "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "properties" : {
           "operator" : {
@@ -3278,6 +3074,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression" : {
+        "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "properties" : {
           "operator" : {
@@ -3293,6 +3090,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison" : {
+        "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "properties" : {
           "operator" : {
@@ -3305,6 +3103,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Likeness" : {
+        "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "properties" : {
           "operator" : {
@@ -3317,6 +3116,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_NullExpression" : {
+        "required" : [ "operator" ],
         "type" : "object",
         "properties" : {
           "operator" : {
@@ -3326,6 +3126,7 @@
         }
       },
       "net.corda.core.node.services.vault.ColumnObjectObject" : {
+        "required" : [ "declaringClass", "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -3366,6 +3167,7 @@
         "type" : "object"
       },
       "net.corda.core.node.services.vault.CriteriaExpression_BinaryLogical" : {
+        "required" : [ "operator" ],
         "type" : "object",
         "properties" : {
           "left" : {
@@ -3400,6 +3202,7 @@
         }
       },
       "net.corda.core.node.services.vault.PageSpecification" : {
+        "required" : [ "default", "pageNumber", "pageSize" ],
         "type" : "object",
         "properties" : {
           "pageNumber" : {
@@ -3433,27 +3236,9 @@
         "type" : "object"
       },
       "net.corda.core.node.services.vault.QueryCriteria_FungibleAssetQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "properties" : {
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          },
           "participants" : {
             "type" : "array",
             "items" : {
@@ -3495,12 +3280,7 @@
               "description" : "Java class name",
               "example" : "java.lang.Object"
             }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_FungibleStateQueryCriteria" : {
-        "type" : "object",
-        "properties" : {
+          },
           "relevancyStatus" : {
             "type" : "string",
             "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
@@ -3519,7 +3299,13 @@
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
             }
-          },
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_FungibleStateQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "properties" : {
           "participants" : {
             "type" : "array",
             "items" : {
@@ -3541,12 +3327,7 @@
               "description" : "Java class name",
               "example" : "java.lang.Object"
             }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria" : {
-        "type" : "object",
-        "properties" : {
+          },
           "relevancyStatus" : {
             "type" : "string",
             "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
@@ -3565,7 +3346,13 @@
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
             }
-          },
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "properties" : {
           "participants" : {
             "type" : "array",
             "items" : {
@@ -3597,6 +3384,25 @@
               "description" : "Java class name",
               "example" : "java.lang.Object"
             }
+          },
+          "relevancyStatus" : {
+            "type" : "string",
+            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+          },
+          "constraintTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+            }
+          },
+          "constraints" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+            }
           }
         }
       },
@@ -3612,6 +3418,7 @@
         }
       },
       "net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition" : {
+        "required" : [ "lockIds", "type" ],
         "type" : "object",
         "properties" : {
           "type" : {
@@ -3628,6 +3435,7 @@
         }
       },
       "net.corda.core.node.services.vault.QueryCriteria_TimeCondition" : {
+        "required" : [ "type" ],
         "type" : "object",
         "properties" : {
           "type" : {
@@ -3643,33 +3451,9 @@
         "type" : "object"
       },
       "net.corda.core.node.services.vault.QueryCriteria_VaultCustomQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "properties" : {
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          },
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
           "expression" : {
             "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpressionNet.corda.core.schemas.StatePersistableBoolean"
           },
@@ -3685,12 +3469,7 @@
               "description" : "Java class name",
               "example" : "java.lang.Object"
             }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria" : {
-        "type" : "object",
-        "properties" : {
+          },
           "relevancyStatus" : {
             "type" : "string",
             "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
@@ -3715,7 +3494,13 @@
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
             }
-          },
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "properties" : {
           "status" : {
             "type" : "string",
             "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
@@ -3746,10 +3531,36 @@
           },
           "timeCondition" : {
             "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_TimeCondition"
+          },
+          "relevancyStatus" : {
+            "type" : "string",
+            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+          },
+          "constraintTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+            }
+          },
+          "constraints" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+            }
+          },
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
           }
         }
       },
       "net.corda.core.node.services.vault.Sort" : {
+        "required" : [ "columns" ],
         "type" : "object",
         "properties" : {
           "columns" : {
@@ -3764,6 +3575,7 @@
         "type" : "object"
       },
       "net.corda.core.node.services.vault.Sort_SortColumn" : {
+        "required" : [ "direction" ],
         "type" : "object",
         "properties" : {
           "sortAttribute" : {
@@ -3776,6 +3588,7 @@
         }
       },
       "net.corda.core.node.services.vault.SortAttribute_Custom" : {
+        "required" : [ "entityStateClass", "entityStateColumnName" ],
         "type" : "object",
         "properties" : {
           "entityStateClass" : {
@@ -3800,11 +3613,9 @@
         "type" : "object"
       },
       "net.corda.core.schemas.CommonSchemaV1_FungibleState" : {
+        "required" : [ "issuerRef", "quantity" ],
         "type" : "object",
         "properties" : {
-          "stateRef" : {
-            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
-          },
           "participants" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -3828,10 +3639,14 @@
               "type" : "string",
               "format" : "byte"
             }
+          },
+          "stateRef" : {
+            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
           }
         }
       },
       "net.corda.core.schemas.PersistentStateRef" : {
+        "required" : [ "index", "txId" ],
         "type" : "object",
         "properties" : {
           "txId" : {
@@ -3844,11 +3659,9 @@
         }
       },
       "net.corda.core.schemas.CommonSchemaV1_LinearState" : {
+        "required" : [ "uuid" ],
         "type" : "object",
         "properties" : {
-          "stateRef" : {
-            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
-          },
           "participants" : {
             "uniqueItems" : true,
             "type" : "array",
@@ -3862,10 +3675,32 @@
           "uuid" : {
             "type" : "string",
             "format" : "uuid"
+          },
+          "stateRef" : {
+            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "net.corda.core.transactions.ComponentGroup" : {
+        "required" : [ "components", "groupIndex" ],
+        "type" : "object",
+        "properties" : {
+          "groupIndex" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "components" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Hex encoded Byte Array",
+              "example" : "736F6D654279746573"
+            }
           }
         }
       },
       "net.corda.core.transactions.ContractUpgradeFilteredTransaction_FilteredComponent" : {
+        "required" : [ "component", "nonce" ],
         "type" : "object",
         "properties" : {
           "component" : {
@@ -3881,6 +3716,7 @@
         }
       },
       "kotlin.PairIntegerNet.corda.core.utilities.ProgressTracker_Step" : {
+        "required" : [ "first" ],
         "type" : "object",
         "properties" : {
           "first" : {
@@ -3893,8 +3729,16 @@
         }
       },
       "net.corda.core.utilities.ProgressTracker" : {
+        "required" : [ "allSteps", "allStepsLabels", "hasEnded", "stepIndex", "steps", "stepsTreeIndex", "topLevelTracker" ],
         "type" : "object",
         "properties" : {
+          "inputSteps" : {
+            "type" : "array",
+            "writeOnly" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
+            }
+          },
           "steps" : {
             "type" : "array",
             "items" : {
@@ -3950,18 +3794,19 @@
       "net.corda.core.utilities.ProgressTracker_Change_Position" : {
         "type" : "object",
         "properties" : {
-          "progressTracker" : {
-            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
           "tracker" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           },
           "newStep" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
+          },
+          "progressTracker" : {
+            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           }
         }
       },
       "net.corda.core.utilities.ProgressTracker_Step" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -3981,32 +3826,33 @@
       "net.corda.core.utilities.ProgressTracker_Change_Rendering" : {
         "type" : "object",
         "properties" : {
-          "progressTracker" : {
-            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
           "tracker" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           },
           "ofStep" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
+          },
+          "progressTracker" : {
+            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           }
         }
       },
       "net.corda.core.utilities.ProgressTracker_Change_Structural" : {
         "type" : "object",
         "properties" : {
-          "progressTracker" : {
-            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
           "tracker" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           },
           "parent" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
+          },
+          "progressTracker" : {
+            "$ref" : "#/components/schemas/net.corda.core.utilities.ProgressTracker"
           }
         }
       },
       "net.corda.finance.contracts.BusinessCalendar" : {
+        "required" : [ "holidayDates" ],
         "type" : "object",
         "properties" : {
           "holidayDates" : {
@@ -4020,6 +3866,7 @@
         }
       },
       "net.corda.finance.contracts.Commodity" : {
+        "required" : [ "commodityCode", "defaultFractionDigits", "displayName", "displayTokenSize" ],
         "type" : "object",
         "properties" : {
           "commodityCode" : {
@@ -4038,6 +3885,7 @@
         }
       },
       "net.corda.finance.contracts.Expression" : {
+        "required" : [ "expr" ],
         "type" : "object",
         "properties" : {
           "expr" : {
@@ -4046,6 +3894,7 @@
         }
       },
       "net.corda.finance.contracts.FixOf" : {
+        "required" : [ "forDay", "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -4061,6 +3910,7 @@
         }
       },
       "net.corda.finance.contracts.Tenor" : {
+        "required" : [ "name" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -4069,9 +3919,11 @@
         }
       },
       "Issued" : {
+        "required" : [ "_productType", "issuer", "product" ],
         "type" : "object",
         "properties" : {
           "issuer" : {
+            "required" : [ "party", "reference" ],
             "type" : "object",
             "properties" : {
               "party" : {
@@ -4094,6 +3946,7 @@
         }
       },
       "net.corda.core.contracts.PartyAndReference" : {
+        "required" : [ "party", "reference" ],
         "type" : "object",
         "properties" : {
           "party" : {
@@ -4108,8 +3961,17 @@
       },
       "net.corda.core.utilities.NonEmptySetNet.corda.core.contracts.IssuedObject" : {
         "uniqueItems" : true,
+        "required" : [ "empty", "size" ],
         "type" : "array",
         "properties" : {
+          "elements" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "writeOnly" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/Issued"
+            }
+          },
           "empty" : {
             "type" : "boolean"
           },
@@ -4124,8 +3986,19 @@
       },
       "net.corda.core.utilities.NonEmptySetNet.corda.core.crypto.SecureHash" : {
         "uniqueItems" : true,
+        "required" : [ "empty", "size" ],
         "type" : "array",
         "properties" : {
+          "elements" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "writeOnly" : true,
+            "items" : {
+              "type" : "string",
+              "description" : "Base 58 Encoded Secure Hash",
+              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
           "empty" : {
             "type" : "boolean"
           },
@@ -4141,12 +4014,24 @@
         }
       },
       "net.corda.finance.contracts.asset.Obligation_Terms" : {
+        "required" : [ "acceptableContracts", "acceptableIssuedProducts", "dueBefore", "product", "timeTolerance" ],
         "type" : "object",
         "properties" : {
           "acceptableContracts" : {
             "uniqueItems" : true,
+            "required" : [ "empty", "size" ],
             "type" : "array",
             "properties" : {
+              "elements" : {
+                "uniqueItems" : true,
+                "type" : "array",
+                "writeOnly" : true,
+                "items" : {
+                  "type" : "string",
+                  "description" : "Base 58 Encoded Secure Hash",
+                  "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+                }
+              },
               "empty" : {
                 "type" : "boolean"
               },
@@ -4163,8 +4048,17 @@
           },
           "acceptableIssuedProducts" : {
             "uniqueItems" : true,
+            "required" : [ "empty", "size" ],
             "type" : "array",
             "properties" : {
+              "elements" : {
+                "uniqueItems" : true,
+                "type" : "array",
+                "writeOnly" : true,
+                "items" : {
+                  "$ref" : "#/components/schemas/Issued"
+                }
+              },
               "empty" : {
                 "type" : "boolean"
               },
@@ -4223,6 +4117,7 @@
         }
       },
       "net.corda.finance.flows.AbstractCashFlow_Companion_FINALISING_TX" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4240,6 +4135,7 @@
         }
       },
       "net.corda.finance.flows.AbstractCashFlow_Companion_GENERATING_ID" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4257,6 +4153,7 @@
         }
       },
       "net.corda.finance.flows.AbstractCashFlow_Companion_GENERATING_TX" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4274,6 +4171,7 @@
         }
       },
       "net.corda.finance.flows.AbstractCashFlow_Companion_SIGNING_TX" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4291,6 +4189,7 @@
         }
       },
       "net.corda.finance.flows.CashExitFlow_ExitRequest" : {
+        "required" : [ "amount", "issuerRef" ],
         "type" : "object",
         "properties" : {
           "amount" : {
@@ -4304,6 +4203,7 @@
         }
       },
       "net.corda.finance.flows.CashIssueAndPaymentFlow_IssueAndPaymentRequest" : {
+        "required" : [ "amount", "anonymous", "issueRef" ],
         "type" : "object",
         "properties" : {
           "amount" : {
@@ -4326,6 +4226,7 @@
         }
       },
       "net.corda.finance.flows.CashIssueFlow_IssueRequest" : {
+        "required" : [ "amount", "issueRef" ],
         "type" : "object",
         "properties" : {
           "amount" : {
@@ -4342,6 +4243,7 @@
         }
       },
       "net.corda.finance.flows.CashPaymentFlow_PaymentRequest" : {
+        "required" : [ "amount", "anonymous", "issuerConstraint" ],
         "type" : "object",
         "properties" : {
           "amount" : {
@@ -4366,6 +4268,7 @@
         }
       },
       "net.corda.finance.contracts.DealState" : {
+        "required" : [ "participants" ],
         "type" : "object",
         "properties" : {
           "linearId" : {
@@ -4391,6 +4294,7 @@
         }
       },
       "net.corda.core.identity.AnonymousParty" : {
+        "required" : [ "owningKey" ],
         "type" : "object",
         "properties" : {
           "owningKey" : {
@@ -4401,6 +4305,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Handshake" : {
+        "required" : [ "payload" ],
         "type" : "object",
         "properties" : {
           "payload" : {
@@ -4415,6 +4320,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Primary_Companion_GENERATING_ID" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4432,6 +4338,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Primary_Companion_SENDING_PROPOSAL" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4449,6 +4356,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_COLLECTING_SIGNATURES" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4466,6 +4374,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_RECEIVING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4483,6 +4392,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_RECORDING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4500,6 +4410,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_SIGNING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4517,6 +4428,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_VERIFYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4534,6 +4446,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_COLLECTING_SIGNATURES" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4551,6 +4464,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_RECEIVING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4568,6 +4482,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_RECORDING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4585,6 +4500,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_SIGNING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4602,6 +4518,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_VERIFYING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4619,6 +4536,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Seller_Companion_AWAITING_PROPOSAL" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4636,6 +4554,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_Seller_Companion_VERIFYING_AND_SIGNING" : {
+        "required" : [ "extraAuditData", "label" ],
         "type" : "object",
         "properties" : {
           "label" : {
@@ -4653,6 +4572,7 @@
         }
       },
       "net.corda.finance.flows.TwoPartyTradeFlow_SellerTradeInfo" : {
+        "required" : [ "price" ],
         "type" : "object",
         "properties" : {
           "price" : {
@@ -4664,6 +4584,7 @@
         }
       },
       "net.corda.finance.schemas.CashSchemaV1" : {
+        "required" : [ "mappedTypes", "migrationResource", "name", "version" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -4682,11 +4603,9 @@
         }
       },
       "net.corda.finance.schemas.CashSchemaV1_PersistentCashState" : {
+        "required" : [ "currency", "issuerPartyHash", "issuerRef", "pennies" ],
         "type" : "object",
         "properties" : {
-          "stateRef" : {
-            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
-          },
           "owner" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
           },
@@ -4706,10 +4625,14 @@
               "type" : "string",
               "format" : "byte"
             }
+          },
+          "stateRef" : {
+            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
           }
         }
       },
       "net.corda.finance.schemas.CommercialPaperSchemaV1" : {
+        "required" : [ "mappedTypes", "migrationResource", "name", "version" ],
         "type" : "object",
         "properties" : {
           "name" : {
@@ -4728,11 +4651,9 @@
         }
       },
       "net.corda.finance.schemas.CommercialPaperSchemaV1_PersistentCommercialPaperState" : {
+        "required" : [ "currency", "faceValue", "faceValueIssuerPartyHash", "faceValueIssuerRef", "issuancePartyHash", "issuanceRef", "maturity", "ownerHash" ],
         "type" : "object",
         "properties" : {
-          "stateRef" : {
-            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
-          },
           "issuancePartyHash" : {
             "type" : "string"
           },
@@ -4766,6 +4687,9 @@
               "type" : "string",
               "format" : "byte"
             }
+          },
+          "stateRef" : {
+            "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
           }
         }
       }

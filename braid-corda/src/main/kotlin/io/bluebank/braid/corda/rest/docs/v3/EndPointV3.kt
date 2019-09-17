@@ -104,24 +104,6 @@ abstract class EndPointV3(
         ?: ""
     }
 
-//  open val produces: String
-//    get() {
-//      return if (apiOperation != null && !apiOperation!!.produces.isBlank()) {
-//        apiOperation!!.produces
-//      } else {
-//        returnType.mediaType()
-//      }
-//    }
-//
-//  open val consumes: String
-//    get() {
-//      return if (apiOperation != null && !apiOperation!!.consumes.isBlank()) {
-//        apiOperation!!.consumes
-//      } else {
-//        mapBodyParameter()?.schema?.properties?.keys?.first() ?: returnType.mediaType()
-//      }
-//    }
-
   internal fun resolveTypes(): EndPointV3 {
     modelContext.addType(this.returnType)
     this.parameterTypes.forEach {

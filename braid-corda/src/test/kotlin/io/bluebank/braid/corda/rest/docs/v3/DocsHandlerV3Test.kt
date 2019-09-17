@@ -16,27 +16,62 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 //import io.swagger.v3.oas.models.OpenAPI
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.natpryce.hamkrest.equalTo
+import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.PathItem
 import io.vertx.core.http.HttpMethod
-import io.vertx.core.json.Json
+import org.hamcrest.CoreMatchers.hasItem
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Ignore
 import org.junit.Test
 
 class DocsHandlerV3Test {
+  private val openApi: OpenAPI
+
+  init {
+    val docs = DocsHandlerV3()
+    docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
+    openApi = docs.createSwagger()
+  }
+
+
+  fun myFunction(type: aType) {
+  }
+
+  data class aType(
+      val requiredString: String,
+      val requiredDefaultString: String = "",
+      val optionalString: String?
+  )
+
 
   @Test
   fun `should generate openApi`() {
-
-    val docs = DocsHandlerV3()
-    docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
-    val openApi = docs.createSwagger()
-
     val path = openApi.paths["path"]
-    println(Json.encodePrettily(openApi))
     assertThat(path, notNullValue())
   }
 
-  fun myFunction() {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+  @Test
+  @Ignore
+  fun `should mark requiredString as required`() {
+    val schema =  openApi.components.schemas["io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3Test_aType"]
+    assertThat(schema?.required, hasItem("requiredString"))
   }
+
+
+  @Test
+  fun `should Print the swagger`() {
+    val swagger = ObjectMapper()
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .writerWithDefaultPrettyPrinter()
+        .writeValueAsString(openApi);
+
+    println(swagger)
+  }
+
+
 }
