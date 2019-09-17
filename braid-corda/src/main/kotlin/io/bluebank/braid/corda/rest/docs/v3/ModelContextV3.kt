@@ -41,7 +41,7 @@ class ModelContextV3 {
   private val mutableModels = mutableMapOf<String, Schema<*>>()
   val models: Map<String, Schema<*>> get() = mutableModels
   private val modelConverters = ModelConverters().apply {
-    addConverter(QualifiedTypeNameConverter(Json.mapper()))
+    addConverter(QualifiedTypeNameConverter(io.vertx.core.json.Json.mapper))
     addConverter(CustomModelConverterV3())
   }
 

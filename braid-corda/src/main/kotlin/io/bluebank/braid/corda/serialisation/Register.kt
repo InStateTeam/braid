@@ -25,6 +25,7 @@ import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
+import net.corda.core.contracts.TimeWindow
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
@@ -82,6 +83,7 @@ object BraidCordaJacksonInit {
             // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
             .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
             .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
+            .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
 
             .addSerializer(PublicKey::class.java, PublicKeySerializer())
             .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
