@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation
 
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream
 import io.bluebank.braid.corda.rest.docs.v3.ModelContextV3
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
@@ -26,10 +27,17 @@ import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
+import org.hamcrest.CoreMatchers.startsWith
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import sun.security.provider.X509Factory
+import java.io.ByteArrayInputStream
+import java.net.URI
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -83,6 +91,24 @@ class SerialisationTests {
     val encoded = Json.encode(expected)
     
     assertEquals("\"2019-03-30T12:34:56.567+0000\"", encoded)
+  }
+
+  @Test
+  fun `that X509 Should serialize as bytes`() {
+    val base64 = this::class.java.getResource("/serlialization/certificate/x509.pem")
+        .readText()
+        .replace(X509Factory.BEGIN_CERT,"")
+        .replace(X509Factory.END_CERT,"")
+        .replace("\n","")
+        .replace("\r","")
+
+    val certificate = CertificateFactory.getInstance("X.509")
+        .generateCertificate(ByteArrayInputStream(Base64.getDecoder().decode(base64)))
+
+    val encoded = Json.encode(certificate)
+    val decoded = Json.decodeValue(encoded, X509Certificate::class.java)
+
+    assertThat(encoded, startsWith("\"MIIIRzCCBi"))
   }
 
 

@@ -21,6 +21,7 @@ import io.swagger.models.Model
 import io.swagger.models.ModelImpl
 import io.swagger.models.properties.*
 import io.swagger.util.Json
+import io.swagger.v3.oas.models.media.ByteArraySchema
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
@@ -30,6 +31,8 @@ import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
 import java.lang.reflect.Type
 import java.security.PublicKey
+import java.security.cert.CertPath
+import java.security.cert.X509Certificate
 import java.util.*
 
 /**
@@ -68,6 +71,14 @@ class CustomModelConverterV2 : ModelConverter {
           return StringProperty()
             .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
             .description("Base 58 Encoded Secure Hash")
+        }
+        if (X509Certificate::class.java.isAssignableFrom(clazz)) {
+          return ByteArrayProperty()
+              .description("X509 encoded certificate")
+        }
+        if (CertPath::class.java.isAssignableFrom(clazz)) {
+          return ByteArrayProperty()
+              .description("X509 encoded certificate PKI path")
         }
         if (CordaX500Name::class.java.isAssignableFrom(clazz)) {
           return StringProperty()
