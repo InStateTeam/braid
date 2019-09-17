@@ -18,11 +18,13 @@ package io.bluebank.braid.corda.rest.docs.v3
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
 import net.corda.core.contracts.TimeWindow
 import net.corda.core.contracts.TransactionVerificationException
+import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class ModelContextV3Test{
@@ -75,5 +77,26 @@ class ModelContextV3Test{
     val exceptn = modelContext.models.get(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName())
     assertThat(exceptn,notNullValue())
     assertThat(exceptn?.properties?.get("cause"),nullValue())
+  }
+
+  @Test
+  fun `that PackageOwnershipException excludes cause`() {
+    val modelContext = ModelContextV3()
+    modelContext.addType(TransactionVerificationException.PackageOwnershipException::class.java)
+
+    val exceptn = modelContext.models.get(TransactionVerificationException.PackageOwnershipException::class.java.swaggerTypeName())
+    assertThat(exceptn,notNullValue())
+    assertThat(exceptn?.properties?.get("cause"),nullValue())
+  }
+
+  @Test
+  @Ignore
+  fun `that PartyAndCertificate is modelled as per serializer`() {
+    val modelContext = ModelContextV3()
+    modelContext.addType(PartyAndCertificate::class.java)
+
+    val exceptn = modelContext.models.get(PartyAndCertificate::class.java.swaggerTypeName())
+    assertThat(exceptn,notNullValue())
+
   }
 }

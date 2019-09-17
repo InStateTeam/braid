@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-abstract class InvalidAttachmentExceptionMixin{
+abstract class CordaThrowableMixin{
   @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
 
 }
