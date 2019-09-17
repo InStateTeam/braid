@@ -90,6 +90,9 @@ class CustomModelConverterV3 : ModelConverter {
                 )
                 .addProperties("displayTokenSize", NumberSchema().example("0.01"))
                 .addProperties("token", StringSchema().example("GBP"))
+                .addRequiredItem("quantity")
+                .addRequiredItem("displayTokenSize")
+                .addRequiredItem("token")
 
           } else {
             return ObjectSchema()
@@ -103,6 +106,9 @@ class CustomModelConverterV3 : ModelConverter {
                 .addProperties("_tokenType", StringSchema()
                     .example("net.corda.core.contracts.Issued")
                 )
+                .addRequiredItem("quantity")
+                .addRequiredItem("displayTokenSize")
+                .addRequiredItem("token")
           }
         }
         if (Issued::class.java.isAssignableFrom(clazz)) {
@@ -114,13 +120,17 @@ class CustomModelConverterV3 : ModelConverter {
                 .name("IssuedCurrency")
                 .addProperties("issuer", context.resolve(AnnotatedType(PartyAndReference::class.java)))
                 .addProperties("product", context.resolve(AnnotatedType(boundType)))
+                .addRequiredItem("issuer")
+                .addRequiredItem("product")
           } else {
             return ObjectSchema()
                 .name("Issued")
                 .addProperties("issuer", context.resolve(AnnotatedType(PartyAndReference::class.java)))
                 .addProperties("product", context.resolve(AnnotatedType(boundType)))
                 .addProperties("_productType", StringSchema().example("java.util.Currency"))
-
+                .addRequiredItem("issuer")
+                .addRequiredItem("product")
+                .addRequiredItem("_productType")
           }
         }
       }
