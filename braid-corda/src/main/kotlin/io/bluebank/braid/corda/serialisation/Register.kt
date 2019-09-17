@@ -36,6 +36,8 @@ import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
 import java.security.PublicKey
+import java.security.cert.CertPath
+import java.security.cert.X509Certificate
 
 import java.util.Arrays.asList
 
@@ -91,8 +93,10 @@ object BraidCordaJacksonInit {
 //            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)
 //            .setMixInAnnotation(CertPath::class.java, JacksonSupport.CertPathMixin::class.java)
 //
-//            .addSerializer(java.security.cert.X509Certificate::class.java, ())
-//            .addDeserializer(java.security.cert.X509Certificate::class.java, JacksonSupport.X509CertificateDeserializer::class.java)
+            .addSerializer(X509Certificate::class.java, X509Serializer())
+            .addDeserializer(X509Certificate::class.java, X509Deserializer())
+            .addSerializer(CertPath::class.java, CertPathSerializer())
+            .addDeserializer(CertPath::class.java, CertPathDeserializer())
 
             .addSerializer(PublicKey::class.java, PublicKeySerializer())
             .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())

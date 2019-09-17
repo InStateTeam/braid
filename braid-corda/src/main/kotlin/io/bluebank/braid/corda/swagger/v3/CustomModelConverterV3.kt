@@ -27,6 +27,8 @@ import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
 import java.security.PublicKey
+import java.security.cert.CertPath
+import java.security.cert.X509Certificate
 import java.util.*
 
 /**
@@ -65,6 +67,14 @@ class CustomModelConverterV3 : ModelConverter {
           return StringSchema()
               .example("O=Bank A, L=London, C=GB")
               .description("CordaX500Name encoded Party")
+        }
+        if (X509Certificate::class.java.isAssignableFrom(clazz)) {
+          return ByteArraySchema()
+              .description("X509 encoded certificate")
+        }
+        if (CertPath::class.java.isAssignableFrom(clazz)) {
+          return ByteArraySchema()
+              .description("X509 encoded certificate PKI path")
         }
         if (OpaqueBytes::class.java.isAssignableFrom(clazz)) {
           return StringSchema()
