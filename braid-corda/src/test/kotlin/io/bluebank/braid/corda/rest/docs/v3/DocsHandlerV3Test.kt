@@ -19,11 +19,12 @@ package io.bluebank.braid.corda.rest.docs.v3
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.natpryce.hamkrest.equalTo
+import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.PathItem
 import io.vertx.core.http.HttpMethod
-import org.hamcrest.CoreMatchers.hasItem
-import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Ignore
 import org.junit.Test
@@ -32,6 +33,9 @@ class DocsHandlerV3Test {
   private val openApi: OpenAPI
 
   init {
+    BraidCordaJacksonInit.init()
+    CustomModelConverters.init()
+
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
     openApi = docs.createSwagger()
@@ -56,10 +60,22 @@ class DocsHandlerV3Test {
 
 
   @Test
-  @Ignore
   fun `should mark requiredString as required`() {
     val schema =  openApi.components.schemas["io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3Test_aType"]
     assertThat(schema?.required, hasItem("requiredString"))
+  }
+
+  @Test
+  @Ignore  // todo does not figure out defauled values on kotlin
+  fun `should mark requiredDefaultString as required`() {
+    val schema =  openApi.components.schemas["io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3Test_aType"]
+    assertThat(schema?.required, not(hasItem("requiredDefaultString")))
+  }
+
+ @Test
+  fun `should mark optionalString as not required`() {
+    val schema =  openApi.components.schemas["io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3Test_aType"]
+    assertThat(schema?.required, not(hasItem("optionalString")))
   }
 
 

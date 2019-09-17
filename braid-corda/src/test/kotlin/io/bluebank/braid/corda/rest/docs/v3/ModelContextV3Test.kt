@@ -32,8 +32,7 @@ import org.junit.Test
 class ModelContextV3Test{
   @Before
   fun setUp() {
-    BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
+    BraidCordaJacksonInit.init()    // adds KotlinModule for required field parameter
   }
 
   @Test
