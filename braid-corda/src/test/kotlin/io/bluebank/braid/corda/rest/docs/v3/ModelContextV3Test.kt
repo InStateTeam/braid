@@ -16,18 +16,14 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.swagger.v3.oas.models.media.StringSchema
-import io.vertx.core.json.Json
 import net.corda.core.contracts.TimeWindow
-import net.corda.core.flows.WaitTimeUpdate
+import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 
 class ModelContextV3Test{
   @Before
@@ -41,7 +37,7 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TraversableTransaction::class.java)
 
-    val wire = modelContext.models.get(TraversableTransaction::class.java.name)
+    val wire = modelContext.models.get(TraversableTransaction::class.java.swaggerTypeName())
     assertThat(wire,notNullValue())
     assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
 
@@ -53,7 +49,7 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(WireTransaction::class.java)
 
-    val wire = modelContext.models.get(WireTransaction::class.java.name)
+    val wire = modelContext.models.get(WireTransaction::class.java.swaggerTypeName())
     assertThat(wire,notNullValue())
     assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
 
@@ -65,29 +61,19 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TimeWindow::class.java)
 
-    val wire = modelContext.models.get(TimeWindow::class.java.name)
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("length"),nullValue())
+    val window = modelContext.models.get(TimeWindow::class.java.name)
+    assertThat(window,notNullValue())
+    assertThat(window?.properties?.get("length"),nullValue())
 
   }
 
   @Test
-  fun `that WaitTimeUpdate description is correct`() {
+  fun `that InvalidAttachmentException excludes cause`() {
     val modelContext = ModelContextV3()
-    modelContext.addType(WaitTimeUpdate::class.java)
+    modelContext.addType(TransactionVerificationException.InvalidAttachmentException::class.java)
 
-    val waitTime = modelContext.models.get(WaitTimeUpdate::class.java.name)
-    assertThat(waitTime,notNullValue())
-    assertThat(waitTime?.properties?.get("waitTime")?.type, equalTo("string"))
-
-  }
-
-  @Test
-  fun `that WaitTimeUpdate serializable is sensible`() {
-    ModelContextV3()
-    val expected = WaitTimeUpdate(Duration.of(10, ChronoUnit.DAYS))
-    val encoded = Json.encode(expected)
-
-    kotlin.test.assertEquals("{\"waitTime\":\"PT240H\"}", encoded)
+    val exceptn = modelContext.models.get(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName())
+    assertThat(exceptn,notNullValue())
+    assertThat(exceptn?.properties?.get("cause"),nullValue())
   }
 }
