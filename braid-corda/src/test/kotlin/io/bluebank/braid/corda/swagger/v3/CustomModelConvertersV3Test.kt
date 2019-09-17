@@ -274,8 +274,4 @@ class CustomModelConvertersV3Test {
 
   }
 
-  data class IssuedType(
-    val value: String
-  )
-
 }

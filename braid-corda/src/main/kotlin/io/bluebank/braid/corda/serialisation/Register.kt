@@ -19,13 +19,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
-import io.bluebank.braid.corda.swagger.SignedTransactionMinimalMixin
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.TimeWindow
+import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
@@ -84,6 +84,7 @@ object BraidCordaJacksonInit {
             .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
             .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
             .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
+            .setMixInAnnotation(TransactionVerificationException.InvalidAttachmentException::class.java, InvalidAttachmentExceptionMixin::class.java)
 
             .addSerializer(PublicKey::class.java, PublicKeySerializer())
             .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())

@@ -23,20 +23,26 @@ import io.swagger.v3.oas.annotations.media.Schema
  */
 class QualifiedTypeNameResolver : TypeNameResolver() {
 
-  override fun nameForClass(cls: Class<*>, options: MutableSet<Options>): String {
-    return simplerClassName(cls, options).replace("$","_")
+  override fun nameForClass(cls: Class<*>, options: Set<Options>): String {
+    return cls.swaggerTypeName(options)
   }
 
-  private fun simplerClassName(cls: Class<*>, options: MutableSet<Options>): String {
-    val className = when {
-      cls.name.startsWith("java.") -> cls.simpleName
-      else -> cls.name
-    }
-    if (options.contains(Options.SKIP_API_MODEL)) {
-      return className
-    }
-    return cls.getAnnotation(Schema::class.java)?.name?.trimToNull() ?: className
+
+}
+
+fun Class<*>.swaggerTypeName(options: Set<TypeNameResolver.Options> = emptySet()): String {
+  return this.simplerName(options).replace("$","_")
+}
+
+private fun Class<*>.simplerName(options: Set<TypeNameResolver.Options>): String {
+  val className = when {
+    this.name.startsWith("java.") -> this.simpleName
+    else -> this.name
   }
+  if (options.contains(TypeNameResolver.Options.SKIP_API_MODEL)) {
+    return className
+  }
+  return this.getAnnotation(Schema::class.java)?.name?.trimToNull() ?: className
 }
 
 private fun String.trimToNull(): String? {

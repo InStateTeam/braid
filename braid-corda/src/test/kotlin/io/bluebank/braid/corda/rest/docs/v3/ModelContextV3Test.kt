@@ -16,17 +16,13 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
 import net.corda.core.contracts.TimeWindow
+import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
-import net.corda.testing.core.genericExpectEvents
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class ModelContextV3Test{
@@ -41,7 +37,7 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TraversableTransaction::class.java)
 
-    val wire = modelContext.models.get(TraversableTransaction::class.java.name)
+    val wire = modelContext.models.get(TraversableTransaction::class.java.swaggerTypeName())
     assertThat(wire,notNullValue())
     assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
 
@@ -53,7 +49,7 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(WireTransaction::class.java)
 
-    val wire = modelContext.models.get(WireTransaction::class.java.name)
+    val wire = modelContext.models.get(WireTransaction::class.java.swaggerTypeName())
     assertThat(wire,notNullValue())
     assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
 
@@ -65,9 +61,19 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TimeWindow::class.java)
 
-    val wire = modelContext.models.get(TimeWindow::class.java.name)
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("length"),nullValue())
+    val window = modelContext.models.get(TimeWindow::class.java.name)
+    assertThat(window,notNullValue())
+    assertThat(window?.properties?.get("length"),nullValue())
 
+  }
+
+  @Test
+  fun `that InvalidAttachmentException excludes cause`() {
+    val modelContext = ModelContextV3()
+    modelContext.addType(TransactionVerificationException.InvalidAttachmentException::class.java)
+
+    val exceptn = modelContext.models.get(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName())
+    assertThat(exceptn,notNullValue())
+    assertThat(exceptn?.properties?.get("cause"),nullValue())
   }
 }
