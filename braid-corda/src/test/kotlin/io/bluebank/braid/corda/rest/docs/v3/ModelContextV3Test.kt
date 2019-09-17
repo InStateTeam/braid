@@ -16,18 +16,18 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
+import io.swagger.v3.oas.models.media.StringSchema
+import io.vertx.core.json.Json
 import net.corda.core.contracts.TimeWindow
+import net.corda.core.flows.WaitTimeUpdate
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
-import net.corda.testing.core.genericExpectEvents
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 class ModelContextV3Test{
   @Before
@@ -69,5 +69,25 @@ class ModelContextV3Test{
     assertThat(wire,notNullValue())
     assertThat(wire?.properties?.get("length"),nullValue())
 
+  }
+
+  @Test
+  fun `that WaitTimeUpdate description is correct`() {
+    val modelContext = ModelContextV3()
+    modelContext.addType(WaitTimeUpdate::class.java)
+
+    val waitTime = modelContext.models.get(WaitTimeUpdate::class.java.name)
+    assertThat(waitTime,notNullValue())
+    assertThat(waitTime?.properties?.get("waitTime")?.type, equalTo("string"))
+
+  }
+
+  @Test
+  fun `that WaitTimeUpdate serializable is sensible`() {
+    ModelContextV3()
+    val expected = WaitTimeUpdate(Duration.of(10, ChronoUnit.DAYS))
+    val encoded = Json.encode(expected)
+
+    kotlin.test.assertEquals("{\"waitTime\":\"PT240H\"}", encoded)
   }
 }
