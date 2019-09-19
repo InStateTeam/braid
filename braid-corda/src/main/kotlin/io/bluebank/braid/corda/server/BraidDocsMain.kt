@@ -24,19 +24,33 @@ import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.utilities.contextLogger
+import java.util.concurrent.CountDownLatch
 
 class BraidDocsMain() {
+  companion object {
+    private val log = contextLogger()
+  }
   /**
    * @param openApiVersion - 2 or 3
    */
   fun swaggerText(openApiVersion: Int): String {
     val restConfig = Braid().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
-    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-
-    val classes = readCordaClasses()
-    classes.forEach { restMounter.docsHandler.addType(it) }
-    return restMounter.docsHandler.swagger()
+    return try {
+      val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
+      val classes = readCordaClasses()
+      classes.forEach { restMounter.docsHandler.addType(it) }
+      restMounter.docsHandler.swagger()
+    } finally {
+      log.info("shutting down Vertx")
+      val done = CountDownLatch(1)
+      vertx.close {
+        log.info("vertx shutdown")
+        done.countDown()
+      }
+      done.await()
+    }
   }
 
   private fun readCordaClasses(): List<Class<out Any>> {
