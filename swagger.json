@@ -408,7 +408,7 @@
         "type": "object",
         "properties": {
           "stateAndRef": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRefObject"
+            "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_Object"
           },
           "upgradedContractClass": {
             "type": "string",
@@ -420,11 +420,11 @@
       "net.corda.core.contracts.AttachmentConstraint": {
         "type": "object"
       },
-      "net.corda.core.contracts.StateAndRefObject": {
+      "net.corda.core.contracts.StateAndRef_Object": {
         "type": "object",
         "properties": {
           "state": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionStateObject"
+            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionState_Object"
           },
           "ref": {
             "$ref": "#/components/schemas/net.corda.core.contracts.StateRef"
@@ -449,7 +449,7 @@
           }
         }
       },
-      "net.corda.core.contracts.TransactionStateObject": {
+      "net.corda.core.contracts.TransactionState_Object": {
         "required": [
           "contract",
           "data"
@@ -500,14 +500,14 @@
         "type": "object",
         "properties": {
           "state": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
+            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
           },
           "ref": {
             "$ref": "#/components/schemas/net.corda.core.contracts.StateRef"
           }
         }
       },
-      "net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState": {
+      "net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState": {
         "required": [
           "contract"
         ],
@@ -577,7 +577,7 @@
           "outputs": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
+              "$ref": "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
             }
           },
           "outputStates": {
@@ -1128,93 +1128,6 @@
           }
         }
       },
-      "net.corda.core.flows.AbstractStateReplacementFlow_Acceptor_Companion_APPROVING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "rx.ObservableNet.corda.core.utilities.ProgressTracker_Change": {
-        "type": "object"
-      },
-      "net.corda.core.flows.AbstractStateReplacementFlow_Acceptor_Companion_VERIFYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.AbstractStateReplacementFlow_Instigator_Companion_NOTARY": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.AbstractStateReplacementFlow_Instigator_Companion_SIGNING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "net.corda.core.flows.AbstractStateReplacementFlow_Proposal": {
         "required": [
           "modification"
@@ -1226,90 +1139,6 @@
           },
           "modification": {
             "type": "object"
-          }
-        }
-      },
-      "net.corda.core.flows.CollectSignaturesFlow_Companion_COLLECTING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.CollectSignaturesFlow_Companion_VERIFYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.FinalityFlow_Companion_BROADCASTING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.FinalityFlow_Companion_NOTARISING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
         }
       },
@@ -1497,11 +1326,11 @@
           "requestSignature": {
             "$ref": "#/components/schemas/net.corda.core.flows.NotarisationRequestSignature"
           },
-          "signedTransaction": {
-            "$ref": "#/components/schemas/net.corda.core.transactions.SignedTransaction"
-          },
           "coreTransaction": {
             "$ref": "#/components/schemas/net.corda.core.transactions.CoreTransaction"
+          },
+          "signedTransaction": {
+            "$ref": "#/components/schemas/net.corda.core.transactions.SignedTransaction"
           }
         }
       },
@@ -1765,15 +1594,15 @@
       "net.corda.core.contracts.TimeWindow": {
         "type": "object",
         "properties": {
+          "fromTime": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
           "untilTime": {
             "type": "string",
             "description": "JSR310 encoded time representation of Instant"
           },
           "midpoint": {
-            "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
-          },
-          "fromTime": {
             "type": "string",
             "description": "JSR310 encoded time representation of Instant"
           }
@@ -1878,111 +1707,6 @@
       "net.corda.core.flows.NotaryError_WrongNotary": {
         "type": "object"
       },
-      "net.corda.core.flows.NotaryFlow_Client_Companion_REQUESTING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.NotaryFlow_Client_Companion_VALIDATING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.SignTransactionFlow_Companion_RECEIVING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.SignTransactionFlow_Companion_SIGNING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.SignTransactionFlow_Companion_VERIFYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "net.corda.core.flows.WaitTimeUpdate": {
         "required": [
           "waitTime"
@@ -1992,69 +1716,6 @@
           "waitTime": {
             "type": "string",
             "description": "JSR310 encoded time representation of Duration"
-          }
-        }
-      },
-      "net.corda.core.flows.WithReferencedStatesFlow_Companion_ATTEMPT": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.WithReferencedStatesFlow_Companion_RETRYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.core.flows.WithReferencedStatesFlow_Companion_SUCCESS": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
         }
       },
@@ -2080,15 +1741,15 @@
           "party": {
             "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
-          "name": {
-            "type": "string",
-            "description": "CordaX500Name encoded Party",
-            "example": "O=Bank A, L=London, C=GB"
-          },
           "owningKey": {
             "type": "string",
             "description": "Base 58 Encoded Public Key",
             "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "name": {
+            "type": "string",
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
           }
         }
       },
@@ -2176,11 +1837,11 @@
           }
         }
       },
-      "net.corda.core.contracts.StateAndRefNet.corda.core.contracts.ContractState": {
+      "net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState": {
         "type": "object",
         "properties": {
           "state": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
+            "$ref": "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
           },
           "ref": {
             "$ref": "#/components/schemas/net.corda.core.contracts.StateRef"
@@ -2200,7 +1861,7 @@
           "states": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRefNet.corda.core.contracts.ContractState"
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
             }
           },
           "statesMetadata": {
@@ -2296,14 +1957,14 @@
             "uniqueItems": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRefNet.corda.core.contracts.ContractState"
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
             }
           },
           "produced": {
             "uniqueItems": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRefNet.corda.core.contracts.ContractState"
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
             }
           },
           "flowId": {
@@ -2322,7 +1983,7 @@
             "uniqueItems": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRefNet.corda.core.contracts.ContractState"
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
             }
           },
           "empty": {
@@ -2348,44 +2009,44 @@
         "type": "object",
         "properties": {
           "uploaderCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateString"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_String"
           },
           "filenameCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateString"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_String"
           },
           "uploadDateCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateInstant"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
           },
           "contractClassNamesCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateListString"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_List_String"
           },
           "signersCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateListPublicKey"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_List_PublicKey"
           },
           "isSignedCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateBoolean"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Boolean"
           },
           "versionCondition": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateInteger"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Integer"
           }
         }
       },
-      "net.corda.core.node.services.vault.ColumnPredicateBoolean": {
+      "net.corda.core.node.services.vault.ColumnPredicate_Boolean": {
         "type": "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicateInstant": {
+      "net.corda.core.node.services.vault.ColumnPredicate_Instant": {
         "type": "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicateInteger": {
+      "net.corda.core.node.services.vault.ColumnPredicate_Integer": {
         "type": "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicateListPublicKey": {
+      "net.corda.core.node.services.vault.ColumnPredicate_List_PublicKey": {
         "type": "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicateListString": {
+      "net.corda.core.node.services.vault.ColumnPredicate_List_String": {
         "type": "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicateString": {
+      "net.corda.core.node.services.vault.ColumnPredicate_String": {
         "type": "object"
       },
       "net.corda.core.node.services.vault.AttachmentQueryCriteria_OrComposition": {
@@ -2590,7 +2251,10 @@
           }
         }
       },
-      "net.corda.core.node.services.vault.ColumnObjectObject": {
+      "net.corda.core.node.services.vault.ColumnPredicate_Object": {
+        "type": "object"
+      },
+      "net.corda.core.node.services.vault.Column_Object_Object": {
         "required": [
           "declaringClass",
           "name"
@@ -2607,22 +2271,19 @@
           }
         }
       },
-      "net.corda.core.node.services.vault.ColumnPredicateObject": {
-        "type": "object"
-      },
       "net.corda.core.node.services.vault.CriteriaExpression_AggregateFunctionExpression": {
         "type": "object",
         "properties": {
           "column": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnObjectObject"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.Column_Object_Object"
           },
           "predicate": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateObject"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Object"
           },
           "groupByColumns": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnObjectObject"
+              "$ref": "#/components/schemas/net.corda.core.node.services.vault.Column_Object_Object"
             }
           },
           "orderBy": {
@@ -2634,9 +2295,6 @@
           }
         }
       },
-      "net.corda.core.node.services.vault.CriteriaExpressionObjectBoolean": {
-        "type": "object"
-      },
       "net.corda.core.node.services.vault.CriteriaExpression_BinaryLogical": {
         "required": [
           "operator"
@@ -2644,10 +2302,10 @@
         "type": "object",
         "properties": {
           "left": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpressionObjectBoolean"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
           },
           "right": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpressionObjectBoolean"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
           },
           "operator": {
             "type": "string",
@@ -2658,14 +2316,17 @@
           }
         }
       },
+      "net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean": {
+        "type": "object"
+      },
       "net.corda.core.node.services.vault.CriteriaExpression_ColumnPredicateExpression": {
         "type": "object",
         "properties": {
           "column": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnObjectObject"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.Column_Object_Object"
           },
           "predicate": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateObject"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Object"
           }
         }
       },
@@ -2673,7 +2334,7 @@
         "type": "object",
         "properties": {
           "expression": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpressionObjectBoolean"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
           }
         }
       },
@@ -2712,7 +2373,7 @@
           }
         }
       },
-      "net.corda.core.node.services.vault.ColumnPredicateLong": {
+      "net.corda.core.node.services.vault.ColumnPredicate_Long": {
         "type": "object"
       },
       "net.corda.core.node.services.vault.QueryCriteria_FungibleAssetQueryCriteria": {
@@ -2737,7 +2398,7 @@
             }
           },
           "quantity": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateLong"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
           },
           "issuer": {
             "type": "array",
@@ -2816,7 +2477,7 @@
             }
           },
           "quantity": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateLong"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
           },
           "status": {
             "type": "string",
@@ -2990,11 +2651,11 @@
             ]
           },
           "predicate": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicateInstant"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
           }
         }
       },
-      "net.corda.core.node.services.vault.CriteriaExpressionNet.corda.core.schemas.StatePersistableBoolean": {
+      "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean": {
         "type": "object"
       },
       "net.corda.core.node.services.vault.QueryCriteria_VaultCustomQueryCriteria": {
@@ -3007,7 +2668,7 @@
         "type": "object",
         "properties": {
           "expression": {
-            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpressionNet.corda.core.schemas.StatePersistableBoolean"
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
           },
           "status": {
             "type": "string",
@@ -3322,177 +2983,6 @@
           }
         }
       },
-      "kotlin.PairIntegerNet.corda.core.utilities.ProgressTracker_Step": {
-        "required": [
-          "first"
-        ],
-        "type": "object",
-        "properties": {
-          "first": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "second": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          }
-        }
-      },
-      "kotlin.PairIntegerString": {
-        "required": [
-          "first",
-          "second"
-        ],
-        "type": "object",
-        "properties": {
-          "first": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "second": {
-            "type": "string"
-          }
-        }
-      },
-      "net.corda.core.utilities.ProgressTracker": {
-        "required": [
-          "allSteps",
-          "allStepsLabels",
-          "hasEnded",
-          "stepIndex",
-          "steps",
-          "stepsTreeIndex",
-          "topLevelTracker"
-        ],
-        "type": "object",
-        "properties": {
-          "inputSteps": {
-            "type": "array",
-            "writeOnly": true,
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-            }
-          },
-          "steps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-            }
-          },
-          "stepIndex": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "stepsTreeIndex": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "parent": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
-          "currentStep": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "stepsTreeIndexChanges": {
-            "$ref": "#/components/schemas/rx.ObservableInteger"
-          },
-          "allStepsLabels": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/kotlin.PairIntegerString"
-            }
-          },
-          "stepsTreeChanges": {
-            "$ref": "#/components/schemas/rx.ObservableListKotlin.PairIntegerString"
-          },
-          "hasEnded": {
-            "type": "boolean"
-          },
-          "currentStepRecursive": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          },
-          "topLevelTracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
-          "allSteps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/kotlin.PairIntegerNet.corda.core.utilities.ProgressTracker_Step"
-            }
-          }
-        }
-      },
-      "net.corda.core.utilities.ProgressTracker_Change_Position": {
-        "type": "object",
-        "properties": {
-          "tracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
-          "newStep": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          },
-          "progressTracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          }
-        }
-      },
-      "net.corda.core.utilities.ProgressTracker_Step": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties" : {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "rx.ObservableInteger": {
-        "type": "object"
-      },
-      "rx.ObservableListKotlin.PairIntegerString": {
-        "type": "object"
-      },
-      "net.corda.core.utilities.ProgressTracker_Change_Rendering": {
-        "type": "object",
-        "properties": {
-          "tracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
-          "ofStep": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          },
-          "progressTracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          }
-        }
-      },
-      "net.corda.core.utilities.ProgressTracker_Change_Structural": {
-        "type": "object",
-        "properties": {
-          "tracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          },
-          "parent": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker_Step"
-          },
-          "progressTracker": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.ProgressTracker"
-          }
-        }
-      },
       "net.corda.finance.contracts.BusinessCalendar": {
         "required": [
           "holidayDates"
@@ -3625,7 +3115,7 @@
           }
         }
       },
-      "net.corda.core.utilities.NonEmptySetNet.corda.core.contracts.IssuedObject": {
+      "net.corda.core.utilities.NonEmptySet_net_corda_core_contracts_Issued_Object": {
         "uniqueItems": true,
         "required": [
           "empty",
@@ -3653,7 +3143,7 @@
           "$ref": "#/components/schemas/Issued"
         }
       },
-      "net.corda.core.utilities.NonEmptySetNet.corda.core.crypto.SecureHash": {
+      "net.corda.core.utilities.NonEmptySet_net_corda_core_crypto_SecureHash": {
         "uniqueItems": true,
         "required": [
           "empty",
@@ -3765,90 +3255,6 @@
           },
           "product": {
             "type": "object"
-          }
-        }
-      },
-      "net.corda.finance.flows.AbstractCashFlow_Companion_FINALISING_TX": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.AbstractCashFlow_Companion_GENERATING_ID": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.AbstractCashFlow_Companion_GENERATING_TX": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.AbstractCashFlow_Companion_SIGNING_TX": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
         }
       },
@@ -4000,300 +3406,6 @@
           },
           "secondaryIdentity": {
             "$ref": "#/components/schemas/net.corda.core.identity.AnonymousParty"
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Primary_Companion_GENERATING_ID": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Primary_Companion_SENDING_PROPOSAL": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_COLLECTING_SIGNATURES": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_RECEIVING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_RECORDING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_SIGNING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyDealFlow_Secondary_Companion_VERIFYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_COLLECTING_SIGNATURES": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_RECEIVING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_RECORDING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_SIGNING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Buyer_VERIFYING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Seller_Companion_AWAITING_PROPOSAL": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "net.corda.finance.flows.TwoPartyTradeFlow_Seller_Companion_VERIFYING_AND_SIGNING": {
-        "required": [
-          "extraAuditData",
-          "label"
-        ],
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "changes": {
-            "$ref": "#/components/schemas/rx.ObservableNet.corda.core.utilities.ProgressTracker_Change"
-          },
-          "extraAuditData": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
         }
       },
