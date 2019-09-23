@@ -35,6 +35,7 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
+import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.ProgressTracker
 import java.security.PublicKey
@@ -90,6 +91,7 @@ object BraidCordaJacksonInit {
             .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
             .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
             .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
+      .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
             .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
 
 //            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
