@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class CordaThrowableMixin{
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
+import com.fasterxml.jackson.annotation.JsonIgnoreType
 
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getStackTrace(): Array<StackTraceElement>
-
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getSuppressed(): List<Throwable>?
+@JsonIgnoreType
+class IgnoreTypeMixin{
 }

@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger
 
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.swagger.converter.ModelConverters
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
@@ -23,11 +23,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
-import java.security.cert.CertPath
+import java.security.cert.X509Certificate
 
-class CertPathSerializer : StdSerializer<CertPath>(CertPath::class.java) {
+class X509Serializer : StdSerializer<X509Certificate>(X509Certificate::class.java) {
   override fun serialize(
-      value: CertPath,
+      value: X509Certificate,
       generator: JsonGenerator,
       provider: SerializerProvider
   ) {
@@ -35,15 +35,15 @@ class CertPathSerializer : StdSerializer<CertPath>(CertPath::class.java) {
   }
 }
 
-class CertPathDeserializer :
-    StdDeserializer<CertPath>(CertPath::class.java) {
+class X509Deserializer :
+    StdDeserializer<X509Certificate>(X509Certificate::class.java) {
 
   override fun deserialize(
       parser: JsonParser,
       context: DeserializationContext
-  ): CertPath {
+  ): X509Certificate {
 
     val cf = CertificateFactory.getInstance("X.509")
-    return cf.generateCertPath(ByteArrayInputStream(parser.binaryValue)) as CertPath
+    return cf.generateCertificate(ByteArrayInputStream(parser.binaryValue)) as X509Certificate
   }
 }

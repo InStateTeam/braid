@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class TimeWindowMixin constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getLength(): java.time.Duration?
+abstract class CordaThrowableMixin{
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
 
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getStackTrace(): Array<StackTraceElement>
+
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getSuppressed(): List<Throwable>?
 }

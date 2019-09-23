@@ -13,21 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.mixin
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import net.corda.core.transactions.WireTransaction
+abstract class TimeWindowMixin constructor() {
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getLength(): java.time.Duration?
 
-class WireTransactionSerializer :
-  StdSerializer<WireTransaction>(WireTransaction::class.java) {
-
-  override fun serialize(
-    value: WireTransaction,
-    gen: JsonGenerator,
-    provider: SerializerProvider
-  ) {
-    value.id
-  }
 }

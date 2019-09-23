@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.serializers
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+import io.bluebank.braid.corda.serialisation.mixin.*
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
@@ -35,6 +36,7 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.OpaqueBytes
+import net.corda.core.utilities.ProgressTracker
 import java.security.PublicKey
 import java.security.cert.CertPath
 import java.security.cert.X509Certificate
@@ -88,6 +90,7 @@ object BraidCordaJacksonInit {
             .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
             .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
             .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
+            .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
 
 //            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
 //            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)

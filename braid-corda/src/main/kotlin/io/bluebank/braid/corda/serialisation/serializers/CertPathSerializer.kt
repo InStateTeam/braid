@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
@@ -21,36 +21,29 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import net.corda.core.utilities.OpaqueBytes
-import net.corda.core.utilities.parseAsHex
-import net.corda.core.utilities.toHexString
+import java.io.ByteArrayInputStream
+import java.security.cert.CertificateFactory
+import java.security.cert.CertPath
 
-class OpaqueBytesSerializer : StdSerializer<OpaqueBytes>(OpaqueBytes::class.java) {
+class CertPathSerializer : StdSerializer<CertPath>(CertPath::class.java) {
   override fun serialize(
-    value: OpaqueBytes,
-    generator: JsonGenerator,
-    provider: SerializerProvider
+      value: CertPath,
+      generator: JsonGenerator,
+      provider: SerializerProvider
   ) {
-    generator.writeString(
-      value.bytes.copyOfRange(
-        value.offset,
-        value.offset + value.size
-      ).toHexString()
-    )
+    generator.writeBinary(value.encoded)
   }
 }
 
-class OpaqueBytesDeserializer : StdDeserializer<OpaqueBytes>(OpaqueBytes::class.java) {
+class CertPathDeserializer :
+    StdDeserializer<CertPath>(CertPath::class.java) {
+
   override fun deserialize(
-    parser: JsonParser,
-    context: DeserializationContext
-  ): OpaqueBytes {
-    return try {
-      // try converting as hex
-      OpaqueBytes(parser.text.parseAsHex())
-    } catch (err: IllegalArgumentException) {
-      // convert the string to bytes
-      OpaqueBytes(parser.text.toByteArray())
-    }
+      parser: JsonParser,
+      context: DeserializationContext
+  ): CertPath {
+
+    val cf = CertificateFactory.getInstance("X.509")
+    return cf.generateCertPath(ByteArrayInputStream(parser.binaryValue)) as CertPath
   }
 }
