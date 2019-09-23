@@ -59,5 +59,15 @@ class BraidDocsMainKtTest {
    assertThat(schemaNames.toString(), schemaNames.size , equalTo(0));
   }
 
+@Test
+  fun `should not have rx Observavle`() {
+   val schemaNames = json.getJsonObject("components").getJsonObject("schemas").map.keys
+       .stream()
+       .filter { it.contains("Observable") }
+       .collect(toSet())
+
+   assertThat(schemaNames.toString(), schemaNames.size , equalTo(0));
+  }
+
 
 }
