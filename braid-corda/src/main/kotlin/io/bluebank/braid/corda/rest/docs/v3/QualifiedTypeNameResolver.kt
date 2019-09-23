@@ -15,7 +15,9 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import com.fasterxml.jackson.databind.JavaType
 import io.swagger.v3.core.jackson.TypeNameResolver
+import io.swagger.v3.core.util.PrimitiveType
 import io.swagger.v3.oas.annotations.media.Schema
 
 /**
@@ -27,7 +29,19 @@ class QualifiedTypeNameResolver : TypeNameResolver() {
     return cls.swaggerTypeName(options)
   }
 
-
+  override fun nameForGenericType(type: JavaType, options: MutableSet<Options>?): String {
+    val generic = StringBuilder(nameForClass(type, options))
+    val count = type.containedTypeCount()
+    for (i in 0 until count) {
+      val arg = type.containedType(i)
+      val argName = if (PrimitiveType.fromType(arg) != null)
+        nameForClass(arg, options)
+      else
+        nameForType(arg, options)
+      generic.append("_${argName.replace('.', '_')}")
+    }
+    return generic.toString()
+  }
 }
 
 fun Class<*>.swaggerTypeName(options: Set<TypeNameResolver.Options> = emptySet()): String {

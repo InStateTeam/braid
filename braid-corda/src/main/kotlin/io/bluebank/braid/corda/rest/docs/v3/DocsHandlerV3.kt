@@ -39,7 +39,6 @@ import kotlin.reflect.KCallable
 
 class DocsHandlerV3(
   private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
-
   private val auth: SecurityScheme? = null,
   private val basePath: String = "http://localhost:8080",
   private val debugMode: Boolean = false
