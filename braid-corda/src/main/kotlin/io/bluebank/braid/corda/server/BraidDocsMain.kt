@@ -72,7 +72,12 @@ class BraidDocsMain() {
             "net.corda.finance.internal",
             "net.corda.common.validation.internal",
             "net.corda.client.rpc.internal",
-            "net.corda.core.cordapp"
+          "net.corda.core.cordapp",
+          "net.corda.core.messaging",
+          "net.corda.node.services.statemachine"
+        )
+      .blacklistClasses(
+        "net.corda.core.utilities.ProgressTracker"
         )
         .blacklistClasses(ProgressTracker::class.java.name)
         .blacklistClasses(Observable::class.java.name)
