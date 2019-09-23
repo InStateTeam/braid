@@ -541,12 +541,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
@@ -554,6 +548,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -1910,10 +1910,10 @@
       "net.corda.core.concurrent.CordaFutureObject" : {
         "type" : "object",
         "properties" : {
-          "done" : {
+          "cancelled" : {
             "type" : "boolean"
           },
-          "cancelled" : {
+          "done" : {
             "type" : "boolean"
           }
         }

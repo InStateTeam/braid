@@ -24,7 +24,9 @@ import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.contextLogger
+import rx.Observable
 import java.util.concurrent.CountDownLatch
 
 class BraidDocsMain() {
@@ -72,6 +74,8 @@ class BraidDocsMain() {
             "net.corda.client.rpc.internal",
             "net.corda.core.cordapp"
         )
+        .blacklistClasses(ProgressTracker::class.java.name)
+        .blacklistClasses(Observable::class.java.name)
         .scan()
 
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches

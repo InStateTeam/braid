@@ -16,29 +16,48 @@
 package io.bluebank.braid.server
 
 import io.vertx.core.json.JsonObject
+import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Test
+import java.util.stream.Collectors.toSet
 
 class BraidDocsMainKtTest {
+  private lateinit var json: JsonObject
+  private lateinit var swagger: String
+
+  @Before
+  fun setUp() {
+    val jars = listOf(
+        "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
+        "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
+    )
+    swagger = generateSwaggerText(3, jars)
+     json = JsonObject(swagger)
+
+  }
+
   @Test
   fun `that we can generate a swagger definition V2`() {
-    val jars = listOf(
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
-    )
-    val swagger = generateSwaggerText(2, jars)
-    val json = JsonObject(swagger)
-    assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
+     assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
   }
 
   @Test
   fun `that we can generate a swagger definition for V3`() {
-    val jars = listOf(
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
-      "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
-    )
-    val swagger = generateSwaggerText(3, jars)
-    val json = JsonObject(swagger)
-    assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
+     assertNotNull(json.getJsonObject("paths")?.getJsonObject("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow"))
   }
+
+ @Test
+  fun `should not have ProgressTracker`() {
+   val schemaNames = json.getJsonObject("components").getJsonObject("schemas").map.keys
+       .stream()
+       .filter { it.contains("ProgressTracker") }
+       .collect(toSet())
+   
+   assertThat(schemaNames.toString(), schemaNames.size , equalTo(0));
+  }
+
+
 }
