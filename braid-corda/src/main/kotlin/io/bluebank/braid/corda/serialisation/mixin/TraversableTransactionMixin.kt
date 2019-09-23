@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.mixin
 
 abstract class TraversableTransactionMixin public constructor() {
   @com.fasterxml.jackson.annotation.JsonIgnore public abstract fun getAvailableComponentGroups(): kotlin.collections.List<kotlin.Any>

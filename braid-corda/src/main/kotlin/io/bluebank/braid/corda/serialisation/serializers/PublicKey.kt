@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
@@ -21,25 +21,25 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import net.corda.core.identity.CordaX500Name
+import net.corda.core.utilities.parsePublicKeyBase58
+import net.corda.core.utilities.toBase58String
+import java.security.PublicKey
 
-class CordaX500NameSerializer : StdSerializer<CordaX500Name>(CordaX500Name::class.java) {
+class PublicKeySerializer : StdSerializer<PublicKey>(PublicKey::class.java) {
   override fun serialize(
-    value: CordaX500Name,
+    key: PublicKey,
     generator: JsonGenerator,
     provider: SerializerProvider
   ) {
-    generator.writeString(value.toString())
+    generator.writeString(key.toBase58String())
   }
 }
 
-class CordaX500NameDeserializer :
-  StdDeserializer<CordaX500Name>(CordaX500Name::class.java) {
-
+class PublicKeyDeserializer : StdDeserializer<PublicKey>(PublicKey::class.java) {
   override fun deserialize(
     parser: JsonParser,
     context: DeserializationContext
-  ): CordaX500Name {
-    return CordaX500Name.parse(parser.text)
+  ): PublicKey {
+    return parsePublicKeyBase58(parser.text)
   }
 }

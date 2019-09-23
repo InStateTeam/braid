@@ -18,11 +18,9 @@ package io.bluebank.braid.corda.rest.docs.v3
 //import io.swagger.v3.oas.models.OpenAPI
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.natpryce.hamkrest.equalTo
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.PathItem
 import io.vertx.core.http.HttpMethod
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat

@@ -17,7 +17,7 @@ package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.corda.server.flow.FlowService
 import io.bluebank.braid.corda.server.flow.StartableByRPCFinder.Companion.rpcClasses

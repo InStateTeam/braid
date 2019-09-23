@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.vertx.core.json.Json
 import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.*

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation
+package io.bluebank.braid.corda.serialisation.serializers
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
@@ -21,29 +21,25 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import java.io.ByteArrayInputStream
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
+import net.corda.core.identity.CordaX500Name
 
-class X509Serializer : StdSerializer<X509Certificate>(X509Certificate::class.java) {
+class CordaX500NameSerializer : StdSerializer<CordaX500Name>(CordaX500Name::class.java) {
   override fun serialize(
-      value: X509Certificate,
-      generator: JsonGenerator,
-      provider: SerializerProvider
+    value: CordaX500Name,
+    generator: JsonGenerator,
+    provider: SerializerProvider
   ) {
-    generator.writeBinary(value.encoded)
+    generator.writeString(value.toString())
   }
 }
 
-class X509Deserializer :
-    StdDeserializer<X509Certificate>(X509Certificate::class.java) {
+class CordaX500NameDeserializer :
+  StdDeserializer<CordaX500Name>(CordaX500Name::class.java) {
 
   override fun deserialize(
-      parser: JsonParser,
-      context: DeserializationContext
-  ): X509Certificate {
-
-    val cf = CertificateFactory.getInstance("X.509")
-    return cf.generateCertificate(ByteArrayInputStream(parser.binaryValue)) as X509Certificate
+    parser: JsonParser,
+    context: DeserializationContext
+  ): CordaX500Name {
+    return CordaX500Name.parse(parser.text)
   }
 }
