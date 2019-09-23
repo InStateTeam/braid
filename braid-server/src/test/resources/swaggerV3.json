@@ -541,6 +541,12 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
@@ -548,12 +554,6 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionStateNet.corda.core.contracts.ContractState"
-            }
-          },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -982,103 +982,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "cause" : {
-            "type" : "object",
-            "properties" : {
-              "stackTrace" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "methodName" : {
-                      "type" : "string"
-                    },
-                    "fileName" : {
-                      "type" : "string"
-                    },
-                    "lineNumber" : {
-                      "type" : "integer",
-                      "format" : "int32"
-                    },
-                    "className" : {
-                      "type" : "string"
-                    },
-                    "nativeMethod" : {
-                      "type" : "boolean"
-                    }
-                  }
-                }
-              },
-              "message" : {
-                "type" : "string"
-              },
-              "localizedMessage" : {
-                "type" : "string"
-              },
-              "suppressed" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "stackTrace" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "object",
-                        "properties" : {
-                          "methodName" : {
-                            "type" : "string"
-                          },
-                          "fileName" : {
-                            "type" : "string"
-                          },
-                          "lineNumber" : {
-                            "type" : "integer",
-                            "format" : "int32"
-                          },
-                          "className" : {
-                            "type" : "string"
-                          },
-                          "nativeMethod" : {
-                            "type" : "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "message" : {
-                      "type" : "string"
-                    },
-                    "localizedMessage" : {
-                      "type" : "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "stackTrace" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "properties" : {
-                "methodName" : {
-                  "type" : "string"
-                },
-                "fileName" : {
-                  "type" : "string"
-                },
-                "lineNumber" : {
-                  "type" : "integer",
-                  "format" : "int32"
-                },
-                "className" : {
-                  "type" : "string"
-                },
-                "nativeMethod" : {
-                  "type" : "boolean"
-                }
-              }
-            }
-          },
           "originalExceptionClassName" : {
             "type" : "string"
           },
@@ -1098,44 +1001,6 @@
           },
           "localizedMessage" : {
             "type" : "string"
-          },
-          "suppressed" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "properties" : {
-                "stackTrace" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "object",
-                    "properties" : {
-                      "methodName" : {
-                        "type" : "string"
-                      },
-                      "fileName" : {
-                        "type" : "string"
-                      },
-                      "lineNumber" : {
-                        "type" : "integer",
-                        "format" : "int32"
-                      },
-                      "className" : {
-                        "type" : "string"
-                      },
-                      "nativeMethod" : {
-                        "type" : "boolean"
-                      }
-                    }
-                  }
-                },
-                "message" : {
-                  "type" : "string"
-                },
-                "localizedMessage" : {
-                  "type" : "string"
-                }
-              }
-            }
           }
         }
       },
@@ -1159,103 +1024,6 @@
           "packageName" : {
             "type" : "string"
           },
-          "cause" : {
-            "type" : "object",
-            "properties" : {
-              "stackTrace" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "methodName" : {
-                      "type" : "string"
-                    },
-                    "fileName" : {
-                      "type" : "string"
-                    },
-                    "lineNumber" : {
-                      "type" : "integer",
-                      "format" : "int32"
-                    },
-                    "className" : {
-                      "type" : "string"
-                    },
-                    "nativeMethod" : {
-                      "type" : "boolean"
-                    }
-                  }
-                }
-              },
-              "message" : {
-                "type" : "string"
-              },
-              "localizedMessage" : {
-                "type" : "string"
-              },
-              "suppressed" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "stackTrace" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "object",
-                        "properties" : {
-                          "methodName" : {
-                            "type" : "string"
-                          },
-                          "fileName" : {
-                            "type" : "string"
-                          },
-                          "lineNumber" : {
-                            "type" : "integer",
-                            "format" : "int32"
-                          },
-                          "className" : {
-                            "type" : "string"
-                          },
-                          "nativeMethod" : {
-                            "type" : "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "message" : {
-                      "type" : "string"
-                    },
-                    "localizedMessage" : {
-                      "type" : "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "stackTrace" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "properties" : {
-                "methodName" : {
-                  "type" : "string"
-                },
-                "fileName" : {
-                  "type" : "string"
-                },
-                "lineNumber" : {
-                  "type" : "integer",
-                  "format" : "int32"
-                },
-                "className" : {
-                  "type" : "string"
-                },
-                "nativeMethod" : {
-                  "type" : "boolean"
-                }
-              }
-            }
-          },
           "originalExceptionClassName" : {
             "type" : "string"
           },
@@ -1275,44 +1043,6 @@
           },
           "localizedMessage" : {
             "type" : "string"
-          },
-          "suppressed" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object",
-              "properties" : {
-                "stackTrace" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "object",
-                    "properties" : {
-                      "methodName" : {
-                        "type" : "string"
-                      },
-                      "fileName" : {
-                        "type" : "string"
-                      },
-                      "lineNumber" : {
-                        "type" : "integer",
-                        "format" : "int32"
-                      },
-                      "className" : {
-                        "type" : "string"
-                      },
-                      "nativeMethod" : {
-                        "type" : "boolean"
-                      }
-                    }
-                  }
-                },
-                "message" : {
-                  "type" : "string"
-                },
-                "localizedMessage" : {
-                  "type" : "string"
-                }
-              }
-            }
           }
         }
       },
@@ -1899,11 +1629,11 @@
       "net.corda.core.contracts.TimeWindow" : {
         "type" : "object",
         "properties" : {
-          "untilTime" : {
+          "fromTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "fromTime" : {
+          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
@@ -2451,11 +2181,11 @@
         "required" : [ "failure", "orThrow", "success" ],
         "type" : "object",
         "properties" : {
-          "success" : {
-            "type" : "boolean"
-          },
           "orThrow" : {
             "type" : "object"
+          },
+          "success" : {
+            "type" : "boolean"
           },
           "failure" : {
             "type" : "boolean"
@@ -2467,190 +2197,14 @@
         "type" : "object",
         "properties" : {
           "certPath" : {
-            "type" : "object",
-            "properties" : {
-              "type" : {
-                "type" : "string"
-              },
-              "certificates" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "object",
-                  "properties" : {
-                    "type" : {
-                      "type" : "string"
-                    },
-                    "encoded" : {
-                      "type" : "array",
-                      "items" : {
-                        "type" : "string",
-                        "format" : "byte"
-                      }
-                    },
-                    "publicKey" : {
-                      "type" : "string",
-                      "description" : "Base 58 Encoded Public Key",
-                      "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-                    }
-                  }
-                }
-              },
-              "encoded" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "encodings" : {
-                "type" : "object"
-              }
-            }
+            "type" : "string",
+            "description" : "X509 encoded certificate PKI path",
+            "format" : "byte"
           },
           "certificate" : {
-            "type" : "object",
-            "properties" : {
-              "type" : {
-                "type" : "string"
-              },
-              "issuerX500Principal" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  },
-                  "encoded" : {
-                    "type" : "array",
-                    "items" : {
-                      "type" : "string",
-                      "format" : "byte"
-                    }
-                  }
-                }
-              },
-              "signature" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "basicConstraints" : {
-                "type" : "integer",
-                "format" : "int32"
-              },
-              "serialNumber" : {
-                "type" : "integer"
-              },
-              "tbscertificate" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "extendedKeyUsage" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "notBefore" : {
-                "type" : "string",
-                "format" : "date-time"
-              },
-              "notAfter" : {
-                "type" : "string",
-                "format" : "date-time"
-              },
-              "sigAlgName" : {
-                "type" : "string"
-              },
-              "sigAlgOID" : {
-                "type" : "string"
-              },
-              "sigAlgParams" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "issuerUniqueID" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "boolean"
-                }
-              },
-              "subjectUniqueID" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "boolean"
-                }
-              },
-              "keyUsage" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "boolean"
-                }
-              },
-              "subjectAlternativeNames" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "object"
-                  }
-                }
-              },
-              "issuerAlternativeNames" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "object"
-                  }
-                }
-              },
-              "subjectDN" : {
-                "type" : "object",
-                "properties" : {
-                  "name" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "version" : {
-                "type" : "integer",
-                "format" : "int32"
-              },
-              "criticalExtensionOIDs" : {
-                "uniqueItems" : true,
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "nonCriticalExtensionOIDs" : {
-                "uniqueItems" : true,
-                "type" : "array",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "encoded" : {
-                "type" : "array",
-                "items" : {
-                  "type" : "string",
-                  "format" : "byte"
-                }
-              },
-              "publicKey" : {
-                "type" : "string",
-                "description" : "Base 58 Encoded Public Key",
-                "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-              }
-            }
+            "type" : "string",
+            "description" : "X509 encoded certificate",
+            "format" : "byte"
           },
           "party" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"

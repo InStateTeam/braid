@@ -18,4 +18,7 @@ package io.bluebank.braid.corda.serialisation
 abstract class CordaThrowableMixin{
   @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
 
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getStackTrace(): Array<StackTraceElement>
+
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getSuppressed(): List<Throwable>?
 }
