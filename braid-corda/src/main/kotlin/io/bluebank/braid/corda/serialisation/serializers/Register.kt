@@ -48,12 +48,13 @@ import java.util.Arrays.asList
  * If you add to this file, please also add to CustomModelConverter forcorrect swagger generation
  */
 object BraidCordaJacksonInit {
+
   init {
     BraidJacksonInit.init()
     // we reuse the jackson support from corda, replacing those that are not flexible enough for
     // dynamic languages
     @Suppress("DEPRECATION") val sm = SimpleModule("io.swagger.util.DeserializationModule")
-            .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
+      .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
 
 // we won't use the party serliazers due to the way they require a specialised ObjectMapper!
 //          .addSerializer(AnonymousParty::class.java, JacksonSupport.AnonymousPartySerializer)
@@ -61,66 +62,66 @@ object BraidCordaJacksonInit {
 //          .addSerializer(Party::class.java, JacksonSupport.PartySerializer)
 //          .addDeserializer(Party::class.java, JacksonSupport.PartyDeserializer)
 //          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
-            .addSerializer(SecureHash::class.java, SecureHashSerializer)
-            .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
-            .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
-            .addDeserializer(SecureHash.SHA256::class.java, SecureHashDeserializer())
+      .addSerializer(SecureHash::class.java, SecureHashSerializer)
+      .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
+      .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
+      .addDeserializer(SecureHash.SHA256::class.java, SecureHashDeserializer())
 
-            // For ed25519 pubkeys
-            // TODO: Fix these
+      // For ed25519 pubkeys
+      // TODO: Fix these
 //          .addSerializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeySerializer)
 //          .addDeserializer(EdDSAPublicKey::class.java, JacksonSupport.PublicKeyDeserializer)
 
-            // For NodeInfo
-            // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.
-            .addSerializer(NodeInfo::class.java, JacksonSupport.NodeInfoSerializer)
-            .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
+      // For NodeInfo
+      // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.
+      .addSerializer(NodeInfo::class.java, JacksonSupport.NodeInfoSerializer)
+      .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
 
-            // For OpaqueBytes
-            .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
-            .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
+      // For OpaqueBytes
+      .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
+      .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
 
-            // For X.500 distinguished names
-            .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
-            .addSerializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameSerializer)
+      // For X.500 distinguished names
+      .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
+      .addSerializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameSerializer)
 
-            // Mixins for transaction types to prevent some properties from being serialized
-            .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
-            // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
-            .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
-            .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
-            .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
-            .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
+      // Mixins for transaction types to prevent some properties from being serialized
+      .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
+      // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
+      .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
+      .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
+      .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
+      .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
       .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
-            .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
+      .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
 
 //            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
 //            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)
 //            .setMixInAnnotation(CertPath::class.java, JacksonSupport.CertPathMixin::class.java)
 //
-            .addSerializer(X509Certificate::class.java, X509Serializer())
-            .addDeserializer(X509Certificate::class.java, X509Deserializer())
-            .addSerializer(CertPath::class.java, CertPathSerializer())
-            .addDeserializer(CertPath::class.java, CertPathDeserializer())
-
-            .addSerializer(PublicKey::class.java, PublicKeySerializer())
-            .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
-            // For Amount
-            // we do not use the Corda amount serialisers
-            .addSerializer(Amount::class.java, AmountSerializer())
-            .addDeserializer(Amount::class.java, AmountDeserializer())
-            //     .addSerializer(Currency::class.java, CurrencySerializer())          likely to cause issues distinuishing strings from currency in Amount and Issuer class
-            //     .addDeserializer(Currency::class.java, CurrencyDeserializer())
-            .addSerializer(Issued::class.java, IssuedSerializer())
-            .addDeserializer(Issued::class.java, IssuedDeserializer())
+      .addSerializer(X509Certificate::class.java, X509Serializer())
+      .addDeserializer(X509Certificate::class.java, X509Deserializer())
+      .addSerializer(CertPath::class.java, CertPathSerializer())
+      .addDeserializer(CertPath::class.java, CertPathDeserializer())
+      .addDeserializer(NonEmptySet::class.java, NonEmptySetDeserializer())
+      .addSerializer(PublicKey::class.java, PublicKeySerializer())
+      .addDeserializer(PublicKey::class.java, PublicKeyDeserializer())
+      // For Amount
+      // we do not use the Corda amount serialisers
+      .addSerializer(Amount::class.java, AmountSerializer())
+      .addDeserializer(Amount::class.java, AmountDeserializer())
+      //     .addSerializer(Currency::class.java, CurrencySerializer())          likely to cause issues distinuishing strings from currency in Amount and Issuer class
+      //     .addDeserializer(Currency::class.java, CurrencyDeserializer())
+      .addSerializer(Issued::class.java, IssuedSerializer())
+      .addDeserializer(Issued::class.java, IssuedDeserializer())
 
     asList(Json.mapper, Json.prettyMapper)
-            .forEach {
-              it.registerModule(sm)
-              .registerModule(ParameterNamesModule())
-              .registerModule(Jdk8Module())
-              .registerModule(JavaTimeModule())
-    };
+      .forEach {
+        it.registerModule(sm)
+          .registerModule(ParameterNamesModule())
+          .registerModule(Jdk8Module())
+          .registerModule(JavaTimeModule())
+      };
   }
 
   fun init() {

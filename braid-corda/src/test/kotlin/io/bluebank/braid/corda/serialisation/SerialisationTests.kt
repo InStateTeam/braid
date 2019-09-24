@@ -15,11 +15,12 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.server.Braid
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
+import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
@@ -36,7 +37,9 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.reflect.jvm.javaType
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SerialisationTests {
   companion object {
@@ -49,7 +52,7 @@ class SerialisationTests {
 
   @Before
   fun before() {
-    BraidCordaJacksonInit.init()
+    Braid.init()
   }
 
 //  @Ignore
@@ -104,8 +107,21 @@ class SerialisationTests {
     assertThat(encoded, startsWith("\"MIIIRzCCBi"))
   }
 
+  @Test
+  fun `given a non empty set we can deserialise it`() {
+    val json = """
+      [
+        "item1", 
+        "item2"
+      ]
+    """.trimIndent()
+    val type = ::f.parameters.first().type.javaType
+    val javaType = Json.mapper.typeFactory.constructType(type)
+    val result = Json.mapper.readValue<NonEmptySet<String>>(json, javaType)
+    assertTrue(result is NonEmptySet)
+    assertEquals(2, result.size)
+    assertTrue(result.contains("item1") && result.contains("item2"))
+  }
 
-
-
-
+  private fun f(set: NonEmptySet<String>) {}
 }
