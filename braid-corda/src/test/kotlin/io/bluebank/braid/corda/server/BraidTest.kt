@@ -16,7 +16,6 @@
 package io.bluebank.braid.corda.server
 
 import com.fasterxml.jackson.core.type.TypeReference
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
@@ -69,7 +68,7 @@ class BraidTest {
     @BeforeClass
     @JvmStatic
     fun setUp(testContext: TestContext) {
-      BraidCordaJacksonInit.init()
+      Braid.init()
       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
