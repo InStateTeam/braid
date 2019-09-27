@@ -56,10 +56,10 @@ import java.util.Arrays.asList
  */
 @Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
-class BraidTest {
+class BraidCordaStandaloneServerTest {
 
   companion object {
-    private val log = loggerFor<BraidTest>()
+    private val log = loggerFor<BraidCordaStandaloneServerTest>()
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
     private val bankA = CordaX500Name("BankA", "", "GB")
@@ -73,7 +73,7 @@ class BraidTest {
     @BeforeClass
     @JvmStatic
     fun setUp(testContext: TestContext) {
-      Braid.init()
+      BraidCordaStandaloneServer.init()
       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
@@ -123,7 +123,7 @@ class BraidTest {
       async: Async,
       networkHostAndPort: NetworkHostAndPort
     ): Future<String>? {
-      return Braid(
+      return BraidCordaStandaloneServer(
         userName = "user1",
         password = "test",
         port = port,

@@ -29,16 +29,15 @@ import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
 
-data class Braid(
+class BraidCordaStandaloneServer(
   val port: Int = 8080,
   val userName: String = "",
   val password: String = "",
   val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
   val openApiVersion: Int = 2
 ) {
-
   companion object {
-    private val log = loggerFor<Braid>()
+    private val log = loggerFor<BraidCordaStandaloneServer>()
 
     init {
       BraidCordaJacksonInit.init()

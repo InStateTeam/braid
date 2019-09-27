@@ -64,7 +64,7 @@ class CordappScanner(private val classLoader: ClassLoader) {
   }
 
   fun flowsForCordapp(cordapp: String): List<String>? {
-    return flowsByCordapp[cordapp]?.map { it.name } ?: error("cannot find cordapp $cordapp")
+    return flowsByCordapp[cordapp]?.map { it.name } ?: emptyList()
   }
 
   fun cordappAndFlowList(): List<Pair<String, KClass<out Any>>> {

@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
@@ -52,7 +52,7 @@ class SerialisationTests {
 
   @Before
   fun before() {
-    Braid.init()
+    BraidCordaStandaloneServer.init()
   }
 
 //  @Ignore

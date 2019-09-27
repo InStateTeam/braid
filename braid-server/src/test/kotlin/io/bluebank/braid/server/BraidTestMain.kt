@@ -15,11 +15,11 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.logging.loggerFor
 
-private val log = loggerFor<Braid>()
+private val log = loggerFor<BraidCordaStandaloneServer>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
