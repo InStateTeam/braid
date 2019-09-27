@@ -18,7 +18,7 @@ package io.bluebank.braid.corda
 import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
 import io.bluebank.braid.corda.services.SimpleNetworkMapService
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
-import io.bluebank.braid.core.http.write
+import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
@@ -40,6 +40,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import net.corda.core.node.AppServiceHub
+import javax.ws.rs.core.Response
 
 class CordaSockJSHandler private constructor(
   private val vertx: Vertx,
@@ -72,15 +73,15 @@ class CordaSockJSHandler private constructor(
       registerCustomService(config, protocol, router, sockJSHandler)
       router.get(config.rootPath).handler {
         val services = REGISTERED_HANDLERS.keys + config.services.keys
-        it.write(ServiceDescriptor.createServiceDescriptors(config.rootPath, services))
+        it.end(ServiceDescriptor.createServiceDescriptors(config.rootPath, services))
       }
       router.get("${config.rootPath}:serviceName").handler {
         val serviceName = it.pathParam("serviceName")
         val serviceDoc = handler.getDocumentation()[serviceName]
         if (serviceDoc != null) {
-          it.write(serviceDoc)
+          it.end(serviceDoc)
         } else {
-          it.write(RuntimeException("could not find service $serviceName"))
+          it.end(RuntimeException("could not find service $serviceName"), Response.Status.BAD_REQUEST.statusCode)
         }
       }
     }

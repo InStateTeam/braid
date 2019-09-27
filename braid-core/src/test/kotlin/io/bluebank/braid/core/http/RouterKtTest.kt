@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.core.async
+package io.bluebank.braid.core.http
 
-import io.bluebank.braid.core.http.body
-import io.bluebank.braid.core.http.getFuture
+import io.bluebank.braid.core.async.assertFails
+import io.bluebank.braid.core.async.catch
+import io.bluebank.braid.core.async.onSuccess
+import io.bluebank.braid.core.async.withFuture
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.socket.findFreePort
@@ -34,10 +36,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.nio.Buffer
 
 @RunWith(VertxUnitRunner::class)
-class WebKtTest {
+class RouterKtTest {
 
   companion object {
     init {
@@ -86,8 +87,8 @@ class WebKtTest {
     client.getFuture("/string")
       .compose { it.body<String>() }
       .onSuccess { context.assertEquals("string", it, "that string response is correct") }
-
-      .compose { client.get("/object").getBodyBuffer() }.mapToObject<Person>()
+      .compose { client.getFuture("/object") }
+      .compose { it.body<Person>() }
       .onSuccess {
         context.assertEquals(
           Person("fred"),
@@ -96,9 +97,7 @@ class WebKtTest {
         )
       }
       .compose { client.getFuture("/jsonobject") }
-      .compose { it.body<Buffer>() }
-      .compose { client.getFuture("/jsonobject") }
-      .map { it.body<JsonObject>() }
+      .compose { it.body<JsonObject>() }
       .onSuccess {
         context.assertEquals(
           jsonObjectOf("name" to "value"),
@@ -108,7 +107,7 @@ class WebKtTest {
       }
 
       .compose { client.getFuture("/jsonarray") }
-      .map { it.body<JsonArray>() }
+      .compose { it.body<JsonArray>() }
       .onSuccess {
         context.assertEquals(
           jsonArrayOf(1, 2, 3),
@@ -123,8 +122,7 @@ class WebKtTest {
         }
       }
       .compose { withFuture<Void> { future -> httpServer.close(future) } }
-      .compose { client.getFuture("/string") }
-      .compose { it.body<String>().assertFails() }
+      .compose { client.getFuture("/string").assertFails() }
       .onSuccess { async.complete() }
       .catch { context.fail(it) }
   }

@@ -17,9 +17,12 @@ package io.bluebank.braid.core.http
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
+import io.netty.handler.codec.http.HttpHeaderValues
 import io.netty.handler.codec.http.HttpHeaderValues.*
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.http.HttpClientResponse
+import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpHeaders.*
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
@@ -29,7 +32,6 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.InvocationTargetException
 import java.nio.ByteBuffer
-import javax.ws.rs.core.Response
 
 fun Router.setupAllowAnyCORS() {
   route().handler {
@@ -60,14 +62,6 @@ fun Router.setupOptionsMethod() {
   }
 }
 
-fun RoutingContext.withErrorHandler(callback: RoutingContext.() -> Unit) {
-  try {
-    this.callback()
-  } catch (err: Throwable) {
-    this.response().end(err, Response.Status.INTERNAL_SERVER_ERROR.statusCode)
-  }
-}
-
 var log = loggerFor<Router>()
 
 fun HttpServerResponse.end(error: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
@@ -95,6 +89,7 @@ fun <T> HttpServerResponse.end(future: Future<T>) {
 
 fun <T> HttpServerResponse.end(value: T) {
   when (value) {
+    is Throwable -> this.end(value)
     is Future<*> -> this.end(value)
     is String -> this.endWithString(value)
     is Buffer -> this.endWithBuffer(value)
@@ -137,6 +132,11 @@ fun HttpServerResponse.endWithByteBuf(value: ByteBuf) {
   endWithBuffer(Buffer.buffer(value))
 }
 
+val HttpClientResponse.failed: Boolean
+  get() {
+    return (statusCode() / 100) != 2
+  }
+
 fun HttpServerResponse.end(value: JsonArray) {
   val payload = value.encode()
   this
@@ -151,5 +151,22 @@ fun HttpServerResponse.end(value: JsonObject) {
     .putHeader(CONTENT_LENGTH, payload.length.toString())
     .putHeader(CONTENT_TYPE, "application/json")
     .end(payload)
+}
+
+fun RoutingContext.end(text: String) {
+  val length = text.length
+  response().apply {
+    putHeader(HttpHeaders.CONTENT_LENGTH, length.toString())
+    putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.TEXT_PLAIN)
+    end(text)
+  }
+}
+
+fun <T : Any> RoutingContext.end(obj: T) {
+  response().end(obj)
+}
+
+fun RoutingContext.end(err: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
+  response().end(err, statusCode, statusMessage)
 }
 
