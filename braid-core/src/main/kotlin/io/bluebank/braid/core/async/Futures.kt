@@ -40,7 +40,7 @@ fun <T> Future<T>.getOrThrow(): T {
 }
 
 fun <T> Future<T>.onSuccess(fn: (T) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       if (it.succeeded()) {
@@ -55,7 +55,7 @@ fun <T> Future<T>.onSuccess(fn: (T) -> Unit): Future<T> {
 }
 
 fun <T> Future<T>.catch(fn: (Throwable) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       if (it.failed()) {
@@ -70,7 +70,7 @@ fun <T> Future<T>.catch(fn: (Throwable) -> Unit): Future<T> {
 }
 
 fun <T> Future<T>.finally(fn: (AsyncResult<T>) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       fn(it)
