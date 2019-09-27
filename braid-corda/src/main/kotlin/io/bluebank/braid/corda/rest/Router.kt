@@ -18,12 +18,10 @@ package io.bluebank.braid.corda.rest
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
-import io.bluebank.braid.core.http.withErrorHandler
 import io.bluebank.braid.core.jsonrpc.Converter
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiParam
 import io.vertx.codegen.annotations.Nullable
-import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
 import io.vertx.ext.web.Route
@@ -33,29 +31,26 @@ import java.nio.ByteBuffer
 import javax.ws.rs.*
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.HttpHeaders
+import javax.ws.rs.core.Response
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
+val HTTP_UNPROCESSABLE_STATUS_CODE = 422
+
 fun <R> Route.bind(fn: KCallable<R>) {
   fn.validateParameters()
   this.handler { rc ->
-    rc.withErrorHandler {
+    try {
       val args = fn.parseArguments(rc)
-      val result = fn.call(*args)
-      rc.response().end(result)
-    }
-  }
-}
-
-@JvmName("bindOnFuture")
-fun <R> Route.bind(fn: KCallable<Future<R>>) {
-  fn.validateParameters()
-  this.handler { rc ->
-    rc.withErrorHandler {
-      val args = fn.parseArguments(rc)
-      rc.response().end(fn.call(*args))
+      try {
+        rc.response().end(fn.call(*args))
+      } catch (e: Throwable) {
+        rc.response().end(e, HTTP_UNPROCESSABLE_STATUS_CODE)
+      }
+    } catch (e: Throwable) {
+      rc.response().end(e, Response.Status.BAD_REQUEST.statusCode)
     }
   }
 }
@@ -68,9 +63,7 @@ private fun parseBodyParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  return context.body.let { body ->
-    parseComplexType(parameter, body)
-  }
+  return parseComplexType(parameter, context.body)
 }
 
 private fun parseComplexType(parameter: KParameter, body: @Nullable Buffer): ParseResult {

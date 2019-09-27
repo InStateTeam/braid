@@ -47,6 +47,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 import java.util.Arrays.asList
+import javax.ws.rs.core.Response
 
 /**
  * Run with Either
@@ -372,8 +373,8 @@ class BraidTest {
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
 
-    getNotary().map {
-      val notary = it
+    getNotary().map { jsonObject ->
+      val notary = jsonObject
 
       val json = JsonObject()
         .put("notary", notary)
@@ -389,12 +390,16 @@ class BraidTest {
         .putHeader("Accept", "application/json; charset=utf8")
         .putHeader("Content-length", "" + encodePrettily.length)
         .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(500, it.statusCode(), it.statusMessage())
+        .handler { clientResponse ->
+          context.assertEquals(
+            Response.Status.BAD_REQUEST.statusCode,
+            clientResponse.statusCode(),
+            clientResponse.statusMessage()
+          )
 
-          it.bodyHandler {
+          clientResponse.bodyHandler {
             val reply = it.toString()
-            log.info("reply:" + reply)
+            log.info("reply: $reply")
             context.assertThat(reply, containsString("issuerBaaaaaankPartyRef"))
 
             async.complete()

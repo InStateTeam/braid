@@ -29,6 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
@@ -285,7 +286,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       // N.B. no header set
       .exceptionHandler(context::fail)
       .handler { response ->
-        context.assertEquals(500, response.statusCode())
+        context.assertEquals(Response.Status.BAD_REQUEST.statusCode, response.statusCode())
         async16.complete()
       }
       .end()
@@ -298,7 +299,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
       .exceptionHandler(context::fail)
       .handler {
-        context.assertEquals(500, it.statusCode())
+        context.assertEquals(HTTP_UNPROCESSABLE_STATUS_CODE, it.statusCode())
         context.assertEquals("on purpose failure", it.statusMessage())
         context.assertEquals(MediaType.APPLICATION_JSON, it.getHeader(HttpHeaders.CONTENT_TYPE))
 

@@ -20,6 +20,8 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.impl.NoStackTraceThrowable
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -41,6 +43,8 @@ inline fun <reified T : Any> HttpClientResponse.body(): Future<T> {
               Double::class.java -> result.complete(buffer.toString().toDouble())
               BigDecimal::class.java -> result.complete(buffer.toString().toBigDecimal())
               BigInteger::class.java -> result.complete(buffer.toString().toBigInteger())
+              JsonObject::class.java -> result.complete(buffer.toJsonObject())
+              JsonArray::class.java -> result.complete(buffer.toJsonArray())
               else -> result.complete(Json.decodeValue(buffer, T::class.java))
             }
           } catch (e: Throwable) {

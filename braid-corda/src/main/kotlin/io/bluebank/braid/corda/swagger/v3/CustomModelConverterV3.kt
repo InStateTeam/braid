@@ -44,7 +44,6 @@ class CustomModelConverterV3 : ModelConverter {
     private val log = loggerFor<CustomModelConverterV3>()
   }
 
-
   override fun resolve(
     type: AnnotatedType,
     context: io.swagger.v3.core.converter.ModelConverterContext,

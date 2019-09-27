@@ -95,8 +95,15 @@ fun HttpClient.requestFuture(
           else -> putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
         }
       }
-      .exceptionHandler(result::fail)
-      .handler(result::complete)
+      .exceptionHandler {
+        // seems that vertx can occasionally fail a request twice
+        if (!result.isComplete) {
+          result.fail(it)
+        }
+      }
+      .handler {
+        result.complete(it)
+      }
       .apply {
         when {
           body == null -> end()
