@@ -42,82 +42,39 @@ class CustomModelConverterV3 : ModelConverter {
 
   companion object {
     private val log = loggerFor<CustomModelConverterV3>()
-    private val publicKeySchema = StringSchema()
-      .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
-      .description("Base 58 Encoded Public Key")
-    private val classSchema = StringSchema()
-      .example("java.lang.Object")
-      .description("Java class name")
-    private val secureHashSchema = StringSchema()
-      .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
-      .description("Base 58 Encoded Secure Hash")
-    private val cordaX500NameSchema = StringSchema()
-      .example("O=Bank A, L=London, C=GB")
-      .description("CordaX500Name encoded Party")
-    private val x509Schema = ByteArraySchema()
-      .description("X509 encoded certificate")
-    private val certPathSchema = ByteArraySchema()
-      .description("X509 encoded certificate PKI path")
-    private val opaqueBytesSchema = StringSchema()
-      .example("736F6D654279746573")
-      .description("Hex encoded Byte Array")
-    private val currencySchema = StringSchema()
-      .example("GBP")
-      .description("3 digit ISO 4217 code of the currency")
-    private val amountCurrencySchema = ObjectSchema()
-      .name("AmountCurrency")
-      .addProperties(
-        "quantity", IntegerSchema()
-          .example(100)
-          .description("total amount in minor units")
-      )
-      .addProperties("displayTokenSize", NumberSchema().example("0.01"))
-      .addProperties("token", StringSchema().example("GBP"))
-      .addRequiredItem("quantity")
-      .addRequiredItem("displayTokenSize")
-      .addRequiredItem("token")
-    private val generalAmountSchema = ObjectSchema()
-      .name("Amount")
-      .addProperties(
-        "quantity", IntegerSchema()
-          .example(100)
-          .description("total amount in minor units")
-      )
-      .addProperties("displayTokenSize", NumberSchema().example("0.01"))
-      .addProperties("token", StringSchema().example("GBP"))
-      .addRequiredItem("quantity")
-      .addRequiredItem("displayTokenSize")
-      .addRequiredItem("token")
-      .addProperties(
-        "_tokenType", StringSchema()
-          .example("net.corda.core.contracts.Issued")
-      )
   }
+
 
   override fun resolve(
     type: AnnotatedType,
     context: io.swagger.v3.core.converter.ModelConverterContext,
-    chain: MutableIterator<ModelConverter>
-  ): Schema<*> {
+    chain: MutableIterator<ModelConverter>?
+  ): Schema<*>? {
     val jsonType = Json.mapper().constructType(type.type)
-    return when (jsonType) {
-      null -> chain.next().resolve(type, context, chain)
-      else -> {
-        val clazz = jsonType.rawClass
-        when {
-          PublicKey::class.java.isAssignableFrom(clazz) -> publicKeySchema
-          Class::class.java.isAssignableFrom(clazz) -> classSchema
-          SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz) -> secureHashSchema
-          CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameSchema
-          X509Certificate::class.java.isAssignableFrom(clazz) -> x509Schema
-          CertPath::class.java.isAssignableFrom(clazz) -> certPathSchema
-          OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesSchema
-          Currency::class.java.isAssignableFrom(clazz) -> currencySchema
-          Amount::class.java.isAssignableFrom(clazz) -> geAmountSchema(jsonType)
-          Issued::class.java.isAssignableFrom(clazz) -> getIssuedSchema(context, jsonType)
-          else -> chain.next().resolve(type, context, chain)
+    return try {
+      when (jsonType) {
+        null -> chain?.next()?.resolve(type, context, chain)
+        else -> {
+          val clazz = jsonType.rawClass
+          when {
+            PublicKey::class.java.isAssignableFrom(clazz) -> publicKeySchema()
+            Class::class.java.isAssignableFrom(clazz) -> classSchema()
+            SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz) -> secureHashSchema()
+            CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameSchema()
+            X509Certificate::class.java.isAssignableFrom(clazz) -> x509Schema()
+            CertPath::class.java.isAssignableFrom(clazz) -> certPathSchema()
+            OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesSchema()
+            Currency::class.java.isAssignableFrom(clazz) -> currencySchema()
+            Amount::class.java.isAssignableFrom(clazz) -> geAmountSchema(jsonType)
+            Issued::class.java.isAssignableFrom(clazz) -> getIssuedSchema(context, jsonType)
+            Throwable::class.java.isAssignableFrom(clazz) -> errorSchema()
+            else -> chain?.next()?.resolve(type, context, chain)
+          }
         }
       }
+    } catch (e: Throwable) {
+      log.error("failed to parse or resolve type: $type")
+      throw e
     }
   }
 
@@ -125,8 +82,8 @@ class CustomModelConverterV3 : ModelConverter {
     // String and Currency get created as their own types
     val boundType = jsonType.bindings.getBoundType(0)
     return when {
-      boundType?.rawClass == Currency::class.java -> amountCurrencySchema
-      else -> generalAmountSchema
+      boundType?.rawClass == Currency::class.java -> amountCurrencySchema()
+      else -> generalAmountSchema()
     }
   }
 
@@ -153,5 +110,73 @@ class CustomModelConverterV3 : ModelConverter {
         .addRequiredItem("_productType")
     }
   }
+
+  private fun publicKeySchema() = StringSchema()
+    .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
+    .description("Base 58 Encoded Public Key")
+
+  private fun classSchema() = StringSchema()
+    .example("java.lang.Object")
+    .description("Java class name")
+
+  private fun secureHashSchema() = StringSchema()
+    .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
+    .description("Base 58 Encoded Secure Hash")
+
+  private fun cordaX500NameSchema() = StringSchema()
+    .example("O=Bank A, L=London, C=GB")
+    .description("CordaX500Name encoded Party")
+
+  private fun x509Schema() = ByteArraySchema()
+    .description("X509 encoded certificate")
+
+  private fun certPathSchema() = ByteArraySchema()
+    .description("X509 encoded certificate PKI path")
+
+  private fun opaqueBytesSchema() = StringSchema()
+    .example("736F6D654279746573")
+    .description("Hex encoded Byte Array")
+
+  private fun currencySchema() = StringSchema()
+    .example("GBP")
+    .description("3 digit ISO 4217 code of the currency")
+
+  private fun amountCurrencySchema() = ObjectSchema()
+    .name("AmountCurrency")
+    .addProperties(
+      "quantity", IntegerSchema()
+        .example(100)
+        .description("total amount in minor units")
+    )
+    .addProperties("displayTokenSize", NumberSchema().example("0.01"))
+    .addProperties("token", StringSchema().example("GBP"))
+    .addRequiredItem("quantity")
+    .addRequiredItem("displayTokenSize")
+    .addRequiredItem("token")
+
+  private fun generalAmountSchema() = ObjectSchema()
+    .name("Amount")
+    .addProperties(
+      "quantity", IntegerSchema()
+        .example(100)
+        .description("total amount in minor units")
+    )
+    .addProperties("displayTokenSize", NumberSchema().example("0.01"))
+    .addProperties("token", StringSchema().example("GBP"))
+    .addRequiredItem("quantity")
+    .addRequiredItem("displayTokenSize")
+    .addRequiredItem("token")
+    .addProperties(
+      "_tokenType", StringSchema()
+        .example("net.corda.core.contracts.Issued")
+    )
+
+  private fun errorSchema() = ObjectSchema()
+    .name("Error")
+    .description("a payload for error information when a method fails")
+    .addProperties("message", StringSchema().description("the description of the error"))
+//      .addProperties("cause", ObjectSchema().`$ref`("Error").nullable(true))
+    .addProperties("type", StringSchema().description("the class of error being returned"))
+
 
 }

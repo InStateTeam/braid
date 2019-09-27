@@ -15,22 +15,26 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.server.Braid
 import net.corda.core.contracts.TimeWindow
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
-import org.hamcrest.CoreMatchers.*
-import org.junit.Assert.*
-import org.junit.Before
+import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.CoreMatchers.nullValue
+import org.junit.Assert.assertThat
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 
-class ModelContextV3Test{
-  @Before
-  fun setUp() {
-    BraidCordaJacksonInit.init()    // adds KotlinModule for required field parameter
+class ModelContextV3Test {
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      Braid.init()
+    }
   }
 
   @Test
@@ -40,8 +44,8 @@ class ModelContextV3Test{
     modelContext.addType(TraversableTransaction::class.java)
 
     val wire = modelContext.models.get(TraversableTransaction::class.java.swaggerTypeName())
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
 
   }
 
@@ -52,8 +56,8 @@ class ModelContextV3Test{
     modelContext.addType(WireTransaction::class.java)
 
     val wire = modelContext.models.get(WireTransaction::class.java.swaggerTypeName())
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
 
   }
 
@@ -64,8 +68,8 @@ class ModelContextV3Test{
     modelContext.addType(TimeWindow::class.java)
 
     val window = modelContext.models.get(TimeWindow::class.java.name)
-    assertThat(window,notNullValue())
-    assertThat(window?.properties?.get("length"),nullValue())
+    assertThat(window, notNullValue())
+    assertThat(window?.properties?.get("length"), nullValue())
 
   }
 
@@ -74,9 +78,10 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TransactionVerificationException.InvalidAttachmentException::class.java)
 
-    val exceptn = modelContext.models.get(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName())
-    assertThat(exceptn,notNullValue())
-    assertThat(exceptn?.properties?.get("cause"),nullValue())
+    val exception =
+      modelContext.models[TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName()]
+    assertThat(exception, notNullValue())
+    assertThat(exception?.properties?.get("cause"), nullValue())
   }
 
   @Test
@@ -84,9 +89,9 @@ class ModelContextV3Test{
     val modelContext = ModelContextV3()
     modelContext.addType(TransactionVerificationException.PackageOwnershipException::class.java)
 
-    val exceptn = modelContext.models.get(TransactionVerificationException.PackageOwnershipException::class.java.swaggerTypeName())
-    assertThat(exceptn,notNullValue())
-    assertThat(exceptn?.properties?.get("cause"),nullValue())
+    val exception = modelContext.models["Error"]
+    assertThat(exception, notNullValue())
+    assertThat(exception?.properties?.get("cause"), nullValue())
   }
 
   @Test
@@ -96,7 +101,7 @@ class ModelContextV3Test{
     modelContext.addType(PartyAndCertificate::class.java)
 
     val exceptn = modelContext.models.get(PartyAndCertificate::class.java.swaggerTypeName())
-    assertThat(exceptn,notNullValue())
+    assertThat(exceptn, notNullValue())
 
   }
 }

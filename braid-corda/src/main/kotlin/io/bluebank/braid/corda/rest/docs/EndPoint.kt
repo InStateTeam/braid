@@ -50,7 +50,6 @@ abstract class EndPoint(
   val method: HttpMethod,
   val path: String
 ) {
-
   companion object {
     fun create(
       groupName: String,
@@ -144,7 +143,10 @@ abstract class EndPoint(
       operation.addSecurity(DocsHandlerV2.SECURITY_DEFINITION_NAME, listOf())
     }
     operation.addResponse("200", operation.responses["default"])
-    operation.addResponse("500", Response().description("server failure"))
+    operation.addResponse(
+      "500",
+      Response().description("server failure").responseSchema(Throwable::class.java.getSwaggerModelReference())
+    )
     return operation
   }
 

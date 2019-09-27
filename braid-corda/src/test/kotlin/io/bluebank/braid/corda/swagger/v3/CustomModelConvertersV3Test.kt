@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.server.Braid
 import io.bluebank.braid.corda.swagger.ClassWithTypes
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.jackson.ModelResolver
@@ -29,7 +29,7 @@ import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -37,16 +37,16 @@ import kotlin.test.assertEquals
 class CustomModelConvertersV3Test {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      Braid.init()
+    }
   }
 
   private val converter = ModelConverters().apply {
     addConverter(ModelResolver(Json.mapper))
     addConverter(CustomModelConverterV3())
-  }
-  
-  @Before
-  fun setUp() {
-    BraidCordaJacksonInit.init()
   }
 
   @Test
@@ -269,7 +269,5 @@ class CustomModelConvertersV3Test {
     val classType = properties?.get("clazz")
     assertThat(properties?.toString(), classType, notNullValue())
     assertThat(properties?.toString(), classType?.type, equalTo("string"))
-
   }
-
 }

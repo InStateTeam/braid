@@ -126,10 +126,9 @@ abstract class EndPointV3(
 
     operation.responses(
       ApiResponses()
-        .addApiResponse("200", response())
-        .addApiResponse("500", ApiResponse().description("server failure"))
+        .addApiResponse("200", response(returnType))
+        .addApiResponse("500", response(Throwable::class.java))
     )
-
     return operation
   }
 
@@ -153,15 +152,15 @@ abstract class EndPointV3(
 
   protected fun Type.getSwaggerProperty(): ResolvedSchema = modelContext.addType(this)
 
-  private fun response(): ApiResponse {
-    val actualReturnType = returnType.actualType()
+  private fun response(type: Type): ApiResponse {
+    val actualReturnType = type.actualType()
     if (actualReturnType == Unit::class.java ||
       actualReturnType == Void::class.java ||
       actualReturnType.typeName == "void"
     ) {
       return ApiResponse().description("empty response")
     } else {
-      val responseSchema = returnType.getSwaggerProperty()
+      val responseSchema = type.getSwaggerProperty()
       return ApiResponse()
         .description("")
         .content(

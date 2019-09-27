@@ -73,12 +73,13 @@ fun HttpServerResponse.end(error: Throwable) {
   val e = if (error is InvocationTargetException) error.targetException else error
   log.trace("returning error to client", e)
   val message = e.message ?: "Undefined error"
+  val payload = Json.encode(e)
   this
-    .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
-    .putHeader(CONTENT_LENGTH, message.length.toString())
+    .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+    .putHeader(CONTENT_LENGTH, payload.length.toString())
     .setStatusMessage(message.replace("\n","").replace("\r",""))
     .setStatusCode(500)
-    .end(message)
+    .end(payload)
 }
 
 fun <T> HttpServerResponse.end(future: Future<T>) {
