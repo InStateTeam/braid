@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
@@ -29,6 +29,7 @@ import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import sun.security.provider.X509Factory
@@ -44,6 +45,11 @@ import kotlin.test.assertTrue
 class SerialisationTests {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
 
   @Rule
@@ -52,7 +58,7 @@ class SerialisationTests {
 
   @Before
   fun before() {
-    BraidCordaStandaloneServer.init()
+    BraidCordaJacksonSwaggerInit.init()
   }
 
 //  @Ignore

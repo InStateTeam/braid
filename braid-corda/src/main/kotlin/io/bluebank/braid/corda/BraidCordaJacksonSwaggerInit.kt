@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.swagger
+package io.bluebank.braid.corda
 
-import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
-import io.swagger.converter.ModelConverters
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.swagger.CustomModelConverters
 
-/**
- * To be used when calling BraidCordaJacksonInit.init()
- */
-object CustomModelConverters {
-
+object BraidCordaJacksonSwaggerInit {
   init {
-    ModelConverters.getInstance().addConverter(CustomModelConverterV2())
-    io.swagger.v3.core.converter.ModelConverters.getInstance().addConverter(CustomModelConverterV3())
+    BraidCordaJacksonInit.init()
+    CustomModelConverters.init()
   }
 
   fun init() {

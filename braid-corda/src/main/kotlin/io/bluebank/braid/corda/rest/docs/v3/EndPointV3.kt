@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
@@ -36,6 +37,8 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response.Status.BAD_REQUEST
+import javax.ws.rs.core.Response.Status.OK
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
@@ -126,10 +129,16 @@ abstract class EndPointV3(
 
     operation.responses(
       ApiResponses()
-        .addApiResponse("200", response())
-        .addApiResponse("500", ApiResponse().description("server failure"))
+        .addApiResponse(OK.statusCode.toString(), response(returnType))
+        .addApiResponse(
+          BAD_REQUEST.statusCode.toString(),
+          response(Throwable::class.java).description("the server failed to parse the request")
+        )
+        .addApiResponse(
+          HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
+          response(Throwable::class.java).description("the request could not be processed")
+        )
     )
-
     return operation
   }
 
@@ -153,15 +162,15 @@ abstract class EndPointV3(
 
   protected fun Type.getSwaggerProperty(): ResolvedSchema = modelContext.addType(this)
 
-  private fun response(): ApiResponse {
-    val actualReturnType = returnType.actualType()
+  private fun response(type: Type): ApiResponse {
+    val actualReturnType = type.actualType()
     if (actualReturnType == Unit::class.java ||
       actualReturnType == Void::class.java ||
       actualReturnType.typeName == "void"
     ) {
       return ApiResponse().description("empty response")
     } else {
-      val responseSchema = returnType.getSwaggerProperty()
+      val responseSchema = type.getSwaggerProperty()
       return ApiResponse()
         .description("")
         .content(

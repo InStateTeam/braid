@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.swagger
+package io.bluebank.braid.corda.serialisation.mixin
 
-import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
-import io.swagger.converter.ModelConverters
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 
-/**
- * To be used when calling BraidCordaJacksonInit.init()
- */
-object CustomModelConverters {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+abstract class ThrowableMixin {
 
-  init {
-    ModelConverters.getInstance().addConverter(CustomModelConverterV2())
-    io.swagger.v3.core.converter.ModelConverters.getInstance().addConverter(CustomModelConverterV3())
-  }
+  //  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
+  @com.fasterxml.jackson.annotation.JsonIgnore
+  abstract fun getStackTrace(): Array<StackTraceElement>
 
-  fun init() {
-  }
+  @com.fasterxml.jackson.annotation.JsonIgnore
+  abstract fun getSuppressed(): List<Throwable>?
 }

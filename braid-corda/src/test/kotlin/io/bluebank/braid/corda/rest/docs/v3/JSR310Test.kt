@@ -15,21 +15,26 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.vertx.core.json.Json
-import org.hamcrest.CoreMatchers.*
-import org.junit.Assert.*
-import org.junit.Before
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.notNullValue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThat
+import org.junit.BeforeClass
 import org.junit.Test
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 class JSR310Test{
-  @Before
-  fun setUp() {
-    BraidCordaJacksonInit.init()    // adds JSR310 DateParsing
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
-  
+
   @Test
   fun `that WaitTimeUpdate description is correct`() {
     val modelContext = ModelContextV3()

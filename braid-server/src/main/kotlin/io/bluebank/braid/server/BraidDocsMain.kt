@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.bluebank.braid.corda.server.BraidDocsMain
 import io.bluebank.braid.core.logging.loggerFor
@@ -42,7 +43,7 @@ fun main(args: Array<String>) {
 internal fun generateSwaggerText(openApiVersion: Int, jars: List<String>): String {
   val cordappsClassLoader = jars.toJarsClassLoader()
   // we call so as to initialise model converters etc before replacing the context class loader
-  BraidCordaStandaloneServer.init()
+  BraidCordaJacksonSwaggerInit.init()
   val swaggerText = tryWithClassLoader(cordappsClassLoader) {
     BraidDocsMain().swaggerText(openApiVersion)
   }

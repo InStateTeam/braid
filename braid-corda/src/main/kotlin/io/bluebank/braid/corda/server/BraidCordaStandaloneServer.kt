@@ -16,14 +16,13 @@
 package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.BraidConfig
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestConfig
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.bluebank.braid.corda.services.SimpleNetworkMapService
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
-import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
@@ -38,14 +37,8 @@ class BraidCordaStandaloneServer(
 ) {
   companion object {
     private val log = loggerFor<BraidCordaStandaloneServer>()
-
     init {
-      BraidCordaJacksonInit.init()
-      CustomModelConverters.init()
-    }
-
-    fun init() {
-      // will on lazy basis invoke the Jackson and ModelConverters init
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

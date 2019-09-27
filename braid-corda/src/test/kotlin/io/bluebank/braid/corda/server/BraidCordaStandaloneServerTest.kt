@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.server
 
 import com.fasterxml.jackson.core.type.TypeReference
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
@@ -47,6 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 import java.util.Arrays.asList
+import javax.ws.rs.core.Response
 
 /**
  * Run with Either
@@ -66,14 +68,14 @@ class BraidCordaStandaloneServerTest {
     private val bankB = CordaX500Name("BankB", "", "US")
 
     private var port = findFreePort()
+    private val clientVertx = Vertx.vertx()
     private val client =
-      Vertx.vertx().createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
-    private val driverl = Future.succeededFuture("");
+      clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
 
     @BeforeClass
     @JvmStatic
-    fun setUp(testContext: TestContext) {
-      BraidCordaStandaloneServer.init()
+    fun beforeClass(testContext: TestContext) {
+      BraidCordaJacksonSwaggerInit.init()
       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
@@ -137,8 +139,9 @@ class BraidCordaStandaloneServerTest {
 
     @AfterClass
     @JvmStatic
-    fun closeDown() {
+    fun closeDown(context: TestContext) {
       client.close()
+      clientVertx.close(context.asyncAssertSuccess())
     }
   }
 
@@ -372,8 +375,8 @@ class BraidCordaStandaloneServerTest {
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
 
-    getNotary().map {
-      val notary = it
+    getNotary().map { jsonObject ->
+      val notary = jsonObject
 
       val json = JsonObject()
         .put("notary", notary)
@@ -389,12 +392,16 @@ class BraidCordaStandaloneServerTest {
         .putHeader("Accept", "application/json; charset=utf8")
         .putHeader("Content-length", "" + encodePrettily.length)
         .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(500, it.statusCode(), it.statusMessage())
+        .handler { clientResponse ->
+          context.assertEquals(
+            Response.Status.BAD_REQUEST.statusCode,
+            clientResponse.statusCode(),
+            clientResponse.statusMessage()
+          )
 
-          it.bodyHandler {
+          clientResponse.bodyHandler {
             val reply = it.toString()
-            log.info("reply:" + reply)
+            log.info("reply: $reply")
             context.assertThat(reply, containsString("issuerBaaaaaankPartyRef"))
 
             async.complete()

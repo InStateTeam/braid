@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.utilities.contextLogger
@@ -27,6 +28,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response
 
 @Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
@@ -283,7 +286,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       // N.B. no header set
       .exceptionHandler(context::fail)
       .handler { response ->
-        context.assertEquals(500, response.statusCode())
+        context.assertEquals(Response.Status.BAD_REQUEST.statusCode, response.statusCode())
         async16.complete()
       }
       .end()
@@ -296,14 +299,14 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
       .exceptionHandler(context::fail)
       .handler {
-        context.assertEquals(500, it.statusCode())
+        context.assertEquals(HTTP_UNPROCESSABLE_STATUS_CODE, it.statusCode())
         context.assertEquals("on purpose failure", it.statusMessage())
-        val expectedContentType = "text/plain; charset=utf8"
-        context.assertEquals(expectedContentType, it.getHeader(HttpHeaders.CONTENT_TYPE))
+        context.assertEquals(MediaType.APPLICATION_JSON, it.getHeader(HttpHeaders.CONTENT_TYPE))
 
-        it.bodyHandler {
-          val body = it.toString("utf8")
-          context.assertEquals("on purpose failure", body)
+        it.bodyHandler { buffer ->
+          val jo = JsonObject(buffer)
+          context.assertEquals(RuntimeException::class.java.simpleName, jo.getString("type"))
+          context.assertEquals("on purpose failure", jo.getString("message"))
           async1.complete()
         }
       }

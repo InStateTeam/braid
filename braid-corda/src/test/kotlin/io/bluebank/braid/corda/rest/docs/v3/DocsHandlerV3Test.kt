@@ -18,27 +18,31 @@ package io.bluebank.braid.corda.rest.docs.v3
 //import io.swagger.v3.oas.models.OpenAPI
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.swagger.v3.oas.models.OpenAPI
 import io.vertx.core.http.HttpMethod
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 
 class DocsHandlerV3Test {
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      BraidCordaJacksonSwaggerInit.init()
+    }
+  }
+
   private val openApi: OpenAPI
 
   init {
-    BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
-
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
     openApi = docs.createSwagger()
   }
-
 
   fun myFunction(type: aType) {
   }

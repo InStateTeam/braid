@@ -15,10 +15,11 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class CordaThrowableMixin{
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getCause(): Throwable?
-
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getStackTrace(): Array<StackTraceElement>
-
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getSuppressed(): List<Throwable>?
+abstract class CordaThrowableMixin : ThrowableMixin() {
+  @get:com.fasterxml.jackson.annotation.JsonIgnore
+  abstract var originalExceptionClassName: String?
+  @get:com.fasterxml.jackson.annotation.JsonIgnore
+  abstract var originalMessage: String?
+  @get:com.fasterxml.jackson.annotation.JsonIgnore
+  abstract var localizedMessage: String?
 }
