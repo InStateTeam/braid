@@ -15,12 +15,16 @@
  */
 package io.bluebank.braid.core.async
 
+import io.bluebank.braid.core.http.body
+import io.bluebank.braid.core.http.getFuture
 import io.bluebank.braid.core.json.BraidJacksonInit
 import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import io.vertx.ext.web.Router
@@ -30,6 +34,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.nio.Buffer
 
 @RunWith(VertxUnitRunner::class)
 class WebKtTest {
@@ -78,8 +83,8 @@ class WebKtTest {
   @Test
   fun `that we can end a routing context with a variety of types`(context: TestContext) {
     val async = context.async()
-    client.get("/string")
-      .getBodyAsString()
+    client.getFuture("/string")
+      .compose { it.body<String>() }
       .onSuccess { context.assertEquals("string", it, "that string response is correct") }
 
       .compose { client.get("/object").getBodyBuffer() }.mapToObject<Person>()
@@ -90,9 +95,10 @@ class WebKtTest {
           "that object response matches"
         )
       }
-
-      .compose { client.get("/jsonobject").getBodyBuffer() }
-      .map { io.vertx.core.json.JsonObject(it) }
+      .compose { client.getFuture("/jsonobject") }
+      .compose { it.body<Buffer>() }
+      .compose { client.getFuture("/jsonobject") }
+      .map { it.body<JsonObject>() }
       .onSuccess {
         context.assertEquals(
           jsonObjectOf("name" to "value"),
@@ -101,8 +107,8 @@ class WebKtTest {
         )
       }
 
-      .compose { client.get("/jsonarray").getBodyBuffer() }
-      .map { io.vertx.core.json.JsonArray(it) }
+      .compose { client.getFuture("/jsonarray") }
+      .map { it.body<JsonArray>() }
       .onSuccess {
         context.assertEquals(
           jsonArrayOf(1, 2, 3),
@@ -111,13 +117,14 @@ class WebKtTest {
         )
       }
       .compose {
-        client.get("/error").toFuture().recover { error ->
+        client.getFuture("/error").recover { error ->
           context.assertEquals("error", error.message, "that error matches")
           Future.succeededFuture()
         }
       }
       .compose { withFuture<Void> { future -> httpServer.close(future) } }
-      .compose { client.get("/string").getBodyAsString().assertFails() }
+      .compose { client.getFuture("/string") }
+      .compose { it.body<String>().assertFails() }
       .onSuccess { async.complete() }
       .catch { context.fail(it) }
   }
