@@ -52,10 +52,10 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model Amount`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-    println(models)
+//    println(models)
 
-    assertThat(models.toString(), models.get("Amount"), notNullValue())
-    val properties = models.get("Amount")?.properties
+    assertThat(models.toString(), models["Amount"], notNullValue())
+    val properties = models["Amount"]?.properties
 
     assertThat(properties?.toString(), properties?.size, equalTo(4))
     assertThat(
@@ -82,7 +82,7 @@ class CustomModelConvertersV3Test {
     val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
-    val model = models.get("AmountCurrency")
+    val model = models["AmountCurrency"]
     assertThat(models.toString(), model, notNullValue())
     val properties = model?.properties
 
@@ -105,7 +105,7 @@ class CustomModelConvertersV3Test {
     val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
-    val model = models.get("ClassWithTypes")
+    val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
@@ -118,7 +118,7 @@ class CustomModelConvertersV3Test {
     val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
-    val model = models.get("ClassWithTypes")
+    val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
@@ -131,7 +131,7 @@ class CustomModelConvertersV3Test {
     val models = converter.readAll(ClassWithTypes::class.java)
     println(models)
 
-    val model = models.get("ClassWithTypes")
+    val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
@@ -143,7 +143,7 @@ class CustomModelConvertersV3Test {
   fun `should Correctly Model Issued as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
 
-    val model = models.get("Issued")
+    val model = models["Issued"]
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
@@ -171,7 +171,7 @@ class CustomModelConvertersV3Test {
   fun `should Strip out SignedTransaction Exclusions`() {
     val models = converter.readAll(ClassWithTypes::class.java)
 
-    val model = models.get("SignedTransaction")
+    val model = models["SignedTransaction"]
     assertThat(models.toString(), model, notNullValue())
 
     val properties = model?.properties
@@ -241,7 +241,7 @@ class CustomModelConvertersV3Test {
 
     val models = converter.readAll(ClassWithTypes::class.java)
 
-    val properties = models.get("Party")?.properties
+    val properties = models["Party"]?.properties
     assertThat(properties?.size, equalTo(2))
     assertThat(properties?.keys, hasItem("name"))
     assertThat(properties?.toString(), properties?.get("name")?.type, equalTo("string"))
@@ -264,8 +264,8 @@ class CustomModelConvertersV3Test {
   fun `should Correctly Model Class as string`() {
 
     val models = converter.readAll(ClassWithTypes::class.java)
-   
-    val properties = models.get("ClassWithTypes")?.properties
+
+   val properties = models["ClassWithTypes"]?.properties
     val classType = properties?.get("clazz")
     assertThat(properties?.toString(), classType, notNullValue())
     assertThat(properties?.toString(), classType?.type, equalTo("string"))
