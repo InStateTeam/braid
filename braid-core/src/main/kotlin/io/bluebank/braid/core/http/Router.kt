@@ -73,13 +73,14 @@ var log = loggerFor<Router>()
 fun HttpServerResponse.end(error: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
   val e = if (error is InvocationTargetException) error.targetException else error
   log.trace("returning error to client", e)
+  val payload = Json.encode(e)
   val message = statusMessage ?: e.message ?: "Undefined error"
   this
-    .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
-    .putHeader(CONTENT_LENGTH, message.length.toString())
+    .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+    .putHeader(CONTENT_LENGTH, payload.length.toString())
     .setStatusMessage(message.replace("\n","").replace("\r",""))
     .setStatusCode(statusCode)
-    .end(message)
+    .end(payload)
 }
 
 fun <T> HttpServerResponse.end(future: Future<T>) {

@@ -15,22 +15,29 @@
  */
 package io.bluebank.braid.corda.server.rpc
 
+import io.bluebank.braid.corda.server.Braid
 import io.swagger.converter.ModelConverters
 import net.corda.core.flows.ContractUpgradeFlow
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 
 class ModelConvertersTest {
-
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      Braid.init()
+    }
+  }
 
   @Test
   fun testModelConverters() {
     val java = net.corda.core.contracts.UpgradedContract::class.java
     val readAsProperty = ModelConverters.getInstance().readAsProperty(java)
     println(readAsProperty)
-
   }
 
   @Test
@@ -40,19 +47,17 @@ class ModelConvertersTest {
     println(readAsProperty)
   }
 
-
-
   @Test
   @Ignore // todo make ModelConverter for UpgradedContract
   fun testModelConvertersOfFlowConstrucor() {
     val constructors = ContractUpgradeFlow.Initiate::class.java.constructors
-
-    constructors.forEach {
-      it.parameters.forEach {
+    constructors.forEach { constructor ->
+      constructor.parameters.forEach { parameter ->
         val readAsProperty =
-          ModelConverters.getInstance().readAsProperty(it.parameterizedType)
-        assertThat(it.parameterizedType.toString(), readAsProperty, notNullValue())
+          ModelConverters.getInstance().readAsProperty(parameter.parameterizedType)
+        assertThat(parameter.parameterizedType.toString(), readAsProperty, notNullValue())
       }
     }
   }
+
 }

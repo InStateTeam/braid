@@ -42,8 +42,6 @@ import java.security.PublicKey
 import java.security.cert.CertPath
 import java.security.cert.X509Certificate
 
-import java.util.Arrays.asList
-
 /**
  * If you add to this file, please also add to CustomModelConverter forcorrect swagger generation
  */
@@ -91,6 +89,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
       .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
       .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
+      .setMixInAnnotation(Throwable::class.java, ThrowableMixin::class.java)
       .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
       .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
       .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
@@ -115,13 +114,12 @@ object BraidCordaJacksonInit {
       .addSerializer(Issued::class.java, IssuedSerializer())
       .addDeserializer(Issued::class.java, IssuedDeserializer())
 
-    asList(Json.mapper, Json.prettyMapper)
-      .forEach {
-        it.registerModule(sm)
-          .registerModule(ParameterNamesModule())
-          .registerModule(Jdk8Module())
-          .registerModule(JavaTimeModule())
-      };
+    listOf(Json.mapper, Json.prettyMapper, io.swagger.v3.core.util.Json.mapper()).forEach {
+      it.registerModule(sm)
+        .registerModule(ParameterNamesModule())
+        .registerModule(Jdk8Module())
+        .registerModule(JavaTimeModule())
+    };
   }
 
   fun init() {

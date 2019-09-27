@@ -15,13 +15,13 @@
  */
 package io.bluebank.braid.corda.swagger
 
+import com.fasterxml.jackson.databind.JavaType
 import io.swagger.converter.ModelConverter
 import io.swagger.converter.ModelConverterContext
 import io.swagger.models.Model
 import io.swagger.models.ModelImpl
 import io.swagger.models.properties.*
 import io.swagger.util.Json
-import io.swagger.v3.oas.models.media.ByteArraySchema
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
@@ -42,127 +42,117 @@ import java.util.*
  *
  */
 class CustomModelConverterV2 : ModelConverter {
-
   companion object {
     private val log = loggerFor<CustomModelConverterV2>()
   }
 
   override fun resolveProperty(
-    type: Type?,
-    context: ModelConverterContext?,
+    type: Type,
+    context: ModelConverterContext,
     annotations: Array<out Annotation>?,
     chain: Iterator<ModelConverter>?
   ): Property? {
-    try {
+    return try {
       val jsonType = Json.mapper().constructType(type)
-      if (jsonType != null) {
-        val clazz = jsonType.rawClass
-        if (PublicKey::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
-            .description("Base 58 Encoded Public Key")
-        }
-        if (Class::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("java.lang.Object")
-            .description("Java class name")
-        }
-        if (SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
-            .description("Base 58 Encoded Secure Hash")
-        }
-        if (X509Certificate::class.java.isAssignableFrom(clazz)) {
-          return ByteArrayProperty()
-              .description("X509 encoded certificate")
-        }
-        if (CertPath::class.java.isAssignableFrom(clazz)) {
-          return ByteArrayProperty()
-              .description("X509 encoded certificate PKI path")
-        }
-        if (CordaX500Name::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("O=Bank A, L=London, C=GB")
-            .description("CordaX500Name encoded Party")
-        }
-        if (OpaqueBytes::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("736F6D654279746573")
-            .description("Hex encoded Byte Array")
-        }
-        if (Currency::class.java.isAssignableFrom(clazz)) {
-          return StringProperty()
-            .example("GBP")
-            .description("3 digit ISO 4217 code of the currency")
-        }
-
-        if (Amount::class.java.isAssignableFrom(clazz)) {
-          // String and Currency get created as their own types
-          val boundType = jsonType.bindings.getBoundType(0)
-          if (boundType != null && (boundType.rawClass == Currency::class.java)
-          ) {
-            context?.defineModel(
-              "AmountCurrency", ModelImpl()
-                .type("object")
-                .property(
-                  "quantity",
-                  IntegerProperty().example(100).description("total amount in minor units")
-                )
-                .property("displayTokenSize", DecimalProperty().example("0.01"))
-                .property("token", StringProperty().example("GBP"))
-            )
-            return RefProperty("AmountCurrency")
-          } else {
-            val model = ModelImpl()
-              .type("object")
-              .property(
-                "quantity",
-                IntegerProperty().example(100).description("total amount in minor units")
-              )
-              .property("displayTokenSize", DecimalProperty().example("0.01"))
-              .property("token", StringProperty().example("GBP"))
-              .property(
-                "_tokenType",
-                StringProperty().example("net.corda.core.contracts.Issued")
-              )
-            context?.defineModel("Amount", model)
-
-            return RefProperty("Amount")
-
-          }
-        }
-        if (Issued::class.java.isAssignableFrom(clazz)) {
-          // String and Currency get created as their own types
-          val boundType = jsonType.bindings.getBoundType(0)
-          if (boundType != null && (boundType.rawClass == Currency::class.java || boundType.rawClass == String::class.java)
-          ) {
-            context?.defineModel(
-              "IssuedCurrency", ModelImpl()
-                .type("object")
-                .property("product",     context?.resolveProperty(boundType, annotations))
-                .property("issuer",      context?.resolveProperty(PartyAndReference::class.java,annotations))
-            )
-            return RefProperty("IssuedCurrency")
-          } else {
-            val model = ModelImpl()
-              .type("object")
-              .property("product", context?.resolveProperty(boundType, annotations)  )
-                .property("issuer", context?.resolveProperty(PartyAndReference::class.java,annotations))
-              .property("_productType", StringProperty().example("java.util.Currency"))
-            context?.defineModel("Issued", model)
-
-            return RefProperty("Issued")
+      when (jsonType) {
+        null -> chain?.next()?.resolveProperty(type, context, annotations, chain)
+        else -> {
+          val clazz = jsonType.rawClass
+          when {
+            PublicKey::class.java.isAssignableFrom(clazz) -> publicKeyProperty()
+            Class::class.java.isAssignableFrom(clazz) -> classProperty()
+            SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz) -> secureHashProperty()
+            X509Certificate::class.java.isAssignableFrom(clazz) -> x509CertificateProperty()
+            CertPath::class.java.isAssignableFrom(clazz) -> certPathProperty()
+            CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameProperty()
+            OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesProperty()
+            Currency::class.java.isAssignableFrom(clazz) -> currencyProperty()
+            Amount::class.java.isAssignableFrom(clazz) -> processAmountType(context, jsonType)
+            Issued::class.java.isAssignableFrom(clazz) -> processIssuedType(context, annotations, jsonType)
+            Throwable::class.java.isAssignableFrom(clazz) -> processThrowableType(context)
+            else -> chain?.next()?.resolveProperty(type, context, annotations, chain)
           }
         }
       }
     } catch (e: Throwable) {
-      log.error("Unable to parse: $type", e)
+      log.error("Unable to parse or resolve type: $type", e)
+      throw RuntimeException("Unable to resolve type:$type", e)
     }
+  }
 
-    return try {
-      chain?.next()?.resolveProperty(type, context, annotations, chain)
-    } catch (e: Exception) {
-      throw RuntimeException("Unable to resolve type:$type",e )
+  private fun processThrowableType(
+    context: ModelConverterContext
+  ): Property? {
+    context.defineModel(
+      "Error", ModelImpl()
+        .type("object")
+        .property("message", StringProperty().description("the error message"))
+        .property("type", StringProperty().description("the class of error being returned"))
+    )
+    return RefProperty("Error")
+  }
+
+  private fun processIssuedType(
+    context: ModelConverterContext,
+    annotations: Array<out Annotation>?,
+    jsonType: JavaType
+  ): RefProperty {
+    // String and Currency get created as their own types
+    val boundType = jsonType.bindings.getBoundType(0)
+    return if (boundType != null && (boundType.rawClass == Currency::class.java || boundType.rawClass == String::class.java)
+    ) {
+      context.defineModel(
+        "IssuedCurrency", ModelImpl()
+          .type("object")
+          .property("product", context.resolveProperty(boundType, annotations))
+          .property("issuer", context.resolveProperty(PartyAndReference::class.java, annotations))
+      )
+      RefProperty("IssuedCurrency")
+    } else {
+      val model = ModelImpl()
+        .type("object")
+        .property("product", context.resolveProperty(boundType, annotations))
+        .property("issuer", context.resolveProperty(PartyAndReference::class.java, annotations))
+        .property("_productType", StringProperty().example("java.util.Currency"))
+      context.defineModel("Issued", model)
+      RefProperty("Issued")
+    }
+  }
+
+  private fun processAmountType(
+    context: ModelConverterContext,
+    jsonType: JavaType
+  ): RefProperty {
+    // String and Currency get created as their own types
+    val boundType = jsonType.bindings.getBoundType(0)
+    return if (boundType != null && (boundType.rawClass == Currency::class.java)) {
+      context.defineModel(
+        "AmountCurrency", ModelImpl()
+          .type("object")
+          .property(
+            "quantity",
+            IntegerProperty().example(100).description("total amount in minor units")
+          )
+          .property("displayTokenSize", DecimalProperty().example("0.01"))
+          .property("token", StringProperty().example("GBP"))
+      )
+      RefProperty("AmountCurrency")
+    } else {
+      val model = ModelImpl()
+        .type("object")
+        .property(
+          "quantity",
+          IntegerProperty().example(100).description("total amount in minor units")
+        )
+        .property("displayTokenSize", DecimalProperty().example("0.01"))
+        .property("token", StringProperty().example("GBP"))
+        .property(
+          "_tokenType",
+          StringProperty().example("net.corda.core.contracts.Issued")
+        )
+      context.defineModel("Amount", model)
+
+      RefProperty("Amount")
     }
   }
 
@@ -174,4 +164,33 @@ class CustomModelConverterV2 : ModelConverter {
     return chain?.next()?.resolve(type, context, chain)
   }
 
+  private fun publicKeyProperty() = StringProperty()
+    .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
+    .description("Base 58 Encoded Public Key")
+
+  private fun classProperty() = StringProperty()
+    .example("java.lang.Object")
+    .description("Java class name")
+
+  private fun secureHashProperty() = StringProperty()
+    .example("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
+    .description("Base 58 Encoded Secure Hash")
+
+  private fun x509CertificateProperty() = ByteArrayProperty()
+    .description("X509 encoded certificate")
+
+  private fun certPathProperty() = ByteArrayProperty()
+    .description("X509 encoded certificate PKI path")
+
+  private fun cordaX500NameProperty() = StringProperty()
+    .example("O=Bank A, L=London, C=GB")
+    .description("CordaX500Name encoded Party")
+
+  private fun opaqueBytesProperty() = StringProperty()
+    .example("736F6D654279746573")
+    .description("Hex encoded Byte Array")
+
+  private fun currencyProperty() = StringProperty()
+    .example("GBP")
+    .description("3 digit ISO 4217 code of the currency")
 }
