@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.server
 
 import com.fasterxml.jackson.core.type.TypeReference
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
@@ -57,24 +58,24 @@ import javax.ws.rs.core.Response
  */
 @Suppress("DEPRECATION")
 @RunWith(VertxUnitRunner::class)
-class BraidTest {
+class BraidCordaStandaloneServerTest {
 
   companion object {
-    private val log = loggerFor<BraidTest>()
+    private val log = loggerFor<BraidCordaStandaloneServerTest>()
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
     private val bankA = CordaX500Name("BankA", "", "GB")
     private val bankB = CordaX500Name("BankB", "", "US")
 
     private var port = findFreePort()
+    private val clientVertx = Vertx.vertx()
     private val client =
-      Vertx.vertx().createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
-    private val driverl = Future.succeededFuture("");
+      clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
 
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
@@ -124,7 +125,7 @@ class BraidTest {
       async: Async,
       networkHostAndPort: NetworkHostAndPort
     ): Future<String>? {
-      return Braid(
+      return BraidCordaStandaloneServer(
         userName = "user1",
         password = "test",
         port = port,
@@ -138,8 +139,9 @@ class BraidTest {
 
     @AfterClass
     @JvmStatic
-    fun closeDown() {
+    fun closeDown(context: TestContext) {
       client.close()
+      clientVertx.close(context.asyncAssertSuccess())
     }
   }
 

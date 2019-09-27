@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
@@ -40,6 +41,7 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response.Status.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
@@ -142,10 +144,18 @@ abstract class EndPoint(
     if (protected) {
       operation.addSecurity(DocsHandlerV2.SECURITY_DEFINITION_NAME, listOf())
     }
-    operation.addResponse("200", operation.responses["default"])
+    operation.addResponse(OK.statusCode.toString(), operation.responses["default"])
     operation.addResponse(
-      "500",
+      INTERNAL_SERVER_ERROR.statusCode.toString(),
       Response().description("server failure").responseSchema(Throwable::class.java.getSwaggerModelReference())
+    )
+    operation.addResponse(
+      BAD_REQUEST.statusCode.toString(),
+      Response().description("the server failed to parse the request").responseSchema(Throwable::class.java.getSwaggerModelReference())
+    )
+    operation.addResponse(
+      HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
+      Response().description("the request could not be processed").responseSchema(Throwable::class.java.getSwaggerModelReference())
     )
     return operation
   }

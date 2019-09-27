@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.vertx.core.json.Json
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.notNullValue
@@ -31,7 +31,7 @@ class JSR310Test{
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

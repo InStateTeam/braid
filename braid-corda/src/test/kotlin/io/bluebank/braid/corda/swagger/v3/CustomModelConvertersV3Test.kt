@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.swagger.ClassWithTypes
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.jackson.ModelResolver
@@ -40,7 +40,7 @@ class CustomModelConvertersV3Test {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

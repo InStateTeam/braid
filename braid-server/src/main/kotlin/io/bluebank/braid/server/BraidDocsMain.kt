@@ -15,14 +15,15 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.bluebank.braid.corda.server.BraidDocsMain
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import java.io.File
 
-private val log = loggerFor<Braid>()
+private val log = loggerFor<BraidCordaStandaloneServer>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
@@ -42,7 +43,7 @@ fun main(args: Array<String>) {
 internal fun generateSwaggerText(openApiVersion: Int, jars: List<String>): String {
   val cordappsClassLoader = jars.toJarsClassLoader()
   // we call so as to initialise model converters etc before replacing the context class loader
-  Braid.init()
+  BraidCordaJacksonSwaggerInit.init()
   val swaggerText = tryWithClassLoader(cordappsClassLoader) {
     BraidDocsMain().swaggerText(openApiVersion)
   }

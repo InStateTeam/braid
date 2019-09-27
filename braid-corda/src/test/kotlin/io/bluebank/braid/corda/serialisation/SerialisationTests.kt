@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
@@ -28,6 +28,7 @@ import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
@@ -47,13 +48,18 @@ class SerialisationTests {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 
   @Rule
   @JvmField
   val testSerialization = SerializationEnvironmentRule()
+
+  @Before
+  fun before() {
+    BraidCordaJacksonSwaggerInit.init()
+  }
 
 //  @Ignore
   @Test     // fails because we cant tell if this is a String or a Currency

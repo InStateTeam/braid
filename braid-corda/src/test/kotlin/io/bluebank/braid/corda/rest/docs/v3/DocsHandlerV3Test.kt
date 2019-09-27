@@ -18,7 +18,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 //import io.swagger.v3.oas.models.OpenAPI
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.swagger.v3.oas.models.OpenAPI
 import io.vertx.core.http.HttpMethod
 import org.hamcrest.CoreMatchers.*
@@ -32,7 +32,7 @@ class DocsHandlerV3Test {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import net.corda.core.contracts.TimeWindow
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.identity.PartyAndCertificate
@@ -33,7 +33,7 @@ class ModelContextV3Test {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

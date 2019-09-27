@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.swagger.converter.ModelConverters
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
@@ -38,7 +38,7 @@ class CustomModelConvertersV2Test {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

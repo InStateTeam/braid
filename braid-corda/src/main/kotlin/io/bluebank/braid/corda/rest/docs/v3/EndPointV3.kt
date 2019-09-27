@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
@@ -36,6 +37,8 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response.Status.BAD_REQUEST
+import javax.ws.rs.core.Response.Status.OK
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
@@ -126,8 +129,15 @@ abstract class EndPointV3(
 
     operation.responses(
       ApiResponses()
-        .addApiResponse("200", response(returnType))
-        .addApiResponse("500", response(Throwable::class.java))
+        .addApiResponse(OK.statusCode.toString(), response(returnType))
+        .addApiResponse(
+          BAD_REQUEST.statusCode.toString(),
+          response(Throwable::class.java).description("the server failed to parse the request")
+        )
+        .addApiResponse(
+          HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
+          response(Throwable::class.java).description("the request could not be processed")
+        )
     )
     return operation
   }

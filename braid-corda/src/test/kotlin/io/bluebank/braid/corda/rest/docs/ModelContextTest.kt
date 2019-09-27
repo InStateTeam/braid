@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import org.hamcrest.CoreMatchers.notNullValue
@@ -30,7 +30,7 @@ class ModelContextTest {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 

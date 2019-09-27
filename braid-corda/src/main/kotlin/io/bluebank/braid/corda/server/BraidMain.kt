@@ -35,7 +35,7 @@ class BraidMain {
   ): Future<String> {
     val classLoader = additionalPaths.toJarsClassLoader()
     return tryWithClassLoader(classLoader) {
-      Braid(
+      BraidCordaStandaloneServer(
         port = port,
         userName = userName,
         password = password,

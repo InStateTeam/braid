@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.server.rpc
 
-import io.bluebank.braid.corda.server.Braid
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.swagger.converter.ModelConverters
 import net.corda.core.flows.ContractUpgradeFlow
 import org.hamcrest.CoreMatchers.notNullValue
@@ -29,7 +29,7 @@ class ModelConvertersTest {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      Braid.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
   }
 
