@@ -17,10 +17,15 @@ package io.bluebank.braid.corda.server
 
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.services.SimpleNodeInfo
+import io.bluebank.braid.core.async.catch
+import io.bluebank.braid.core.async.onSuccess
+import io.bluebank.braid.core.http.body
+import io.bluebank.braid.core.http.getFuture
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
+import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
@@ -36,7 +41,6 @@ import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
-import org.hamcrest.Matchers.greaterThan
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -62,7 +66,8 @@ class BraidTest {
     private val bankB = CordaX500Name("BankB", "", "US")
 
     private var port = findFreePort()
-    private val client = Vertx.vertx().createHttpClient()
+    private val client =
+      Vertx.vertx().createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
     private val driverl = Future.succeededFuture("");
 
     @BeforeClass
@@ -300,37 +305,30 @@ class BraidTest {
   @Test
   fun shouldListFlows(context: TestContext) {
     val async = context.async()
-
     log.info("calling get: http://localhost:$port/api/rest/cordapps/flows")
-    client.get(port, "localhost", "/api/rest/cordapps/flows")
-      .putHeader("Accept", "application/json; charset=utf8")
-      .exceptionHandler(context::fail)
-      .handler {
-        context.assertEquals(200, it.statusCode(), it.statusMessage())
-
-        it.bodyHandler {
-          val nodes = Json.decodeValue(it, object : TypeReference<List<String>>() {})
-
-          context.assertThat(nodes.size, greaterThan(2))
-
-          context.assertThat(
-            nodes,
-            hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise")
-          )
-          context.assertThat(
-            nodes,
-            hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise")
-          )
-          context.assertThat(
-            nodes,
-            hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate")
-          )
-          context.assertThat(nodes, hasItem("net.corda.finance.flows.CashIssueFlow"))
-
-          async.complete()
-        }
+    client.getFuture("/api/rest/cordapps/corda-core/flows")
+      .compose { it.body<List<String>>() }
+      .onSuccess { flows ->
+        context.assertThat(
+          flows,
+          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise")
+        )
+        context.assertThat(
+          flows,
+          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise")
+        )
+        context.assertThat(
+          flows,
+          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate")
+        )
       }
-      .end()
+      .compose { client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows") }
+      .compose { it.body<List<String>>() }
+      .onSuccess { flows ->
+        context.assertThat(flows, hasItem("net.corda.finance.flows.CashIssueFlow"))
+      }
+      .onSuccess { async.complete() }
+      .catch(context::fail)
   }
 
   @Test
@@ -345,8 +343,7 @@ class BraidTest {
         .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
         .put("issuerBankPartyRef", "AABBCC")
 
-      val path =
-        "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+      val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
       log.info("calling post: http://localhost:$port$path")
 
       val encodePrettily = json.encodePrettily()
@@ -407,6 +404,21 @@ class BraidTest {
     }
   }
 
+  @Test
+  fun `should list cordapps`(context: TestContext) {
+    val async = context.async()
+    val path = "/api/rest/cordapps"
+    client.getFuture(path)
+      .compose { it.body<List<String>>() }
+      .onSuccess { list ->
+        context.assertTrue(list.contains("corda-core"))
+        context.assertTrue(list.contains("corda-finance-contracts"))
+        context.assertTrue(list.contains("corda-finance-workflows"))
+      }
+      .onSuccess { async.complete() }
+      .catch { context.fail(it) }
+  }
+
   private fun getNotary(): Future<JsonObject> {
     val result = Future.future<JsonObject>()
     client.get(port, "localhost", "/api/rest/network/notaries")
@@ -424,5 +436,6 @@ class BraidTest {
       .end()
     return result;
   }
-
 }
+
+

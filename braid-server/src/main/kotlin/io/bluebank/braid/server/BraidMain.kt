@@ -30,6 +30,6 @@ fun main(args: Array<String>) {
   val password = args[2]
   val port = Integer.valueOf(args[3])
   val openApiVersion = Integer.valueOf(args[4])
-  val additionalPaths = args.asList().drop(5)
+  val additionalPaths = args.toList().drop(5)
   BraidMain().start(networkAndPort, userName, password, port,openApiVersion, additionalPaths)
 }

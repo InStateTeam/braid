@@ -15,28 +15,13 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import com.fasterxml.jackson.databind.module.SimpleSerializers
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.datatype.jsr310.deser.*
-import com.fasterxml.jackson.datatype.jsr310.deser.key.*
-import com.fasterxml.jackson.datatype.jsr310.ser.*
-import com.fasterxml.jackson.datatype.jsr310.ser.key.ZonedDateTimeKeySerializer
 import io.swagger.util.Json
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
-import io.swagger.v3.oas.models.media.*
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.Issued
-import net.corda.core.contracts.PartyAndReference
-import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.CordaX500Name
-import net.corda.core.serialization.serialize
-import net.corda.core.utilities.OpaqueBytes
+import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.media.StringSchema
 import net.corda.core.utilities.loggerFor
-import java.security.PublicKey
 import java.time.*
-import java.util.*
 
 /**
  * From https://github.com/swagger-api/swagger-core/issues/1167
@@ -117,7 +102,7 @@ class JSR310ModelConverterV3 : ModelConverter {
     return try {
       chain.next().resolve(type, context, chain)
     } catch (e: Exception) {
-      throw RuntimeException("Unable to resolve type:$type",e )
+      throw RuntimeException("Unable to resolve type: $type", e)
     }
   }
 

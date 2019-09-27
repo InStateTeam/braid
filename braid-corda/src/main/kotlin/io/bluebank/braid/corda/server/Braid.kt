@@ -19,15 +19,12 @@ import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.server.flow.FlowInitiator
-import io.bluebank.braid.corda.server.flow.FlowService
-import io.bluebank.braid.corda.server.flow.StartableByRPCFinder.Companion.rpcClasses
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.bluebank.braid.corda.services.SimpleNetworkMapService
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.swagger.CustomModelConverters
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.utils.toCordappName
 import io.vertx.core.Future
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
@@ -39,35 +36,38 @@ data class Braid(
   val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
   val openApiVersion: Int = 2
 ) {
+
   companion object {
+    private val log = loggerFor<Braid>()
+
     init {
       BraidCordaJacksonInit.init()
       CustomModelConverters.init()
     }
+
     fun init() {
       // will on lazy basis invoke the Jackson and ModelConverters init
     }
   }
 
   fun startServer(): Future<String> {
-      log.info("Starting Braid on port: $port")
-      val result = Future.future<String>()
-      BraidConfig()
-        // .withFlow(IssueObligation.Initiator::class)
-        .withPort(port)
-        .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-        .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion))
-        .bootstrapBraid(null, result)
-      //addShutdownHook {  }
-      return result
+    log.info("Starting Braid on port: $port")
+    val result = Future.future<String>()
+    BraidConfig()
+      .withPort(port)
+      .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+      .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion))
+      .bootstrapBraid(null, result)
+    //addShutdownHook {  }
+    return result
   }
 
   fun restConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
+    val cordappsScanner = CordappScanner(classLoader)
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
     val flowInitiator = FlowInitiator(cordaServicesAdapter)
-    val rpcClasses = rpcClasses(classLoader)
     val networkService = SimpleNetworkMapService(cordaServicesAdapter)
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
@@ -78,30 +78,26 @@ data class Braid(
           get("/network/nodes/self", networkService::myNodeInfo)
         }
         group("cordapps") {
-          get("/cordapps/flows", FlowService(rpc)::flows)
-          rpcClasses.forEach { kotlinFlowClass ->
-            try {
-              val cordappName =
-                kotlinFlowClass.java.protectionDomain.codeSource.location.toCordappName()
-              val path = "/cordapps/$cordappName/flows/${kotlinFlowClass.java.name}"
-              log.info("registering: $path")
-              post(path, flowInitiator.getInitiator(kotlinFlowClass))
-            } catch (e: Throwable) {
-              log.warn("Unable to register flow:${kotlinFlowClass.java.name}", e);
+          get("/cordapps", cordappsScanner::cordapps)
+          get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)
+          try {
+            cordappsScanner.cordappAndFlowList()
+            cordappsScanner.cordappAndFlowList().forEach { (cordapp, flowClass) ->
+              try {
+                val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
+                log.info("registering: $path")
+                post(path, flowInitiator.getInitiator(flowClass))
+              } catch (e: Throwable) {
+                log.warn("unable to register flow:${flowClass.java.name}", e);
+              }
             }
+          } catch (e: Throwable) {
+            log.error("failed to register flows", e)
           }
         }
       }
   }
 }
-
-//fun issueObligation(params: IssueObligationInitiatorParameters): Future<SignedTransaction> {
-//    val amount = Amount.parseCurrency(params.amount)
-//    val lender = r.identityService.wellKnownPartyFromX500Name(CordaX500Name.parse(params.lender)) ?: error("lender not found ${params.lender}")
-//    return serviceHub.startFlow(IssueObligation.Initiator(amount, lender,  params.anonymous)).returnValue.toVertxFuture()
-//}
-
-private val log = loggerFor<Braid>()
 
 
 
