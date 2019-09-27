@@ -17,15 +17,16 @@
 
 package io.bluebank.braid.corda.rest
 
+//import io.swagger.v3.oas.annotations.
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http.HttpHeaderValues
-//import io.swagger.v3.oas.annotations.
 import io.swagger.annotations.*
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.ext.web.RoutingContext
+import net.corda.core.CordaException
 import java.nio.ByteBuffer
 import javax.ws.rs.HeaderParam
 import javax.ws.rs.core.Context
@@ -49,6 +50,10 @@ class TestService {
     Buffer.buffer(bytes.length() * 2)
       .appendBytes(bytes.bytes)
       .appendBytes(bytes.bytes)
+
+  fun throwCordaException(): String {
+    throw CordaException("something went wrong", java.lang.RuntimeException("sub exception"))
+  }
 
   @ApiOperation(
     value = "do something custom",

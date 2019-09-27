@@ -15,22 +15,23 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
-import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
+import io.bluebank.braid.corda.server.Braid
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.Assert.assertThat
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 
-class ModelContextTest{
-  @Before
-  fun setUp() {
-    BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
+class ModelContextTest {
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      Braid.init()
+    }
   }
 
   @Test
@@ -41,9 +42,8 @@ class ModelContextTest{
     modelContext.addType(TraversableTransaction::class.java)
 
     val wire = modelContext.models.get("TraversableTransaction")
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
-
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
   }
 
   @Test
@@ -54,10 +54,10 @@ class ModelContextTest{
     modelContext.addType(WireTransaction::class.java)
 
     val wire = modelContext.models.get("WireTransaction")
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentHashes"),nullValue())
-    assertThat(wire?.properties?.get("availableComponentHashes\$core"),nullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentHashes"), nullValue())
+    assertThat(wire?.properties?.get("availableComponentHashes\$core"), nullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
 
   }
 }

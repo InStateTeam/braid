@@ -1070,10 +1070,10 @@
             "type": "integer",
             "format": "int64"
           },
-          "originalMessage": {
+          "message": {
             "type": "string"
           },
-          "message": {
+          "originalMessage": {
             "type": "string"
           },
           "localizedMessage": {
@@ -1117,10 +1117,10 @@
             "type": "integer",
             "format": "int64"
           },
-          "originalMessage": {
+          "message": {
             "type": "string"
           },
-          "message": {
+          "originalMessage": {
             "type": "string"
           },
           "localizedMessage": {
@@ -1326,11 +1326,11 @@
           "requestSignature": {
             "$ref": "#/components/schemas/net.corda.core.flows.NotarisationRequestSignature"
           },
-          "signedTransaction": {
-            "$ref": "#/components/schemas/net.corda.core.transactions.SignedTransaction"
-          },
           "coreTransaction": {
             "$ref": "#/components/schemas/net.corda.core.transactions.CoreTransaction"
+          },
+          "signedTransaction": {
+            "$ref": "#/components/schemas/net.corda.core.transactions.SignedTransaction"
           }
         }
       },
@@ -1594,15 +1594,15 @@
       "net.corda.core.contracts.TimeWindow": {
         "type": "object",
         "properties": {
+          "untilTime": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
           "midpoint": {
             "type": "string",
             "description": "JSR310 encoded time representation of Instant"
           },
           "fromTime": {
-            "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
-          },
-          "untilTime": {
             "type": "string",
             "description": "JSR310 encoded time representation of Instant"
           }
@@ -1741,15 +1741,15 @@
           "party": {
             "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
-          "owningKey": {
-            "type": "string",
-            "description": "Base 58 Encoded Public Key",
-            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "name": {
             "type": "string",
             "description": "CordaX500Name encoded Party",
             "example": "O=Bank A, L=London, C=GB"
+          },
+          "owningKey": {
+            "type": "string",
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },

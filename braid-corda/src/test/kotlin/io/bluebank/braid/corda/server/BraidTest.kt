@@ -72,7 +72,7 @@ class BraidTest {
 
     @BeforeClass
     @JvmStatic
-    fun setUp(testContext: TestContext) {
+    fun beforeClass(testContext: TestContext) {
       Braid.init()
       val async = testContext.async()
 

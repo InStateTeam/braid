@@ -28,7 +28,7 @@ import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import sun.security.provider.X509Factory
@@ -44,16 +44,16 @@ import kotlin.test.assertTrue
 class SerialisationTests {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      Braid.init()
+    }
   }
 
   @Rule
   @JvmField
   val testSerialization = SerializationEnvironmentRule()
-
-  @Before
-  fun before() {
-    Braid.init()
-  }
 
 //  @Ignore
   @Test     // fails because we cant tell if this is a String or a Currency
