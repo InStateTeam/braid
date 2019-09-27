@@ -29,6 +29,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.InvocationTargetException
 import java.nio.ByteBuffer
+import javax.ws.rs.core.Response
 
 fun Router.setupAllowAnyCORS() {
   route().handler {
@@ -63,21 +64,21 @@ fun RoutingContext.withErrorHandler(callback: RoutingContext.() -> Unit) {
   try {
     this.callback()
   } catch (err: Throwable) {
-    this.response().end(err)
+    this.response().end(err, Response.Status.INTERNAL_SERVER_ERROR.statusCode)
   }
 }
 
 var log = loggerFor<Router>()
 
-fun HttpServerResponse.end(error: Throwable) {
+fun HttpServerResponse.end(error: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
   val e = if (error is InvocationTargetException) error.targetException else error
   log.trace("returning error to client", e)
-  val message = e.message ?: "Undefined error"
+  val message = statusMessage ?: e.message ?: "Undefined error"
   this
     .putHeader(CONTENT_TYPE, "$TEXT_PLAIN; charset=utf8")
     .putHeader(CONTENT_LENGTH, message.length.toString())
     .setStatusMessage(message.replace("\n","").replace("\r",""))
-    .setStatusCode(500)
+    .setStatusCode(statusCode)
     .end(message)
 }
 
@@ -93,6 +94,7 @@ fun <T> HttpServerResponse.end(future: Future<T>) {
 
 fun <T> HttpServerResponse.end(value: T) {
   when (value) {
+    is Future<*> -> this.end(value)
     is String -> this.endWithString(value)
     is Buffer -> this.endWithBuffer(value)
     is ByteArray -> this.endWithByteArray(value)
