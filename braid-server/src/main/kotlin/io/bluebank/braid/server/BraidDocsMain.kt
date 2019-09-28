@@ -16,18 +16,18 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
-import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.bluebank.braid.corda.server.BraidDocsMain
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import java.io.File
 
-private val log = loggerFor<BraidCordaStandaloneServer>()
+private val log = loggerFor<BraidDocsMain>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
+    println("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
+    return
   }
 
   val file = File(args[0])

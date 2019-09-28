@@ -48,6 +48,10 @@
       <version>${corda.version}</version>
       <exclusions>
         <exclusion>
+          <groupId>net.corda</groupId>
+          <artifactId>corda-shell</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>net.corda.plugins</groupId>
           <artifactId>cordform-common</artifactId>
         </exclusion>
