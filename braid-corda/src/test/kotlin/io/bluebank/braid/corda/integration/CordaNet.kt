@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.integration
 
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.socket.findConsecutiveFreePorts
 import net.corda.core.identity.CordaX500Name
@@ -38,6 +39,7 @@ class CordaNet(
   companion object {
     init {
       LogInitialiser.init()
+      BraidCordaJacksonSwaggerInit.init()
     }
 
     @JvmStatic
