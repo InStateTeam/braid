@@ -101,6 +101,7 @@
     <nexus-staging.version>1.6.8</nexus-staging.version>
     <swagger.version>2.0.9</swagger.version>
     <node.dir>${user.home}/.node</node.dir>
+    <logback.version>1.2.3</logback.version>
   </properties>
 
   <modules>
@@ -278,8 +279,12 @@
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.2.3</version>
-        <scope>test</scope>
+        <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>${logback.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
@@ -305,6 +310,11 @@
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-models</artifactId>
         <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
     </dependencies>
 

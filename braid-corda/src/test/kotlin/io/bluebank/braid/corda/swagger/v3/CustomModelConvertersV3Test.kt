@@ -80,7 +80,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model AmountCurrency and AmountString`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-    println(models)
+//    println(models)
 
     val model = models["AmountCurrency"]
     assertThat(models.toString(), model, notNullValue())
@@ -103,7 +103,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model OpaqueBytes as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-    println(models)
+//    println(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
@@ -116,7 +116,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model SecureHash as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-    println(models)
+//    println(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
@@ -129,7 +129,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model Currency as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-    println(models)
+//    println(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())

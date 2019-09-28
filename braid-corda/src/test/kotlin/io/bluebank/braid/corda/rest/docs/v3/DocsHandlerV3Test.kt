@@ -90,6 +90,4 @@ class DocsHandlerV3Test {
 
     println(swagger)
   }
-
-
 }

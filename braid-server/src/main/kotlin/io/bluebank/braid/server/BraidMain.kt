@@ -22,7 +22,8 @@ private val log = loggerFor<BraidMain>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
+    println("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
+    return
   }
 
   val networkAndPort = args[0]
