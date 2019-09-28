@@ -15,7 +15,8 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import net.corda.core.contracts.TimeWindow
 import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.identity.PartyAndCertificate
@@ -27,13 +28,15 @@ import org.junit.Assert.assertThat
 import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ModelContextV3Test {
   companion object {
     @BeforeClass
     @JvmStatic
     fun beforeClass() {
-      BraidCordaJacksonSwaggerInit.init()
+      BraidCordaJacksonInit.init()
     }
   }
 
@@ -78,8 +81,9 @@ class ModelContextV3Test {
     val modelContext = ModelContextV3()
     modelContext.addType(TransactionVerificationException.InvalidAttachmentException::class.java)
 
-    val exception =
-      modelContext.models[TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName()]
+    assertFalse(modelContext.models.containsKey(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName()))
+    assertTrue(modelContext.models.containsKey("Error"))
+    val exception = modelContext.models["Error"]
     assertThat(exception, notNullValue())
     assertThat(exception?.properties?.get("cause"), nullValue())
   }
@@ -104,4 +108,15 @@ class ModelContextV3Test {
     assertThat(exceptn, notNullValue())
 
   }
+
+  @Test
+  fun `that we model errors correctly`() {
+    val modelContext = ModelContextV3()
+    val r2 = modelContext.addType(BraidSwaggerError::class.java)
+    assertTrue(
+      modelContext.models.containsKey("Error"),
+      "that the name of the error type is Error without the package name"
+    )
+  }
+
 }

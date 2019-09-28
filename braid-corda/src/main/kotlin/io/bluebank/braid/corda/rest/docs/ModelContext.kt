@@ -15,11 +15,14 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.corda.swagger.CustomModelConverterV2
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.swagger.models.Swagger
+import io.swagger.models.properties.BinaryProperty
+import io.swagger.models.properties.Property
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import java.lang.reflect.ParameterizedType
@@ -28,9 +31,24 @@ import java.nio.ByteBuffer
 
 class ModelContext {
   private val mutableModels = mutableMapOf<String, Model>()
+  private val modelConverters = ModelConverters().apply { addConverter(CustomModelConverterV2()) }
   val models: Map<String, Model> get() = mutableModels
 
-  fun addType(type: Type) {
+  fun getProperty(type: Type): Property {
+    addType(type)
+    val actualType = type.actualType()
+    return try {
+      if (actualType.isBinary()) {
+        BinaryProperty()
+      } else {
+        modelConverters.readAsProperty(actualType)
+      }
+    } catch (e: Throwable) {
+      throw RuntimeException("Unable to convert actual type: $actualType", e)
+    }
+  }
+
+  private fun addType(type: Type) {
     if (type is ParameterizedType) {
       if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
         this.addType(type.actualTypeArguments[0])
@@ -40,9 +58,10 @@ class ModelContext {
         }
       }
     } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
-      mutableModels += type.createSwaggerModels()
+      type.createSwaggerModels()
     }
   }
+
 
   fun addToSwagger(swagger: Swagger): Swagger {
     models.forEach { (name, model) ->
@@ -66,8 +85,18 @@ class ModelContext {
     }
   }
 
-  private fun Type.createSwaggerModels(): Map<String, Model> {
-    return ModelConverters.getInstance().readAll(this)
+  private fun Type.actualType(): Type {
+    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
+      this.actualTypeArguments[0]
+    } else {
+      this
+    }
+  }
+
+  private fun Type.createSwaggerModels() {
+    val actualType = actualType()
+    val models = modelConverters.readAll(actualType)
+    this@ModelContext.mutableModels += models
   }
 
   companion object {

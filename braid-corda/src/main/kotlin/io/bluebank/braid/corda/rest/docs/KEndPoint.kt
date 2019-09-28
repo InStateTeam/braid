@@ -25,6 +25,7 @@ import io.vertx.core.http.HttpMethod.*
 import java.lang.reflect.Type
 import javax.ws.rs.DefaultValue
 import javax.ws.rs.QueryParam
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
@@ -37,13 +38,15 @@ class KEndPoint(
   val name: String,
   val parameters: List<KParameter>,
   override val returnType: Type,
-  override val annotations: List<Annotation>
-) : EndPoint(groupName, protected, method, path) {
+  override val annotations: List<Annotation>,
+  modelContext: ModelContext
+) : EndPoint(groupName, protected, method, path, modelContext) {
 
   init {
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
   }
 
+  private val contextParameters = parameters.filter { it.findAnnotation<Context>() != null }
   private val pathParamNames = Paths.PATH_PARAMS_RE.findAll(path)
     .map { it.groups[2]!!.value }
 
@@ -62,8 +65,8 @@ class KEndPoint(
 
   private val queryParams = parameters.subtract(pathParams).let {
     when (bodyParameter) {
-      null -> it
-      else -> it - bodyParameter
+      null -> it - contextParameters
+      else -> it - contextParameters - bodyParameter
     }
   }
 
@@ -74,7 +77,12 @@ class KEndPoint(
     }
 
   override val parameterTypes: List<Type>
-    get() = parameters.map { it.type.javaTypeIncludingSynthetics() }
+    get() = ((pathParams + queryParams).let {
+      when {
+        bodyParameter != null -> it + bodyParameter
+        else -> it
+      }
+    }).map { it.type.javaTypeIncludingSynthetics() }
 
   override fun toSwaggerParams(): List<Parameter> {
     return if (this.parameters.isEmpty()) {

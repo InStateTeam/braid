@@ -32,12 +32,12 @@ import java.net.URL
 import kotlin.reflect.KCallable
 
 class DocsHandlerV2(
-    private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
-    private val scheme: Scheme = Scheme.HTTPS,
+  private val swaggerInfo: SwaggerInfo = SwaggerInfo(),
+  private val scheme: Scheme = Scheme.HTTPS,
 
-    private val basePath: String = "http://localhost:8080",
-    private val auth: SecuritySchemeDefinition? = null,
-    private val debugMode: Boolean = false
+  private val basePath: String = "http://localhost:8080",
+  private val auth: SecuritySchemeDefinition? = null,
+  private val debugMode: Boolean = false
 ) : DocsHandler {
 
   companion object {
@@ -56,12 +56,12 @@ class DocsHandlerV2(
     val absoluteURI = URL(context.request().absoluteURI())
     swagger.host = absoluteURI.authority
     val output =
-        Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
+      Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
     context.response()
-        .setStatusCode(HttpResponseStatus.OK.code())
-        .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-        .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
-        .end(output)
+      .setStatusCode(HttpResponseStatus.OK.code())
+      .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+      .end(output)
   }
 
   override fun swagger(): String {
@@ -72,34 +72,36 @@ class DocsHandlerV2(
     val url = URL(basePath)
     val info = createSwaggerInfo()
     return Swagger()
-        .info(info)
-        .host(url.host + ":" + url.port)
-        .basePath(url.path)
-        .apply {
-          if (auth != null) {
-            securityDefinition(SECURITY_DEFINITION_NAME, auth)
-          }
+      .info(info)
+      .host(url.host + ":" + url.port)
+      .basePath(url.path)
+      .apply {
+        if (auth != null) {
+          securityDefinition(SECURITY_DEFINITION_NAME, auth)
         }
-        .scheme(scheme)
-        .consumes(APPLICATION_JSON.toString())
-        .produces(APPLICATION_JSON.toString())
-        .apply {
-          modelContext.addToSwagger(this)
-          endpoints.forEach {
-            addEndpoint(it)
-          }
+      }
+      .scheme(scheme)
+      .consumes(APPLICATION_JSON.toString())
+      .produces(APPLICATION_JSON.toString())
+      .apply {
+        modelContext.addToSwagger(this)
+        endpoints.forEach {
+          addEndpoint(it)
         }
+      }
   }
 
   private fun createSwaggerInfo(): Info? {
     val info = Info()
-        .version(swaggerInfo.version)
-        .title(swaggerInfo.serviceName)
-        .description(swaggerInfo.description)
-        .contact(Contact()
-            .name(swaggerInfo.contact.name)
-            .email(swaggerInfo.contact.email)
-            .url(swaggerInfo.contact.url))
+      .version(swaggerInfo.version)
+      .title(swaggerInfo.serviceName)
+      .description(swaggerInfo.description)
+      .contact(
+        Contact()
+          .name(swaggerInfo.contact.name)
+          .email(swaggerInfo.contact.email)
+          .url(swaggerInfo.contact.url)
+      )
     return info
   }
 
@@ -128,33 +130,34 @@ class DocsHandlerV2(
   }
 
   override fun <Response> add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: KCallable<Response>
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: KCallable<Response>
   ) {
     val endpoint = EndPoint.create(
-        groupName,
-        protected,
-        method,
-        path,
-        handler.name,
-        handler.parameters,
-        handler.returnType,
-        handler.annotations
+      groupName,
+      protected,
+      method,
+      path,
+      handler.name,
+      handler.parameters,
+      handler.returnType,
+      handler.annotations,
+      modelContext
     )
     add(endpoint)
   }
 
   override fun add(
-      groupName: String,
-      protected: Boolean,
-      method: HttpMethod,
-      path: String,
-      handler: (RoutingContext) -> Unit
+    groupName: String,
+    protected: Boolean,
+    method: HttpMethod,
+    path: String,
+    handler: (RoutingContext) -> Unit
   ) {
-    val endpoint = EndPoint.create(groupName, protected, method, path, handler)
+    val endpoint = EndPoint.create(groupName, protected, method, path, modelContext, handler)
     add(endpoint)
   }
 
@@ -169,7 +172,7 @@ class DocsHandlerV2(
   }
 
   override fun addType(type: Type) {
-    modelContext.addType(type)
+    modelContext.getProperty(type)
   }
 }
 

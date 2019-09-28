@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
+import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
@@ -132,11 +133,11 @@ abstract class EndPointV3(
         .addApiResponse(OK.statusCode.toString(), response(returnType))
         .addApiResponse(
           BAD_REQUEST.statusCode.toString(),
-          response(Throwable::class.java).description("the server failed to parse the request")
+          response(BraidSwaggerError::class.java).description("the server failed to parse the request")
         )
         .addApiResponse(
           HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
-          response(Throwable::class.java).description("the request could not be processed")
+          response(BraidSwaggerError::class.java).description("the request could not be processed")
         )
     )
     return operation
