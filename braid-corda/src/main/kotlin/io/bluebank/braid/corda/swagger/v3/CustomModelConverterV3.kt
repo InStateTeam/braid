@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.swagger.v3
 
 import com.fasterxml.jackson.databind.JavaType
+import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
 import io.swagger.util.Json
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
@@ -66,7 +67,10 @@ class CustomModelConverterV3 : ModelConverter {
             Currency::class.java.isAssignableFrom(clazz) -> currencySchema()
             Amount::class.java.isAssignableFrom(clazz) -> geAmountSchema(jsonType)
             Issued::class.java.isAssignableFrom(clazz) -> getIssuedSchema(context, jsonType)
-            Throwable::class.java.isAssignableFrom(clazz) -> errorSchema()
+            Throwable::class.java.isAssignableFrom(clazz) -> {
+              type.type = BraidSwaggerError::class.java
+              chain?.next()?.resolve(type, context, chain)
+            }
             else -> chain?.next()?.resolve(type, context, chain)
           }
         }
@@ -169,13 +173,5 @@ class CustomModelConverterV3 : ModelConverter {
       "_tokenType", StringSchema()
         .example("net.corda.core.contracts.Issued")
     )
-
-  private fun errorSchema() = ObjectSchema()
-    .name("Error")
-    .description("a payload for error information when a method fails")
-    .addProperties("message", StringSchema().description("the description of the error"))
-//      .addProperties("cause", ObjectSchema().`$ref`("Error").nullable(true))
-    .addProperties("type", StringSchema().description("the class of error being returned"))
-
 
 }

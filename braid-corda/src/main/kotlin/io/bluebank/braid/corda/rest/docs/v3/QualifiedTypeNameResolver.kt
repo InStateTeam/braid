@@ -45,10 +45,11 @@ class QualifiedTypeNameResolver : TypeNameResolver() {
 }
 
 fun Class<*>.swaggerTypeName(options: Set<TypeNameResolver.Options> = emptySet()): String {
-  return when {
-    Throwable::class.java.isAssignableFrom(this) -> "Error"
-    else -> this.simplerName(options).replace("$", "_")
-  }
+  return this.simplerName(options).replace("$", "_")
+//  return when {
+//    Throwable::class.java.isAssignableFrom(this) -> "Error"
+//    else -> this.simplerName(options).replace("$", "_")
+//  }
 }
 
 private fun Class<*>.simplerName(options: Set<TypeNameResolver.Options>): String {
