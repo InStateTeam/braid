@@ -15,14 +15,16 @@
  */
 package io.bluebank.braid.corda.services.vault
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import net.corda.core.contracts.ContractState
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.Sort
 
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 data class VaultQuery(
-   val criteria: QueryCriteria,
-   val paging: PageSpecification,
-   val sorting: Sort,
-   val contractStateType:Class<ContractState>
+    val criteria: QueryCriteria = QueryCriteria.VaultQueryCriteria(),
+    val paging: PageSpecification = PageSpecification(),
+    val sorting: Sort = Sort(emptyList()),
+    val contractStateType:Class<ContractState> = ContractState::class.java
 )

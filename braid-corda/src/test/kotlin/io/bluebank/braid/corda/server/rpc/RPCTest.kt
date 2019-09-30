@@ -18,18 +18,15 @@ package io.bluebank.braid.corda.server.rpc
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
+import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.node.services.vault.PageSpecification
-import net.corda.core.node.services.vault.QueryCriteria
-import net.corda.core.node.services.vault.Sort
-import net.corda.core.node.services.vault.SortAttribute
+import net.corda.core.node.services.vault.*
 import net.corda.core.toObservable
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.OpaqueBytes
@@ -37,6 +34,8 @@ import net.corda.core.utilities.parsePublicKeyBase58
 import net.corda.finance.AMOUNT
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.CashIssueFlow
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.Arrays.asList
 
@@ -66,17 +65,30 @@ fun main(args: Array<String>) {
   Json.mapper.registerModule(it)
   Json.prettyMapper.registerModule(it)
 
-  issueCash(ops)
+  //issueCash(ops)
 
   //info(ops)
 
   val vaultQuery = ops.vaultQuery(Cash.State::class.java)
 
 
-  val criteria = QueryCriteria.LinearStateQueryCriteria(participants = listOf(notary(ops) as AbstractParty))
-  val sortAttribute = SortAttribute.Standard(Sort.VaultStateAttribute.CONSTRAINT_TYPE)
-  val results = ops.vaultQueryBy(criteria, PageSpecification(),
-      Sort(asList(Sort.SortColumn(sortAttribute, Sort.Direction.ASC))),Cash.State::class.java)
+  val start = Instant.now().minus(15, ChronoUnit.DAYS)
+  val end = start.plus(30, ChronoUnit.DAYS)
+  val recordedBetweenExpression = QueryCriteria.TimeCondition(
+      QueryCriteria.TimeInstantType.RECORDED,
+      ColumnPredicate.Between(start, end))
+  val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
+  
+  //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
+  val sorting = Sort(asList(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
+
+
+  val q = VaultQuery(criteria = criteria)
+  println(Json.encodePrettily(q))
+
+
+  val results = ops.vaultQueryBy(q.criteria,q.paging,q.sorting,q.contractStateType)
+
 
   connection.notifyServerAndClose()
 }

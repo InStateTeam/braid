@@ -16,12 +16,14 @@
 package io.bluebank.braid.corda.serialisation
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.corda.swagger.CustomModelConvertersV2Test
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.contracts.TransactionState
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
@@ -30,6 +32,7 @@ import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
 import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
@@ -140,6 +143,46 @@ class SerialisationTests {
     val txnState = TransactionState(state, state.javaClass.name,DUMMY_BANK_A)
 
     Json.encodePrettily(txnState)
+  }
+
+  @Test
+  fun `Should serialize queryCriteria`() {
+
+    val json ="""
+{
+  "criteria" : {
+    "@class" : ".QueryCriteria${'$'}VaultQueryCriteria",
+    "status" : "UNCONSUMED",
+    "contractStateTypes" : null,
+    "stateRefs" : null,
+    "notary" : null,
+    "softLockingCondition" : null,
+    "timeCondition" : {
+      "type" : "RECORDED",
+      "predicate" : {
+        "@class" : ".ColumnPredicate${'$'}Between",
+        "rightFromLiteral" : "2019-09-15T12:58:23.283Z",
+        "rightToLiteral" : "2019-10-15T12:58:23.283Z"
+      }
+    },
+    "relevancyStatus" : "ALL",
+    "constraintTypes" : [ ],
+    "constraints" : [ ],
+    "participants" : null
+  },
+  "paging" : {
+    "pageNumber" : -1,
+    "pageSize" : 200
+  },
+  "sorting" : {
+    "columns" : [ ]
+  },
+  "contractStateType" : "net.corda.core.contracts.ContractState"
+}
+"""
+
+    val decodeValue = Json.decodeValue(json,VaultQuery::class.java)
+    assertThat(decodeValue, notNullValue())
   }
 
   private fun f(set: NonEmptySet<String>) {}

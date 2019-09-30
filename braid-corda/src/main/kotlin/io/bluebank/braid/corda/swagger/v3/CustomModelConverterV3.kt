@@ -22,6 +22,7 @@ import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.models.media.*
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
