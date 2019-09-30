@@ -22,6 +22,7 @@ import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.vault.VaultService
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
@@ -69,6 +70,11 @@ class BraidCordaStandaloneServer(
           get("/network/notaries", networkService::notaries)
           get("/network/nodes/self", networkService::myNodeInfo)
         }
+        group("vault") {
+          get("/vault/vaultQuery", VaultService(rpc)::vaultQuery)
+          post("/vault/vaultQueryBy", VaultService(rpc)::vaultQueryBy)
+        }
+
         group("cordapps") {
           get("/cordapps", cordappsScanner::cordapps)
           get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)

@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.server
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
+import io.bluebank.braid.corda.util.VertxMatcher.vertxAssertThat
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
 import io.bluebank.braid.core.http.body
@@ -443,6 +444,31 @@ class BraidCordaStandaloneServerTest {
       .end()
     return result;
   }
+
+
+
+  @Test
+  fun `should query the vault`(context: TestContext) {
+    val async = context.async()
+
+
+
+    log.info("calling get: http://localhost:${port}/api/rest/network/vault")
+    client.get(port, "localhost", "/api/rest/vault/vaultQuery")
+        .putHeader("Accept", "application/json; charset=utf8")
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val nodes = it.toJsonObject()
+
+            vertxAssertThat(context,nodes, notNullValue())
+
+            async.complete()
+          }
+        }
+        .end()
+  }
+
 }
-
-

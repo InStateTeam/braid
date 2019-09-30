@@ -25,6 +25,7 @@ import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.CordaThrowable
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.TimeWindow
 import net.corda.core.crypto.SecureHash
@@ -93,6 +94,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
       .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
       .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
+      .setMixInAnnotation(ContractState::class.java, ContractStateMixin::class.java)
 
 //            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
 //            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)

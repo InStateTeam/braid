@@ -22,16 +22,23 @@ import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.node.services.vault.PageSpecification
+import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.node.services.vault.Sort
+import net.corda.core.node.services.vault.SortAttribute
 import net.corda.core.toObservable
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.parsePublicKeyBase58
 import net.corda.finance.AMOUNT
+import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.CashIssueFlow
 import java.util.*
+import java.util.Arrays.asList
 
 class RPCTest
 
@@ -62,14 +69,21 @@ fun main(args: Array<String>) {
   issueCash(ops)
 
   //info(ops)
-  //cordaRPCOperations.
 
-  //ops.
-  //ops.startFlow()
+  val vaultQuery = ops.vaultQuery(Cash.State::class.java)
+
+
+  val criteria = QueryCriteria.LinearStateQueryCriteria(participants = listOf(notary(ops) as AbstractParty))
+  val sortAttribute = SortAttribute.Standard(Sort.VaultStateAttribute.CONSTRAINT_TYPE)
+  val results = ops.vaultQueryBy(criteria, PageSpecification(),
+      Sort(asList(Sort.SortColumn(sortAttribute, Sort.Direction.ASC))),Cash.State::class.java)
+
   connection.notifyServerAndClose()
 }
 
+
 private fun issueCash(ops: CordaRPCOps) {
+
   val party = Party(
     CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),
     parsePublicKeyBase58("GfHq2tTVk9z4eXgyVjEnMc2NbZTfJ6Y3YJDYNRvPn2U7jiS3suzGY1yqLhgE")
@@ -78,13 +92,16 @@ private fun issueCash(ops: CordaRPCOps) {
     CashIssueFlow::class.java,
     AMOUNT(10.00, Currency.getInstance("GBP")),
     OpaqueBytes("123".toByteArray()),
-    party
+      notary(ops)
   )
   progressHandler.returnValue.toObservable().toFuture()
     .setHandler {
       println(it)
     }
 }
+
+private fun notary(ops: CordaRPCOps) =
+    ops.notaryPartyFromX500Name(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"))
 
 private fun info(ops: CordaRPCOps) {
   log.info("currentNodeTime" + Json.encodePrettily(ops.currentNodeTime()))

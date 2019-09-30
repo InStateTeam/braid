@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
   val file = File(args[0])
   val openApiVersion = Integer.parseInt(args[1])
 
-  file.parentFile.mkdirs()
+  file.parentFile?.mkdirs()
   val jars = args.toList().drop(2)
   val swaggerText = generateSwaggerText(openApiVersion, jars)
   file.writeText(swaggerText)
