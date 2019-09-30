@@ -17,7 +17,9 @@ package io.bluebank.braid.core.utils
 
 import java.io.File
 import java.net.URI
+import java.net.URL
 import java.net.URLClassLoader
+import java.util.Arrays.asList
 
 object PathsClassLoader {
   private val tempFileDownloader = JarDownloader()
@@ -27,16 +29,28 @@ object PathsClassLoader {
 
   fun jarsClassLoader(jarPaths: Collection<String>): ClassLoader {
     val urls = jarPaths.asSequence().map {
-      try {
-        // attempt to download the file if available
-        tempFileDownloader.uriToFile(URI(it).toURL())
-      } catch (err: IllegalArgumentException) {
-        // attempt to create as a path
-        File(it).toURI().toURL()
-      }
-    }.toList().toTypedArray()
+      urlOrFiles(it)
+    }.flatMap {it.asSequence()}.toList().toTypedArray()
     return URLClassLoader(urls, Thread.currentThread().contextClassLoader)
   }
+
+  fun urlOrFiles(urlOrFileName: String): List<URL> {
+    return try {
+      // attempt to download the file if available
+      asList(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
+    } catch (err: IllegalArgumentException) {
+      localFiles(urlOrFileName)
+    }
+  }
+
+ private fun localFiles(urlOrFileName: String): List<URL> {
+      // attempt to create as a path
+      val file = File(urlOrFileName)
+      if(file.isDirectory){
+           return file.list().map { localFiles(it) }.flatMap { it }.toList()
+      }
+      return asList(file.toURI().toURL())
+    }
 }
 
 fun List<String>.toJarsClassLoader(): ClassLoader {

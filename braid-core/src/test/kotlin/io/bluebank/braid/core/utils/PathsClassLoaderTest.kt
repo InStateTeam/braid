@@ -15,8 +15,12 @@
  */
 package io.bluebank.braid.core.utils
 
+import org.hamcrest.CoreMatchers.endsWith
+import org.hamcrest.CoreMatchers.hasItem
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertThat
 import org.junit.Test
+import java.net.URL
 
 class PathsClassLoaderTest {
   @Test
