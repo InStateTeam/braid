@@ -42,6 +42,11 @@ class CustomModelConvertersV3Test {
     fun beforeClass() {
       BraidCordaJacksonSwaggerInit.init()
     }
+    fun print(message: kotlin.Any?) {
+      // enabling this printLn adds 20,000 lines to the test result output
+      // which can make it harder to review the output from other tests (and increases the test run-time)
+      // println(message)
+    }
   }
 
   private val converter = ModelConverters().apply {
@@ -52,7 +57,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model Amount`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-//    println(models)
+    print(models)
 
     assertThat(models.toString(), models["Amount"], notNullValue())
     val properties = models["Amount"]?.properties
@@ -80,7 +85,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model AmountCurrency and AmountString`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-//    println(models)
+    print(models)
 
     val model = models["AmountCurrency"]
     assertThat(models.toString(), model, notNullValue())
@@ -103,7 +108,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model OpaqueBytes as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-//    println(models)
+    print(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
@@ -116,7 +121,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model SecureHash as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-//    println(models)
+    print(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())
@@ -129,7 +134,7 @@ class CustomModelConvertersV3Test {
   @Test
   fun `should Correctly Model Currency as string`() {
     val models = converter.readAll(ClassWithTypes::class.java)
-//    println(models)
+    print(models)
 
     val model = models["ClassWithTypes"]
     assertThat(models.toString(), model, notNullValue())

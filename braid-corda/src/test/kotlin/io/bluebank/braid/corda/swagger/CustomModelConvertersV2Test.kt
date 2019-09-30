@@ -40,12 +40,15 @@ class CustomModelConvertersV2Test {
     fun beforeClass() {
       BraidCordaJacksonSwaggerInit.init()
     }
+    fun print(message: kotlin.Any?) {
+      println(message)
+    }
   }
 
   @Test
   fun `should Correctly Model Amount`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
+    print(models)
 
     assertThat(models.toString(), models.get("Amount"), notNullValue())
     val properties = models.get("Amount")?.properties
@@ -73,7 +76,7 @@ class CustomModelConvertersV2Test {
   @Test
   fun `should Correctly Model AmountCurrency and AmountString`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
+    print(models)
 
     val model = models.get("AmountCurrency")
     assertThat(models.toString(), model, notNullValue())
@@ -96,7 +99,7 @@ class CustomModelConvertersV2Test {
   @Test
   fun `should Correctly Model OpaqueBytes as string`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
+    print(models)
 
     val model = models.get("ClassWithTypes")
     assertThat(models.toString(), model, notNullValue())
@@ -109,7 +112,7 @@ class CustomModelConvertersV2Test {
   @Test
   fun `should Correctly Model SecureHash as string`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
+    print(models)
 
     val model = models.get("ClassWithTypes")
     assertThat(models.toString(), model, notNullValue())
@@ -122,7 +125,7 @@ class CustomModelConvertersV2Test {
   @Test
   fun `should Correctly Model Currency as string`() {
     val models = ModelConverters.getInstance().readAll(ClassWithTypes::class.java)
-    println(models)
+    print(models)
 
     val model = models.get("ClassWithTypes")
     assertThat(models.toString(), model, notNullValue())
