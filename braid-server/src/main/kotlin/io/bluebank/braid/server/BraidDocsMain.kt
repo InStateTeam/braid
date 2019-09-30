@@ -26,7 +26,7 @@ private val log = loggerFor<BraidDocsMain>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    println("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJar1> <cordAppJar2> ....]")
+    println("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJarOrDir1> <cordAppJarOrDir2> ....]")
     return
   }
 
