@@ -17,25 +17,16 @@
 
 package io.bluebank.braid.corda.rest
 
-import io.bluebank.braid.corda.BraidConfig
-import io.bluebank.braid.corda.BraidServer
-import io.bluebank.braid.core.http.HttpServerConfig
-import io.bluebank.braid.core.security.JWTUtils
+//import io.swagger.v3.oas.annotations.
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.swagger.annotations.*
 import io.vertx.core.Future
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AuthProvider
-import io.vertx.ext.auth.jwt.JWTAuth
-import io.vertx.ext.auth.jwt.JWTOptions
 import io.vertx.ext.web.RoutingContext
-import java.io.File
-import java.io.FileOutputStream
+import net.corda.core.CordaException
 import java.nio.ByteBuffer
 import javax.ws.rs.HeaderParam
 import javax.ws.rs.core.Context
@@ -59,6 +50,10 @@ class TestService {
     Buffer.buffer(bytes.length() * 2)
       .appendBytes(bytes.bytes)
       .appendBytes(bytes.bytes)
+
+  fun throwCordaException(): String {
+    throw CordaException("something went wrong", java.lang.RuntimeException("sub exception"))
+  }
 
   @ApiOperation(
     value = "do something custom",
@@ -99,7 +94,7 @@ class TestService {
   }
 
   fun willFail(): String {
-    throw RuntimeException("total fail!")
+    throw RuntimeException("on purpose failure")
   }
 
   fun headerListOfStrings(@HeaderParam(X_HEADER_LIST_STRING) value: List<String>): List<String> {
@@ -136,105 +131,18 @@ class TestService {
 
     return headers.getRequestHeader(X_HEADER_LIST_STRING).map { it.toInt() }
   }
-}
 
-class TestServiceApp(port: Int, private val service: TestService) {
-  companion object {
-    const val SWAGGER_ROOT = "/swagger"
-    const val REST_API_ROOT = "/"
-    @JvmStatic
-    fun main(args: Array<String>) {
-      TestServiceApp(8080, TestService())
-    }
+  fun mapNumbersToStrings(numbers: Map<Int, Int>): Map<String, String> {
+    return numbers.map { it.key.toString() to it.value.toString() }.toMap()
   }
 
-  private val tempJKS = File.createTempFile("temp-", ".jceks")!!
-  private val jwtSecret = "secret"
-  private lateinit var jwtAuth: JWTAuth
-
-  val server: BraidServer
-
-  init {
-    val thisObj = this
-    server = BraidConfig()
-      .withPort(port)
-      .withService(service)
-      .withAuthConstructor(this::createAuthProvider)
-      .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
-      .withRestConfig(RestConfig(serviceName = "my-service")
-        .withAuthSchema(AuthSchema.Token)
-        .withSwaggerPath(SWAGGER_ROOT)
-        .withApiPath(REST_API_ROOT)
-        .withDebugMode()
-        .withPaths {
-          group("General Ledger") {
-            unprotected {
-              get("/hello-async", service::sayHelloAsync)
-              get("/quiet-async-void", service::quietAsyncVoid)
-              get("/quiet-async-unit", service::quietAsyncUnit)
-              get("/quiet-unit", service::quietUnit)
-              post("/login", thisObj::login)
-              get("/hello", service::sayHello)
-              get("/buffer", service::getBuffer)
-              get("/bytearray", service::getByteArray)
-              get("/bytebuf", service::getByteBuf)
-              get("/bytebuffer", service::getByteBuffer)
-              post("/doublebuffer", service::doubleBuffer)
-              post("/custom", service::somethingCustom)
-              get("/stringlist", service::returnsListOfStuff)
-              get("/willfail", service::willFail)
-              get("/headers/list/string", service::headerListOfStrings)
-              get("/headers/list/int", service::headerListOfInt)
-              get("/headers", service::headers)
-              get("/headers/optional", service::optionalHeader)
-              get("/headers/non-optional", service::nonOptionalHeader)
-            }
-            protected {
-              post("/echo", service::echo)
-            }
-          }
-        })
-      .bootstrapBraid(TestAppServiceHub())
+  fun mapMapOfNumbersToMapOfStrings(data: Map<String, List<Int>>): Map<String, List<String>> {
+    return data.map { entry ->
+      entry.key to entry.value.map { it.toString() }
+    }.toMap()
   }
 
-  fun whenReady(): Future<String> = server.whenReady()
-  fun shutdown() = server.shutdown()
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  fun login(request: LoginRequest): String {
-    if (request == LoginRequest("sa", "admin")) {
-      @Suppress("DEPRECATION")
-      return jwtAuth.generateToken(
-        JsonObject().put("user", request.user),
-        JWTOptions().setExpiresInMinutes(24 * 60)
-      )
-    } else {
-      throw RuntimeException("failed to authenticate")
-    }
-  }
-
-  private fun createAuthProvider(vertx: Vertx): AuthProvider {
-    ensureJWTKeyStoreExists()
-    @Suppress("DEPRECATION")
-    return JWTAuth.create(
-      vertx, JsonObject().put(
-        "keyStore", JsonObject()
-          .put("path", tempJKS.absolutePath)
-          .put("type", "jceks")
-          .put("password", jwtSecret)
-      )
-    ).apply {
-      jwtAuth = this
-    }
-  }
-
-  private fun ensureJWTKeyStoreExists() {
-    val ks = JWTUtils.createSimpleJWTKeyStore(jwtSecret)
-    FileOutputStream(tempJKS.absoluteFile).use {
-      ks.store(it, jwtSecret.toCharArray())
-      it.flush()
-    }
-  }
+  fun sum(request: SumRequest): SumResponse = SumResponse(request.lhs + request.rhs, request.nonce)
 }
 
 data class LoginRequest(
@@ -246,4 +154,9 @@ data class LoginRequest(
     example = "admin"
   ) val password: String
 )
+
+abstract class AbstractRequest(val nonce: Int)
+abstract class AbstractResult(val nonce: Int)
+class SumRequest(val lhs: Int, val rhs: Int, nonce: Int) : AbstractRequest(nonce)
+class SumResponse(val value: Int, nonce: Int) : AbstractResult(nonce)
 

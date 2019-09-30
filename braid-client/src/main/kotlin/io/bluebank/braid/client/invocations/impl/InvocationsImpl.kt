@@ -74,17 +74,23 @@ internal class InvocationsImpl internal constructor(
       "${config.serviceURI.path}/websocket"
     )
     val result = Future.future<Boolean>()
-    client.websocket(url.toString(), { sock ->
-      socket = sock
-      sock.handler(this::receive)
-      sock.exceptionHandler(exceptionHandler)
-      sock.closeHandler(closeHandler)
-      result.complete(true)
-    }, { error ->
-      log.error("failed to bind to websocket", error)
-      socket = null
-      result.fail(error)
-    })
+    client.webSocket(url.toString()) { arWebSocket ->
+      when {
+        arWebSocket.succeeded() -> {
+          val sock = arWebSocket.result()
+          socket = arWebSocket.result()
+          sock.handler(this::receive)
+          sock.exceptionHandler(exceptionHandler)
+          sock.closeHandler(closeHandler)
+          result.complete(true)
+        }
+        else -> {
+          log.error("failed to bind to websocket", arWebSocket.cause())
+          socket = null
+          result.fail(arWebSocket.cause())
+        }
+      }
+    }
     result.getOrThrow()
   }
 

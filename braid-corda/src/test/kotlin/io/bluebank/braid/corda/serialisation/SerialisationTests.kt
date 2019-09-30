@@ -15,26 +15,41 @@
  */
 package io.bluebank.braid.corda.serialisation
 
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
+import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
+import org.hamcrest.CoreMatchers.startsWith
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import sun.security.provider.X509Factory
+import java.io.ByteArrayInputStream
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.reflect.jvm.javaType
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SerialisationTests {
   companion object {
     val DUMMY_BANK_A = TestIdentity(DUMMY_BANK_A_NAME, 40).party
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
 
   @Rule
@@ -43,7 +58,7 @@ class SerialisationTests {
 
   @Before
   fun before() {
-    BraidCordaJacksonInit.init()
+    BraidCordaJacksonSwaggerInit.init()
   }
 
 //  @Ignore
@@ -80,6 +95,39 @@ class SerialisationTests {
     assertEquals("\"2019-03-30T12:34:56.567+0000\"", encoded)
   }
 
+  @Test
+  fun `that X509 Should serialize as bytes`() {
+    val base64 = this::class.java.getResource("/serlialization/certificate/x509.pem")
+        .readText()
+        .replace(X509Factory.BEGIN_CERT,"")
+        .replace(X509Factory.END_CERT,"")
+        .replace("\n","")
+        .replace("\r","")
 
+    val certificate = CertificateFactory.getInstance("X.509")
+        .generateCertificate(ByteArrayInputStream(Base64.getDecoder().decode(base64)))
 
+    val encoded = Json.encode(certificate)
+    val decoded = Json.decodeValue(encoded, X509Certificate::class.java)
+
+    assertThat(encoded, startsWith("\"MIIIRzCCBi"))
+  }
+
+  @Test
+  fun `given a non empty set we can deserialise it`() {
+    val json = """
+      [
+        "item1", 
+        "item2"
+      ]
+    """.trimIndent()
+    val type = ::f.parameters.first().type.javaType
+    val javaType = Json.mapper.typeFactory.constructType(type)
+    val result = Json.mapper.readValue<NonEmptySet<String>>(json, javaType)
+    assertTrue(result is NonEmptySet)
+    assertEquals(2, result.size)
+    assertTrue(result.contains("item1") && result.contains("item2"))
+  }
+
+  private fun f(set: NonEmptySet<String>) {}
 }

@@ -31,6 +31,8 @@ import javax.ws.rs.QueryParam
 import kotlin.reflect.KFunction
 
 class KEndPointTest {
+  private val modelContext = ModelContext()
+
   @Test
   fun `that names can be applied with @QueryParam`() {
     val method = this::listAccountsPagedRest
@@ -85,6 +87,25 @@ class KEndPointTest {
     assertEquals("default-path-param", p.defaultValue)
   }
 
+  private fun <R> createOperation(
+    method: HttpMethod = GET,
+    path: String = "/foo",
+    group: String = "",
+    name: String = "my-name",
+    protected: Boolean = false,
+    handler: KFunction<R>
+  ) = EndPoint.create(
+    group,
+    protected,
+    method,
+    path,
+    "my-name",
+    handler.parameters,
+    handler.returnType,
+    handler.annotations,
+    modelContext
+  ).toOperation()
+
   fun listAccountsPagedRest(
     @Suppress("UNUSED_PARAMETER") @QueryParam("page-number")
     @ApiParam(
@@ -135,23 +156,4 @@ class KEndPointTest {
     details: String
   ) {
   }
-
-  private fun <R> createOperation(
-    method: HttpMethod = GET,
-    path: String = "/foo",
-    group: String = "",
-    name: String = "my-name",
-    protected: Boolean = false,
-    handler: KFunction<R>
-  ) = EndPoint.create(
-    group,
-    protected,
-    method,
-    path,
-    "my-name",
-    handler.parameters,
-    handler.returnType,
-    handler.annotations
-  ).toOperation()
-
 }

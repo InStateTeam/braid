@@ -70,6 +70,7 @@ build:
       - braid-core/target
       - braid-quickstart/target
       - braid-standalone-server/target
+      - braid-server/target
   only:
     - master
     - patch-1

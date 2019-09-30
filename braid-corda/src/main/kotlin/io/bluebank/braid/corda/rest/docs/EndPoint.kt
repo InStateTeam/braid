@@ -15,11 +15,11 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
+import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
-import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.swagger.models.Operation
 import io.swagger.models.Response
@@ -28,7 +28,6 @@ import io.swagger.models.parameters.Parameter
 import io.swagger.models.parameters.PathParameter
 import io.swagger.models.parameters.QueryParameter
 import io.swagger.models.properties.ArrayProperty
-import io.swagger.models.properties.BinaryProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.PropertyBuilder
 import io.vertx.core.Future
@@ -40,6 +39,7 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.Response.Status.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
@@ -48,9 +48,9 @@ abstract class EndPoint(
   private val groupName: String,
   val protected: Boolean,
   val method: HttpMethod,
-  val path: String
+  val path: String,
+  val modelContext: ModelContext
 ) {
-
   companion object {
     fun create(
       groupName: String,
@@ -60,7 +60,8 @@ abstract class EndPoint(
       name: String,
       parameters: List<KParameter>,
       returnType: KType,
-      annotations: List<Annotation>
+      annotations: List<Annotation>,
+      modelContext: ModelContext
     ): EndPoint {
       return KEndPoint(
         groupName,
@@ -70,7 +71,8 @@ abstract class EndPoint(
         name,
         parameters,
         returnType.javaTypeIncludingSynthetics(),
-        annotations
+        annotations,
+        modelContext
       )
     }
 
@@ -79,9 +81,10 @@ abstract class EndPoint(
       protected: Boolean,
       method: HttpMethod,
       path: String,
+      modelContext: ModelContext,
       fn: RoutingContext.() -> Unit
     ): EndPoint {
-      return ImplicitParamsEndPoint(groupName, protected, method, path, fn)
+      return ImplicitParamsEndPoint(groupName, protected, method, path, modelContext, fn)
     }
   }
 
@@ -128,9 +131,9 @@ abstract class EndPoint(
     }
 
   fun addTypes(models: ModelContext) {
-    models.addType(this.returnType)
+    models.getProperty(this.returnType)
     this.parameterTypes.forEach {
-      models.addType(it)
+      models.getProperty(it)
     }
   }
 
@@ -141,10 +144,21 @@ abstract class EndPoint(
     operation.parameters = toSwaggerParams()
     operation.tag(groupName)
     if (protected) {
-      operation.addSecurity(DocsHandler.SECURITY_DEFINITION_NAME, listOf())
+      operation.addSecurity(DocsHandlerV2.SECURITY_DEFINITION_NAME, listOf())
     }
-    operation.addResponse("200", operation.responses["default"])
-    operation.addResponse("500", Response().description("server failure"))
+    operation.addResponse(OK.statusCode.toString(), operation.responses["default"])
+    operation.addResponse(
+      INTERNAL_SERVER_ERROR.statusCode.toString(),
+      Response().description("server failure").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+    )
+    operation.addResponse(
+      BAD_REQUEST.statusCode.toString(),
+      Response().description("the server failed to parse the request").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+    )
+    operation.addResponse(
+      HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
+      Response().description("the request could not be processed").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+    )
     return operation
   }
 
@@ -187,15 +201,10 @@ abstract class EndPoint(
   }
 
   protected fun Type.getSwaggerProperty(): Property {
-    val actualType = this.actualType()
     try {
-      return if (actualType.isBinary()) {
-        BinaryProperty()
-      } else {
-        ModelConverters.getInstance().readAsProperty(actualType)
-      }
+      return modelContext.getProperty(this)
     } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type:" + actualType)
+      throw RuntimeException("Unable to convert actual type: $this", e)
     }
   }
 
@@ -235,6 +244,9 @@ abstract class EndPoint(
     }
   }
 
+  /**
+   * @return true iff the type is binary data
+   */
   private fun Type.isBinary(): Boolean {
     return when (this) {
       Buffer::class.java,

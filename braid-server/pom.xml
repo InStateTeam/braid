@@ -80,11 +80,12 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.2.3</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -130,7 +131,22 @@
       <groupId>net.corda</groupId>
       <artifactId>corda-node-driver</artifactId>
       <version>${corda.version}</version>
-      <scope>test</scope>  <!-- somehow without this it cannot start corda rpc and also drags in the needed slf4j logging-->
+      <scope>test
+      </scope>  <!-- somehow without this it cannot start corda rpc and also drags in the needed slf4j logging-->
+      <exclusions>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-stdlib-jre8</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-stdlib-jre7</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency><!--needed  for json serialization-->
       <groupId>net.corda</groupId>
@@ -226,31 +242,27 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <shadedArtifactAttached>true</shadedArtifactAttached>
-          <createDependencyReducedPom>true</createDependencyReducedPom>
-        </configuration>
-
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.1.1</version>
         <executions>
           <execution>
+            <id>make-assembly</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>single</goal>
             </goals>
             <configuration>
-              <transformers>
-                <transformer
-                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>io.bluebank.braid.server.Braid</Main-Class>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-              <artifactSet/>
-              <outputFile>${project.build.directory}/${project.artifactId}--fat.jar
-              </outputFile>
+              <archive>
+                <manifest>
+                  <mainClass>io.bluebank.braid.server.BraidMainKt</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>braid-server</finalName>
+              <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>
             </configuration>
           </execution>
         </executions>

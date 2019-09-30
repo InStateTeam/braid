@@ -80,28 +80,45 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
         <executions>
           <execution>
             <id>set immutable version</id>
             <phase>generate-resources</phase>
             <goals>
-              <goal>run</goal>
+              <goal>npm</goal>
             </goals>
             <configuration>
-              <target>
-                <exec executable="npm" failonerror="true">
-                  <arg value="version"/>
-                  <arg value="${project.version}"/>
-                  <arg value="--allow-same-version"/>
-                </exec>
-                <exec executable="npm" failonerror="true">
-                  <arg value="install"/>
-                </exec>
-              </target>
+              <arguments>version ${project.version} --allow-same-version</arguments>
             </configuration>
           </execution>
+          <execution>
+            <id>install dependencies</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
           <execution>
             <id>npm clean</id>
             <phase>clean</phase>
@@ -113,21 +130,6 @@
                 <delete dir="dist"/>
                 <delete dir="test-dist"/>
                 <delete dir="node_modules"/>
-              </target>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm run build</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="npm" failonerror="true">
-                  <arg value="run"/>
-                  <arg value="build"/>
-                </exec>
               </target>
             </configuration>
           </execution>

@@ -37,6 +37,7 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
   }
 
   override fun invoke(request: JsonRPCRequest): Observable<Any> {
+    @Suppress("DEPRECATION")
     return Observable.create<Any> { subscriber ->
       request.withMDC {
         try {

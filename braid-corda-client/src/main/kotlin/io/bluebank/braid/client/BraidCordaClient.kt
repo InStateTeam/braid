@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.client
 
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
+import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpClientOptions

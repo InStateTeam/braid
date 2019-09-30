@@ -19,8 +19,6 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Future.succeededFuture
-import io.vertx.core.buffer.Buffer
-import io.vertx.core.json.Json
 import rx.Observable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
@@ -40,7 +38,7 @@ fun <T> Future<T>.getOrThrow(): T {
 }
 
 fun <T> Future<T>.onSuccess(fn: (T) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       if (it.succeeded()) {
@@ -55,7 +53,7 @@ fun <T> Future<T>.onSuccess(fn: (T) -> Unit): Future<T> {
 }
 
 fun <T> Future<T>.catch(fn: (Throwable) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       if (it.failed()) {
@@ -70,7 +68,7 @@ fun <T> Future<T>.catch(fn: (Throwable) -> Unit): Future<T> {
 }
 
 fun <T> Future<T>.finally(fn: (AsyncResult<T>) -> Unit): Future<T> {
-  val result = Future.future<T>()
+  val result = future<T>()
   setHandler {
     try {
       fn(it)
@@ -124,9 +122,6 @@ inline fun <T> withFuture(fn: (Future<T>) -> Unit): Future<T> {
   fn(result)
   return result
 }
-
-inline fun <reified T> Future<Buffer>.mapToObject(): Future<T> =
-  this.map { Json.decodeValue(it, T::class.java) }
 
 fun <T> Future<T>.mapUnit(): Future<Unit> = this.map { Unit }
 

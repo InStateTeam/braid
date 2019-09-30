@@ -15,88 +15,37 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.rest.docs.ModelContext
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.server.BraidDocsMain
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
-import io.bluebank.braid.server.rpc.RPCFactory.Companion.createRpcFactoryStub
-import io.bluebank.braid.server.util.toCordappsClassLoader
-import io.github.classgraph.ClassGraph
-import io.vertx.core.Vertx
-import io.vertx.ext.web.impl.RouterImpl
-import net.corda.core.CordaInternal
-import net.corda.core.flows.FlowInitiator
-import net.corda.core.flows.FlowLogic
 import java.io.File
 
-private val log = loggerFor<Braid>()
+private val log = loggerFor<BraidDocsMain>()
 
 fun main(args: Array<String>) {
   if (args.isEmpty()) {
-    throw IllegalArgumentException("Usage: BraidDocsMainKt <outputFileName> [<cordaAppJar1> <cordAppJar2> ....]")
+    println("Usage: BraidDocsMainKt <outputFileName> <openApiVersion 2,3> [<cordaAppJarOrDir1> <cordAppJarOrDir2> ....]")
+    return
   }
 
   val file = File(args[0])
-  file.parentFile.mkdirs()
-  val cordappsClassLoader = args.toList().drop(1).toCordappsClassLoader()
-  // we call so as to initialise model converters etc before replacing the context class loader
-  Braid.init()
-  tryWithClassLoader(cordappsClassLoader) {
-    val swaggerText = BraidDocsMain().swaggerText()
-    file.writeText(swaggerText)
-  }
+  val openApiVersion = Integer.parseInt(args[1])
+
+  file.parentFile?.mkdirs()
+  val jars = args.toList().drop(2)
+  val swaggerText = generateSwaggerText(openApiVersion, jars)
+  file.writeText(swaggerText)
   log.info("wrote to: ${file.absolutePath}")
 }
 
-class BraidDocsMain() {
-  fun swaggerText(): String {
-    val restConfig = Braid().restConfig(createRpcFactoryStub())
-    val vertx = Vertx.vertx()
-    val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-    val classes = readCordaClasses()
-    val models = ModelContext().apply {
-      classes.forEach { addType(it) }
-    }
-    val swagger = restMounter.docsHandler.createSwagger()
-    models.addToSwagger(swagger)
-    return io.swagger.util.Json.pretty().writeValueAsString(swagger)
+internal fun generateSwaggerText(openApiVersion: Int, jars: List<String>): String {
+  val cordappsClassLoader = jars.toJarsClassLoader()
+  // we call so as to initialise model converters etc before replacing the context class loader
+  BraidCordaJacksonSwaggerInit.init()
+  val swaggerText = tryWithClassLoader(cordappsClassLoader) {
+    BraidDocsMain().swaggerText(openApiVersion)
   }
-
-  private fun readCordaClasses(): List<Class<out Any>> {
-    val res = ClassGraph()
-      .enableClassInfo()
-      .enableAnnotationInfo()
-      .addClassLoader(ClassLoader.getSystemClassLoader())
-      .whitelistPackages("net.corda")
-      .blacklistPackages(
-        "net.corda.internal",
-        "net.corda.client",
-        "net.corda.core.internal",
-        "net.corda.nodeapi.internal",
-        "net.corda.serialization.internal",
-        "net.corda.testing",
-        "net.corda.common.configuration.parsing.internal",
-        "net.corda.finance.internal",
-        "net.corda.common.validation.internal",
-        "net.corda.client.rpc.internal",
-        "net.corda.core.cordapp"
-      )
-      .scan()
-
-    val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
-    val isCompanionClass = Regex(".*\\$" + "Companion")::matches
-    val isKotlinFileClass = Regex(".*Kt$")::matches
-    return res.allClasses
-      .filter {
-        !it.hasAnnotation(CordaInternal::class.java.name) &&
-          !it.isInterface &&
-          !it.isAbstract &&
-          !it.extendsSuperclass(FlowLogic::class.java.name) &&
-          !it.extendsSuperclass(FlowInitiator::class.java.name) &&
-          !isFunctionName(it.name) &&
-          !isCompanionClass(it.name) &&
-          !isKotlinFileClass(it.name)
-      }
-      .map { it.loadClass() }
-  }
+  return swaggerText
 }

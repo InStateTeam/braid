@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.rest.docs.DocsHandler
+import io.bluebank.braid.corda.rest.docs.DocsHandlerV2
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -110,7 +111,12 @@ class RestMounter(
     log.info("swagger json bound to ${config.hostAndPortUri}/$swaggerJsonPath")
 
     // and now for the swagger static
-    val sh = StaticHandler.create("swagger")
+    val swaggerStaticResource = when (config.openApiVersion) {
+      2 -> "swagger-1"
+      3 -> "swagger-2"
+      else -> error("unrecognised open api version")
+    }
+    val sh = StaticHandler.create(swaggerStaticResource)
     router.getWithRegex("/$swaggerPath").handler {
       if (it.request().path().endsWith("/")) {
         sh.handle(it)

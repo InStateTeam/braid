@@ -15,9 +15,9 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.setupAllowAnyCORS
 import io.bluebank.braid.core.http.setupOptionsMethod
-import io.bluebank.braid.core.http.write
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
@@ -43,6 +43,7 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
+import javax.ws.rs.core.Response
 
 class JsonRPCVerticle(
   private val rootPath: String, val services: List<Any>, val port: Int,
@@ -51,7 +52,7 @@ class JsonRPCVerticle(
 ) : AbstractVerticle() {
 
   companion object {
-    val logger = loggerFor<JsonRPCVerticle>()
+    private val logger = loggerFor<JsonRPCVerticle>()
   }
 
   val serviceMap: MutableMap<String, ServiceExecutor> by lazy {
@@ -171,7 +172,7 @@ class JsonRPCVerticle(
 
   private fun RoutingContext.getServiceList() {
     val sm = ServiceDescriptor.createServiceDescriptors(rootPath, serviceMap.keys)
-    write(sm)
+    end(sm)
   }
 
   private fun RoutingContext.getService(serviceName: String) {
@@ -186,7 +187,7 @@ class JsonRPCVerticle(
       "$rootPath$serviceName/script",
       defaultServiceEndpoint(rootPath, serviceName)
     )
-    write(docs)
+    end(docs)
   }
 
   private fun RoutingContext.getServiceScript(serviceName: String) {
@@ -217,7 +218,7 @@ class JsonRPCVerticle(
       logger.info("remove route $it")
       it.remove()
     }
-    write("done")
+    end("done")
   }
 
   private fun sockPath(serviceName: String) = "$rootPath$serviceName/*"
@@ -226,10 +227,10 @@ class JsonRPCVerticle(
     val service = getJavaExecutorForService(serviceName)
 
     if (service == null) {
-      write("")
+      end("")
       return
     } else {
-      write(service.getStubs())
+      end(service.getStubs())
     }
   }
 
@@ -239,7 +240,7 @@ class JsonRPCVerticle(
       service.updateScript(script)
       response().end()
     } catch (err: Throwable) {
-      write(err)
+      end(err, Response.Status.BAD_REQUEST.statusCode)
     }
   }
 

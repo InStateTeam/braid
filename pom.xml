@@ -99,6 +99,9 @@
     <maven.javadoc.skip>true</maven.javadoc.skip><!-- We use Dokka instead. -->
     <slf4j.version>1.7.25</slf4j.version>
     <nexus-staging.version>1.6.8</nexus-staging.version>
+    <swagger.version>2.0.9</swagger.version>
+    <node.dir>${user.home}/.node</node.dir>
+    <logback.version>1.2.3</logback.version>
   </properties>
 
   <modules>
@@ -276,8 +279,12 @@
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.2.3</version>
-        <scope>test</scope>
+        <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>${logback.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
@@ -293,6 +300,21 @@
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
         <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-models</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
     </dependencies>
 
@@ -348,6 +370,7 @@
           </executions>
           <configuration>
             <jvmTarget>1.8</jvmTarget>
+            <languageVersion>1.2</languageVersion>
             <javaParameters>true</javaParameters>
           </configuration>
         </plugin>
@@ -385,6 +408,25 @@
           <artifactId>nexus-staging-maven-plugin</artifactId>
           <version>${nexus-staging.version}</version>
         </plugin>
+        <plugin>
+          <groupId>com.github.eirslett</groupId>
+          <artifactId>frontend-maven-plugin</artifactId>
+          <version>1.8.0</version>
+          <configuration>
+            <installDirectory>${node.dir}</installDirectory>r
+            <nodeVersion>v10.16.3</nodeVersion>
+            <npmVersion>6.11.3</npmVersion>
+          </configuration>
+          <executions>
+            <execution>
+              <id>install node and npm</id>
+              <goals>
+                <goal>install-node-and-npm</goal>
+              </goals>
+              <phase>initialize</phase>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -409,8 +451,9 @@
         <configuration>
           <header>LICENSE</header>
           <excludes>
-            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*
-            </exclude>
+            <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
+            <exclude>**/braid-corda/src/main/resources/swagger-1/**/*</exclude>
+            <exclude>**/braid-corda/src/main/resources/swagger-2/**/*</exclude>
             <exclude>.gradle/**</exclude>
             <exclude>.m2/**</exclude>
             <exclude>**/monaco-editor/**/*</exclude>

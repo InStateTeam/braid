@@ -15,24 +15,24 @@
  */
 package io.bluebank.braid.corda.rest.docs
 
-import io.bluebank.braid.corda.serialisation.BraidCordaJacksonInit
-import io.bluebank.braid.corda.swagger.CustomModelConverters
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
-import net.corda.testing.core.genericExpectEvents
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.Assert.assertThat
+import org.junit.Assert.assertTrue
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 
-class ModelContextTest{
-  @Before
-  fun setUp() {
-    BraidCordaJacksonInit.init()
-    CustomModelConverters.init()
+class ModelContextTest {
+  companion object {
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
 
   @Test
@@ -40,12 +40,11 @@ class ModelContextTest{
   fun `should exclude availableComponentGroups from TraversableTransaction`() {
 
     val modelContext = ModelContext()
-    modelContext.addType(TraversableTransaction::class.java)
+    modelContext.getProperty(TraversableTransaction::class.java)
 
     val wire = modelContext.models.get("TraversableTransaction")
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
-
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
   }
 
   @Test
@@ -53,13 +52,20 @@ class ModelContextTest{
   fun `should exclude availableComponentGroups from WireTransaction`() {
 
     val modelContext = ModelContext()
-    modelContext.addType(WireTransaction::class.java)
+    modelContext.getProperty(WireTransaction::class.java)
 
     val wire = modelContext.models.get("WireTransaction")
-    assertThat(wire,notNullValue())
-    assertThat(wire?.properties?.get("availableComponentHashes"),nullValue())
-    assertThat(wire?.properties?.get("availableComponentHashes\$core"),nullValue())
-    assertThat(wire?.properties?.get("availableComponentGroups"),nullValue())
+    assertThat(wire, notNullValue())
+    assertThat(wire?.properties?.get("availableComponentHashes"), nullValue())
+    assertThat(wire?.properties?.get("availableComponentHashes\$core"), nullValue())
+    assertThat(wire?.properties?.get("availableComponentGroups"), nullValue())
+  }
 
+  @Test
+  fun `that we model errors correctly`() {
+    val modelContext = ModelContext()
+    val r2 = modelContext.getProperty(BraidSwaggerError::class.java)
+    val models = modelContext.models
+    assertTrue(models.containsKey("Error"))
   }
 }
