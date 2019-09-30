@@ -33,6 +33,9 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.NodeInfo
+import net.corda.core.node.services.vault.ColumnPredicate
+import net.corda.core.node.services.vault.PageSpecification
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
@@ -95,6 +98,9 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
       .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
       .setMixInAnnotation(ContractState::class.java, ContractStateMixin::class.java)
+      .setMixInAnnotation(QueryCriteria::class.java, QueryCriteriaMixin::class.java)
+      .setMixInAnnotation(ColumnPredicate::class.java, ColumnPredicateMixin::class.java)
+      .setMixInAnnotation(PageSpecification::class.java, PageSpecificationMixin::class.java)
 
 //            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
 //            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)

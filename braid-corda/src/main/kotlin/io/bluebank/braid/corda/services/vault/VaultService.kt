@@ -33,6 +33,8 @@ class VaultService(val rpc: RPCFactory){
     return vaultQueryBy
   }
 
+
+
   @ApiOperation(value = "Queries the vault for contract states of the supplied type")
   fun vaultQuery(
       @QueryParam(value = "contract-state-type")

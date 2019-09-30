@@ -729,16 +729,7 @@
         "type" : "object"
       },
       "net.corda.core.contracts.ContractState" : {
-        "required" : [ "participants" ],
-        "type" : "object",
-        "properties" : {
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
+        "type" : "object"
       },
       "net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState" : {
         "type" : "object",
@@ -900,8 +891,136 @@
           }
         }
       },
+      "net.corda.core.node.services.vault.ColumnPredicate_AggregateFunction" : {
+        "required" : [ "type" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : [ "COUNT", "AVG", "MIN", "MAX", "SUM" ]
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_Between" : {
+        "required" : [ "rightFromLiteral", "rightToLiteral" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "rightToLiteral" : {
+              "type" : "object"
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison" : {
+        "required" : [ "operator", "rightLiteral" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "operator" : {
+              "type" : "string",
+              "enum" : [ "LESS_THAN", "LESS_THAN_OR_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL" ]
+            },
+            "rightLiteral" : {
+              "type" : "object"
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression" : {
+        "required" : [ "operator", "rightLiteral" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "operator" : {
+              "type" : "string",
+              "enum" : [ "IN", "NOT_IN", "IN_IGNORE_CASE", "NOT_IN_IGNORE_CASE" ]
+            },
+            "rightLiteral" : {
+              "type" : "array",
+              "items" : {
+                "type" : "object"
+              }
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison" : {
+        "required" : [ "operator", "rightLiteral" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "operator" : {
+              "type" : "string",
+              "enum" : [ "EQUAL", "NOT_EQUAL", "EQUAL_IGNORE_CASE", "NOT_EQUAL_IGNORE_CASE" ]
+            },
+            "rightLiteral" : {
+              "type" : "object"
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_Instant" : {
+        "type" : "object"
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_Likeness" : {
+        "required" : [ "operator", "rightLiteral" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "operator" : {
+              "type" : "string",
+              "enum" : [ "LIKE", "NOT_LIKE", "LIKE_IGNORE_CASE", "NOT_LIKE_IGNORE_CASE" ]
+            },
+            "rightLiteral" : {
+              "type" : "string"
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_Long" : {
+        "type" : "object"
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_NullExpression" : {
+        "required" : [ "operator" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "operator" : {
+              "type" : "string",
+              "enum" : [ "IS_NULL", "NOT_NULL" ]
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean" : {
+        "type" : "object"
+      },
       "net.corda.core.node.services.vault.PageSpecification" : {
-        "required" : [ "default", "pageNumber", "pageSize" ],
+        "required" : [ "pageNumber", "pageSize" ],
         "type" : "object",
         "properties" : {
           "pageNumber" : {
@@ -911,14 +1030,413 @@
           "pageSize" : {
             "type" : "integer",
             "format" : "int32"
-          },
-          "default" : {
-            "type" : "boolean"
           }
         }
       },
       "net.corda.core.node.services.vault.QueryCriteria" : {
         "type" : "object"
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_AndComposition" : {
+        "required" : [ "a", "b" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "a" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+            },
+            "b" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_CommonQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "relevancyStatus" : {
+              "type" : "string",
+              "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+            },
+            "constraintTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+              }
+            },
+            "constraints" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+              }
+            },
+            "participants" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "status" : {
+              "type" : "string",
+              "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+            },
+            "contractStateTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "description" : "Java class name",
+                "example" : "java.lang.Object"
+              }
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_FungibleAssetQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "participants" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "owner" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "quantity" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
+            },
+            "issuer" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "issuerRef" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "description" : "Hex encoded Byte Array",
+                "example" : "736F6D654279746573"
+              }
+            },
+            "status" : {
+              "type" : "string",
+              "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+            },
+            "contractStateTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "description" : "Java class name",
+                "example" : "java.lang.Object"
+              }
+            },
+            "relevancyStatus" : {
+              "type" : "string",
+              "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+            },
+            "constraintTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+              }
+            },
+            "constraints" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+              }
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_FungibleStateQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "participants" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "quantity" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
+            },
+            "status" : {
+              "type" : "string",
+              "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+            },
+            "contractStateTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "description" : "Java class name",
+                "example" : "java.lang.Object"
+              }
+            },
+            "relevancyStatus" : {
+              "type" : "string",
+              "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+            },
+            "constraintTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+              }
+            },
+            "constraints" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+              }
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "participants" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+              }
+            },
+            "uuid" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "format" : "uuid"
+              }
+            },
+            "externalId" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "status" : {
+              "type" : "string",
+              "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+            },
+            "contractStateTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "description" : "Java class name",
+                "example" : "java.lang.Object"
+              }
+            },
+            "relevancyStatus" : {
+              "type" : "string",
+              "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+            },
+            "constraintTypes" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "type" : "string",
+                "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+              }
+            },
+            "constraints" : {
+              "uniqueItems" : true,
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+              }
+            }
+          }
+        } ]
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_OrComposition" : {
+        "type" : "object",
+        "properties" : {
+          "a" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          "b" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition" : {
+        "required" : [ "lockIds", "type" ],
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "UNLOCKED_ONLY", "LOCKED_ONLY", "SPECIFIED", "UNLOCKED_AND_SPECIFIED" ]
+          },
+          "lockIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_TimeCondition" : {
+        "required" : [ "type" ],
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "RECORDED", "CONSUMED" ]
+          },
+          "predicate" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_VaultCustomQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "properties" : {
+          "expression" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+          },
+          "contractStateTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Java class name",
+              "example" : "java.lang.Object"
+            }
+          },
+          "relevancyStatus" : {
+            "type" : "string",
+            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+          },
+          "constraintTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+            }
+          },
+          "constraints" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+            }
+          },
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria" : {
+        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
+          },
+          "contractStateTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Java class name",
+              "example" : "java.lang.Object"
+            }
+          },
+          "stateRefs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
+            }
+          },
+          "notary" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          },
+          "softLockingCondition" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition"
+          },
+          "timeCondition" : {
+            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_TimeCondition"
+          },
+          "relevancyStatus" : {
+            "type" : "string",
+            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
+          },
+          "constraintTypes" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
+            }
+          },
+          "constraints" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
+            }
+          },
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
       },
       "net.corda.core.node.services.vault.Sort" : {
         "required" : [ "columns" ],
@@ -1034,11 +1552,8 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
+          "notary" : {
+            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
           "outputs" : {
             "type" : "array",
@@ -1046,8 +1561,11 @@
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
             }
           },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
           },
           "id" : {
             "type" : "string",
@@ -1615,15 +2133,15 @@
       "net.corda.core.contracts.TimeWindow" : {
         "type" : "object",
         "properties" : {
+          "fromTime" : {
+            "type" : "string",
+            "description" : "JSR310 encoded time representation of Instant"
+          },
           "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
           "midpoint" : {
-            "type" : "string",
-            "description" : "JSR310 encoded time representation of Instant"
-          },
-          "fromTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -1873,9 +2391,6 @@
       "net.corda.core.node.services.vault.ColumnPredicate_Boolean" : {
         "type" : "object"
       },
-      "net.corda.core.node.services.vault.ColumnPredicate_Instant" : {
-        "type" : "object"
-      },
       "net.corda.core.node.services.vault.ColumnPredicate_Integer" : {
         "type" : "object"
       },
@@ -1939,90 +2454,6 @@
             "type" : "string",
             "description" : "Java class name",
             "example" : "java.lang.Object"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_AggregateFunction" : {
-        "required" : [ "type" ],
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "string",
-            "enum" : [ "COUNT", "AVG", "MIN", "MAX", "SUM" ]
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_Between" : {
-        "required" : [ "rightFromLiteral", "rightToLiteral" ],
-        "type" : "object",
-        "properties" : {
-          "rightToLiteral" : {
-            "type" : "object"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison" : {
-        "required" : [ "operator", "rightLiteral" ],
-        "type" : "object",
-        "properties" : {
-          "operator" : {
-            "type" : "string",
-            "enum" : [ "LESS_THAN", "LESS_THAN_OR_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL" ]
-          },
-          "rightLiteral" : {
-            "type" : "object"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression" : {
-        "required" : [ "operator", "rightLiteral" ],
-        "type" : "object",
-        "properties" : {
-          "operator" : {
-            "type" : "string",
-            "enum" : [ "IN", "NOT_IN", "IN_IGNORE_CASE", "NOT_IN_IGNORE_CASE" ]
-          },
-          "rightLiteral" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison" : {
-        "required" : [ "operator", "rightLiteral" ],
-        "type" : "object",
-        "properties" : {
-          "operator" : {
-            "type" : "string",
-            "enum" : [ "EQUAL", "NOT_EQUAL", "EQUAL_IGNORE_CASE", "NOT_EQUAL_IGNORE_CASE" ]
-          },
-          "rightLiteral" : {
-            "type" : "object"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_Likeness" : {
-        "required" : [ "operator", "rightLiteral" ],
-        "type" : "object",
-        "properties" : {
-          "operator" : {
-            "type" : "string",
-            "enum" : [ "LIKE", "NOT_LIKE", "LIKE_IGNORE_CASE", "NOT_LIKE_IGNORE_CASE" ]
-          },
-          "rightLiteral" : {
-            "type" : "string"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_NullExpression" : {
-        "required" : [ "operator" ],
-        "type" : "object",
-        "properties" : {
-          "operator" : {
-            "type" : "string",
-            "enum" : [ "IS_NULL", "NOT_NULL" ]
           }
         }
       },
@@ -2099,344 +2530,6 @@
         "properties" : {
           "expression" : {
             "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_AndComposition" : {
-        "type" : "object",
-        "properties" : {
-          "a" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
-          },
-          "b" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.ColumnPredicate_Long" : {
-        "type" : "object"
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_FungibleAssetQueryCriteria" : {
-        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
-        "type" : "object",
-        "properties" : {
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "owner" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "quantity" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
-          },
-          "issuer" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "issuerRef" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
-            }
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
-          },
-          "contractStateTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Java class name",
-              "example" : "java.lang.Object"
-            }
-          },
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_FungibleStateQueryCriteria" : {
-        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
-        "type" : "object",
-        "properties" : {
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "quantity" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
-          },
-          "contractStateTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Java class name",
-              "example" : "java.lang.Object"
-            }
-          },
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria" : {
-        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
-        "type" : "object",
-        "properties" : {
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "uuid" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "uuid"
-            }
-          },
-          "externalId" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
-          },
-          "contractStateTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Java class name",
-              "example" : "java.lang.Object"
-            }
-          },
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_OrComposition" : {
-        "type" : "object",
-        "properties" : {
-          "a" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
-          },
-          "b" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition" : {
-        "required" : [ "lockIds", "type" ],
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "string",
-            "enum" : [ "UNLOCKED_ONLY", "LOCKED_ONLY", "SPECIFIED", "UNLOCKED_AND_SPECIFIED" ]
-          },
-          "lockIds" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "uuid"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_TimeCondition" : {
-        "required" : [ "type" ],
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "string",
-            "enum" : [ "RECORDED", "CONSUMED" ]
-          },
-          "predicate" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean" : {
-        "type" : "object"
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_VaultCustomQueryCriteria" : {
-        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
-        "type" : "object",
-        "properties" : {
-          "expression" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
-          },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
-          },
-          "contractStateTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Java class name",
-              "example" : "java.lang.Object"
-            }
-          },
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          },
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria" : {
-        "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string",
-            "enum" : [ "UNCONSUMED", "CONSUMED", "ALL" ]
-          },
-          "contractStateTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Java class name",
-              "example" : "java.lang.Object"
-            }
-          },
-          "stateRefs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "notary" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "softLockingCondition" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition"
-          },
-          "timeCondition" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_TimeCondition"
-          },
-          "relevancyStatus" : {
-            "type" : "string",
-            "enum" : [ "RELEVANT", "NOT_RELEVANT", "ALL" ]
-          },
-          "constraintTypes" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "ALWAYS_ACCEPT", "HASH", "CZ_WHITELISTED", "SIGNATURE" ]
-            }
-          },
-          "constraints" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
-            }
-          },
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
           }
         }
       },
@@ -2881,17 +2974,10 @@
         }
       },
       "net.corda.finance.contracts.DealState" : {
-        "required" : [ "participants" ],
         "type" : "object",
         "properties" : {
           "linearId" : {
             "$ref" : "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
-          },
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
           }
         }
       },

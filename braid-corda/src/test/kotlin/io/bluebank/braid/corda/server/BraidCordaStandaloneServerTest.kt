@@ -471,4 +471,63 @@ class BraidCordaStandaloneServerTest {
         .end()
   }
 
+
+
+  @Test
+  fun `should query the vault by type`(context: TestContext) {
+    val async = context.async()
+
+    val json ="""
+{
+  "criteria" : {
+    "@class" : ".QueryCriteria${'$'}VaultQueryCriteria",
+    "status" : "UNCONSUMED",
+    "contractStateTypes" : null,
+    "stateRefs" : null,
+    "notary" : null,
+    "softLockingCondition" : null,
+    "timeCondition" : {
+      "type" : "RECORDED",
+      "predicate" : {
+        "@class" : ".ColumnPredicate${'$'}Between",
+        "rightFromLiteral" : "2019-09-15T12:58:23.283Z",
+        "rightToLiteral" : "2019-10-15T12:58:23.283Z"
+      }
+    },
+    "relevancyStatus" : "ALL",
+    "constraintTypes" : [ ],
+    "constraints" : [ ],
+    "participants" : null
+  },
+  "paging" : {
+    "pageNumber" : -1,
+    "pageSize" : 200
+  },
+  "sorting" : {
+    "columns" : [ ]
+  },
+  "contractStateType" : "net.corda.core.contracts.ContractState"
+}
+"""
+
+
+    log.info("calling get: http://localhost:${port}/api/rest/network/vault")
+    client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
+        .putHeader("Accept", "application/json; charset=utf8")
+        .putHeader("Content-length", ""+json.length)
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val nodes = it.toJsonObject()
+
+            vertxAssertThat(context,nodes, notNullValue())
+
+            async.complete()
+          }
+        }
+        .end(json)
+  }
+
 }
