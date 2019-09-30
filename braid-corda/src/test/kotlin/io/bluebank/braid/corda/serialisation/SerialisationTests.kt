@@ -16,22 +16,23 @@
 package io.bluebank.braid.corda.serialisation
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.swagger.CustomModelConvertersV2Test
 import io.vertx.core.json.Json
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
+import net.corda.core.contracts.TransactionState
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
+import net.corda.finance.contracts.asset.Cash
 import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
+import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import sun.security.provider.X509Factory
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateFactory
@@ -127,6 +128,18 @@ class SerialisationTests {
     assertTrue(result is NonEmptySet)
     assertEquals(2, result.size)
     assertTrue(result.contains("item1") && result.contains("item2"))
+  }
+
+  @Test
+  fun `should serialize Transaction state of  Cash Contract State`() {
+    val partyRef = PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01))
+    val state = Cash.State(partyRef,
+        Amount(100, GBP),
+        partyRef.party)
+
+    val txnState = TransactionState(state, state.javaClass.name,DUMMY_BANK_A)
+
+    Json.encodePrettily(txnState)
   }
 
   private fun f(set: NonEmptySet<String>) {}

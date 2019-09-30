@@ -22,7 +22,7 @@ import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.bluebank.braid.corda.services.SimpleNetworkMapService
-import io.bluebank.braid.corda.services.VaultService
+import io.bluebank.braid.corda.services.vault.VaultService
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future

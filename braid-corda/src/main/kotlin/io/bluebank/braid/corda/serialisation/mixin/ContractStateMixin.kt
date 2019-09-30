@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.services.vault
+package io.bluebank.braid.corda.serialisation.mixin
 
-import net.corda.core.contracts.ContractState
-import net.corda.core.node.services.vault.PageSpecification
-import net.corda.core.node.services.vault.QueryCriteria
-import net.corda.core.node.services.vault.Sort
+import net.corda.core.identity.AbstractParty
 
-data class VaultQuery(
-   val criteria: QueryCriteria,
-   val paging: PageSpecification,
-   val sorting: Sort,
-   val contractStateType:Class<ContractState>
-)
+abstract class ContractStateMixin {
+  @get:com.fasterxml.jackson.annotation.JsonIgnore
+  abstract val participants: List<AbstractParty>?
+
+}

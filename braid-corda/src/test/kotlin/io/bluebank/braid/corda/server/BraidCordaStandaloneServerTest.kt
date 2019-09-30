@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.server
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
+import io.bluebank.braid.corda.util.VertxMatcher.vertxAssertThat
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
 import io.bluebank.braid.core.http.body
@@ -462,11 +463,7 @@ class BraidCordaStandaloneServerTest {
           it.bodyHandler {
             val nodes = it.toJsonObject()
 
-            //   val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
-
-            context.assertThat(nodes, notNullValue())
-
-//                        context.assertThat(nodes.getJsonObject(0).getString("owningKey"), equalTo("GfHq2tTVk9z4eXgySzYjYp2YsTewf2FHZCb1Ls31XPzG7Hy2hRUeM8cFaFu4"))
+            vertxAssertThat(context,nodes, notNullValue())
 
             async.complete()
           }

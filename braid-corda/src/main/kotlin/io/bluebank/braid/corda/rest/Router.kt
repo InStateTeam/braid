@@ -15,10 +15,12 @@
  */
 package io.bluebank.braid.corda.rest
 
+import io.bluebank.braid.corda.rest.Router.Companion.LOG
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
 import io.bluebank.braid.core.jsonrpc.Converter
+import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiParam
 import io.vertx.codegen.annotations.Nullable
@@ -39,6 +41,12 @@ import kotlin.reflect.full.isSuperclassOf
 
 val HTTP_UNPROCESSABLE_STATUS_CODE = 422
 
+class Router{
+  companion object{
+     val LOG = loggerFor<Router>()
+  }
+}
+
 fun <R> Route.bind(fn: KCallable<R>) {
   fn.validateParameters()
   this.handler { rc ->
@@ -47,9 +55,11 @@ fun <R> Route.bind(fn: KCallable<R>) {
       try {
         rc.response().end(fn.call(*args))
       } catch (e: Throwable) {
+        LOG.warn("Unable to call: ${rc.request().path()}", e)
         rc.response().end(e, HTTP_UNPROCESSABLE_STATUS_CODE)
       }
     } catch (e: Throwable) {
+      LOG.warn("Unable to parse parameters: ${rc.request().path()}", e)
       rc.response().end(e, Response.Status.BAD_REQUEST.statusCode)
     }
   }
