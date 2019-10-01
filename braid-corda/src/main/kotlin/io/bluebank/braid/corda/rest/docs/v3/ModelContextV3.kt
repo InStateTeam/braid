@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.MiximModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.SuperClassModelConverterV3
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
@@ -39,22 +40,35 @@ class ModelContextV3 {
     addConverter(QualifiedTypeNameConverter(io.vertx.core.json.Json.mapper))
     addConverter(JSR310ModelConverterV3())
     addConverter(MiximModelConverterV3(io.vertx.core.json.Json.mapper))
+    addConverter(SuperClassModelConverterV3())
     addConverter(CustomModelConverterV3())
   }
 
   fun addType(type: Type): ResolvedSchema {
     // todo move to CustomModelConverter
     val actualType = type.actualType()
+
     return try {
       actualType.createSwaggerModels()
           .also {
             val referencedSchemas = it.referencedSchemas
-            mutableModels += referencedSchemas
+            referencedSchemas.keys.forEach {
+                mutableModels.compute(it, { w, prev -> retainDiscriminator(prev,referencedSchemas.get(it)) })
+            }
           }
     } catch (e: Throwable) {
       throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
   }
+
+  fun retainDiscriminator(current: Schema<*>?, possibleReplacement: Schema<*>?): Schema<*>{
+     if(current == null)
+       return possibleReplacement!!
+     if(current.discriminator !=null)
+       return current
+     return possibleReplacement!!
+  }
+
 
   fun addToSwagger(openApi: OpenAPI): OpenAPI {
     models.forEach { (name, model) ->
@@ -82,3 +96,4 @@ class ModelContextV3 {
     }
   }
 }
+

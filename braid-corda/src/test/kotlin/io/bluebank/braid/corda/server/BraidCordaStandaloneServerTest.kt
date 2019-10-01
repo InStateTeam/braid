@@ -44,9 +44,12 @@ import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
 import org.junit.AfterClass
+import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.util.*
 import java.util.Arrays.asList
 import javax.ws.rs.core.Response
@@ -207,6 +210,25 @@ class BraidCordaStandaloneServerTest {
         }
       }
       .end()
+  }
+
+  @Test
+  fun shouldGetPartyB(context: TestContext) {
+    val cordaX500Name = CordaX500Name("PartyB", "New York", "US")
+
+    val toString = cordaX500Name.toString()
+    val encode = URLEncoder.encode(toString)
+    Assert.assertThat(encode, `is`("O%3DPartyB%2C+L%3DNew+York%2C+C%3DUS"))
+  }
+
+
+  @Test
+  fun shouldDecode(context: TestContext) {
+
+    val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS")
+    val parse = CordaX500Name.parse(encode)
+    val cordaX500Name = CordaX500Name("PartyB", "New York", "US")
+    Assert.assertThat(parse, `is`(cordaX500Name))
   }
 
   @Test

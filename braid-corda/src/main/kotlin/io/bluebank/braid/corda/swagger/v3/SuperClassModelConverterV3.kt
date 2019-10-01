@@ -18,24 +18,18 @@ package io.bluebank.braid.corda.swagger.v3
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.SimpleType
-import io.bluebank.braid.corda.rest.docs.v3.QualifiedTypeNameConverter
-import io.bluebank.braid.corda.rest.docs.v3.QualifiedTypeNameResolver
-import io.bluebank.braid.corda.rest.docs.v3.swaggerTypeName
 import io.swagger.v3.core.converter.*
 import io.swagger.v3.oas.models.media.Schema
 import net.corda.core.utilities.loggerFor
 
 /**
  * Workaround for https://github.com/swagger-api/swagger-core/issues/3310
- * This adds Annotations applied on mixins to allow us to describe inheritance heirarchies
- *
+ * This make sure super classes are also processed with Mixin Annotations
  */
-class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
-
-  val namer = QualifiedTypeNameResolver()
+class SuperClassModelConverterV3() : ModelConverter {
 
   companion object {
-    private val log = loggerFor<MiximModelConverterV3>()
+    private val log = loggerFor<SuperClassModelConverterV3>()
   }
 
   override fun resolve(
@@ -44,16 +38,15 @@ class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
       chain: MutableIterator<ModelConverter>?
   ): Schema<*>? {
 
-    val schema = chain?.next()?.resolve(type, context, chain)
+    val subClass = chain?.next()?.resolve(type, context, chain)
 
-    if(schema == null|| type.underlyingType() ==null)
-      return schema
+    // have to resolve this afterwards as ModelResolver tries to find subtypes
+    val underlyingType = type.underlyingType()
+    underlyingType?.superclass?.apply{
+      context.resolve(AnnotatedType(underlyingType.superclass))
+    }
 
-    val mixinClass = mapper.findMixInClassFor(type.underlyingType())
-    if (mixinClass == null)
-      return schema
-
-    return addMixinSchema(mixinClass,type, context,schema)
+    return subClass
   }
 
   private fun AnnotatedType.underlyingType(): Class<*>?{
@@ -63,20 +56,6 @@ class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
       return (this.type as JavaType).rawClass
 
     return null;
-  }
-
-  private fun addMixinSchema(mixin: Class<*>,type:AnnotatedType, context: ModelConverterContext, schema: Schema<Any>): Schema<*> {
-
-    val mixinSchema = context.resolve(AnnotatedType(mixin).name(schema.name))     // give the mixin the same name to stop it being added to schemas
-
-    schema
-        .discriminator(mixinSchema.discriminator)   // to do add others?
-
-    if(schema.name != null)
-      context.defineModel(schema.name,schema, type,null)
-
-    return schema
-
   }
 
 

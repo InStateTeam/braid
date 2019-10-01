@@ -34,16 +34,16 @@ import net.corda.core.node.services.vault.QueryCriteria
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @io.swagger.v3.oas.annotations.media.Schema(
     type = "object",
-    title = "Pet",
+    title = "ColumnPredicate",
     discriminatorProperty = "@class",
     discriminatorMapping = [
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.AggregateFunction::class),
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.Between::class),
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.AggregateFunction::class),
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.CollectionExpression::class),
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.EqualityComparison::class),
-        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.NullExpression::class),
-        DiscriminatorMapping(value = "Likeness", schema = ColumnPredicate.Likeness::class)
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}AggregateFunction", schema = ColumnPredicate.AggregateFunction::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}Between", schema = ColumnPredicate.Between::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}BinaryComparison", schema = ColumnPredicate.BinaryComparison::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}CollectionExpression", schema = ColumnPredicate.CollectionExpression::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}EqualityComparison", schema = ColumnPredicate.EqualityComparison::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}NullExpression", schema = ColumnPredicate.NullExpression::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}Likeness", schema = ColumnPredicate.Likeness::class)
     ],
     subTypes = [ColumnPredicate.AggregateFunction::class]
 )

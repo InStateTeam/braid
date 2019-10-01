@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.*
+import io.bluebank.braid.corda.serialisation.mixin.QueryCriteriaMixin
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.jackson.ModelResolver
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.json.Json
+import net.corda.core.node.services.vault.QueryCriteria
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasKey
@@ -29,6 +31,22 @@ class MiximModelConverterV3Test {
           addConverter(MiximModelConverterV3(Json.mapper))
         }
         .readAll(Pet::class.java)
+
+  }
+
+  @Test
+  fun `should have discriminator for QueryCriteria`() {
+    Json.mapper.addMixIn(QueryCriteria::class.java, QueryCriteriaMixin::class.java)
+
+    val schemas = ModelConverters()
+        .apply {
+          addConverter(ModelResolver(Json.mapper))
+          addConverter(MiximModelConverterV3(Json.mapper))
+        }
+        .readAll(QueryCriteria.AndComposition::class.java)
+
+    assertThat(schemas, hasKey("QueryCriteria"))
+    assertThat(schemas.get("QueryCriteria")?.discriminator, notNullValue())
 
   }
 
