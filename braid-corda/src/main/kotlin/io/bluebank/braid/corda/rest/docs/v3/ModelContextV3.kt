@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
 import io.netty.buffer.ByteBuf
@@ -89,7 +90,8 @@ class ModelContextV3 {
   }
 
   private fun Type.createSwaggerModels(): ResolvedSchema? {
-    return modelConverters.resolveAsResolvedSchema(AnnotatedType(this).resolveAsRef(true))
+    return modelConverters.resolveAsResolvedSchema(AnnotatedType(this)
+        .resolveAsRef(true))
   }
 
   private fun Type.actualType(): Type {

@@ -20,6 +20,7 @@ import org.hamcrest.CoreMatchers.hasItem
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Test
+import java.io.File
 import java.net.URL
 
 class PathsClassLoaderTest {
@@ -32,4 +33,5 @@ class PathsClassLoaderTest {
     val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
     assertNotNull(clazz)
   }
+
 }
