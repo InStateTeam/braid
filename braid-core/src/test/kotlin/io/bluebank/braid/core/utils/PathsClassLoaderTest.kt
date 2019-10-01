@@ -21,8 +21,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.FixMethodOrder
 import org.junit.Test
-import org.junit.runners.MethodSorters
 import java.io.File
+import org.junit.runners.MethodSorters
 import java.net.URL
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -36,7 +36,6 @@ class PathsClassLoaderTest {
     val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
     assertNotNull(clazz)
   }
-
 
   @Test
   fun `2 that we can load classes from directory`() {

@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.serialisation.mixin
 
 import com.fasterxml.jackson.annotation.*
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.ColumnPredicate
 import net.corda.core.node.services.vault.QueryCriteria
@@ -31,4 +32,19 @@ import net.corda.core.node.services.vault.QueryCriteria
   JsonSubTypes.Type(value = ColumnPredicate.Likeness::class)
     )
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@io.swagger.v3.oas.annotations.media.Schema(
+    type = "object",
+    title = "ColumnPredicate",
+    discriminatorProperty = "@class",
+    discriminatorMapping = [
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}AggregateFunction", schema = ColumnPredicate.AggregateFunction::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}Between", schema = ColumnPredicate.Between::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}BinaryComparison", schema = ColumnPredicate.BinaryComparison::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}CollectionExpression", schema = ColumnPredicate.CollectionExpression::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}EqualityComparison", schema = ColumnPredicate.EqualityComparison::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}NullExpression", schema = ColumnPredicate.NullExpression::class),
+        DiscriminatorMapping(value = ".ColumnPredicate${'$'}Likeness", schema = ColumnPredicate.Likeness::class)
+    ],
+    subTypes = [ColumnPredicate.AggregateFunction::class]
+)
 abstract class ColumnPredicateMixin

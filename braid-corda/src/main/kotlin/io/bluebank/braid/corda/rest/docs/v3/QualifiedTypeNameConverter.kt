@@ -18,4 +18,6 @@ package io.bluebank.braid.corda.rest.docs.v3
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.core.jackson.ModelResolver
 
-class QualifiedTypeNameConverter(mapper: ObjectMapper) : ModelResolver(mapper, QualifiedTypeNameResolver())
+class QualifiedTypeNameConverter(mapper: ObjectMapper) : ModelResolver(mapper, QualifiedTypeNameResolver()) {
+
+}

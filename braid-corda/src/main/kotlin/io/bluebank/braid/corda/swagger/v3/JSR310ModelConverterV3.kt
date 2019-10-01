@@ -102,7 +102,7 @@ class JSR310ModelConverterV3 : ModelConverter {
     return try {
       chain.next().resolve(type, context, chain)
     } catch (e: Exception) {
-      throw RuntimeException("Unable to resolve type: $type", e)
+      throw RuntimeException("Unable to resolve type: ${type.type}", e)
     }
   }
 
