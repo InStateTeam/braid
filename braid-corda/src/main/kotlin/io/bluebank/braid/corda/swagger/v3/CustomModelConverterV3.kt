@@ -17,10 +17,12 @@ package io.bluebank.braid.corda.swagger.v3
 
 import com.fasterxml.jackson.databind.JavaType
 import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
+import io.netty.buffer.ByteBuf
 import io.swagger.util.Json
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.models.media.*
+import io.vertx.core.buffer.Buffer
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.Issued
@@ -29,6 +31,8 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
+import java.lang.reflect.Type
+import java.nio.ByteBuffer
 import java.security.PublicKey
 import java.security.cert.CertPath
 import java.security.cert.X509Certificate
@@ -58,6 +62,7 @@ class CustomModelConverterV3 : ModelConverter {
         else -> {
           val clazz = jsonType.rawClass
           when {
+            clazz.isBinary()  -> BinarySchema()
             PublicKey::class.java.isAssignableFrom(clazz) -> publicKeySchema()
             Class::class.java.isAssignableFrom(clazz) -> classSchema()
             SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz) -> secureHashSchema()
@@ -79,6 +84,16 @@ class CustomModelConverterV3 : ModelConverter {
     } catch (e: Throwable) {
       log.error("failed to parse or resolve type: $type")
       throw e
+    }
+  }
+
+  private fun Type.isBinary(): Boolean {
+    return when (this) {
+      Buffer::class.java,
+      ByteArray::class.java,
+      ByteBuffer::class.java,
+      ByteBuf::class.java -> true
+      else -> false
     }
   }
 

@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.serialisation.mixin
 
 import com.fasterxml.jackson.annotation.*
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.ColumnPredicate
 import net.corda.core.node.services.vault.QueryCriteria
@@ -31,4 +32,19 @@ import net.corda.core.node.services.vault.QueryCriteria
   JsonSubTypes.Type(value = ColumnPredicate.Likeness::class)
     )
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@io.swagger.v3.oas.annotations.media.Schema(
+    type = "object",
+    title = "Pet",
+    discriminatorProperty = "@class",
+    discriminatorMapping = [
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.AggregateFunction::class),
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.Between::class),
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.AggregateFunction::class),
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.CollectionExpression::class),
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.EqualityComparison::class),
+        DiscriminatorMapping(value = "Dog", schema = ColumnPredicate.NullExpression::class),
+        DiscriminatorMapping(value = "Likeness", schema = ColumnPredicate.Likeness::class)
+    ],
+    subTypes = [ColumnPredicate.AggregateFunction::class]
+)
 abstract class ColumnPredicateMixin

@@ -1552,19 +1552,19 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
+          "outputs" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
             }
           },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
-          "outputs" : {
+          "outputStates" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -2533,6 +2533,9 @@
           }
         }
       },
+      "io.bluebank.braid.corda.serialisation.mixin.PageSpecificationMixin" : {
+        "type" : "object"
+      },
       "net.corda.core.node.services.vault.SortAttribute_Custom" : {
         "required" : [ "entityStateClass", "entityStateColumnName" ],
         "type" : "object",
@@ -2580,11 +2583,8 @@
             "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
           },
           "issuerRef" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "byte"
-            }
+            "type" : "string",
+            "format" : "binary"
           },
           "stateRef" : {
             "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
@@ -3067,11 +3067,8 @@
             "type" : "string"
           },
           "issuerRef" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "byte"
-            }
+            "type" : "string",
+            "format" : "binary"
           },
           "stateRef" : {
             "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
@@ -3105,11 +3102,8 @@
             "type" : "string"
           },
           "issuanceRef" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "byte"
-            }
+            "type" : "string",
+            "format" : "binary"
           },
           "ownerHash" : {
             "type" : "string"
@@ -3129,11 +3123,8 @@
             "type" : "string"
           },
           "faceValueIssuerRef" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "format" : "byte"
-            }
+            "type" : "string",
+            "format" : "binary"
           },
           "stateRef" : {
             "$ref" : "#/components/schemas/net.corda.core.schemas.PersistentStateRef"

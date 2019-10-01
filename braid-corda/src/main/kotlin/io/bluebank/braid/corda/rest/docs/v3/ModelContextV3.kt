@@ -15,29 +15,22 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
-import io.netty.buffer.ByteBuf
+import io.bluebank.braid.corda.swagger.v3.MiximModelConverterV3
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
-import io.swagger.v3.core.util.Json
-import io.swagger.v3.core.util.PrimitiveType
 import io.swagger.v3.oas.models.OpenAPI
-import io.swagger.v3.oas.models.media.BinarySchema
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.Future
-import io.vertx.core.buffer.Buffer
 import net.corda.core.utilities.contextLogger
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import java.nio.ByteBuffer
 
 class ModelContextV3 {
   companion object {
     private val log = contextLogger()
-    private val binaryResolvedSchema = ResolvedSchema().apply { schema = BinarySchema() }
   }
 
   private val mutableModels = mutableMapOf<String, Schema<*>>()
@@ -45,6 +38,7 @@ class ModelContextV3 {
   private val modelConverters = ModelConverters().apply {
     addConverter(QualifiedTypeNameConverter(io.vertx.core.json.Json.mapper))
     addConverter(JSR310ModelConverterV3())
+    addConverter(MiximModelConverterV3(io.vertx.core.json.Json.mapper))
     addConverter(CustomModelConverterV3())
   }
 
@@ -52,16 +46,11 @@ class ModelContextV3 {
     // todo move to CustomModelConverter
     val actualType = type.actualType()
     return try {
-      when {
-        actualType.isBinary() -> binaryResolvedSchema
-        else -> {
-          actualType.createSwaggerModels()?.also {
-            mutableModels += it.referencedSchemas
-          } ?: ResolvedSchema().apply {
-            this.schema = PrimitiveType.createProperty(actualType)
+      actualType.createSwaggerModels()
+          .also {
+            val referencedSchemas = it.referencedSchemas
+            mutableModels += referencedSchemas
           }
-        }
-      }
     } catch (e: Throwable) {
       throw RuntimeException("Unable to convert actual type: $actualType", e)
     }
@@ -79,17 +68,8 @@ class ModelContextV3 {
     return openApi
   }
 
-  private fun Type.isBinary(): Boolean {
-    return when (this) {
-      Buffer::class.java,
-      ByteArray::class.java,
-      ByteBuffer::class.java,
-      ByteBuf::class.java -> true
-      else -> false
-    }
-  }
 
-  private fun Type.createSwaggerModels(): ResolvedSchema? {
+  private fun Type.createSwaggerModels(): ResolvedSchema {
     return modelConverters.resolveAsResolvedSchema(AnnotatedType(this)
         .resolveAsRef(true))
   }

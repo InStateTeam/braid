@@ -246,6 +246,8 @@ class BraidCordaStandaloneServerTest {
       .end()
   }
 
+
+
   @Test
   fun shouldListSelf(context: TestContext) {
     val async = context.async()
