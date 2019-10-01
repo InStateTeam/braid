@@ -39,15 +39,16 @@ object PathsClassLoader {
       // attempt to download the file if available
       asList(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
     } catch (err: IllegalArgumentException) {
-      localFiles(urlOrFileName)
+      localFiles(File(urlOrFileName))
     }
   }
 
- private fun localFiles(urlOrFileName: String): List<URL> {
+ private fun localFiles(file: File): List<URL> {
       // attempt to create as a path
-      val file = File(urlOrFileName)
       if(file.isDirectory){
-           return file.list().map { localFiles(it) }.flatMap { it }.toList()
+        val list = file.listFiles()
+        val toList = list.map { localFiles(it) }.flatMap { it }.toList()
+        return toList
       }
       return asList(file.toURI().toURL())
     }

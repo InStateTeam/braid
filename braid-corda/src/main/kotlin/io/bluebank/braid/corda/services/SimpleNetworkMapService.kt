@@ -99,7 +99,7 @@ class SimpleNetworkMapService(
       x500Name?.isNotEmpty() ?: false -> {
         val x500Name1 = CordaX500Name.parse(x500Name!!)
         val party = networkMapServiceAdapter.wellKnownPartyFromX500Name(x500Name1)
-        listOfNotNull(networkMapServiceAdapter.nodeInfoFromParty(party!!)?.toSimpleNodeInfo())
+        listOfNotNull(party?.let { networkMapServiceAdapter.nodeInfoFromParty(party)?.toSimpleNodeInfo() } )
       }
       else -> networkMapServiceAdapter.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
         Collectors.toList()
