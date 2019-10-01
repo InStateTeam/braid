@@ -246,6 +246,30 @@ class BraidCordaStandaloneServerTest {
       .end()
   }
 
+ @Test
+  fun `should return empty list if node not found`(context: TestContext) {
+    val async = context.async()
+
+    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
+    client.get(
+      port,
+      "localhost",
+      "/api/rest/network/nodes?x500-name=O%3DPartyB%2CL%3DNew+York%2CC%3DUS"
+    )
+      .putHeader("Accept", "application/json; charset=utf8")
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+        it.bodyHandler {
+          val nodes = it.toJsonArray()
+          context.assertThat(nodes.size(), equalTo(0))
+          async.complete()
+        }
+      }
+      .end()
+  }
+
   @Test
   fun shouldListSelf(context: TestContext) {
     val async = context.async()
