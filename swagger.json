@@ -919,7 +919,7 @@
         "required" : [ "type" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
           "type" : "object",
           "properties" : {
@@ -929,14 +929,14 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Between" : {
         "required" : [ "rightFromLiteral", "rightToLiteral" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -945,16 +945,16 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison" : {
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -967,16 +967,16 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression" : {
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -992,16 +992,16 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison" : {
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -1014,9 +1014,9 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Instant" : {
@@ -1038,7 +1038,7 @@
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -1051,9 +1051,9 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Long" : {
@@ -1075,7 +1075,7 @@
         "required" : [ "operator" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate"
         }, {
           "type" : "object",
           "properties" : {
@@ -1085,9 +1085,9 @@
             }
           }
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
         }, {
-          "$ref" : "net.corda.core.node.services.vault.ColumnPredicate_Long"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean" : {
@@ -1126,7 +1126,7 @@
         "required" : [ "a", "b" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1187,7 +1187,7 @@
         "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1259,7 +1259,7 @@
         "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1311,7 +1311,7 @@
         "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1373,7 +1373,7 @@
         "required" : [ "a", "b" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1420,7 +1420,7 @@
         "required" : [ "constraintTypes", "constraints", "expression", "relevancyStatus", "status" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1472,7 +1472,7 @@
         "required" : [ "constraintTypes", "constraints", "relevancyStatus", "status" ],
         "type" : "object",
         "allOf" : [ {
-          "$ref" : "net.corda.core.node.services.vault.QueryCriteria"
+          "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         }, {
           "type" : "object",
           "properties" : {
@@ -1649,16 +1649,16 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "outputs" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "inputs" : {
@@ -1704,16 +1704,16 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "outputs" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "notary" : {
@@ -2325,11 +2325,11 @@
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "fromTime" : {
+          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "untilTime" : {
+          "fromTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }

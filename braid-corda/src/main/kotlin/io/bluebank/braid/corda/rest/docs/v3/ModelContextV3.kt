@@ -15,14 +15,12 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.MiximModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.SuperClassModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.*
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.media.ComposedSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.Future
 import net.corda.core.utilities.contextLogger
@@ -41,6 +39,7 @@ class ModelContextV3 {
     addConverter(JSR310ModelConverterV3())
     addConverter(MiximModelConverterV3(io.vertx.core.json.Json.mapper))
     addConverter(SuperClassModelConverterV3())
+ //   addConverter(ComposedSchemaFixV3())
     addConverter(CustomModelConverterV3())
   }
 
@@ -63,12 +62,25 @@ class ModelContextV3 {
 
   fun retainDiscriminator(current: Schema<*>?, possibleReplacement: Schema<*>?): Schema<*>{
      if(current == null)
-       return possibleReplacement!!
+       return fixUp(possibleReplacement!!)
      if(current.discriminator !=null)
        return current
-     return possibleReplacement!!
+     return fixUp(possibleReplacement!!)
   }
 
+  private fun fixUp(schema: Schema<*>): Schema<*> {
+    if(schema is ComposedSchema){
+      schema.allOf.forEach {
+        prepentComponents(it)
+      }
+    }
+    return schema
+  }
+
+  private fun prepentComponents(it: Schema<Any>) {
+    if (it.`$ref` != null && !it.`$ref`.startsWith("#/components/schemas/"))
+      it.`$ref` = "#/components/schemas/" + it.`$ref`
+  }
 
   fun addToSwagger(openApi: OpenAPI): OpenAPI {
     models.forEach { (name, model) ->
