@@ -20,6 +20,7 @@ import org.hamcrest.CoreMatchers.hasItem
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Test
+import java.io.File
 import java.net.URL
 
 class PathsClassLoaderTest {
@@ -29,6 +30,17 @@ class PathsClassLoaderTest {
       "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
       "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
       )
+    val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
+    assertNotNull(clazz)
+  }
+
+
+  @Test
+  fun `that we can load classes from directory`() {
+    val homeDir = System.getProperty("user.home")
+    val path = File("$homeDir/.downloaded-cordapps").path
+
+    val classLoader = PathsClassLoader.jarsClassLoader(path)
     val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
     assertNotNull(clazz)
   }
