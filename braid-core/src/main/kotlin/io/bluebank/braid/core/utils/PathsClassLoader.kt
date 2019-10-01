@@ -17,6 +17,7 @@ package io.bluebank.braid.core.utils
 
 import java.io.File
 import java.net.URI
+import java.net.URISyntaxException
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.Arrays.asList
@@ -39,6 +40,9 @@ object PathsClassLoader {
       // attempt to download the file if available
       asList(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
     } catch (err: IllegalArgumentException) {
+      localFiles(File(urlOrFileName))
+    } catch (err: URISyntaxException) {
+      // URI throws this exception if urlOrFileName starts with like "C:\" on Windows
       localFiles(File(urlOrFileName))
     }
   }
