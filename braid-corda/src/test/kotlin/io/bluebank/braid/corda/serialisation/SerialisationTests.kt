@@ -93,7 +93,9 @@ class SerialisationTests {
 
   @Test
   fun `that Date should serialized using ISO8601`() {
-    val expected = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse("2019-03-30 12:34:56.567")
+    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+    sdf.timeZone = TimeZone.getTimeZone("UTC")
+    val expected = sdf.parse("2019-03-30 12:34:56.567")
     val encoded = Json.encode(expected)
     
     assertEquals("\"2019-03-30T12:34:56.567+0000\"", encoded)

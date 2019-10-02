@@ -50,8 +50,8 @@ class CordaNet(
     }
 
     fun createCordaNet(): CordaNet {
-      val startPort = findConsecutiveFreePorts(100)
-      return CordaNet(startPort, startPort + 50)
+      val startPort = findConsecutiveFreePorts(200)
+      return CordaNet(startPort, startPort + 150)
     }
   }
 

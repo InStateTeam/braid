@@ -41,7 +41,9 @@ class JavascriptIntegrationTests {
       log.info("project directory is ${getProjectDirectory()}")
       val testDir = getProjectDirectory().resolve("../braid-client-js")
       assertTrue { testDir.exists() }
-      val pb = ProcessBuilder("npm", "run", "test:integration")
+      val npmScriptName = if (isWindows()) "npm.cmd" else "npm"
+      log.info("npm script name is $npmScriptName")
+      val pb = ProcessBuilder(npmScriptName, "run", "test:integration")
       pb.environment()["braidService"] =
         "https://localhost:${cordaNet.braidPortForParty("PartyA")}$DEFAULT_API_MOUNT"
       pb.directory(testDir)
@@ -72,4 +74,11 @@ class JavascriptIntegrationTests {
   }
 
   private fun getProjectDirectory() = File(System.getProperty("user.dir"))
+
+  private fun isWindows(): Boolean {
+    // https://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
+    val osName = System.getProperty("os.name")
+    log.info("System.getProperty(\"os.name\") is $osName")
+    return osName.startsWith("Windows")
+  }
 }
