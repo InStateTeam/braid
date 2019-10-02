@@ -45,7 +45,7 @@ class BraidDocsMain() {
       val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
       val classes = readCordaClasses()
       classes.forEach { restMounter.docsHandler.addType(it) }
-      restMounter.docsHandler.swagger()
+      restMounter.docsHandler.getSwaggerString()
     } finally {
       log.info("shutting down Vertx")
       val done = CountDownLatch(1)

@@ -39,7 +39,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
-val HTTP_UNPROCESSABLE_STATUS_CODE = 422
+const val HTTP_UNPROCESSABLE_STATUS_CODE = 422
 
 class Router{
   companion object{

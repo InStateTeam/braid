@@ -21,7 +21,7 @@ import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
 import kotlin.reflect.KCallable
 
-interface DocsHandler : Handler<RoutingContext>{
+interface DocsHandler : Handler<RoutingContext> {
   fun <Response> add(
     groupName: String,
     protected: Boolean,
@@ -40,5 +40,5 @@ interface DocsHandler : Handler<RoutingContext>{
 
   fun addType(type: Type)
 
-  fun swagger():String
+  fun getSwaggerString(context: RoutingContext? = null): String
 }

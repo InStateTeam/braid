@@ -18,7 +18,6 @@ package io.bluebank.braid.corda.rest.docs
 import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
-import io.netty.buffer.ByteBuf
 import io.swagger.annotations.ApiOperation
 import io.swagger.models.Model
 import io.swagger.models.Operation
@@ -30,19 +29,14 @@ import io.swagger.models.parameters.QueryParameter
 import io.swagger.models.properties.ArrayProperty
 import io.swagger.models.properties.Property
 import io.swagger.models.properties.PropertyBuilder
-import io.vertx.core.Future
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
-import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.jvm.jvmErasure
 
 abstract class EndPoint(
   private val groupName: String,
@@ -131,9 +125,9 @@ abstract class EndPoint(
     }
 
   fun addTypes(models: ModelContext) {
-    models.getProperty(this.returnType)
+    models.addType(this.returnType)
     this.parameterTypes.forEach {
-      models.getProperty(it)
+      models.addType(it)
     }
   }
 
@@ -149,15 +143,15 @@ abstract class EndPoint(
     operation.addResponse(OK.statusCode.toString(), operation.responses["default"])
     operation.addResponse(
       INTERNAL_SERVER_ERROR.statusCode.toString(),
-      Response().description("server failure").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+      Response().description("server failure").responseSchema(Throwable::class.java.getSwaggerModelReference())
     )
     operation.addResponse(
       BAD_REQUEST.statusCode.toString(),
-      Response().description("the server failed to parse the request").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+      Response().description("the server failed to parse the request").responseSchema(Throwable::class.java.getSwaggerModelReference())
     )
     operation.addResponse(
       HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
-      Response().description("the request could not be processed").responseSchema(BraidSwaggerError::class.java.getSwaggerModelReference())
+      Response().description("the request could not be processed").responseSchema(Throwable::class.java.getSwaggerModelReference())
     )
     return operation
   }
@@ -209,11 +203,7 @@ abstract class EndPoint(
   }
 
   private fun decorateOperationWithResponseType(operation: Operation) {
-    val actualReturnType = returnType.actualType()
-    if (actualReturnType == Unit::class.java ||
-      actualReturnType == Void::class.java ||
-      actualReturnType.typeName == "void"
-    ) {
+    if (returnType.isEmptyResponseType()) {
       operation
         .produces(MediaType.TEXT_PLAIN)
         .defaultResponse(Response().description("empty response"))
@@ -227,50 +217,11 @@ abstract class EndPoint(
             responseSchema
           }
         }
-
       }
       @Suppress("DEPRECATION")
       operation
         .produces(produces)
         .defaultResponse(Response().schema(responseSchema).description("default response"))
-    }
-  }
-
-  private fun KType.getKType(): KType {
-    return if (jvmErasure.java == Future::class.java) {
-      this.arguments.last().type!!
-    } else {
-      this
-    }
-  }
-
-  /**
-   * @return true iff the type is binary data
-   */
-  private fun Type.isBinary(): Boolean {
-    return when (this) {
-      Buffer::class.java,
-      ByteArray::class.java,
-      ByteBuffer::class.java,
-      ByteBuf::class.java -> true
-      else -> false
-    }
-  }
-
-  protected fun Type.mediaType(): String {
-    val actualType = this.actualType()
-    return when {
-      actualType.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
-      actualType == String::class.java -> MediaType.TEXT_PLAIN
-      else -> MediaType.APPLICATION_JSON
-    }
-  }
-
-  private fun Type.actualType(): Type {
-    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
-      this.actualTypeArguments[0]
-    } else {
-      this
     }
   }
 }

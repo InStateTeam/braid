@@ -16,11 +16,11 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
-import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
+import io.bluebank.braid.corda.rest.docs.getKType
+import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
 import io.bluebank.braid.core.annotation.MethodDescription
-import io.netty.buffer.ByteBuf
 import io.swagger.v3.core.converter.ResolvedSchema
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.Content
@@ -30,19 +30,14 @@ import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
-import io.vertx.core.Future
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
-import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
-import java.nio.ByteBuffer
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response.Status.BAD_REQUEST
 import javax.ws.rs.core.Response.Status.OK
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.jvm.jvmErasure
 
 abstract class EndPointV3(
   private val groupName: String,
@@ -51,7 +46,6 @@ abstract class EndPointV3(
   val path: String,
   private val modelContext: ModelContextV3
 ) {
-
   companion object {
     fun create(
       groupName: String,
@@ -133,11 +127,11 @@ abstract class EndPointV3(
         .addApiResponse(OK.statusCode.toString(), response(returnType))
         .addApiResponse(
           BAD_REQUEST.statusCode.toString(),
-          response(BraidSwaggerError::class.java).description("the server failed to parse the request")
+          response(Throwable::class.java).description("the server failed to parse the request")
         )
         .addApiResponse(
           HTTP_UNPROCESSABLE_STATUS_CODE.toString(),
-          response(BraidSwaggerError::class.java).description("the request could not be processed")
+          response(Throwable::class.java).description("the request could not be processed")
         )
     )
     return operation
@@ -164,15 +158,11 @@ abstract class EndPointV3(
   protected fun Type.getSwaggerProperty(): ResolvedSchema = modelContext.addType(this)
 
   private fun response(type: Type): ApiResponse {
-    val actualReturnType = type.actualType()
-    if (actualReturnType == Unit::class.java ||
-      actualReturnType == Void::class.java ||
-      actualReturnType.typeName == "void"
-    ) {
-      return ApiResponse().description("empty response")
+    return if (type.isEmptyResponseType()) {
+      ApiResponse().description("empty response")
     } else {
       val responseSchema = type.getSwaggerProperty()
-      return ApiResponse()
+      ApiResponse()
         .description("")
         .content(
           Content()
@@ -181,44 +171,6 @@ abstract class EndPointV3(
               io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
             )
         )
-    }
-  }
-
-  private fun KType.getKType(): KType {
-    return if (jvmErasure.java == Future::class.java) {
-      this.arguments.last().type!!
-    } else {
-      this
-    }
-  }
-
-  /**
-   * @return true iff Type is for binary data
-   */
-  private fun Type.isBinary(): Boolean {
-    return when (this) {
-      Buffer::class.java,
-      ByteArray::class.java,
-      ByteBuffer::class.java,
-      ByteBuf::class.java -> true
-      else -> false
-    }
-  }
-
-  protected fun Type.mediaType(): String {
-    val actualType = this.actualType()
-    return when {
-      actualType.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
-      actualType == String::class.java -> MediaType.TEXT_PLAIN
-      else -> MediaType.APPLICATION_JSON
-    }
-  }
-
-  private fun Type.actualType(): Type {
-    return if (this is ParameterizedType && Future::class.java.isAssignableFrom(this.rawType as Class<*>)) {
-      actualTypeArguments[0]
-    } else {
-      this
     }
   }
 }

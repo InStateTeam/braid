@@ -22,7 +22,6 @@ import io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.models.*
 import io.swagger.models.auth.SecuritySchemeDefinition
-import io.swagger.util.Json
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
@@ -47,16 +46,11 @@ class DocsHandlerV2(
 
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPoint>()
-  private val swagger: Swagger by lazy {
-    createSwagger()
-  }
+  private var swagger: Swagger? = null  // thread-safe because of how vertx works
   private val modelContext = ModelContext()
 
   override fun handle(context: RoutingContext) {
-    val absoluteURI = URL(context.request().absoluteURI())
-    swagger.host = absoluteURI.authority
-    val output =
-      Json.pretty().writeValueAsString(if (debugMode) createSwagger() else swagger)
+    val output = getSwaggerString(context)
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
       .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
@@ -64,16 +58,26 @@ class DocsHandlerV2(
       .end(output)
   }
 
-  override fun swagger(): String {
-    return io.swagger.util.Json.pretty().writeValueAsString(createSwagger())
+  override fun getSwaggerString(context: RoutingContext?): String {
+    return io.swagger.util.Json.pretty().writeValueAsString(createOrGetSwagger(context))
   }
 
-  fun createSwagger(): Swagger {
-    val url = URL(basePath)
+  private fun createOrGetSwagger(context: RoutingContext?): Swagger {
+    if (swagger == null || debugMode) {
+      swagger = createSwagger(context)
+    }
+    return swagger!!
+  }
+
+  internal fun createSwagger(context: RoutingContext? = null): Swagger {
+    val url = when (context) {
+      null -> URL(basePath)
+      else -> URL(context.request().absoluteURI())
+    }
     val info = createSwaggerInfo()
     return Swagger()
       .info(info)
-      .host(url.host + ":" + url.port)
+      .host(url.toURI().authority)
       .basePath(url.path)
       .apply {
         if (auth != null) {
