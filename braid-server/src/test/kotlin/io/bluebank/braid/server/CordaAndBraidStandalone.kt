@@ -25,8 +25,8 @@ import net.corda.testing.node.User
 
 fun main(args: Array<String>) {
   val user = User("user1", "test", permissions = setOf("ALL"))
-  val bankA = CordaX500Name("BankA", "", "GB")
-  val bankB = CordaX500Name("BankB", "", "US")
+  val bankA = CordaX500Name("PartyA", "London", "GB")
+  val bankB = CordaX500Name("PartyB", "New York", "US")
 
   driver(
     DriverParameters(

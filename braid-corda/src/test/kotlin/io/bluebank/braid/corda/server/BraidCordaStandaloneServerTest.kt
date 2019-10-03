@@ -129,12 +129,13 @@ class BraidCordaStandaloneServerTest {
       async: Async,
       networkHostAndPort: NetworkHostAndPort
     ): Future<String>? {
-      return BraidCordaStandaloneServer(
+      // compile time check that we can inherit from BraidCordaStandaloneServer
+      return object : BraidCordaStandaloneServer(
         userName = "user1",
         password = "test",
         port = port,
         nodeAddress = networkHostAndPort
-      )
+      ) {}
         .startServer()
         .setHandler {
           async.complete()
