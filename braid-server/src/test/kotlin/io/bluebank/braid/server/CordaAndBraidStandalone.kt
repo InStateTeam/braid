@@ -22,7 +22,6 @@ import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
-import java.util.*
 
 fun main(args: Array<String>) {
   val user = User("user1", "test", permissions = setOf("ALL"))
@@ -39,14 +38,14 @@ fun main(args: Array<String>) {
       ),
       waitForAllNodesToFinish = true,
       isDebug = true,
-      startNodesInProcess = false
+      startNodesInProcess = true
     )
   ) {
     // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
     // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
     val (partyA, partyB) = listOf(
-      startNode(providedName = bankA, rpcUsers = Arrays.asList(user)),
-      startNode(providedName = bankB, rpcUsers = Arrays.asList(user))
+      startNode(providedName = bankA, rpcUsers = listOf(user)),
+      startNode(providedName = bankB, rpcUsers = listOf(user))
     ).map { it.getOrThrow() }
 
     BraidCordaStandaloneServer(8080, "user1", "test", partyA.rpcAddress, 3).startServer()
