@@ -54,7 +54,7 @@ class DocsHandlerV2(
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
       .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+      .setChunked(true)
       .end(output)
   }
 
