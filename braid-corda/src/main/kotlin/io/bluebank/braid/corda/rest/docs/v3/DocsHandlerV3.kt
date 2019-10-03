@@ -34,6 +34,7 @@ import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import net.corda.core.utilities.contextLogger
 import java.lang.reflect.Type
+import java.net.URI
 import java.net.URL
 import kotlin.reflect.KCallable
 
@@ -76,9 +77,13 @@ class DocsHandlerV3(
   }
 
   internal fun createOpenAPI(context: RoutingContext? = null): OpenAPI {
+    val baseURL = URL(basePath)
     val serverURI = when (context) {
-      null -> URL(basePath)
-      else -> context.request().absoluteURI().replace("swagger.json", "")
+      null -> baseURL
+      else -> {
+        val uri = URI(context.request().absoluteURI())
+        URL(uri.scheme, uri.host, uri.port, baseURL.path)
+      }
     }
 
     return OpenAPI()
