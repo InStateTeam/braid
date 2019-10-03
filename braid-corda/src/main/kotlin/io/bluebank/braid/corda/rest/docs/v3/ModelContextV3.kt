@@ -15,7 +15,11 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-import io.bluebank.braid.corda.swagger.v3.*
+import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
+import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.MiximModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.SuperClassModelConverterV3
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
@@ -39,37 +43,47 @@ class ModelContextV3 {
     addConverter(JSR310ModelConverterV3())
     addConverter(MiximModelConverterV3(io.vertx.core.json.Json.mapper))
     addConverter(SuperClassModelConverterV3())
- //   addConverter(ComposedSchemaFixV3())
+    //   addConverter(ComposedSchemaFixV3())
     addConverter(CustomModelConverterV3())
+  }
+
+  init {
+    addType(Throwable::class.java)
   }
 
   fun addType(type: Type): ResolvedSchema {
     // todo move to CustomModelConverter
     val actualType = type.actualType()
-
-    return try {
-      actualType.createSwaggerModels()
-          .also {
-            val referencedSchemas = it.referencedSchemas
-            referencedSchemas.keys.forEach {
-                mutableModels.compute(it, { w, prev -> retainDiscriminator(prev,referencedSchemas.get(it)) })
+    return when {
+      actualType.isEmptyResponseType() -> ResolvedSchema()
+      else -> {
+        try {
+          actualType.createSwaggerModels()
+            .also { schema ->
+              val referencedSchemas = schema.referencedSchemas
+              referencedSchemas.keys.forEach { schemaName ->
+                mutableModels.compute(schemaName) { _, prev ->
+                  retainDiscriminator(prev, referencedSchemas[schemaName])
+                }
+              }
             }
-          }
-    } catch (e: Throwable) {
-      throw RuntimeException("Unable to convert actual type: $actualType", e)
+        } catch (e: Throwable) {
+          throw RuntimeException("Unable to convert actual type: $actualType", e)
+        }
+      }
     }
   }
 
-  fun retainDiscriminator(current: Schema<*>?, possibleReplacement: Schema<*>?): Schema<*>{
-     if(current == null)
-       return fixUp(possibleReplacement!!)
-     if(current.discriminator !=null)
-       return current
-     return fixUp(possibleReplacement!!)
+  fun retainDiscriminator(current: Schema<*>?, possibleReplacement: Schema<*>?): Schema<*> {
+    if (current == null)
+      return fixUp(possibleReplacement!!)
+    if (current.discriminator != null)
+      return current
+    return fixUp(possibleReplacement!!)
   }
 
   private fun fixUp(schema: Schema<*>): Schema<*> {
-    if(schema is ComposedSchema){
+    if (schema is ComposedSchema) {
       schema.allOf.forEach {
         prepentComponents(it)
       }
@@ -94,10 +108,11 @@ class ModelContextV3 {
     return openApi
   }
 
-
   private fun Type.createSwaggerModels(): ResolvedSchema {
-    return modelConverters.resolveAsResolvedSchema(AnnotatedType(this)
-        .resolveAsRef(true))
+    return modelConverters.resolveAsResolvedSchema(
+      AnnotatedType(this)
+        .resolveAsRef(true)
+    )
   }
 
   private fun Type.actualType(): Type {

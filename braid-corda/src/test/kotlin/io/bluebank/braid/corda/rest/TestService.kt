@@ -37,7 +37,7 @@ const val X_HEADER_STRING = "x-string"
 
 class TestService {
   fun sayHello() = "hello"
-  fun sayHelloAsync() = Future.succeededFuture<String>("hello, async!")
+  fun sayHelloAsync() = Future.succeededFuture("hello, async!")
   fun quietAsyncVoid(): Future<Void> = Future.succeededFuture()
   fun quietAsyncUnit(): Future<Unit> = Future.succeededFuture()
   fun quietUnit(): Unit = Unit

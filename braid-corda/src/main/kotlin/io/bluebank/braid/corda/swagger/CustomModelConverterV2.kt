@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.swagger
 
 import com.fasterxml.jackson.databind.JavaType
+import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
 import io.swagger.converter.ModelConverter
 import io.swagger.converter.ModelConverterContext
 import io.swagger.models.Model
@@ -69,7 +70,9 @@ class CustomModelConverterV2 : ModelConverter {
             Currency::class.java.isAssignableFrom(clazz) -> currencyProperty()
             Amount::class.java.isAssignableFrom(clazz) -> processAmountType(context, jsonType)
             Issued::class.java.isAssignableFrom(clazz) -> processIssuedType(context, annotations, jsonType)
-            Throwable::class.java.isAssignableFrom(clazz) -> processThrowableType(context)
+            Throwable::class.java.isAssignableFrom(clazz) || BraidSwaggerError::class.java == clazz -> processThrowableType(
+              context
+            )
             else -> chain?.next()?.resolveProperty(type, context, annotations, chain)
           }
         }

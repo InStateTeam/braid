@@ -41,7 +41,7 @@ class DocsHandlerV3Test {
   init {
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
-    openApi = docs.createSwagger()
+    openApi = docs.createOpenAPI()
   }
 
   fun myFunction(type: aType) {
@@ -86,8 +86,7 @@ class DocsHandlerV3Test {
     val swagger = ObjectMapper()
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .writerWithDefaultPrettyPrinter()
-        .writeValueAsString(openApi);
-
+      .writeValueAsString(openApi)
     println(swagger)
   }
 }
