@@ -43,9 +43,12 @@ class BraidVerticle(
 
   override fun start(startFuture: Future<Void>) {
     log.info("starting with ", config)
-    // setupRouter takes 3500 msec to run on my machine, even for a simple test.
+    // setupRouter takes 3500 msec to run on my machine, even for a simple test
+    // (though it's only slow when running Braid in a separate server and using the class path scanner,
+    // because when using braid within a cordapp it's reasonably fast).
+
     // The vertx blocked thread checker would warn, if we used vertx.executeBlocking and that took more than 10 seconds,
-    // so instead let's use  a WorkerExecutor here which can run for longer than 10 seconds.
+    // so instead let's use a WorkerExecutor here, which *can* run for longer than 10 seconds.
     // CordappScanner supports an unbounded number of cordapps -- so what's a safe/optimum timeout value?
     // Let's arbitrarily choose "2 minutes" for now and maybe make it infinite or configurable later.
 
