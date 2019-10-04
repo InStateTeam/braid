@@ -53,12 +53,12 @@ class BraidVerticle(
     // Let's arbitrarily choose "2 minutes" for now and maybe make it infinite or configurable later.
 
     val poolSize = 1
-    val maxExecuteTime: Long = 2
+    val maxExecuteTime: Long = 60
     val executor = super.vertx.createSharedWorkerExecutor(
       "braid-startup-threadpool",
       poolSize,
       maxExecuteTime,
-      TimeUnit.MINUTES
+      TimeUnit.SECONDS
     )
 
     fun log(start: Long, method: String) {
@@ -72,6 +72,9 @@ class BraidVerticle(
         log(start, "setupRouter")
       },
       {
+        if (it.failed()) {
+          throw it.cause();
+        }
         val start = System.currentTimeMillis()
         setupWebserver(it.result(), startFuture)
         log(start, "setupWebserver")
@@ -101,7 +104,7 @@ class BraidVerticle(
 
   private fun setupRouter(): Router {
     val router = Routers.create(vertx, config.port)
-    log.info("!! running BraidVerticle.setupRouter")
+    log.info("BraidVerticle.setupRouter starting...")
     router.route().handler(LoggerHandler.create(LoggerFormat.SHORT))
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
