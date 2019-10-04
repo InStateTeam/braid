@@ -23,12 +23,14 @@ import io.bluebank.braid.core.http.withCompatibleWebsockets
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
+import io.vertx.core.WorkerExecutor
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.LoggerFormat
 import io.vertx.ext.web.handler.LoggerHandler
 import net.corda.core.node.AppServiceHub
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 class BraidVerticle(
   private val services: AppServiceHub?,
@@ -41,11 +43,43 @@ class BraidVerticle(
 
   override fun start(startFuture: Future<Void>) {
     log.info("starting with ", config)
-    val router = setupRouter()
-    setupWebserver(router, startFuture)
-    log.info(
-      "Braid server started on",
-      "${config.protocol}://localhost:${config.port}${config.rootPath}"
+    // setupRouter takes 3500 msec to run on my machine, even for a simple test.
+    // The vertx blocked thread checker would warn, if we used vertx.executeBlocking and that took more than 10 seconds,
+    // so instead let's use  a WorkerExecutor here which can run for longer than 10 seconds.
+    // CordappScanner supports an unbounded number of cordapps -- so what's a safe/optimum timeout value?
+    // Let's arbitrarily choose "2 minutes" for now and maybe make it infinite or configurable later.
+
+    val poolSize = 1
+    val maxExecuteTime: Long = 2
+    val executor = super.vertx.createSharedWorkerExecutor(
+      "braid-startup-threadpool",
+      poolSize,
+      maxExecuteTime,
+      TimeUnit.MINUTES
+    )
+
+    fun log(start: Long, method: String) {
+      log.info("BraidVerticle.$method complete -- ${System.currentTimeMillis() - start} msec")
+    }
+
+    executor.executeBlocking<Router>(
+      {
+        val start = System.currentTimeMillis()
+        it.complete(setupRouter())
+        log(start, "setupRouter")
+      },
+      {
+        val start = System.currentTimeMillis()
+        setupWebserver(it.result(), startFuture)
+        log(start, "setupWebserver")
+
+        executor.close()
+
+        log.info(
+          "Braid server started on",
+          "${config.protocol}://localhost:${config.port}${config.rootPath}"
+        )
+      }
     )
   }
 
@@ -64,6 +98,7 @@ class BraidVerticle(
 
   private fun setupRouter(): Router {
     val router = Routers.create(vertx, config.port)
+    log.info("!! running BraidVerticle.setupRouter")
     router.route().handler(LoggerHandler.create(LoggerFormat.SHORT))
     router.route().handler(BodyHandler.create())
     router.setupAllowAnyCORS()
