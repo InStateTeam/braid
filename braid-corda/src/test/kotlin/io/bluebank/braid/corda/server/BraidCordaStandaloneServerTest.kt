@@ -368,10 +368,6 @@ class BraidCordaStandaloneServerTest {
           flows,
           hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise")
         )
-        context.assertThat(
-          flows,
-          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Initiate")
-        )
       }
       .compose { client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows") }
       .compose { it.body<List<String>>() }

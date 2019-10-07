@@ -24,10 +24,7 @@ import io.bluebank.braid.core.json.BraidJacksonInit
 import io.vertx.core.json.Json
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.CordaThrowable
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.Issued
-import net.corda.core.contracts.TimeWindow
+import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
@@ -91,6 +88,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
       // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
       .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
+      //.setMixInAnnotation(FungibleAsset::class.java, FungibleAssetMixin::class.java)
       .setMixInAnnotation(TraversableTransaction::class.java, TraversableTransactionMixin::class.java)
       .setMixInAnnotation(TimeWindow::class.java, TimeWindowMixin::class.java)
       .setMixInAnnotation(Throwable::class.java, ThrowableMixin::class.java)
