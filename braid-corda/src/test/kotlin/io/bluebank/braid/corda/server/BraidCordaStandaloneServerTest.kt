@@ -73,8 +73,10 @@ class BraidCordaStandaloneServerTest {
 
     private var port = findFreePort()
     private val clientVertx = Vertx.vertx()
-    private val client =
+    private val client by lazy{
       clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
+    }
+      
 
     @BeforeClass
     @JvmStatic
