@@ -31,6 +31,10 @@ import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 
+/**
+ * Represents an end point of a function
+ */
+
 class KEndPointV3(
   groupName: String,
   protected: Boolean,
