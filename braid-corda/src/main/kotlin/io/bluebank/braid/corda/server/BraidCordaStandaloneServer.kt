@@ -67,8 +67,8 @@ open class BraidCordaStandaloneServer(
       .withPaths {
         group("network") {
           get("/network/nodes", networkService::nodes)
-          get("/network/notaries", networkService::notaries)
           get("/network/nodes/self", networkService::myNodeInfo)
+          get("/network/notaries", networkService::notaries)
         }
         group("vault") {
           get("/vault/vaultQuery", VaultService(rpc)::vaultQuery)
