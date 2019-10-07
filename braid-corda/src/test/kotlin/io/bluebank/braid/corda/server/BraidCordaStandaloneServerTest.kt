@@ -71,10 +71,10 @@ class BraidCordaStandaloneServerTest {
     private val bankA = CordaX500Name("BankA", "", "GB")
     private val bankB = CordaX500Name("BankB", "", "US")
 
-    private var port = findFreePort()
+    private val port = if ("true".equals(System.getProperty("braidStarted"))) 8999 else findFreePort()
     private val clientVertx = Vertx.vertx()
-    private val client =
-      clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
+    private val client = clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
+      
 
     @BeforeClass
     @JvmStatic
@@ -83,9 +83,7 @@ class BraidCordaStandaloneServerTest {
       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
-        port = 8999
         async.complete()
-
       } else if ("true".equals(System.getProperty("cordaStarted"))) {
         startBraid(async, NetworkHostAndPort("localhost", 10005))
       } else {
