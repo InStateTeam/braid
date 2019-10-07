@@ -50,7 +50,7 @@ internal class RPCFactoryImpl(
 
   private val rpc: CordaRPCOps by lazy {
     log.info("Attempting to connect Braid RPC to:$nodeAddress username:$userName")
-    val client = CordaRPCClient(nodeAddress)
+    val client = CordaRPCClient(nodeAddress, classLoader = Thread.currentThread().contextClassLoader)
     val connection = client.start(userName, password)
     connection.proxy
   }
