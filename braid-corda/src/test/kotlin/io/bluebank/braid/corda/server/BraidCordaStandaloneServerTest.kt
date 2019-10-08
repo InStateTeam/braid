@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.server
 import com.fasterxml.jackson.core.type.TypeReference
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.SimpleNodeInfo
+import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.corda.util.VertxMatcher.vertxAssertThat
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
@@ -53,6 +54,19 @@ import java.net.URLEncoder
 import java.util.*
 import java.util.Arrays.asList
 import javax.ws.rs.core.Response
+import net.corda.core.node.services.vault.QueryCriteria.VaultCustomQueryCriteria
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.Builder.equal
+import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
+import net.corda.core.node.services.vault.PageSpecification
+import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
+import net.corda.core.node.services.vault.Sort
+import net.corda.finance.test.SampleCashSchemaV1
+import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.schemas.CashSchemaV1
+import net.corda.nodeapi.internal.coreContractClasses
+
 
 /**
  * Run with Either
@@ -494,7 +508,7 @@ class BraidCordaStandaloneServerTest {
 
 
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/vault")
+    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery")
     client.get(port, "localhost", "/api/rest/vault/vaultQuery")
         .putHeader("Accept", "application/json; charset=utf8")
         .exceptionHandler(context::fail)
@@ -552,7 +566,100 @@ class BraidCordaStandaloneServerTest {
 """
 
 
-    log.info("calling get: http://localhost:${port}/api/rest/network/vault")
+    log.info("calling post: http://localhost:${port}/api/rest/vault/vaultQueryBy")
+    client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
+        .putHeader("Accept", "application/json; charset=utf8")
+        .putHeader("Content-length", ""+json.length)
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val nodes = it.toJsonObject()
+
+            vertxAssertThat(context,nodes, notNullValue())
+            println(nodes.encodePrettily())
+            async.complete()
+          }
+        }
+        .end(json)
+  }
+
+
+
+  @Test
+  fun `should seralize various query`(context: TestContext) {
+    val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
+    val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
+    val quantityIndex = CashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(0L)
+
+    val customCriteria2 = VaultCustomQueryCriteria(quantityIndex)
+    val customCriteria1 = VaultCustomQueryCriteria(currencyIndex)
+
+    val criteria = generalCriteria
+        .and(customCriteria1)
+        .and(customCriteria2)
+
+    val query = VaultQuery(criteria, contractStateType =  Cash.State::class.java)
+
+    val json = Json.encodePrettily(query)
+    println(json)
+  }
+
+
+
+  @Test
+  fun `should query the vault by various criteria`(context: TestContext) {
+                                         val async=   context.async()
+    val json = """{
+  "criteria" : {
+    "@class" : ".QueryCriteria${'$'}AndComposition",
+    "a" : {
+      "@class" : ".QueryCriteria${'$'}AndComposition",
+      "a" : {
+        "@class" : ".QueryCriteria${'$'}VaultQueryCriteria",
+        "status" : "ALL"
+      },
+      "b" : {
+        "@class" : ".QueryCriteria${'$'}VaultCustomQueryCriteria",
+        "expression" : {
+          "@class" : ".CriteriaExpression${'$'}ColumnPredicateExpression",
+          "column" : {
+            "name" : "currency",
+            "declaringClass" : "net.corda.finance.schemas.CashSchemaV1${'$'}PersistentCashState"
+          },
+          "predicate" : {
+            "@class" : ".ColumnPredicate${'$'}EqualityComparison",
+            "operator" : "EQUAL",
+            "rightLiteral" : "GBP"
+          }
+        },
+        "status" : "UNCONSUMED",
+        "relevancyStatus" : "ALL"
+      }
+    },
+    "b" : {
+      "@class" : ".QueryCriteria${'$'}VaultCustomQueryCriteria",
+      "expression" : {
+        "@class" : ".CriteriaExpression${'$'}ColumnPredicateExpression",
+        "column" : {
+          "name" : "pennies",
+          "declaringClass" : "net.corda.finance.schemas.CashSchemaV1${'$'}PersistentCashState"
+        },
+        "predicate" : {
+          "@class" : ".ColumnPredicate${'$'}BinaryComparison",
+          "operator" : "GREATER_THAN_OR_EQUAL",
+          "rightLiteral" : 0
+        }
+      },
+      "status" : "UNCONSUMED",
+      "relevancyStatus" : "ALL"
+    }
+  },
+  "contractStateType" : "net.corda.finance.contracts.asset.Cash${'$'}State"
+}"""
+
+    log.info("calling post: http://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
         .putHeader("Accept", "application/json; charset=utf8")
         .putHeader("Content-length", ""+json.length)

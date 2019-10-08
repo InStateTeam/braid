@@ -26,5 +26,24 @@ data class VaultQuery(
     val criteria: QueryCriteria = QueryCriteria.VaultQueryCriteria(),
     val paging: PageSpecification = PageSpecification(),
     val sorting: Sort = Sort(emptyList()),
-    val contractStateType:Class<ContractState> = ContractState::class.java
-)
+    val contractStateType:Class<out ContractState> = ContractState::class.java
+) {
+  fun withQueryCriteria(criteria: QueryCriteria) : VaultQuery{
+    return copy(criteria = criteria)
+  }
+
+  fun withPageSpecification(paging: PageSpecification) : VaultQuery{
+    return copy(paging = paging )
+  }
+
+
+  fun withSorting(sorting: Sort) : VaultQuery{
+    return copy(sorting = sorting )
+  }
+
+
+  fun withContractStateType(clazz: Class<ContractState>) : VaultQuery{
+    return copy(contractStateType = contractStateType )
+  }
+
+}

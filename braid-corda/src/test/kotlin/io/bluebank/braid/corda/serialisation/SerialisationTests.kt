@@ -23,11 +23,15 @@ import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.contracts.TransactionState
-import net.corda.core.node.services.vault.QueryCriteria
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.*
+import net.corda.core.node.services.vault.Builder.equal
+import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
 import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.test.SampleCashSchemaV1
 import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
@@ -186,6 +190,43 @@ class SerialisationTests {
     val decodeValue = Json.decodeValue(json,VaultQuery::class.java)
     assertThat(decodeValue, notNullValue())
   }
+
+  @Test
+  fun `should serialize complex vault query`() {
+    val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+
+    val currencyIndex = SampleCashSchemaV1.PersistentCashState::currency.equal("USD")
+    val quantityIndex = SampleCashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(1L)
+
+    val customCriteria2 = QueryCriteria.VaultCustomQueryCriteria(quantityIndex)
+    val customCriteria1 = QueryCriteria.VaultCustomQueryCriteria(currencyIndex)
+
+    val criteria = generalCriteria.and(customCriteria1).and(customCriteria2)
+    val query = VaultQuery(criteria)
+
+    val json = Json.encodePrettily(query)
+    Json.decodeValue(json, VaultQuery::class.java)
+  }
+
+
+  @Test
+  fun `should serialize criteria`() {
+    val currencyIndex = SampleCashSchemaV1.PersistentCashState::currency.equal("USD")
+    val customCriteria1 = QueryCriteria.VaultCustomQueryCriteria(currencyIndex)
+
+    val json = Json.encodePrettily(customCriteria1)
+    Json.decodeValue(json, QueryCriteria.VaultCustomQueryCriteria::class.java)
+  }
+
+  @Test
+  fun `should serialize SampleCashSchemaV1$PersistentCashState`() {
+    val expression = CriteriaExpression.ColumnPredicateExpression(Column(SampleCashSchemaV1.PersistentCashState::currency),
+        ColumnPredicate.NullExpression(NullOperator.NOT_NULL))
+    
+    val json = Json.encodePrettily(expression)
+    Json.decodeValue(json, CriteriaExpression.ColumnPredicateExpression::class.java)
+  }
+
 
   private fun f(set: NonEmptySet<String>) {}
 }
