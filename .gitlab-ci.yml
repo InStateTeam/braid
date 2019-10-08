@@ -82,7 +82,7 @@ deploy:
   stage: snapshot_release
   image: dazraf/build-tools:latest
   script:
-    - mvn $MAVEN_CLI_OPTS dokka:javadocJar deploy -DskipTests
+    - mvn $MAVEN_CLI_OPTS deploy -DskipTests
   only:
     - branches
   tags:
