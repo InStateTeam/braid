@@ -21,19 +21,31 @@ import io.bluebank.braid.corda.serialisation.serializers.BraidCordaJacksonInit
 import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
+import io.vertx.core.Future
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
+import net.corda.core.contracts.Amount
+import net.corda.core.contracts.ContractState
+import net.corda.core.contracts.Issued
+import net.corda.core.contracts.PartyAndReference
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
+import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.*
+import net.corda.core.node.services.vault.Builder.equal
+import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
 import net.corda.core.toObservable
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.parsePublicKeyBase58
 import net.corda.finance.AMOUNT
 import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.flows.AbstractCashFlow
 import net.corda.finance.flows.CashIssueFlow
+import net.corda.finance.schemas.CashSchemaV1
+import net.corda.finance.test.SampleCashSchemaV1
+import net.corda.finance.test.SampleCashSchemaV3
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -45,40 +57,91 @@ private val log = loggerFor<RPCTest>()
 
 fun main(args: Array<String>) {
 
-  if (args.size != 3) {
-    throw IllegalArgumentException("Usage: RPCTest <node address> <username> <password>")
+  try {
+    if (args.size != 3) {
+      throw IllegalArgumentException("Usage: RPCTest <node address> <username> <password>")
+    }
+    val nodeAddress = NetworkHostAndPort.parse(args[0])
+    val username = args[1]
+    val password = args[2]
+
+    val client = CordaRPCClient(nodeAddress)
+    val connection = client.start(username, password)
+    val ops = connection.proxy
+
+
+    BraidCordaJacksonInit.init()
+
+    val it = SimpleModule()
+      .addSerializer(rx.Observable::class.java, ToStringSerializer())
+
+    Json.mapper.registerModule(it)
+    Json.prettyMapper.registerModule(it)
+
+    //issueCash(ops)
+
+    //info(ops)
+
+    //println(ops.vaultQuery(Cash.State::class.java))
+    //printJson(vaultQueryBy1(ops))
+
+
+    printJson(vaultQueryBy2(ops))
+
+    connection.notifyServerAndClose()
+  } catch (e: Exception) {
+    log.error("Unable to run rpc", e)
   }
-  val nodeAddress = NetworkHostAndPort.parse(args[0])
-  val username = args[1]
-  val password = args[2]
+}
 
-  val client = CordaRPCClient(nodeAddress)
-  val connection = client.start(username, password)
-  val ops = connection.proxy
+fun printJson(output: Any) {
+  println(Json.encodePrettily(output))
+}
 
-
-  BraidCordaJacksonInit.init()
-
-  val it = SimpleModule()
-    .addSerializer(rx.Observable::class.java, ToStringSerializer())
-
-  Json.mapper.registerModule(it)
-  Json.prettyMapper.registerModule(it)
-
-  //issueCash(ops)
-
-  //info(ops)
-
-  val vaultQuery = ops.vaultQuery(Cash.State::class.java)
+//private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
+//  val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+//  val currencyIndex = Cash.State::amount.greaterThanOrEqual(Amount<Issued<Currency>>(5, Issued(PartyAndReference(notary(ops),OpaqueBytes("123".toByteArray())) ,Currency.getInstance("GBP")))))
+//  val quantityIndex = SampleCashSchemaV3.PersistentCashState::pennies.greaterThanOrEqual(0L)
+//
+//  val customCriteria2 = QueryCriteria.VaultCustomQueryCriteria(quantityIndex)
+//  val customCriteria1 = QueryCriteria.VaultQueryCriteria(currencyIndex)
+//
+//  val criteria = generalCriteria
+//      .and(customCriteria1)
+//    //  .and(customCriteria2)
+//  val results = ops.vaultQueryBy(criteria, PageSpecification(), Sort(emptyList()), Cash.State::class.java)
+//  return results
+//}
 
 
+private fun vaultQueryBy2(ops: CordaRPCOps): Vault.Page<ContractState> {
+  val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+  val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
+  val quantityIndex = CashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(0L)
+
+  val customCriteria2 = QueryCriteria.VaultCustomQueryCriteria(quantityIndex)
+  val customCriteria1 = QueryCriteria.VaultCustomQueryCriteria(currencyIndex)
+
+  val criteria = generalCriteria
+      .and(customCriteria1)
+      .and(customCriteria2)
+
+  val vaultQuery = VaultQuery(criteria, PageSpecification(), Sort(emptyList()), Cash.State::class.java)
+  printJson(vaultQuery)
+
+  val results = ops.vaultQueryBy(criteria, PageSpecification(), Sort(emptyList()), Cash.State::class.java)
+  return results
+}
+
+
+private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val start = Instant.now().minus(15, ChronoUnit.DAYS)
   val end = start.plus(30, ChronoUnit.DAYS)
   val recordedBetweenExpression = QueryCriteria.TimeCondition(
       QueryCriteria.TimeInstantType.RECORDED,
       ColumnPredicate.Between(start, end))
   val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
-  
+
   //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
   val sorting = Sort(asList(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
 
@@ -87,14 +150,12 @@ fun main(args: Array<String>) {
   println(Json.encodePrettily(q))
 
 
-  val results = ops.vaultQueryBy(q.criteria,q.paging,q.sorting,q.contractStateType)
-
-
-  connection.notifyServerAndClose()
+  val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
+  return results
 }
 
 
-private fun issueCash(ops: CordaRPCOps) {
+private fun issueCash(ops: CordaRPCOps): Future<AbstractCashFlow.Result> {
 
   val party = Party(
     CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"),
@@ -106,14 +167,11 @@ private fun issueCash(ops: CordaRPCOps) {
     OpaqueBytes("123".toByteArray()),
       notary(ops)
   )
-  progressHandler.returnValue.toObservable().toFuture()
-    .setHandler {
-      println(it)
-    }
+  return progressHandler.returnValue.toObservable().toFuture()
 }
 
 private fun notary(ops: CordaRPCOps) =
-    ops.notaryPartyFromX500Name(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"))
+    ops.notaryPartyFromX500Name(CordaX500Name.parse("O=Notary Service, L=Zurich, C=CH"))!!
 
 private fun info(ops: CordaRPCOps) {
   log.info("currentNodeTime" + Json.encodePrettily(ops.currentNodeTime()))
