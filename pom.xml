@@ -119,15 +119,15 @@
   </modules>
 
   <distributionManagement>
-    <snapshotRepository>
-      <id>oss</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <layout>default</layout>
-    </snapshotRepository>
 <!--    <snapshotRepository>-->
-<!--      <id>gitlab-maven</id>-->
-<!--      <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>-->
+    <!--      <id>oss</id>-->
+    <!--      <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+    <!--      <layout>default</layout>-->
 <!--    </snapshotRepository>-->
+    <snapshotRepository>
+      <id>gitlab-maven</id>
+      <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+    </snapshotRepository>
     <repository>
       <id>oss</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
