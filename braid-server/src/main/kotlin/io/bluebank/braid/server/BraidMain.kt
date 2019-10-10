@@ -16,9 +16,6 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.server.BraidMain
-import io.bluebank.braid.core.logging.loggerFor
-
-private val log = loggerFor<BraidMain>()
 
 fun main(args: Array<String>) {
   if (args.size < 4) {
@@ -32,5 +29,5 @@ fun main(args: Array<String>) {
   val port = Integer.valueOf(args[3])
   val openApiVersion = Integer.valueOf(args[4])
   val additionalPaths = args.toList().drop(5)
-  BraidMain().start(networkAndPort, userName, password, port,openApiVersion, additionalPaths)
+  BraidMain(additionalPaths, openApiVersion).start(networkAndPort, userName, password, port)
 }

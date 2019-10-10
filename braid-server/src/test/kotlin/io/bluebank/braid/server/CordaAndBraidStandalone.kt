@@ -15,27 +15,37 @@
  */
 package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
+import io.bluebank.braid.corda.server.BraidMain
+import io.bluebank.braid.core.utils.JarDownloader
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.internal.toPath
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
+import net.corda.testing.node.internal.TestCordappInternal
+import java.net.URL
+import java.nio.file.Path
 
 fun main(args: Array<String>) {
   val user = User("user1", "test", permissions = setOf("ALL"))
   val bankA = CordaX500Name("PartyA", "London", "GB")
   val bankB = CordaX500Name("PartyB", "New York", "US")
 
+  val jarFiles = listOf(
+    "file:///Users/fuzz/dev/web3j/corda/console/src/test/resources/cordapps/obligation-0.1.jar",
+    "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
+    "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
+  )
+
+  val downloader = JarDownloader()
+
+  val cordapps = jarFiles.map { downloader.uriToFile(URL(it)).toPath() }.map { TestCordappJar(jarFile = it) }
+
   driver(
     DriverParameters(
-      cordappsForAllNodes = listOf(
-        TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
-        TestCordapp.findCordapp("net.corda.finance.schemas"),
-        TestCordapp.findCordapp("net.corda.finance.flows")
-        //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
-      ),
+      cordappsForAllNodes = cordapps,
       waitForAllNodesToFinish = true,
       isDebug = true,
       startNodesInProcess = true
@@ -48,6 +58,23 @@ fun main(args: Array<String>) {
       startNode(providedName = bankB, rpcUsers = listOf(user))
     ).map { it.getOrThrow() }
 
-    BraidCordaStandaloneServer(8080, "user1", "test", partyA.rpcAddress, 3).startServer()
+    BraidMain(jarFiles, 3).apply {
+      start(partyA.rpcAddress.toString(), "user1", "test", 8080)
+        .compose {
+          start(partyB.rpcAddress.toString(), "user1", "test", 8081)
+        }
+    }
+  }
+}
+
+class TestCordappJar(override val config: Map<String, Any> = emptyMap(), override val jarFile: Path) :
+  TestCordappInternal() {
+
+  override fun withOnlyJarContents(): TestCordappInternal {
+    return TestCordappJar(emptyMap(), jarFile)
+  }
+
+  override fun withConfig(config: Map<String, Any>): TestCordapp {
+    return TestCordappJar(config, jarFile)
   }
 }
