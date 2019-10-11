@@ -43,10 +43,10 @@ class BraidDocsMain() {
    * @param openApiVersion - 2 or 3
    */
   fun swaggerText(openApiVersion: Int): String {
-    val restConfig =
-      BraidCordaStandaloneServer().createRestConfig(RPCFactory.createRpcFactoryStub())
-        .withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
+    val restConfig =
+      BraidCordaStandaloneServer(vertx = vertx).createRestConfig(RPCFactory.createRpcFactoryStub())
+        .withOpenApiVersion(openApiVersion)
     return try {
       val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
       val classes = readCordaClasses()
