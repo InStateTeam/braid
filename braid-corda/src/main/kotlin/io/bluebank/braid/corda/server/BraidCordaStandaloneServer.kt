@@ -26,6 +26,7 @@ import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.services.vault.VaultService
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
+import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
 
@@ -34,7 +35,8 @@ open class BraidCordaStandaloneServer(
   val userName: String = "",
   val password: String = "",
   val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
-  val openApiVersion: Int = 2
+  val openApiVersion: Int = 3,
+  val vertx: Vertx = Vertx.vertx()
 ) {
   companion object {
     private val log = loggerFor<BraidCordaStandaloneServer>()
@@ -49,13 +51,17 @@ open class BraidCordaStandaloneServer(
     BraidConfig()
       .withPort(port)
       .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
-      .withRestConfig(restConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion))
+      .withRestConfig(createRestConfig())
+      .withVertx(vertx)
       .bootstrapBraid(null, result)
     //addShutdownHook {  }
     return result
   }
 
-  fun restConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
+  private fun createRestConfig() =
+    createRestConfig(createRpcFactory(userName, password, nodeAddress), openApiVersion)
+
+  fun createRestConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
     val cordappsScanner = CordappScanner(classLoader)
 

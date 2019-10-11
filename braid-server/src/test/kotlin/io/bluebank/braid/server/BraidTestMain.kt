@@ -33,10 +33,8 @@ fun main(args: Array<String>) {
   val openApiVersion = Integer.valueOf(args[4])
   val additionalPaths = args.asList().drop(5)
 
-  BraidMain().start(networkAndPort, userName, password, port, openApiVersion,additionalPaths)
-      .map{
-    openBrowser(port, it)
-  }
+  BraidMain(additionalPaths, openApiVersion).start(networkAndPort, userName, password, port)
+    .map { openBrowser(port, it) }
 }
 
 private fun openBrowser(port: Int?, it: String?) {
