@@ -32,14 +32,27 @@ private val log = loggerFor<BraidMain>()
 class BraidMain(
   private val jarsClassLoader: ClassLoader = Thread.currentThread().contextClassLoader,
   private val openApiVersion: Int = 3,
-  private val vertx: Vertx = Vertx.vertx()
+  externalVertx: Vertx? = null
 ) {
-
   constructor(
     cordappPaths: List<String> = emptyList(),
     openApiVersion: Int = 3,
-    vertx: Vertx = Vertx.vertx()
-  ) : this(cordappPaths.toJarsClassLoader(), openApiVersion, vertx)
+    externalVertx: Vertx? = null
+  ) : this(cordappPaths.toJarsClassLoader(), openApiVersion, externalVertx)
+
+  val vertx: Vertx
+  private val internallyCreated: Boolean
+  private val deploymentIds = mutableListOf<String>()
+
+  init {
+    if (externalVertx == null) {
+      this.vertx = Vertx.vertx()
+      internallyCreated = true
+    } else {
+      this.vertx = externalVertx
+      internallyCreated = false
+    }
+  }
 
   /**
    * start a braid server on [vertx] instance
@@ -60,6 +73,9 @@ class BraidMain(
         vertx = vertx
       )
         .startServer()
+        .onSuccess {
+          deploymentIds.add(it)
+        }
     }
   }
 
@@ -67,10 +83,39 @@ class BraidMain(
    * Shutdown this BraidMain together with all the instances started
    */
   fun shutdown(): Future<Void> {
-    return Future.future<Void>().let { result ->
-      log.info("shutting down all braid servers ...")
-      vertx.close(result::handle)
-      return result.onSuccess {
+    return shutdownDeployments()
+      .compose { shutdownVertx() }
+  }
+
+  private fun shutdownVertx(): Future<Void>? {
+    return when {
+      internallyCreated -> notifyVertxShutdownSkip()
+      else -> actualVertxShutdown()
+    }
+  }
+
+  private fun actualVertxShutdown(): Future<Void> {
+    log.info("shutting down vertx")
+    return Future.future<Void>().apply { vertx.close(this::handle) }
+      .onSuccess {
+        log.info("vertx shutdown")
+      }
+      .catch {
+        log.error("failed to stop vertx", it)
+      }
+  }
+
+  private fun notifyVertxShutdownSkip(): Future<Void>? {
+    log.info("vertx was externally created - skipping vertx shutdown")
+    return Future.succeededFuture<Void>()
+  }
+
+  private fun shutdownDeployments(): Future<Void> {
+    log.info("shutting down all braid servers ...")
+    return deploymentIds.fold(Future.succeededFuture()) { future, id ->
+      future.compose {
+        Future.future<Void>().apply { vertx.undeploy(id, this::handle) }
+      }.onSuccess {
         log.info("all braid servers shutdown")
       }.catch {
         log.error("failure in shutting down braid servers", it.cause)
