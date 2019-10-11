@@ -229,6 +229,28 @@
         <artifactId>frontend-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>clean project</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>test-client</workingDirectory>
+              <arguments>run clean</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>link braid-client-js to global npm repo</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>../braid-client-js</workingDirectory>
+              <arguments>link</arguments>
+            </configuration>
+          </execution>
+          <execution>
             <id>install dependencies</id>
             <phase>initialize</phase>
             <goals>
@@ -237,6 +259,28 @@
             <configuration>
               <workingDirectory>src/editor</workingDirectory>
               <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install dependencies for test client</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>test-client</workingDirectory>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>link to braid-client-js in global npm rep</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>test-client</workingDirectory>
+              <arguments>link braid-client</arguments>
             </configuration>
           </execution>
           <execution>

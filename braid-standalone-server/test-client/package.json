@@ -1,25 +1,16 @@
 {
-  "name": "brunch-app",
-  "description": "Brunch.io application",
+  "name": "test-client",
+  "description": "simple app to test braid-client javascript library with a JsonRPCVerticle server",
   "private": true,
-  "author": "Brunch",
+  "author": "bluebank",
   "version": "0.0.1",
   "repository": "",
   "scripts": {
-    "start": "brunch watch --server",
-    "build": "brunch build --production"
+    "clean": "rm -rf node_modules",
+    "start": "node app.js"
   },
   "dependencies": {
-    "jsonrpc-websocket-client": "^0.2.0",
-    "rpc-websockets": "^3.4.7"
+    "braid-client": "^4.1.1"
   },
-  "devDependencies": {
-    "auto-reload-brunch": "^2",
-    "babel-brunch": "~6.0",
-    "babel-preset-latest": "^6",
-    "brunch": "^2",
-    "clean-css-brunch": "^2",
-    "uglify-js-brunch": "^2",
-    "babel-polyfill": "^6.26.0"
-  }
+  "devDependencies": {}
 }

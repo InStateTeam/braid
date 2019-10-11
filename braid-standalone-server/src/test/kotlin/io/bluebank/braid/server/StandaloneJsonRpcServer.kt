@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.bluebank.braid.server
 
-.brunch {
-  font-family: -apple-system, Sans-Serif;
-  text-align: center;
-  font-size: 24pt;
-  color: #3f894a;
+import io.vertx.core.http.HttpServerOptions
+
+class MyService {
+  fun echo(msg: String) = msg
+}
+
+fun main(args: Array<String>) {
+  JsonRPCServerBuilder.createServerBuilder()
+    .withHttpServerOptions(HttpServerOptions().setSsl(false))
+    .withPort(8080)
+    .withService(MyService())
+    .build()
 }
