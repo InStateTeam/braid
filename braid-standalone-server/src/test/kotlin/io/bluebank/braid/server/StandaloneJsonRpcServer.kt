@@ -27,4 +27,5 @@ fun main(args: Array<String>) {
     .withPort(8080)
     .withService(MyService())
     .build()
+    .start()
 }
