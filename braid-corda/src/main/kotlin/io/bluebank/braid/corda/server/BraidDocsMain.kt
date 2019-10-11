@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.server
 
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.github.classgraph.ClassGraph
@@ -32,6 +33,10 @@ import java.util.concurrent.CountDownLatch
 class BraidDocsMain() {
   companion object {
     private val log = contextLogger()
+
+    init {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
 
   /**
