@@ -34,6 +34,7 @@ import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.RoutingContext
 import net.corda.core.utilities.contextLogger
 import java.lang.reflect.Type
+import java.net.URI
 import java.net.URL
 import kotlin.reflect.KCallable
 
@@ -51,32 +52,44 @@ class DocsHandlerV3(
 
   private var currentGroupName: String = ""
   private val endpoints = mutableListOf<EndPointV3>()
-  private val swagger: OpenAPI by lazy {
-    createSwagger()
-  }
+  private var openAPI: OpenAPI? = null // this will be thread-safe because of the way vertx works
   private val modelContext = ModelContextV3()
 
   override fun handle(context: RoutingContext) {
-    val openApi = if (debugMode) createSwagger() else swagger
-    openApi.addServersItem(Server().url(context.request().absoluteURI().replace("swagger.json", "")))
-    val output = Json.mapper().writeValueAsString(openApi)
+    val output = getSwaggerString(context)
     context.response()
       .setStatusCode(HttpResponseStatus.OK.code())
       .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+//      .putHeader(HttpHeaders.CONTENT_LENGTH, output.length.toString())
+      .setChunked(true)
       .end(output)
   }
 
-  override fun swagger(): String {
-    return Json.pretty().writeValueAsString(createSwagger())
+  override fun getSwaggerString(context: RoutingContext?): String {
+    return Json.pretty().writeValueAsString(createOrGetOpenAPI(context))
   }
 
-  fun createSwagger(): OpenAPI {
-    val url = URL(basePath)
+  private fun createOrGetOpenAPI(context: RoutingContext? = null): OpenAPI {
+    if (openAPI == null || debugMode) {
+      openAPI = createOpenAPI(context)
+    }
+    return openAPI!!
+  }
+
+  internal fun createOpenAPI(context: RoutingContext? = null): OpenAPI {
+    val baseURL = URL(basePath)
+    val serverURI = when (context) {
+      null -> baseURL
+      else -> {
+        val uri = URI(context.request().absoluteURI())
+        URL(uri.scheme, uri.host, uri.port, baseURL.path)
+      }
+    }
+
     return OpenAPI()
       .apply {
         info(createSwaggerInfo())
-        addServersItem(Server().url(url.toExternalForm()))
+        addServersItem(Server().url(serverURI.toString()))
         // hopefully under server above .basePath(url.path)
         if (auth != null) {
           getOrCreateComponents().securitySchemes = mapOf(SECURITY_DEFINITION_NAME to auth)

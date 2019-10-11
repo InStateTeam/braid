@@ -34,8 +34,11 @@ class ModelContext {
   private val modelConverters = ModelConverters().apply { addConverter(CustomModelConverterV2()) }
   val models: Map<String, Model> get() = mutableModels
 
+  init {
+    addType(Throwable::class.java)
+  }
+
   fun getProperty(type: Type): Property {
-    addType(type)
     val actualType = type.actualType()
     return try {
       if (actualType.isBinary()) {
@@ -48,7 +51,7 @@ class ModelContext {
     }
   }
 
-  private fun addType(type: Type) {
+  fun addType(type: Type) {
     if (type is ParameterizedType) {
       if (Future::class.java.isAssignableFrom(type.rawType as Class<*>)) {
         this.addType(type.actualTypeArguments[0])
@@ -57,7 +60,7 @@ class ModelContext {
           addType(it)
         }
       }
-    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java) {
+    } else if (!type.isBinary() && type != Unit::class.java && type != Void::class.java && type.typeName != "void") {
       type.createSwaggerModels()
     }
   }
@@ -95,8 +98,19 @@ class ModelContext {
 
   private fun Type.createSwaggerModels() {
     val actualType = actualType()
-    val models = modelConverters.readAll(actualType)
-    this@ModelContext.mutableModels += models
+    when {
+      actualType.isEmptyResponseType() -> {
+      }
+      else -> {
+        when {
+          actualType is Class<*> && Throwable::class.java.isAssignableFrom(actualType) -> BraidSwaggerError::class.java
+          else -> actualType
+        }.apply {
+          val models = modelConverters.readAll(this)
+          this@ModelContext.mutableModels += models
+        }
+      }
+    }
   }
 
   companion object {

@@ -60,12 +60,18 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     log.info("calling GET ${TestServiceApp.SWAGGER_ROOT}/swagger.json")
     client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json") { httpResponse ->
       httpResponse.bodyHandler { buffer ->
-        buffer.toJsonObject()
+        try {
+          val s = buffer.toString()
+          val jo = JsonObject(s)
+        } catch (err: Throwable) {
+          context.fail(err)
+        }
         async1.complete()
       }
     }
       .exceptionHandler(context::fail)
       .end()
+    async1.awaitSuccess()
 
     val async2 = context.async()
     log.info("calling GET ${TestServiceApp.SWAGGER_ROOT}/")
@@ -78,6 +84,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     }
       .exceptionHandler(context::fail)
       .end()
+    async2.awaitSuccess()
 
     val async3 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/hello")
@@ -89,6 +96,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     }
       .exceptionHandler(context::fail)
       .end()
+    async3.awaitSuccess()
 
     val async4 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/buffer")
@@ -104,6 +112,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     }
       .exceptionHandler(context::fail)
       .end()
+    async4.awaitSuccess()
 
     val async5 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytearray")
@@ -120,6 +129,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
+    async5.awaitSuccess()
 
     val async6 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytebuf")
@@ -136,6 +146,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
+    async6.awaitSuccess()
 
     val async7 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytebuffer")
@@ -152,6 +163,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
+    async7.awaitSuccess()
 
     val async8 = context.async()
     val bytes = Buffer.buffer("hello")
@@ -172,6 +184,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end(bytes)
+    async8.awaitSuccess()
 
     val async9 = context.async()
     var token = ""
@@ -187,7 +200,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       .setChunked(true)
       .end(Json.encode(LoginRequest(user = "sa", password = "admin")))
 
-    async9.await()
+    async9.awaitSuccess()
 
     val async10 = context.async()
     log.info("calling POST ${TestServiceApp.REST_API_ROOT}/echo")
@@ -203,7 +216,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       .setChunked(true)
       .end("hello")
 
-    async10.await()
+    async10.awaitSuccess()
 
     val async11 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/list/string with the required header 'x-list-string'. Should return an array containing the value of the header")
@@ -219,7 +232,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
-    async11.await()
+    async11.awaitSuccess()
 
     val async12 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/list/int with the required header 'x-list-string'. Should return an array containing the value of the header")
@@ -234,7 +247,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
-    async12.await()
+    async12.awaitSuccess()
 
     val async13 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers with the header 'x-string'. Should return an array containing the value of the x-string header")
@@ -249,7 +262,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
-    async13.await()
+    async13.awaitSuccess()
 
     val async14 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/optional with the header 'x-string'. Should return the value of the x-string header")
@@ -264,7 +277,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
-    async14.await()
+    async14.awaitSuccess()
 
     val async15 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/optional without the optioinal header 'x-string'. Should return 'null'")
@@ -278,7 +291,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         }
       }
       .end()
-    async15.await()
+    async15.awaitSuccess()
 
     val async16 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/non-optional without the required header 'x-string'. This will expect an assertion to fail in the server. This is okay.")
@@ -290,7 +303,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
         async16.complete()
       }
       .end()
-    async16.await()
+    async16.awaitSuccess()
   }
 
   @Test

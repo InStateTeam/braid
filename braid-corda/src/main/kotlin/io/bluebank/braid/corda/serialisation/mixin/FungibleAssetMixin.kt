@@ -13,21 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.serialisation.mixin
 
-import io.bluebank.braid.corda.server.BraidMain
+abstract class FungibleAssetMixin  constructor() {
 
-fun main(args: Array<String>) {
-  if (args.size < 4) {
-    println("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
-    return
-  }
+  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun withNewOwnerAndAmount(newAmount: net.corda.core.contracts.Amount<net.corda.core.contracts.Issued<*>>, newOwner: net.corda.core.identity.AbstractParty): net.corda.core.contracts.FungibleAsset<*>
 
-  val networkAndPort = args[0]
-  val userName = args[1]
-  val password = args[2]
-  val port = Integer.valueOf(args[3])
-  val openApiVersion = Integer.valueOf(args[4])
-  val additionalPaths = args.toList().drop(5)
-  BraidMain(additionalPaths, openApiVersion).start(networkAndPort, userName, password, port)
 }

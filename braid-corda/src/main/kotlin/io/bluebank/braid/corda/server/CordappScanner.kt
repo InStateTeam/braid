@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.server
 
 import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.ContractState
+import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.internal.toMultiMap
 import kotlin.reflect.KClass
@@ -35,6 +36,7 @@ class CordappScanner(private val classLoader: ClassLoader) {
       .enableClassInfo()
       .enableAnnotationInfo()
       .addClassLoader(Thread.currentThread().contextClassLoader)
+        .blacklistClasses(ContractUpgradeFlow.Initiate::class.java.name)
       .scan()
   }
 

@@ -31,14 +31,14 @@ import java.io.FileOutputStream
 class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 2) {
   companion object {
     const val SWAGGER_ROOT = ""
-    const val REST_API_ROOT = "/"
+    const val REST_API_ROOT = "/rest"
     @JvmStatic
     fun main(args: Array<String>) {
       TestServiceApp(8080, TestService(), 3)
     }
   }
 
-  private val tempJKS = File.createTempFile("temp-", ".jceks")!!
+  private val tempJKS = File.createTempFile("temp-", ".jceks")
   private val jwtSecret = "secret"
   private lateinit var jwtAuth: JWTAuth
 
@@ -57,7 +57,8 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
           .withAuthSchema(AuthSchema.Token)
           .withSwaggerPath(SWAGGER_ROOT)
           .withApiPath(REST_API_ROOT)
-          .withDebugMode()
+//          enable the next line to generate the swagger definition everytime
+//          .withDebugMode() //
           .withOpenApiVersion(openApiVersion)
           .withPaths {
             group("Test Service") {
@@ -73,7 +74,7 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
                 get("/bytebuf", service::getByteBuf)
                 get("/bytebuffer", service::getByteBuffer)
                 post("/doublebuffer", service::doubleBuffer)
-                post("/custom", service::somethingCustom)
+                post("/custo•m", service::somethingCustom)
                 get("/stringlist", service::returnsListOfStuff)
                 get("/willfail", service::willFail)
                 get("/headers/list/string", service::headerListOfStrings)

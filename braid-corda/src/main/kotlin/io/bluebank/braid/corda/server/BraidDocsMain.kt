@@ -39,13 +39,14 @@ class BraidDocsMain() {
    */
   fun swaggerText(openApiVersion: Int): String {
     val restConfig =
-      BraidCordaStandaloneServer().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
+      BraidCordaStandaloneServer().createRestConfig(RPCFactory.createRpcFactoryStub())
+        .withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
     return try {
       val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
       val classes = readCordaClasses()
       classes.forEach { restMounter.docsHandler.addType(it) }
-      restMounter.docsHandler.swagger()
+      restMounter.docsHandler.getSwaggerString()
     } finally {
       log.info("shutting down Vertx")
       val done = CountDownLatch(1)
