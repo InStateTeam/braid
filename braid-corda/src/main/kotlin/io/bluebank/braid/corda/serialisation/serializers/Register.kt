@@ -55,13 +55,6 @@ object BraidCordaJacksonInit {
     // dynamic languages
     @Suppress("DEPRECATION") val sm = SimpleModule("io.swagger.util.DeserializationModule")
       .addAbstractTypeMapping(AbstractParty::class.java, Party::class.java)
-
-// we won't use the party serliazers due to the way they require a specialised ObjectMapper!
-//          .addSerializer(AnonymousParty::class.java, JacksonSupport.AnonymousPartySerializer)
-//          .addDeserializer(AnonymousParty::class.java, JacksonSupport.AnonymousPartyDeserializer)
-//          .addSerializer(Party::class.java, JacksonSupport.PartySerializer)
-//          .addDeserializer(Party::class.java, JacksonSupport.PartyDeserializer)
-//          .addDeserializer(AbstractParty::class.java, JacksonSupport.PartyDeserializer)
       .addSerializer(SecureHash::class.java, SecureHashSerializer)
       .addSerializer(SecureHash.SHA256::class.java, SecureHashSerializer)
       .addDeserializer(SecureHash::class.java, SecureHashDeserializer())
@@ -76,17 +69,11 @@ object BraidCordaJacksonInit {
       // TODO this tunnels the Kryo representation as a Base58 encoded string. Replace when RPC supports this.
       .addSerializer(NodeInfo::class.java, JacksonSupport.NodeInfoSerializer)
       .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
-
-      // For OpaqueBytes
-      .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
-      .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
-
+      .setMixInAnnotation(OpaqueBytes::class.java, OpaqueBytesMixin::class.java)
       // For X.500 distinguished names
       .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
       .addSerializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameSerializer)
 
-      // Mixins for transaction types to prevent some properties from being serialized
-      .setMixInAnnotation(SignedTransaction::class.java, JacksonSupport.SignedTransactionMixin::class.java)
       // Caused by: io.vertx.core.json.EncodeException: Failed to encode as JSON: net.corda.core.transactions.WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction (through reference chain: net.corda.finance.flows.AbstractCashFlow$Result["stx"]->net.corda.core.transactions.SignedTransaction["notaryChangeTx"])
       .setMixInAnnotation(WireTransaction::class.java, WireTransactionMixin::class.java)
       //.setMixInAnnotation(FungibleAsset::class.java, FungibleAssetMixin::class.java)
@@ -102,11 +89,8 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(CriteriaExpression::class.java, CriteriaExpressionMixin::class.java)
       .setMixInAnnotation(ColumnPredicate::class.java, ColumnPredicateMixin::class.java)
       .setMixInAnnotation(PageSpecification::class.java, PageSpecificationMixin::class.java)
-
-//            .setMixInAnnotation(X500Principal::class.java, JacksonSupport.X500PrincipalMixin::class.java)
-//            .setMixInAnnotation(X509Certificate::class.java, JacksonSupport.X509CertificateMixin::class.java)
-//            .setMixInAnnotation(CertPath::class.java, JacksonSupport.CertPathMixin::class.java)
-//
+      .setMixInAnnotation(TransactionState::class.java, TransactionStateMixin::class.java)
+      .setMixInAnnotation(SignedTransaction::class.java, SignedTransactionMixin::class.java)
       .addSerializer(X509Certificate::class.java, X509Serializer())
       .addDeserializer(X509Certificate::class.java, X509Deserializer())
       .addSerializer(CertPath::class.java, CertPathSerializer())
@@ -122,6 +106,7 @@ object BraidCordaJacksonInit {
       //     .addDeserializer(Currency::class.java, CurrencyDeserializer())
       .addSerializer(Issued::class.java, IssuedSerializer())
       .addDeserializer(Issued::class.java, IssuedDeserializer())
+      .addDeserializer(AutomaticPlaceholderConstraint::class.java, SingletonDeserializer(AutomaticPlaceholderConstraint))
 
     listOf(Json.mapper, Json.prettyMapper, io.swagger.v3.core.util.Json.mapper()).forEach {
       it.registerModule(sm)

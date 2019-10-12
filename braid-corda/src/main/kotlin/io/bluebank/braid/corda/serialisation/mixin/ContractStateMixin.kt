@@ -17,8 +17,7 @@ package io.bluebank.braid.corda.serialisation.mixin
 
 import net.corda.core.identity.AbstractParty
 
-abstract class ContractStateMixin {
+interface ContractStateMixin {
   @get:com.fasterxml.jackson.annotation.JsonIgnore
-  abstract val participants: List<AbstractParty>?
-
+  val participants: List<AbstractParty>?
 }

@@ -90,7 +90,9 @@ class BraidMainTest {
             "anonymous" to false,
             "notary" to nodes[DUMMY_NOTARY_NAME]
           )
-          client.postFuture(path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueAndPaymentFlow", body = payload)
+          client.postFuture(
+            path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.d",
+            body = payload)
         }
         .compose { it.body<AbstractCashFlow.Result>() }
         .onSuccess {

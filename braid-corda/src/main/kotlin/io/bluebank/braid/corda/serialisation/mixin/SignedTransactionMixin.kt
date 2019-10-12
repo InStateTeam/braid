@@ -16,25 +16,19 @@
 package io.bluebank.braid.corda.serialisation.mixin
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import net.corda.core.transactions.ComponentGroup
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import net.corda.core.serialization.SerializedBytes
+import net.corda.core.transactions.CoreTransaction
+import net.corda.core.transactions.NotaryChangeWireTransaction
+import net.corda.core.transactions.WireTransaction
 
-interface WireTransactionMixin {
-
-  @JsonIgnore
-  fun getAvailableComponentGroups(): kotlin.collections.List<kotlin.Any>
-
-  @JsonIgnore
-  fun getAvailableComponentHashes(): kotlin.collections.List<net.corda.core.crypto.SecureHash>
-
-  @JsonIgnore
-  fun getAvailableComponents(): kotlin.collections.List<kotlin.Any>
-
-  @JsonIgnore
-  fun getMerkleTree(): net.corda.core.crypto.MerkleTree
-
-  @JsonIgnore
-  fun getOutputStates(): kotlin.collections.List<net.corda.core.contracts.ContractState>
-
+interface SignedTransactionMixin {
   @get:JsonIgnore
-  val componentGroups: List<ComponentGroup>
+  val notaryChangeTx: NotaryChangeWireTransaction
+  @get:JsonIgnore
+  val txBits: SerializedBytes<CoreTransaction>
+  @get:JsonIgnore
+  val tx: WireTransaction
+  @get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@coreTransactionType")
+  val coreTransaction: CoreTransaction
 }
