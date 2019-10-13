@@ -251,17 +251,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>install dependencies</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <workingDirectory>src/editor</workingDirectory>
-              <arguments>install</arguments>
-            </configuration>
-          </execution>
-          <execution>
             <id>install dependencies for test client</id>
             <phase>initialize</phase>
             <goals>
@@ -281,17 +270,6 @@
             <configuration>
               <workingDirectory>test-client</workingDirectory>
               <arguments>link braid-client</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <workingDirectory>src/editor</workingDirectory>
-              <arguments>run build</arguments>
             </configuration>
           </execution>
         </executions>
