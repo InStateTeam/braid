@@ -6,7 +6,7 @@
   "version": "0.0.1",
   "repository": "",
   "scripts": {
-    "clean": "node rimraf/bin.js node_modules",
+    "clean": "rm -rf node_modules",
     "start": "node app.js"
   },
   "dependencies": {
