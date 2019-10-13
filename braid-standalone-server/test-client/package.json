@@ -6,11 +6,13 @@
   "version": "0.0.1",
   "repository": "",
   "scripts": {
-    "clean": "rm -rf node_modules",
+    "clean": "rimraf node_modules",
     "start": "node app.js"
   },
   "dependencies": {
     "braid-client": "^4.1.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "rimraf": "^2.6.2"
+  }
 }

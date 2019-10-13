@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda
+package io.bluebank.braid.server
 
-import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
-import io.bluebank.braid.corda.services.SimpleNetworkMapService
-import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
+import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
@@ -25,6 +23,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCResponse
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.meta.ServiceDescriptor
 import io.bluebank.braid.core.meta.defaultServiceEndpoint
+import io.bluebank.braid.core.reflection.serviceName
 import io.bluebank.braid.core.security.AuthenticatedSocket
 import io.bluebank.braid.core.service.ConcreteServiceExecutor
 import io.bluebank.braid.core.service.MethodDescriptor
@@ -35,44 +34,62 @@ import io.bluebank.braid.core.socket.TypedSocket
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
-import net.corda.core.node.AppServiceHub
 import javax.ws.rs.core.Response
 
-class CordaSockJSHandler private constructor(
+data class BraidConfig(
+  val port: Int,
+  val authProvider: AuthProvider?,
+  val rootPath: String = "/api/",
+  val httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions(),
+  val threadPoolSize: Int = 1
+)
+
+// later we may adapt this to add support for the REGISTERED_HANDLERS in CordaSockJSHandler
+// and instead of being a class this could be a function which returns a Map<String, ServiceExecutor>
+class ServiceMap(services: List<Any>) {
+
+  val services: Map<String, ServiceExecutor> = services.associateBy(
+    { it.javaClass.serviceName() },
+    { ConcreteServiceExecutor(it) }
+  )
+}
+
+class BraidSockJSHandler private constructor(
   private val vertx: Vertx,
-  serviceHub: AppServiceHub,
+  private val serviceMap: ServiceMap,
   private val config: BraidConfig
 ) : Handler<SockJSSocket> {
 
   companion object {
-    private val log = loggerFor<CordaSockJSHandler>()
-    private val REGISTERED_HANDLERS = mapOf(
-      "network" to this::createNetworkMapService,
-      "flows" to this::createFlowService
-    )
+    private val log = loggerFor<BraidSockJSHandler>()
 
     fun setupSockJSHandler(
       router: Router,
       vertx: Vertx,
-      serviceHub: AppServiceHub,
+      serviceMap: ServiceMap,
       config: BraidConfig
     ) {
       val sockJSHandler = SockJSHandler.create(vertx)
-      val handler = CordaSockJSHandler(vertx, serviceHub, config)
+      val handler = BraidSockJSHandler(vertx, serviceMap, config)
       sockJSHandler.socketHandler(handler)
       val protocol = if (config.httpServerOptions.isSsl) "https" else "http"
 
       // mount each service
       println("Mounting braid services...")
       log.info("root API mount for braid: ${config.rootPath}")
-      registerCoreServices(protocol, config, router, sockJSHandler)
-      registerCustomService(config, protocol, router, sockJSHandler)
+      serviceMap.services.forEach {
+        val serviceName = it.key
+        val endpoint = defaultServiceEndpoint(config.rootPath, serviceName) + "/*"
+        log.info("mounting braid service $serviceName to $protocol://localhost:${config.port}$endpoint")
+        router.route(endpoint).handler(sockJSHandler)
+      }
       router.get(config.rootPath).handler {
-        val services = REGISTERED_HANDLERS.keys + config.services.keys
+        val services = serviceMap.services.keys
         it.end(ServiceDescriptor.createServiceDescriptors(config.rootPath, services))
       }
       router.get("${config.rootPath}:serviceName").handler {
@@ -81,76 +98,29 @@ class CordaSockJSHandler private constructor(
         if (serviceDoc != null) {
           it.end(serviceDoc)
         } else {
-          it.end(RuntimeException("could not find service $serviceName"), Response.Status.BAD_REQUEST.statusCode)
+          it.end(
+            RuntimeException("could not find service $serviceName"),
+            Response.Status.BAD_REQUEST.statusCode
+          )
         }
       }
     }
-
-    private fun registerCustomService(
-      config: BraidConfig,
-      protocol: String,
-      router: Router,
-      sockJSHandler: SockJSHandler
-    ) {
-      config.services.forEach {
-        mountServiceName(it.key, protocol, config, router, sockJSHandler)
-      }
-    }
-
-    private fun registerCoreServices(
-      protocol: String,
-      config: BraidConfig,
-      router: Router,
-      sockJSHandler: SockJSHandler
-    ) {
-      REGISTERED_HANDLERS.forEach {
-        mountServiceName(it.key, protocol, config, router, sockJSHandler)
-      }
-    }
-
-    private fun mountServiceName(
-      serviceName: String,
-      protocol: String,
-      config: BraidConfig,
-      router: Router,
-      sockJSHandler: SockJSHandler
-    ) {
-      val endpoint = defaultServiceEndpoint(config.rootPath, serviceName) + "/*"
-      log.info("mounting braid service $serviceName to $protocol://localhost:${config.port}$endpoint")
-      router.route(endpoint).handler(sockJSHandler)
-    }
-
-    private fun createNetworkMapService(
-      services: AppServiceHub,
-      @Suppress("UNUSED_PARAMETER") config: BraidConfig
-    ): ServiceExecutor =
-      ConcreteServiceExecutor(SimpleNetworkMapService(services.toCordaServicesAdapter()))
-
-    private fun createFlowService(
-      services: AppServiceHub,
-      config: BraidConfig
-    ): ServiceExecutor =
-      CordaFlowServiceExecutor(services.toCordaServicesAdapter(), config)
   }
 
-  private val authProvider = config.authConstructor?.invoke(vertx)
-  private val serviceMap =
-    REGISTERED_HANDLERS.map { it.key to it.value(serviceHub, config) }.toMap() +
-      config.services.map { it.key to ConcreteServiceExecutor(it.value) }.toMap()
   private val pathRegEx = Regex("${config.rootPath.replace("/", "\\/")}([^\\/]+).*")
 
   override fun handle(socket: SockJSSocket) {
     val serviceName = pathRegEx.matchEntire(socket.uri())?.groupValues?.get(1) ?: ""
-    val service = serviceMap[serviceName]
+    val service = serviceMap.services[serviceName]
     if (service != null) {
-      handleKnownService(socket, authProvider, service)
+      handleKnownService(socket, config.authProvider, service)
     } else {
       handleUnknownService(socket, serviceName)
     }
   }
 
   fun getDocumentation(): Map<String, List<MethodDescriptor>> {
-    return serviceMap.map {
+    return serviceMap.services.map {
       it.key to it.value.getStubs()
     }.toMap()
   }
@@ -190,9 +160,9 @@ class CordaSockJSHandler private constructor(
 
 fun Router.setupSockJSHandler(
   vertx: Vertx,
-  services: AppServiceHub,
+  services: ServiceMap,
   config: BraidConfig
 ): Router {
-  CordaSockJSHandler.setupSockJSHandler(this, vertx, services, config)
+  BraidSockJSHandler.setupSockJSHandler(this, vertx, services, config)
   return this
 }

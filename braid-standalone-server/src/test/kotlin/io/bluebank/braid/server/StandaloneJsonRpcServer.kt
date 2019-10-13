@@ -24,7 +24,7 @@ class MyService {
 fun main(args: Array<String>) {
   JsonRPCServerBuilder.createServerBuilder()
     .withHttpServerOptions(HttpServerOptions().setSsl(false))
-    .withPort(8080)
+    .withPort(8090)
     .withService(MyService())
     .build()
     .start()

@@ -22,6 +22,7 @@ import io.vertx.core.Future.succeededFuture
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.auth.AuthProvider
+import io.bluebank.braid.core.logging.loggerFor
 
 /**
  * configuration options for JsonRPCServer
@@ -37,6 +38,7 @@ class JsonRPCServerBuilder {
     HttpServerConfig.defaultServerOptions()
 
   companion object {
+    private val logger = loggerFor<JsonRPCServerBuilder>()
     /**
      * main entry point to setup a builder
      * following this, call the fluent api to setup options of the builder
@@ -114,6 +116,7 @@ class JsonRPCServerBuilder {
    * don't forget to start the server using [JsonRPCServerBuilder.build]
    */
   fun build(): JsonRPCServer {
+    logger.info("JsonRPCServer.createJsonRpcServer")
     return JsonRPCServer.createJsonRpcServer(this)
   }
 }

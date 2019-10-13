@@ -1,6 +1,6 @@
 const {Proxy} = require('braid-client');
 
-const proxy = new Proxy({url: "http://localhost:8080"}, onOpen, onClose, onError);
+const proxy = new Proxy({url: "http://localhost:8090/api/" }, onOpen, onClose, onError, {strictSSL: false});
 
 async function onOpen() {
   console.log('opened')
@@ -13,5 +13,6 @@ function onClose() {
 }
 
 function onError(err) {
+  console.log('error');
   console.error(err);
 }
