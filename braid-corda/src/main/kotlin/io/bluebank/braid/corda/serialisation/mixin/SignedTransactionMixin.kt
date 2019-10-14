@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.serialisation.mixin
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
@@ -25,32 +26,33 @@ import net.corda.core.transactions.NotaryChangeWireTransaction
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 interface SignedTransactionMixin {
   @get:JsonIgnore
-  val notaryChangeTx: NotaryChangeWireTransaction
-
-  @get:JsonIgnore
-  val isNotaryChangeTransaction: Boolean
-
-  @get:JsonIgnore
-  val tx: WireTransaction
-
-  @get:JsonIgnore
-  val id: SecureHash
-
-  @get:JsonIgnore
-  val coreTransaction: CoreTransaction
-
-  @get:JsonIgnore
-  val inputs: List<*>
-
-  @get:JsonIgnore
-  val notary: Party?
-
-  @get:JsonIgnore
-  val networkParametersHash: SecureHash?
-
-  @get:JsonIgnore
-  val requiredSigningKeys: Set<*>?
+  val notaryChangeTx: WireTransaction
+//  all these not needed
+//  @get:JsonIgnore
+//  val isNotaryChangeTransaction: Boolean
+//
+//  @get:JsonIgnore
+//  val tx: WireTransaction
+//
+//  @get:JsonIgnore
+//  val id: SecureHash
+//
+//  @get:JsonIgnore
+//  val coreTransaction: CoreTransaction
+//
+//  @get:JsonIgnore
+//  val inputs: List<*>
+//
+//  @get:JsonIgnore
+//  val notary: Party?
+//
+//  @get:JsonIgnore
+//  val networkParametersHash: SecureHash?
+//
+//  @get:JsonIgnore
+//  val requiredSigningKeys: Set<*>?
 
 }
