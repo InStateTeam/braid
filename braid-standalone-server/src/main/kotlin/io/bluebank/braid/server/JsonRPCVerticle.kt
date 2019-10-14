@@ -73,16 +73,6 @@ class JsonRPCVerticle(
     val config = BraidConfig(port, authProvider)
     val serviceMap = ServiceMap(services)
     router.setupSockJSHandler(vertx, serviceMap, config)
-
-    router.mountSubRouter(rootPath, servicesRouter)
-    router.get()
-      .last()
-      .handler(
-        StaticHandler.create("editor-web", JsonRPCVerticle::class.java.classLoader)
-          .setCachingEnabled(false)
-          .setMaxCacheSize(1)
-          .setCacheEntryTimeout(1)
-      )
     return router
   }
 }
