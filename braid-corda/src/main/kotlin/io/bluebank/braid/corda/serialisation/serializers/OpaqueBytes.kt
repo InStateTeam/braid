@@ -27,9 +27,9 @@ import net.corda.core.utilities.toHexString
 
 class OpaqueBytesSerializer : StdSerializer<OpaqueBytes>(OpaqueBytes::class.java) {
   override fun serialize(
-    value: OpaqueBytes,
-    generator: JsonGenerator,
-    provider: SerializerProvider
+      value: OpaqueBytes,
+      generator: JsonGenerator,
+      provider: SerializerProvider
   ) {
     generator.writeString(
       value.bytes.copyOfRange(
@@ -42,8 +42,8 @@ class OpaqueBytesSerializer : StdSerializer<OpaqueBytes>(OpaqueBytes::class.java
 
 class OpaqueBytesDeserializer : StdDeserializer<OpaqueBytes>(OpaqueBytes::class.java) {
   override fun deserialize(
-    parser: JsonParser,
-    context: DeserializationContext
+      parser: JsonParser,
+      context: DeserializationContext
   ): OpaqueBytes {
     return try {
       // try converting as hex

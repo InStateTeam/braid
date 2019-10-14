@@ -23,12 +23,17 @@ import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.contracts.TransactionState
+import net.corda.core.crypto.SignatureMetadata
+import net.corda.core.crypto.TransactionSignature
+import net.corda.core.internal.declaredField
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.*
 import net.corda.core.node.services.vault.Builder.equal
 import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
+import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
+import net.corda.core.utilities.parsePublicKeyBase58
 import net.corda.finance.GBP
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.test.SampleCashSchemaV1
@@ -42,6 +47,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
 import sun.security.provider.X509Factory
 import java.io.ByteArrayInputStream
+import java.security.PublicKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
@@ -225,6 +231,25 @@ class SerialisationTests {
     
     val json = Json.encodePrettily(expression)
     Json.decodeValue(json, CriteriaExpression.ColumnPredicateExpression::class.java)
+  }
+
+ @Test
+  fun `should serialize TransactionSignature`() {
+    val expression = TransactionSignature(ByteArray(12), parsePublicKeyBase58("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"), SignatureMetadata(1,1))
+
+    val json = Json.encodePrettily(expression)
+    println(json)
+    Json.decodeValue(json, TransactionSignature::class.java)
+  }
+
+
+ @Test
+  fun `should serialize OpaqueBytes`() {
+    val expression = parsePublicKeyBase58("GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE")
+
+    val json = Json.encodePrettily(expression)
+    println(json)
+    Json.decodeValue(json, OpaqueBytes::class.java)
   }
 
 

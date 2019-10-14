@@ -58,6 +58,7 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
 import net.corda.core.node.services.vault.Sort
+import net.corda.core.transactions.SignedTransaction
 import net.corda.finance.test.SampleCashSchemaV1
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.schemas.CashSchemaV1
@@ -388,7 +389,7 @@ class BraidCordaStandaloneServerTest {
   }
 
   @Test
-  fun shouldStartFlow(context: TestContext) {
+  fun `should Start a CashIssueFlow`(context: TestContext) {
     val async = context.async()
 
     getNotary().map {
@@ -416,6 +417,11 @@ class BraidCordaStandaloneServerTest {
             context.assertThat(reply, notNullValue())
             context.assertThat(reply.getJsonObject("stx"), notNullValue())
             context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+
+            val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
+            log.info(signedTransactionJson)
+            val signedTransaction = Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
+            context.assertThat(signedTransaction, notNullValue())
 
             async.complete()
           }
@@ -585,7 +591,7 @@ class BraidCordaStandaloneServerTest {
 
 
   @Test
-  fun `should seralize various query`(context: TestContext) {
+  fun `should serialize various query`(context: TestContext) {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
     val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
     val quantityIndex = CashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(0L)

@@ -26,6 +26,7 @@ import net.corda.client.jackson.JacksonSupport
 import net.corda.core.CordaThrowable
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
+import net.corda.core.crypto.TransactionSignature
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -78,8 +79,9 @@ object BraidCordaJacksonInit {
       .addDeserializer(NodeInfo::class.java, JacksonSupport.NodeInfoDeserializer)
 
       // For OpaqueBytes
+    //    .setMixInAnnotation(TransactionSignature::class.java, IgnoreTypeMixin::class.java)    //todo put back in a serialization for TransactionSignature
       .addDeserializer(OpaqueBytes::class.java, OpaqueBytesDeserializer())
-      .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())
+  //    .addSerializer(OpaqueBytes::class.java, OpaqueBytesSerializer())  // dont need the serializer as it interfers with TransactionSignature
 
       // For X.500 distinguished names
       .addDeserializer(CordaX500Name::class.java, JacksonSupport.CordaX500NameDeserializer)
