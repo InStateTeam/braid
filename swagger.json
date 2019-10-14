@@ -753,6 +753,17 @@
       "io.bluebank.braid.corda.serialisation.mixin.ContractStateMixin" : {
         "type" : "object"
       },
+      "io.bluebank.braid.corda.serialisation.mixin.TransactionStateMixin" : {
+        "type" : "object",
+        "properties" : {
+          "constraint" : {
+            "$ref" : "#/components/schemas/net.corda.core.contracts.AttachmentConstraint"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+          }
+        }
+      },
       "net.corda.core.contracts.AttachmentConstraint" : {
         "type" : "object"
       },
@@ -1394,9 +1405,7 @@
             "issuerRef" : {
               "type" : "array",
               "items" : {
-                "type" : "string",
-                "description" : "Hex encoded Byte Array",
-                "example" : "736F6D654279746573"
+                "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
               }
             },
             "status" : {
@@ -1742,6 +1751,39 @@
           }
         }
       },
+      "net.corda.core.utilities.ByteSequence" : {
+        "required" : [ "bytes", "offset", "size" ],
+        "type" : "object",
+        "properties" : {
+          "_bytes" : {
+            "type" : "string",
+            "format" : "binary",
+            "writeOnly" : true
+          },
+          "offset" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bytes" : {
+            "type" : "string",
+            "format" : "binary"
+          }
+        }
+      },
+      "net.corda.core.utilities.OpaqueBytes" : {
+        "required" : [ "bytes" ],
+        "type" : "object",
+        "properties" : {
+          "bytes" : {
+            "type" : "string",
+            "format" : "binary"
+          }
+        }
+      },
       "generated.net.corda.core.flows.ContractUpgradeFlow_AuthorisePayload" : {
         "type" : "object",
         "properties" : {
@@ -1796,132 +1838,99 @@
           }
         }
       },
-      "net.corda.client.jackson.JacksonSupport_SignedTransactionMixin" : {
-        "required" : [ "signatures", "transaction" ],
+      "io.bluebank.braid.corda.serialisation.mixin.OpaqueBytesMixin" : {
+        "type" : "object"
+      },
+      "io.bluebank.braid.corda.serialisation.mixin.SerializedBytesMixin" : {
+        "type" : "object"
+      },
+      "io.bluebank.braid.corda.serialisation.mixin.SignedTransactionMixin" : {
+        "type" : "object"
+      },
+      "net.corda.core.crypto.DigitalSignature" : {
+        "required" : [ "bytes" ],
         "type" : "object",
         "properties" : {
-          "transaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
-          "signatures" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
-            }
+          "bytes" : {
+            "type" : "string",
+            "format" : "binary"
           }
         }
       },
-      "net.corda.core.transactions.BaseTransaction" : {
-        "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
+      "net.corda.core.crypto.PartialMerkleTree" : {
         "type" : "object",
         "properties" : {
-          "inputs" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
-          },
-          "references" : {
-            "type" : "array",
-            "items" : {
-              "type" : "object"
-            }
-          },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
-          "outputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
-            }
-          },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          "root" : {
+            "$ref" : "#/components/schemas/net.corda.core.crypto.PartialMerkleTree_PartialTree"
           }
         }
       },
-      "net.corda.core.transactions.CoreTransaction" : {
-        "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
+      "net.corda.core.crypto.PartialMerkleTree_PartialTree" : {
+        "type" : "object"
+      },
+      "net.corda.core.crypto.SignatureMetadata" : {
+        "required" : [ "platformVersion", "schemeNumberID" ],
         "type" : "object",
         "properties" : {
-          "inputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
+          "platformVersion" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "references" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-            }
-          },
-          "networkParametersHash" : {
+          "schemeNumberID" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "net.corda.core.crypto.TransactionSignature" : {
+        "required" : [ "by", "bytes" ],
+        "type" : "object",
+        "properties" : {
+          "bytes" : {
             "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
+            "format" : "binary"
+          },
+          "by" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Public Key",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          "signatureMetadata" : {
+            "$ref" : "#/components/schemas/net.corda.core.crypto.SignatureMetadata"
           },
-          "outputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
-            }
-          },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
-          "id" : {
+          "partialMerkleTree" : {
+            "$ref" : "#/components/schemas/net.corda.core.crypto.PartialMerkleTree"
+          }
+        }
+      },
+      "net.corda.core.serialization.SerializedBytes_net_corda_core_transactions_CoreTransaction" : {
+        "required" : [ "bytes" ],
+        "type" : "object",
+        "properties" : {
+          "bytes" : {
             "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            "format" : "binary"
           }
         }
       },
       "net.corda.core.transactions.SignedTransaction" : {
-        "required" : [ "missingSigners", "notaryChangeTransaction", "references", "signatures" ],
+        "required" : [ "missingSigners", "references", "sigs" ],
         "type" : "object",
         "properties" : {
-          "signatures" : {
+          "txBits" : {
+            "$ref" : "#/components/schemas/net.corda.core.serialization.SerializedBytes_net_corda_core_transactions_CoreTransaction"
+          },
+          "sigs" : {
             "type" : "array",
             "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
+              "$ref" : "#/components/schemas/net.corda.core.crypto.TransactionSignature"
             }
-          },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           },
           "references" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
             }
-          },
-          "networkParametersHash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "notaryChangeTransaction" : {
-            "type" : "boolean"
           },
           "missingSigners" : {
             "uniqueItems" : true,
@@ -1972,9 +1981,7 @@
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issuerRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           }
         }
       },
@@ -1985,9 +1992,7 @@
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issueRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           },
           "recipient" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
@@ -2007,9 +2012,7 @@
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issuerBankPartyRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
@@ -2354,6 +2357,21 @@
           }
         }
       },
+      "net.corda.core.crypto.DigitalSignature_WithKey" : {
+        "required" : [ "by", "bytes" ],
+        "type" : "object",
+        "properties" : {
+          "by" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Public Key",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "bytes" : {
+            "type" : "string",
+            "format" : "binary"
+          }
+        }
+      },
       "net.corda.core.flows.NotarisationPayload" : {
         "required" : [ "transaction" ],
         "type" : "object",
@@ -2373,17 +2391,96 @@
         }
       },
       "net.corda.core.flows.NotarisationRequestSignature" : {
-        "required" : [ "digitalSignature", "platformVersion" ],
+        "required" : [ "platformVersion" ],
         "type" : "object",
         "properties" : {
           "digitalSignature" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.crypto.DigitalSignature_WithKey"
           },
           "platformVersion" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "net.corda.core.transactions.BaseTransaction" : {
+        "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
+        "type" : "object",
+        "properties" : {
+          "outputs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
+          "inputs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          },
+          "references" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          },
+          "notary" : {
+            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          }
+        }
+      },
+      "net.corda.core.transactions.CoreTransaction" : {
+        "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
+        "type" : "object",
+        "properties" : {
+          "inputs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
+            }
+          },
+          "references" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
+            }
+          },
+          "networkParametersHash" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "outputs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
+          "notary" : {
+            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "Base 58 Encoded Secure Hash",
+            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
@@ -2411,9 +2508,7 @@
           "signatures" : {
             "type" : "array",
             "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
+              "$ref" : "#/components/schemas/net.corda.core.crypto.TransactionSignature"
             }
           }
         }
@@ -2917,21 +3012,17 @@
           "components" : {
             "type" : "array",
             "items" : {
-              "type" : "string",
-              "description" : "Hex encoded Byte Array",
-              "example" : "736F6D654279746573"
+              "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
             }
           }
         }
       },
       "net.corda.core.transactions.ContractUpgradeFilteredTransaction_FilteredComponent" : {
-        "required" : [ "component", "nonce" ],
+        "required" : [ "nonce" ],
         "type" : "object",
         "properties" : {
           "component" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           },
           "nonce" : {
             "type" : "string",
@@ -3019,9 +3110,7 @@
                 "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
               },
               "reference" : {
-                "type" : "string",
-                "description" : "Hex encoded Byte Array",
-                "example" : "736F6D654279746573"
+                "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
               }
             }
           },
@@ -3042,9 +3131,7 @@
             "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
           },
           "reference" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           }
         }
       },
@@ -3183,30 +3270,26 @@
         }
       },
       "net.corda.finance.flows.CashExitFlow_ExitRequest" : {
-        "required" : [ "amount", "issuerRef" ],
+        "required" : [ "amount" ],
         "type" : "object",
         "properties" : {
           "amount" : {
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issuerRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           }
         }
       },
       "net.corda.finance.flows.CashIssueAndPaymentFlow_IssueAndPaymentRequest" : {
-        "required" : [ "amount", "anonymous", "issueRef" ],
+        "required" : [ "amount", "anonymous" ],
         "type" : "object",
         "properties" : {
           "amount" : {
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issueRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           },
           "recipient" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
@@ -3220,16 +3303,14 @@
         }
       },
       "net.corda.finance.flows.CashIssueFlow_IssueRequest" : {
-        "required" : [ "amount", "issueRef" ],
+        "required" : [ "amount" ],
         "type" : "object",
         "properties" : {
           "amount" : {
             "$ref" : "#/components/schemas/AmountCurrency"
           },
           "issueRef" : {
-            "type" : "string",
-            "description" : "Hex encoded Byte Array",
-            "example" : "736F6D654279746573"
+            "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
           },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"

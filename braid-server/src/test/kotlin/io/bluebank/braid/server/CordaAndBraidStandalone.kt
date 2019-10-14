@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
   val bankB = CordaX500Name("PartyB", "New York", "US")
 
   val jarFiles = listOf(
-    "file:///Users/fuzz/dev/web3j/corda/console/src/test/resources/cordapps/obligation-0.1.jar",
+//    "file:///Users/fuzz/dev/web3j/corda/console/src/test/resources/cordapps/obligation-0.1.jar",
     "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
     "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
   )
