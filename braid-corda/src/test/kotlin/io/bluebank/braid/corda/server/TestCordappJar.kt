@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.server
 
-import io.bluebank.braid.corda.server.BraidMain
+import net.corda.testing.node.TestCordapp
+import net.corda.testing.node.internal.TestCordappInternal
+import java.nio.file.Path
 
-fun main(args: Array<String>) {
-  if (args.size < 4) {
-    println("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
-    return
+/**
+ * An adapter from an existing jar file to
+ */
+class TestCordappJar(override val config: Map<String, Any> = emptyMap(), override val jarFile: Path) :
+  TestCordappInternal() {
+
+  override fun withOnlyJarContents(): TestCordappInternal {
+    return TestCordappJar(emptyMap(), jarFile)
   }
 
-  val networkAndPort = args[0]
-  val userName = args[1]
-  val password = args[2]
-  val port = Integer.valueOf(args[3])
-  val openApiVersion = Integer.valueOf(args[4])
-  val additionalPaths = args.toList().drop(5)
-  BraidMain(additionalPaths, openApiVersion).start(networkAndPort, userName, password, port)
+  override fun withConfig(config: Map<String, Any>): TestCordapp {
+    return TestCordappJar(config, jarFile)
+  }
 }

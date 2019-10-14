@@ -28,6 +28,10 @@
     <url>http://gitlab.com/bluebank/braid/tree/master</url>
   </scm>
 
+  <properties>
+    <log4j.version>2.11.2</log4j.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -78,14 +82,14 @@
       <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <scope>compile</scope>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>1.2.3</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -126,6 +130,19 @@
       <groupId>net.corda</groupId>
       <artifactId>corda-rpc</artifactId>
       <version>${corda.version}</version>
+    </dependency>
+    <!--    <dependency>-->
+    <!--      <groupId>io.web3j</groupId>-->
+    <!--      <artifactId>obligation</artifactId>-->
+    <!--      <version>1.0</version>-->
+    <!--      <scope>system</scope>-->
+    <!--      <systemPath>/Users/fuzz/dev/web3j/corda/console/src/test/resources/cordapps/obligation-0.1.jar</systemPath>-->
+    <!--    </dependency>-->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.12.2</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>net.corda</groupId>

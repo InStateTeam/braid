@@ -43,11 +43,13 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
         serviceHub?.let {
           log.info("starting up braid server for ${serviceHub.myInfo.legalIdentities.first().name.organisation} on port ${config.port}")
         }
-        BraidServer(serviceHub, config).start(fn).apply {
-          serviceHub?.registerUnloadHandler {
-            shutdown()
+        BraidServer(serviceHub, config)
+          .start(fn)
+          .apply {
+            serviceHub?.registerUnloadHandler {
+              shutdown()
+            }
           }
-        }
       }
     }
   }

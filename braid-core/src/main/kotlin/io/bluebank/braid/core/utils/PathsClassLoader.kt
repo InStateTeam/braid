@@ -29,10 +29,15 @@ object PathsClassLoader {
     jarsClassLoader(jarPaths.toList())
 
   fun jarsClassLoader(jarPaths: Collection<String>): ClassLoader {
-    val urls = jarPaths.asSequence().map {
-      urlOrFiles(it)
-    }.flatMap {it.asSequence()}.toList().toTypedArray()
-    return URLClassLoader(urls, Thread.currentThread().contextClassLoader)
+    return when {
+      jarPaths.isEmpty() -> Thread.currentThread().contextClassLoader
+      else -> {
+        val urls = jarPaths.asSequence().map {
+          urlOrFiles(it)
+        }.flatMap { it.asSequence() }.toList().toTypedArray()
+        URLClassLoader(urls, Thread.currentThread().contextClassLoader)
+      }
+    }
   }
 
   fun urlOrFiles(urlOrFileName: String): List<URL> {
@@ -59,5 +64,5 @@ object PathsClassLoader {
 }
 
 fun List<String>.toJarsClassLoader(): ClassLoader {
-  return PathsClassLoader.jarsClassLoader(this.toList())
+  return PathsClassLoader.jarsClassLoader(this)
 }

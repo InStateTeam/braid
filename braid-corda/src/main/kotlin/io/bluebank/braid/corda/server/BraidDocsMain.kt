@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.server
 
+import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.github.classgraph.ClassGraph
@@ -32,15 +33,20 @@ import java.util.concurrent.CountDownLatch
 class BraidDocsMain() {
   companion object {
     private val log = contextLogger()
+
+    init {
+      BraidCordaJacksonSwaggerInit.init()
+    }
   }
 
   /**
    * @param openApiVersion - 2 or 3
    */
   fun swaggerText(openApiVersion: Int): String {
-    val restConfig =
-      BraidCordaStandaloneServer().restConfig(RPCFactory.createRpcFactoryStub()).withOpenApiVersion(openApiVersion)
     val vertx = Vertx.vertx()
+    val restConfig =
+      BraidCordaStandaloneServer(vertx = vertx).createRestConfig(RPCFactory.createRpcFactoryStub())
+        .withOpenApiVersion(openApiVersion)
     return try {
       val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
       val classes = readCordaClasses()
