@@ -28,7 +28,7 @@
 variables:
   MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
-
+  DOCKER_IMAGE_NAME: cordite/braid
 before_script:
   - npm set registry $NPM_REPO
   - npm set $NPM_CREDENTIALS
@@ -83,9 +83,14 @@ deploy:
   image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS deploy -DskipTests
+    - docker tag bluebank/braid-server ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
+    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:edge
+    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
-    - docker push ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
+    - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
+    - docker push ${DOCKER_IMAGE_NAME}:edge
+    - docker push ${DOCKER_IMAGE_NAME}:latest
   only:
     - master
   tags:
@@ -100,15 +105,16 @@ release:
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P npm-release
+    - docker tag bluebank/braid-server ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
+    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
+    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker pull ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:edge ; docker push ${CI_REGISTRY_IMAGE}:edge
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge} ; docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest; docker push ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}:latest
     - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} cordite/braid-server:edge ; docker push cordite/braid-server:edge
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} cordite/braid-server:${CI_COMMIT_TAG:-edge} ; docker push cordite/braid-server:${CI_COMMIT_TAG:-edge}
-    - docker push cordite/braid-server:latest
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker push ${DOCKER_IMAGE_NAME}:latest
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
   tags:
