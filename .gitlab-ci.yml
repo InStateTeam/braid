@@ -83,14 +83,15 @@ deploy:
   image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS deploy -DskipTests
-    - docker tag bluebank/braid-server ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
-    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:edge
-    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
+    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:edge
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:edge
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
+    - docker push ${CI_REGISTRY_IMAGE}
     - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
-    - docker push ${DOCKER_IMAGE_NAME}:edge
-    - docker push ${DOCKER_IMAGE_NAME}:latest
+    - docker push ${DOCKER_IMAGE_NAME}
   only:
     - master
   tags:
@@ -105,13 +106,13 @@ release:
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P npm-release
-    - docker tag bluebank/braid-server ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
-    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
-    - docker tag ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}
-    - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
-    - docker push ${DOCKER_IMAGE_NAME}:${CI_PIPELINE_ID}:latest
+    - docker push ${CI_REGISTRY_IMAGE}
     - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
     - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
     - docker push ${DOCKER_IMAGE_NAME}:latest
