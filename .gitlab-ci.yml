@@ -46,11 +46,10 @@ stages:
   - release
 
 # Use runner's local cache
-#cache:
-#  paths:
-#    - $CI_PROJECT_DIR/.m2/repository
-#    - .gradle/wrapper
-#    - .gradle/caches
+cache:
+  paths:
+    - $CI_PROJECT_DIR/.m2/repository
+    - $CI_PROJECT_DIR/.gradle
 
 build:
   stage: build
