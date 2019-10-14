@@ -15,11 +15,12 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.*
+import net.corda.core.contracts.ContractState
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.CriteriaExpression
 import net.corda.core.serialization.SerializedBytes
 import net.corda.core.transactions.CoreTransaction
 import net.corda.core.transactions.NotaryChangeWireTransaction
@@ -27,10 +28,19 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-interface SignedTransactionMixin {
+abstract class SignedTransactionMixin
+@JsonCreator
+constructor(@JsonProperty("txBits")
+            txBits: SerializedBytes<net.corda.core.transactions.CoreTransaction>,
+
+            @JsonProperty("sigs")
+            sign: List<net.corda.core.crypto.TransactionSignature>)
+{
   @get:JsonIgnore
-  val notaryChangeTx: WireTransaction
-//  all these not needed
+  abstract val notaryChangeTx: WireTransaction            // avoids WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction
+
+//  all these not needed for serialization but we output into json
+//
 //  @get:JsonIgnore
 //  val isNotaryChangeTransaction: Boolean
 //
