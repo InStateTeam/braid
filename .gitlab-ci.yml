@@ -99,7 +99,7 @@ release:
   when: manual
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
+    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P npm-release
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
     - docker pull ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:edge ; docker push ${CI_REGISTRY_IMAGE}:edge
