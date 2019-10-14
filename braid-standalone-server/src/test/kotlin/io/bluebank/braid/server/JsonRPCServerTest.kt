@@ -21,7 +21,7 @@ import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.bluebank.braid.core.meta.defaultServiceEndpoint
 import io.bluebank.braid.core.meta.defaultServiceMountpoint
 import io.bluebank.braid.server.JsonRPCServerBuilder.Companion.createServerBuilder
-import io.bluebank.braid.server.services.JavascriptExecutor
+//import io.bluebank.braid.server.services.JavascriptExecutor
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
@@ -61,18 +61,13 @@ class JsonRPCServerTest {
 
   @Before
   fun before(testContext: TestContext) {
-    JavascriptExecutor.clearScriptsFolder(vertx)
-      .compose {
-        val result = future<Void>()
-        server.start(result::handle)
-        result
-      }.setHandler(testContext.asyncAssertSuccess())
+    val result = future<Void>()
+    server.start(result::handle)
+    result.setHandler(testContext.asyncAssertSuccess())
   }
 
   @After
   fun after(testContext: TestContext) {
-    JavascriptExecutor.clearScriptsFolder(vertx)
-      .setHandler(testContext.asyncAssertSuccess())
     server.stop(testContext.asyncAssertSuccess<Void>()::handle)
     client.close()
   }
@@ -81,94 +76,35 @@ class JsonRPCServerTest {
   fun `that we can list services and create them`(testContext: TestContext) {
     val serviceName = "myservice"
     httpGetAsJsonObject("/api/")
-      .compose {
-        testContext.assertEquals(0, it.size())
-        httpGet("/api/$serviceName/script")
-      }
-      .map {
-        testContext.assertEquals("", it.toString())
-      }
-      .compose {
-        httpGetAsJsonObject("/api/")
-      }
-      .map {
-        testContext.assertEquals(1, it.size())
-        testContext.assertTrue(it.containsKey(serviceName))
-        val serviceDef = it.getJsonObject(serviceName)
-        testContext.assertTrue(
-          serviceDef.containsKey("endpoint") && serviceDef.containsKey(
-            "documentation"
-          )
-        )
-        testContext.assertEquals(
-          defaultServiceEndpoint(serviceName),
-          serviceDef.getString("endpoint")
-        )
-        testContext.assertEquals(
-          defaultServiceMountpoint(serviceName),
-          serviceDef.getString("documentation")
-        )
-      }
+//      .compose {
+//        testContext.assertEquals(0, it.size())
+//        httpGet("/api/$serviceName/script")
+//      }
+//      .map {
+//        testContext.assertEquals("", it.toString())
+//      }
+//      .compose {
+//        httpGetAsJsonObject("/api/")
+//      }
+//      .map {
+//        testContext.assertEquals(1, it.size())
+//        testContext.assertTrue(it.containsKey(serviceName))
+//        val serviceDef = it.getJsonObject(serviceName)
+//        testContext.assertTrue(
+//          serviceDef.containsKey("endpoint") && serviceDef.containsKey(
+//            "documentation"
+//          )
+//        )
+//        testContext.assertEquals(
+//          defaultServiceEndpoint(serviceName),
+//          serviceDef.getString("endpoint")
+//        )
+//        testContext.assertEquals(
+//          defaultServiceMountpoint(serviceName),
+//          serviceDef.getString("documentation")
+//        )
+//      }
       .setHandler(testContext.asyncAssertSuccess())
-  }
-
-  @Test
-  fun `that we can set a script on a service and execute it`(testContext: TestContext) {
-    val serviceName = "myservice"
-    val script = """
-      |// This is a comment
-      |function add(lhs, rhs) {
-      |  return lhs + rhs
-      |}
-      """.trimIndent().trimMargin("|")
-
-    httpPost("/api/$serviceName/script", script)
-      .compose {
-        jsonRPC("${defaultServiceEndpoint(serviceName)}/websocket", "add", 1, 2)
-      }
-      .map {
-        Json.decodeValue(it, JsonRPCResultResponse::class.java)
-      }
-      .map { it.result.toString().toDouble().toInt() }
-      .map {
-        testContext.assertEquals(3, it)
-      }
-      .setHandler(testContext.asyncAssertSuccess())
-  }
-
-  private fun jsonRPC(url: String, method: String, vararg params: Any?): Future<Buffer> {
-    val id = 1L
-    val result = future<Buffer>()
-    try {
-      @Suppress("DEPRECATION")
-      client.websocket(url, { socket ->
-        socket.handler { response ->
-          try {
-            val jo = JsonObject(response)
-            val responseId = jo.getLong("id")
-            when {
-              responseId != id -> result.fail("expected id $id but $responseId")
-              jo.containsKey("result") -> result.complete(response)
-              jo.containsKey("error") -> result.fail(jo.getJsonObject("error").encode())
-              jo.containsKey("completed") -> {
-                // we ignore the 'completed' message
-              }
-            }
-          } catch (err: Throwable) {
-            result.fail(err)
-          }
-        }.exceptionHandler { err ->
-          result.fail(err)
-        }
-        val request = JsonRPCRequest(id = id, method = method, params = params.toList())
-        socket.writeFrame(WebSocketFrame.textFrame(Json.encode(request), true))
-      }, { connectionError ->
-        result.fail(connectionError)
-      })
-    } catch (err: Throwable) {
-      result.fail(err)
-    }
-    return result
   }
 
   private fun httpGetAsJsonObject(url: String): Future<JsonObject> {
@@ -190,30 +126,6 @@ class JsonRPCServerTest {
       }.exceptionHandler {
         future.fail(it)
       }.end()
-    } catch (err: Throwable) {
-      future.fail(err)
-    }
-    return future
-  }
-
-  private fun httpPost(url: String, data: String): Future<Buffer> {
-    val future = future<Buffer>()
-    try {
-      @Suppress("DEPRECATION")
-      client.post(url) {
-        if ((it.statusCode() / 100) != 2) {
-          future.fail("failed: ${it.statusMessage()}")
-        } else {
-          it.bodyHandler {
-            future.complete(it)
-          }
-        }
-      }
-        .putHeader(HttpHeaders.CONTENT_LENGTH, data.length.toString())
-        .exceptionHandler {
-          future.fail(it)
-        }
-        .end(data)
     } catch (err: Throwable) {
       future.fail(err)
     }
