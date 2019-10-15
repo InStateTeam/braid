@@ -15,15 +15,26 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class WireTransactionMixin  constructor() {
+import com.fasterxml.jackson.annotation.JsonIgnore
+import net.corda.core.transactions.ComponentGroup
 
-  @com.fasterxml.jackson.annotation.JsonIgnore  abstract fun getAvailableComponentGroups(): kotlin.collections.List<kotlin.Any>
+interface WireTransactionMixin {
 
-  @com.fasterxml.jackson.annotation.JsonIgnore  abstract fun getAvailableComponentHashes(): kotlin.collections.List<net.corda.core.crypto.SecureHash>
+  @JsonIgnore
+  fun getAvailableComponentGroups(): kotlin.collections.List<kotlin.Any>
 
-  @com.fasterxml.jackson.annotation.JsonIgnore  abstract fun getAvailableComponents(): kotlin.collections.List<kotlin.Any>
+  @JsonIgnore
+  fun getAvailableComponentHashes(): kotlin.collections.List<net.corda.core.crypto.SecureHash>
 
-  @com.fasterxml.jackson.annotation.JsonIgnore  abstract fun getMerkleTree(): net.corda.core.crypto.MerkleTree
+  @JsonIgnore
+  fun getAvailableComponents(): kotlin.collections.List<kotlin.Any>
 
-  @com.fasterxml.jackson.annotation.JsonIgnore  abstract fun getOutputStates(): kotlin.collections.List<net.corda.core.contracts.ContractState>
+  @JsonIgnore
+  fun getMerkleTree(): net.corda.core.crypto.MerkleTree
+
+  @JsonIgnore
+  fun getOutputStates(): kotlin.collections.List<net.corda.core.contracts.ContractState>
+
+  @get:JsonIgnore
+  val componentGroups: List<ComponentGroup>
 }

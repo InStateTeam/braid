@@ -18,7 +18,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
 import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.MiximModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.MixinModelConverterV3
 import io.bluebank.braid.corda.swagger.v3.SuperClassModelConverterV3
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
@@ -41,7 +41,7 @@ class ModelContextV3 {
   private val modelConverters = ModelConverters().apply {
     addConverter(QualifiedTypeNameConverter(io.vertx.core.json.Json.mapper))
     addConverter(JSR310ModelConverterV3())
-    addConverter(MiximModelConverterV3(io.vertx.core.json.Json.mapper))
+    addConverter(MixinModelConverterV3(io.vertx.core.json.Json.mapper))
     addConverter(SuperClassModelConverterV3())
     //   addConverter(ComposedSchemaFixV3())
     addConverter(CustomModelConverterV3())

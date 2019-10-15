@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class FungibleAssetMixin  constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore
-  abstract fun withNewOwnerAndAmount(newAmount: net.corda.core.contracts.Amount<net.corda.core.contracts.Issued<*>>, newOwner: net.corda.core.identity.AbstractParty): net.corda.core.contracts.FungibleAsset<*>
+interface NoMixin {
+
 }

@@ -15,6 +15,8 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.core.utils.toJarsClassLoader
+import io.bluebank.braid.core.utils.tryWithClassLoader
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.driver.DriverParameters
@@ -30,6 +32,17 @@ import java.util.Arrays.asList
   */
 
 fun main(args: Array<String>) {
+  // provide a list of cordaApp jars  including obligsation
+
+  val jars = args.toList()
+
+  tryWithClassLoader(jars.toJarsClassLoader()) {
+    startStandalone()
+  }
+
+}
+
+private fun startStandalone() {
   val user = User("user1", "test", permissions = setOf("ALL"))
   val bankA = CordaX500Name("BankA", "", "GB")
   val bankB = CordaX500Name("BankB", "", "US")
@@ -62,6 +75,5 @@ fun main(args: Array<String>) {
     println("partyB rpc: $partyB.rpcAddress")
 
   }
-
 }
 

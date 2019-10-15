@@ -28,7 +28,6 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
 import java.lang.reflect.Type
 import java.security.PublicKey
@@ -66,7 +65,6 @@ class CustomModelConverterV2 : ModelConverter {
             X509Certificate::class.java.isAssignableFrom(clazz) -> x509CertificateProperty()
             CertPath::class.java.isAssignableFrom(clazz) -> certPathProperty()
             CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameProperty()
-            OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesProperty()
             Currency::class.java.isAssignableFrom(clazz) -> currencyProperty()
             Amount::class.java.isAssignableFrom(clazz) -> processAmountType(context, jsonType)
             Issued::class.java.isAssignableFrom(clazz) -> processIssuedType(context, annotations, jsonType)

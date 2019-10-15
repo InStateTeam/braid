@@ -24,12 +24,10 @@ import io.swagger.v3.core.converter.ModelConverter
 import io.swagger.v3.oas.models.media.*
 import io.vertx.core.buffer.Buffer
 import net.corda.core.contracts.Amount
-import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
 import java.lang.reflect.Type
 import java.nio.ByteBuffer
@@ -69,7 +67,6 @@ class CustomModelConverterV3 : ModelConverter {
             CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameSchema()
             X509Certificate::class.java.isAssignableFrom(clazz) -> x509Schema()
             CertPath::class.java.isAssignableFrom(clazz) -> certPathSchema()
-            OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesSchema()
             Currency::class.java.isAssignableFrom(clazz) -> currencySchema()
             Amount::class.java.isAssignableFrom(clazz) -> geAmountSchema(jsonType)
             Issued::class.java.isAssignableFrom(clazz) -> getIssuedSchema(context, jsonType)
