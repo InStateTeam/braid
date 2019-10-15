@@ -43,7 +43,7 @@ class NetworkServiceTest {
       on { networkMapSnapshot() } doReturn listOf(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
-    val network = SimpleNetworkMapService(ops)
+    val network = SimpleNetworkMapServiceImpl(ops)
     val simpleInfo = network.myNodeInfo()
     assertThat(simpleInfo.addresses, `is`(addresses))
     assertThat(simpleInfo.legalIdentities, `is`(asList()))

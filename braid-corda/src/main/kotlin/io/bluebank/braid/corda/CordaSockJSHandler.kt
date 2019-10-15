@@ -16,7 +16,7 @@
 package io.bluebank.braid.corda
 
 import io.bluebank.braid.corda.services.CordaFlowServiceExecutor
-import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.jsonrpc.JsonRPCMounter
@@ -124,7 +124,7 @@ class CordaSockJSHandler private constructor(
       services: AppServiceHub,
       @Suppress("UNUSED_PARAMETER") config: BraidConfig
     ): ServiceExecutor =
-      ConcreteServiceExecutor(SimpleNetworkMapService(services.toCordaServicesAdapter()))
+      ConcreteServiceExecutor(SimpleNetworkMapServiceImpl(services.toCordaServicesAdapter()))
 
     private fun createFlowService(
       services: AppServiceHub,
