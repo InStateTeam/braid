@@ -42,11 +42,12 @@ import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.NodeHandle
 import net.corda.testing.driver.driver
 import net.corda.testing.node.User
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import java.net.URL
 import kotlin.test.Test
 
-//@Ignore
+@Ignore
 @RunWith(VertxUnitRunner::class)
 class BraidMainTest {
   companion object {
@@ -91,7 +92,7 @@ class BraidMainTest {
             "notary" to nodes[DUMMY_NOTARY_NAME]
           )
           client.postFuture(
-            path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.d",
+            path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueAndPaymentFlow",
             body = payload)
         }
         .compose { it.body<AbstractCashFlow.Result>() }
