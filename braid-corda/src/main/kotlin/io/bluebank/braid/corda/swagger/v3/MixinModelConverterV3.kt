@@ -17,10 +17,7 @@ package io.bluebank.braid.corda.swagger.v3
 
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.type.SimpleType
-import io.bluebank.braid.corda.rest.docs.v3.QualifiedTypeNameConverter
 import io.bluebank.braid.corda.rest.docs.v3.QualifiedTypeNameResolver
-import io.bluebank.braid.corda.rest.docs.v3.swaggerTypeName
 import io.swagger.v3.core.converter.*
 import io.swagger.v3.oas.models.media.Schema
 import net.corda.core.utilities.loggerFor
@@ -30,12 +27,12 @@ import net.corda.core.utilities.loggerFor
  * This adds Annotations applied on mixins to allow us to describe inheritance heirarchies
  *
  */
-class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
+class MixinModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
 
   val namer = QualifiedTypeNameResolver()
 
   companion object {
-    private val log = loggerFor<MiximModelConverterV3>()
+    private val log = loggerFor<MixinModelConverterV3>()
   }
 
   override fun resolve(
@@ -67,7 +64,8 @@ class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
 
   private fun addMixinSchema(mixin: Class<*>,type:AnnotatedType, context: ModelConverterContext, schema: Schema<Any>): Schema<*> {
 
-    val mixinSchema = context.resolve(AnnotatedType(mixin).name(schema.name))     // give the mixin the same name to stop it being added to schemas
+    val mixinSchema =  mixinModelConverter(context)
+        .resolve(AnnotatedType(mixin))    
 
     schema
         .discriminator(mixinSchema.discriminator)   // to do add others?
@@ -77,6 +75,13 @@ class MiximModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
 
     return schema
 
+  }
+
+  var mixinConverter: ModelConverterContextImpl? = null;
+  private fun mixinModelConverter(context: ModelConverterContext): ModelConverterContextImpl {
+    if(mixinConverter==null)
+      mixinConverter = ModelConverterContextImpl(context.converters.asSequence().toList())
+    return mixinConverter!!;
   }
 
 

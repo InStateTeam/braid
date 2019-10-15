@@ -750,20 +750,6 @@
           }
         }
       },
-      "io.bluebank.braid.corda.serialisation.mixin.ContractStateMixin" : {
-        "type" : "object"
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.TransactionStateMixin" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-          },
-          "constraint" : {
-            "$ref" : "#/components/schemas/net.corda.core.contracts.AttachmentConstraint"
-          }
-        }
-      },
       "net.corda.core.contracts.AttachmentConstraint" : {
         "type" : "object"
       },
@@ -898,9 +884,6 @@
             "$ref" : "#/components/schemas/net.corda.core.node.services.Vault_ConstraintInfo"
           }
         }
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.PageSpecificationMixin" : {
-        "type" : "object"
       },
       "io.bluebank.braid.corda.services.vault.VaultQuery" : {
         "required" : [ "contractStateType" ],
@@ -1838,36 +1821,6 @@
           }
         }
       },
-      "io.bluebank.braid.corda.serialisation.mixin.OpaqueBytesMixin" : {
-        "type" : "object"
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.SerializedBytesMixin" : {
-        "type" : "object"
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.SignedTransactionMixin" : {
-        "type" : "object",
-        "properties" : {
-          "txBits" : {
-            "$ref" : "#/components/schemas/net.corda.core.serialization.SerializedBytes_net_corda_core_transactions_CoreTransaction"
-          },
-          "sigs" : {
-            "type" : "array",
-            "writeOnly" : true,
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.crypto.TransactionSignature"
-            }
-          },
-          "cachedTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          }
-        }
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.TimeWindowMixin" : {
-        "type" : "object"
-      },
-      "io.bluebank.braid.corda.serialisation.mixin.WireTransactionMixin" : {
-        "type" : "object"
-      },
       "net.corda.core.contracts.Command_Object" : {
         "required" : [ "signers", "value" ],
         "type" : "object",
@@ -1902,11 +1855,11 @@
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "untilTime" : {
+          "midpoint" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "midpoint" : {
+          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -1982,12 +1935,6 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "inputs" : {
             "type" : "array",
             "items" : {
@@ -2007,6 +1954,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -2053,12 +2006,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
@@ -2066,6 +2013,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {

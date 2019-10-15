@@ -44,7 +44,7 @@ class MiximModelConverterV3Test {
      schemas = ModelConverters()
         .apply {
           addConverter(ModelResolver(Json.mapper))
-          addConverter(MiximModelConverterV3(Json.mapper))
+          addConverter(MixinModelConverterV3(Json.mapper))
         }
         .readAll(Pet::class.java)
 
@@ -57,7 +57,7 @@ class MiximModelConverterV3Test {
     val schemas = ModelConverters()
         .apply {
           addConverter(ModelResolver(Json.mapper))
-          addConverter(MiximModelConverterV3(Json.mapper))
+          addConverter(MixinModelConverterV3(Json.mapper))
         }
         .readAll(QueryCriteria.AndComposition::class.java)
 
