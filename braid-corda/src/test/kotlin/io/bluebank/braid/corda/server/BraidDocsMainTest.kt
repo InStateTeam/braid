@@ -58,8 +58,4 @@ class BraidDocsMainTest {
     assertTrue(openApi.components.schemas.containsKey("net.corda.finance.contracts.Commodity"))
   }
 
-//  @Test
-//  fun `that we dont have ByteSequence`() {
-//    assertThat(openApi.components.schemas.keys,not(hasItem("net.corda.core.utilities.ByteSequence")))
-//  }
 }

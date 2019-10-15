@@ -18,8 +18,7 @@ package io.bluebank.braid.corda.server
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import net.corda.core.CordaInternal
-import net.corda.core.flows.FlowInitiator
-import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.*
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.SerializeAsToken
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -58,6 +57,15 @@ class CordaClasses {
             "net.corda.node.migration",
             "net.corda.node.internal"
         )
+        // todo may be these are needed but grags in Progress Tracker and are companions of FlowLogic
+//        .blacklistClasses(AbstractStateReplacementFlow.Acceptor.Companion.APPROVING::class.java.name)
+//        .blacklistClasses(AbstractStateReplacementFlow.Acceptor.Companion.VERIFYING::class.java.name)
+//        .blacklistClasses(AbstractStateReplacementFlow.Instigator.Companion.NOTARY::class.java.name)
+//        .blacklistClasses(AbstractStateReplacementFlow.Instigator.Companion.SIGNING::class.java.name)
+//        .blacklistClasses(CollectSignaturesFlow.Companion.VERIFYING::class.java.name)
+//        .blacklistClasses(FinalityFlow.Companion.BROADCASTING::class.java.name)
+//        .blacklistClasses(FinalityFlow.Companion.NOTARISING::class.java.name)
+
         .blacklistClasses(ProgressTracker::class.java.name)
         .blacklistClasses(ProgressTracker.Change::class.java.name)
         .blacklistClasses(ProgressTracker.Change.Position::class.java.name)
@@ -65,7 +73,7 @@ class CordaClasses {
         .blacklistClasses(ProgressTracker.Change.Structural::class.java.name)
         .blacklistClasses(ProgressTracker.STARTING::class.java.name)
         .blacklistClasses(ProgressTracker.UNSTARTED::class.java.name)
-        .blacklistClasses(ProgressTracker.Step::class.java.name)
+     //   .blacklistClasses(ProgressTracker.Step::class.java.name)       // dont include here as it is needed to xclude subclasses
         .blacklistClasses(Observable::class.java.name)
         .blacklistClasses(ByteSequence::class.java.name)
         .scan()
@@ -82,12 +90,15 @@ class CordaClasses {
         !it.hasAnnotation(CordaInternal::class.java.name) &&
         !it.isInterface &&
         !it.isAbstract &&
+        !it.extendsSuperclass(ProgressTracker.Step::class.java.name) &&
         !it.extendsSuperclass(FlowLogic::class.java.name) &&
         !it.extendsSuperclass(FlowInitiator::class.java.name) &&
         !it.extendsSuperclass(Throwable::class.java.name) &&
         !isFunctionName(it.name) &&
         !isCompanionClass(it.name) &&
-        !isKotlinFileClass(it.name)
+        !isKotlinFileClass(it.name) &&
+        !it.name.equals(ProgressTracker.Step::class.java.name)
+
   }
 
   private fun isSingletonSerializeAsToken(type: ClassInfo):Boolean =
