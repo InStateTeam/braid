@@ -26,13 +26,13 @@
 # therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
 
 variables:
-  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2 -T 2C"
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=.m2/repository -T 2C"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
   DOCKER_IMAGE_NAME: cordite/braid
 before_script:
   - npm set registry $NPM_REPO
   - npm set $NPM_CREDENTIALS
-  #- export GRADLE_USER_HOME=`pwd`/.gradle
+  - export GRADLE_USER_HOME=`pwd`/.gradle
   - mkdir -p ~/.m2/repository
   - cp maven/settings.xml ~/.m2/settings.xml
   - rm -rf ~/.gnupg
@@ -49,7 +49,7 @@ stages:
 cache:
   key: $CI_PROJECT_ID
   paths:
-    - $CI_PROJECT_DIR/.m2/repository
+    - $CI_PROJECT_DIR/.m2/
     - $CI_PROJECT_DIR/.gradle
 
 build:
