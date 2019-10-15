@@ -42,7 +42,7 @@ class BraidDocsMainTest {
     assertTrue(openApi.paths.containsKey("/network/nodes"))
     assertTrue(openApi.paths.containsKey("/cordapps"))
     assertTrue(openApi.paths.containsKey("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashPaymentFlow"))
-    assertTrue(openApi.components.schemas.containsKey("Error"))
+    assertTrue(openApi.components.schemas.containsKey("InvocationError"))
     assertTrue(openApi.components.schemas.containsKey("net.corda.finance.contracts.Commodity"))
   }
 }

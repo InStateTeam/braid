@@ -87,12 +87,12 @@ class CustomModelConverterV2 : ModelConverter {
     context: ModelConverterContext
   ): Property? {
     context.defineModel(
-      "Error", ModelImpl()
+      "InvocationError", ModelImpl()
         .type("object")
         .property("message", StringProperty().description("the error message"))
         .property("type", StringProperty().description("the class of error being returned"))
     )
-    return RefProperty("Error")
+    return RefProperty("InvocationError")
   }
 
   private fun processIssuedType(
