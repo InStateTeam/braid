@@ -15,10 +15,11 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.*
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.MINIMAL_CLASS
 import io.bluebank.braid.corda.serialisation.mixin.QueryCriteriaMixin
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.jackson.ModelResolver

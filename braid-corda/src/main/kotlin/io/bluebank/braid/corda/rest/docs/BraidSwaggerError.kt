@@ -25,8 +25,8 @@ const val TYPE_DESC = "the type of error"
 /**
  * A proxy type for Throwables - to work around the insanity of swaggers resolve() algorithm
  */
-@ApiModel(value = "Error")
-@Schema(name = "Error")
+@ApiModel(value = "InvocationError")
+@Schema(name = "InvocationError")
 data class BraidSwaggerError(
   @Schema(description = MESSAGE_DESC)
   @ApiModelProperty(MESSAGE_DESC)

@@ -90,7 +90,7 @@ class SerialisationTests {
   @Test
   fun `that Amount of Issued Currency can be serialised and deserialised`() {
     val expected =
-        Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
+      Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
     val encoded = Json.encode(expected)
     val actual = Json.decodeValue(encoded, Amount::class.java)
     assertEquals(expected, actual)
@@ -112,10 +112,10 @@ class SerialisationTests {
   fun `that X509 Should serialize as bytes`() {
     val base64 = this::class.java.getResource("/serialization/certificate/x509.pem")
         .readText()
-        .replace(X509Factory.BEGIN_CERT, "")
-        .replace(X509Factory.END_CERT, "")
-        .replace("\n", "")
-        .replace("\r", "")
+      .replace(X509Factory.BEGIN_CERT, "")
+      .replace(X509Factory.END_CERT, "")
+      .replace("\n", "")
+      .replace("\r", "")
 
     val certificate = CertificateFactory.getInstance("X.509")
         .generateCertificate(ByteArrayInputStream(Base64.getDecoder().decode(base64)))
@@ -347,9 +347,9 @@ class SerialisationTests {
 
   private fun createTransactionSignature(): TransactionSignature {
     val txSig = TransactionSignature(
-        "message".toByteArray(),
-        generatePublicKey(),
-        SignatureMetadata(4, 1)
+      "message".toByteArray(),
+      generatePublicKey(),
+      SignatureMetadata(4, 1)
     )
     return txSig
   }

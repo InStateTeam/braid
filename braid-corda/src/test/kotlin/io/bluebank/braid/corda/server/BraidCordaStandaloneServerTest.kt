@@ -25,7 +25,6 @@ import io.bluebank.braid.core.async.onSuccess
 import io.bluebank.braid.core.http.body
 import io.bluebank.braid.core.http.getFuture
 import io.bluebank.braid.core.socket.findFreePort
-import io.bluebank.braid.core.synth.decodeValue
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -36,37 +35,31 @@ import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.Builder.equal
+import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
+import net.corda.core.node.services.vault.QueryCriteria.VaultCustomQueryCriteria
+import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
+import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.NetworkHostAndPort
 import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
 import net.corda.finance.AMOUNT
+import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.schemas.CashSchemaV1
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
+import net.corda.testing.internal.withTestSerializationEnvIfNotSet
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
+import org.junit.*
 import org.junit.runner.RunWith
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
 import java.util.Arrays.asList
 import javax.ws.rs.core.Response
-import net.corda.core.node.services.vault.QueryCriteria.VaultCustomQueryCriteria
-import net.corda.core.node.services.Vault
-import net.corda.core.node.services.vault.Builder.equal
-import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
-import net.corda.core.node.services.vault.PageSpecification
-import net.corda.core.node.services.vault.QueryCriteria
-import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
-import net.corda.core.node.services.vault.Sort
-import net.corda.core.transactions.SignedTransaction
-import net.corda.finance.test.SampleCashSchemaV1
-import net.corda.finance.contracts.asset.Cash
-import net.corda.finance.schemas.CashSchemaV1
-import net.corda.nodeapi.internal.coreContractClasses
-import net.corda.testing.core.SerializationEnvironmentRule
-import net.corda.testing.internal.withTestSerializationEnvIfNotSet
-import org.junit.*
 
 
 /**
@@ -98,7 +91,7 @@ class BraidCordaStandaloneServerTest {
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-       val async = testContext.async()
+      val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
         async.complete()
@@ -405,7 +398,7 @@ class BraidCordaStandaloneServerTest {
       val json = JsonObject()
         .put("notary", notary)
         .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-        .put("issuerBankPartyRef",JsonObject().put("bytes","AABBCC"))
+        .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
 
       val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
       log.info("calling post: http://localhost:$port$path")
@@ -700,7 +693,7 @@ class BraidCordaStandaloneServerTest {
     getNotary().map {
       val notary = it
 
-      val json ="""
+      val json = """
 {
   "amount": {
     "quantity": 100,
@@ -719,23 +712,23 @@ class BraidCordaStandaloneServerTest {
 
 
       client.post(port, "localhost", path)
-          .putHeader("Accept", "application/json; charset=utf8")
-          .putHeader("Content-length", "" + json.length)
-          .exceptionHandler(context::fail)
-          .handler {
-            context.assertEquals(200, it.statusCode(), it.statusMessage())
+        .putHeader("Accept", "application/json; charset=utf8")
+        .putHeader("Content-length", "" + json.length)
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
 
-            it.bodyHandler {
-              val reply = it.toJsonObject()
-              log.info("reply:" + reply.encodePrettily())
-              context.assertThat(reply, notNullValue())
-              context.assertThat(reply.getJsonObject("stx"), notNullValue())
-              context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+          it.bodyHandler {
+            val reply = it.toJsonObject()
+            log.info("reply:" + reply.encodePrettily())
+            context.assertThat(reply, notNullValue())
+            context.assertThat(reply.getJsonObject("stx"), notNullValue())
+            context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
-              async.complete()
-            }
+            async.complete()
           }
-          .end(json)
+        }
+        .end(json)
     }
   }
 }

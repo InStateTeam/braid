@@ -95,6 +95,11 @@ abstract class EndPointV3(
     annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
 
+  val operationId: String
+    get() {
+      return path.dropWhile { it == '/' }.replace('/', '_').replace('-', '_')
+    }
+
   val description: String
     get() {
       return methodDescription?.description?.nonEmptyOrNull()
@@ -112,6 +117,7 @@ abstract class EndPointV3(
 
   fun toOperation(): Operation {
     val operation = Operation()
+      .operationId(operationId)
       // todo .consumes(consumes)
       .description(description)
       .parameters(toSwaggerParams())

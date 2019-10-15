@@ -15,13 +15,6 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import net.corda.core.serialization.SerializedBytes
-import net.corda.core.transactions.CoreTransaction
-import net.corda.core.transactions.NotaryChangeWireTransaction
-import net.corda.core.transactions.WireTransaction
-
 interface NoMixin {
 
 }

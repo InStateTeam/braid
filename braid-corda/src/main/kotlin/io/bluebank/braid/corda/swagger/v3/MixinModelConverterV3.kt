@@ -18,7 +18,10 @@ package io.bluebank.braid.corda.swagger.v3
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.bluebank.braid.corda.rest.docs.v3.QualifiedTypeNameResolver
-import io.swagger.v3.core.converter.*
+import io.swagger.v3.core.converter.AnnotatedType
+import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.converter.ModelConverterContext
+import io.swagger.v3.core.converter.ModelConverterContextImpl
 import io.swagger.v3.oas.models.media.Schema
 import net.corda.core.utilities.loggerFor
 
@@ -64,8 +67,8 @@ class MixinModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
 
   private fun addMixinSchema(mixin: Class<*>,type:AnnotatedType, context: ModelConverterContext, schema: Schema<Any>): Schema<*> {
 
-    val mixinSchema =  mixinModelConverter(context)
-        .resolve(AnnotatedType(mixin))    
+    val mixinSchema = mixinModelConverter(context)
+      .resolve(AnnotatedType(mixin))
 
     schema
         .discriminator(mixinSchema.discriminator)   // to do add others?
@@ -79,7 +82,7 @@ class MixinModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
 
   var mixinConverter: ModelConverterContextImpl? = null;
   private fun mixinModelConverter(context: ModelConverterContext): ModelConverterContextImpl {
-    if(mixinConverter==null)
+    if (mixinConverter == null)
       mixinConverter = ModelConverterContextImpl(context.converters.asSequence().toList())
     return mixinConverter!!;
   }

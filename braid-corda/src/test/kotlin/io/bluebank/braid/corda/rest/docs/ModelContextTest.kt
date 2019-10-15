@@ -66,6 +66,6 @@ class ModelContextTest {
     val modelContext = ModelContext()
     val r2 = modelContext.getProperty(BraidSwaggerError::class.java)
     val models = modelContext.models
-    assertTrue(models.containsKey("Error"))
+    assertTrue(models.containsKey("InvocationError"))
   }
 }

@@ -15,16 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
-import net.corda.core.contracts.PrivacySalt
-import net.corda.core.crypto.DigitalSignature
 import net.corda.core.crypto.SecureHash
-import net.corda.core.crypto.TransactionSignature
-import net.corda.core.serialization.SerializedBytes
-import net.corda.core.utilities.OpaqueBytes
 
 
 abstract class SerializedBytesMixin : OpaqueBytesMixin() {
