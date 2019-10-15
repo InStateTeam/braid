@@ -754,7 +754,16 @@
         "type" : "object"
       },
       "net.corda.core.contracts.ContractState" : {
-        "type" : "object"
+        "required" : [ "participants" ],
+        "type" : "object",
+        "properties" : {
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
       },
       "net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState" : {
         "type" : "object",
@@ -1855,11 +1864,11 @@
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "midpoint" : {
+          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "untilTime" : {
+          "midpoint" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -2046,11 +2055,11 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
           "tx" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.WireTransaction"
+          },
+          "coreTransaction" : {
+            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           },
           "inputs" : {
             "type" : "array",
@@ -3539,10 +3548,17 @@
         }
       },
       "net.corda.finance.contracts.DealState" : {
+        "required" : [ "participants" ],
         "type" : "object",
         "properties" : {
           "linearId" : {
             "$ref" : "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
+          },
+          "participants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
           }
         }
       },
