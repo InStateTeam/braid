@@ -7,8 +7,7 @@ import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.ContractState
 import net.corda.finance.contracts.asset.Cash
 import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.hasItem
+import org.hamcrest.CoreMatchers.*
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -31,16 +30,17 @@ class CordaClassesTest {
   
   @Test
   fun `should have cash state`() {
-    assertThat(classes, hasItem(Cash.State::class))
+    assertThat(classes, hasItem(Cash.State::class.java))
   }
-
 
   @Test
   fun `should match cash state`() {
-    val classInfo = ClassGraph().whitelistClasses(Cash.State::class.java.name)
+    val classInfo = ClassGraph()
+        .whitelistClasses(Cash.State::class.java.name)
         .enableAnnotationInfo()
         .scan()
         .allClasses[0]
+    assertThat(classInfo.loadClass().name, `is`(Cash.State::class.java.name)     )
     assertThat(CordaClasses().isCordaSerializedClass(classInfo), equalTo(true))
   }
 

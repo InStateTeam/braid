@@ -67,10 +67,10 @@ class CordaClasses {
         !isKotlinFileClass(it.name)
   }
 
-  private fun isCordaSerializable(it: ClassInfo):Boolean =
-      it.hasAnnotation(CordaSerializable::class.java.name)
-          || (it.superclass != null && isCordaSerializable(it.superclass))
-          || it.interfaces.stream()
+  private fun isCordaSerializable(type: ClassInfo):Boolean =
+      type.hasAnnotation(CordaSerializable::class.java.name)
+          || (type.superclass != null && isCordaSerializable(type.superclass))
+          || type.interfaces.stream()
               .filter{isCordaSerializable(it)}
               .findFirst()
               .isPresent()
