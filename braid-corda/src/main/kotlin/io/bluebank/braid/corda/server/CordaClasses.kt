@@ -18,13 +18,12 @@ package io.bluebank.braid.corda.server
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import net.corda.core.CordaInternal
-import net.corda.core.flows.*
+import net.corda.core.flows.FlowInitiator
+import net.corda.core.flows.FlowLogic
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.SerializeAsToken
-import net.corda.core.serialization.SingletonSerializeAsToken
 import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.ProgressTracker
-import net.corda.node.internal.AbstractNode
 import rx.Observable
 
 class CordaClasses {
@@ -85,7 +84,7 @@ class CordaClasses {
         .toList()
   }
 
-  fun isCordaSerializedClass(it: ClassInfo): Boolean {
+  internal fun isCordaSerializedClass(it: ClassInfo): Boolean {
     return isCordaSerializable(it) &&
         !it.hasAnnotation(CordaInternal::class.java.name) &&
         !it.isInterface &&

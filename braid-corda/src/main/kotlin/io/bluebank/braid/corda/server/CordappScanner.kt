@@ -26,8 +26,21 @@ import kotlin.reflect.KClass
  * Retrieves a set of jar module names that are cordapps. The technique
  */
 class CordappScanner(private val classLoader: ClassLoader) {
+  fun cordapps(): List<String> {
+    return lazyCordapps
+  }
 
-  companion object {
+  fun flowsForCordapp(cordapp: String): List<String>? {
+    return flowsByCordapp[cordapp]?.map { it.name } ?: emptyList()
+  }
+
+  fun cordappAndFlowList(): List<Pair<String, KClass<out Any>>> {
+    return flowClassesByCordapp
+  }
+
+
+  fun contractStates(): List<KClass<out Any>> {
+    return contractStateClasses
   }
 
   private val classGraph by lazy {
@@ -40,7 +53,7 @@ class CordappScanner(private val classLoader: ClassLoader) {
       .scan()
   }
 
-  private val contracts by lazy {
+  private val contractStates by lazy {
     classGraph.getClassesImplementing(ContractState::class.java.name)
   }
 
@@ -49,7 +62,7 @@ class CordappScanner(private val classLoader: ClassLoader) {
   }
 
   private val lazyCordapps by lazy {
-    (contracts + flows).map { it.classpathElementFile.nameWithoutExtension.removeVersion() }.distinct().sorted()
+    (contractStates + flows).map { it.classpathElementFile.nameWithoutExtension.removeVersion() }.distinct().sorted()
   }
 
   private val flowsByCordapp by lazy {
@@ -61,16 +74,9 @@ class CordappScanner(private val classLoader: ClassLoader) {
       .sortedBy { it.first }
   }
 
-  fun cordapps(): List<String> {
-    return lazyCordapps
+  private val contractStateClasses by lazy {
+    contractStates.map { classLoader.loadClass(it.name).kotlin }
   }
 
-  fun flowsForCordapp(cordapp: String): List<String>? {
-    return flowsByCordapp[cordapp]?.map { it.name } ?: emptyList()
-  }
-
-  fun cordappAndFlowList(): List<Pair<String, KClass<out Any>>> {
-    return flowClassesByCordapp
-  }
 }
 

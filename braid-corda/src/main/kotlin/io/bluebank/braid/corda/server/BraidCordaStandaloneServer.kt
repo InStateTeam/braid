@@ -71,6 +71,9 @@ open class BraidCordaStandaloneServer(
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
       .withPaths {
+        cordappsScanner.contractStates().forEach {
+          this.docsHandler.addType(it.java)
+        }
         group("network") {
           get("/network/nodes", networkService::nodes)
           get("/network/nodes/self", networkService::myNodeInfo)
@@ -85,7 +88,6 @@ open class BraidCordaStandaloneServer(
           get("/cordapps", cordappsScanner::cordapps)
           get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)
           try {
-            cordappsScanner.cordappAndFlowList()
             cordappsScanner.cordappAndFlowList().forEach { (cordapp, flowClass) ->
               try {
                 val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
