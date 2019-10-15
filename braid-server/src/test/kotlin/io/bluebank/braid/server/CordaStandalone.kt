@@ -15,6 +15,8 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.core.utils.toJarsClassLoader
+import io.bluebank.braid.core.utils.tryWithClassLoader
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.driver.DriverParameters
@@ -30,28 +32,39 @@ import java.util.Arrays.asList
   */
 
 fun main(args: Array<String>) {
+  // provide a list of cordaApp jars  including obligsation
+
+  val jars = args.toList()
+
+  tryWithClassLoader(jars.toJarsClassLoader()) {
+    startStandalone()
+  }
+
+}
+
+private fun startStandalone() {
   val user = User("user1", "test", permissions = setOf("ALL"))
   val bankA = CordaX500Name("BankA", "", "GB")
   val bankB = CordaX500Name("BankB", "", "US")
 
   driver(
-    DriverParameters(
-      cordappsForAllNodes = listOf(
-        TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
-        TestCordapp.findCordapp("net.corda.finance.schemas"),
-        TestCordapp.findCordapp("net.corda.finance.flows")
-        //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
-      ),
-      waitForAllNodesToFinish = true,
-      isDebug = true,
-      startNodesInProcess = true
-    )
+      DriverParameters(
+          cordappsForAllNodes = listOf(
+              TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
+              TestCordapp.findCordapp("net.corda.finance.schemas"),
+              TestCordapp.findCordapp("net.corda.finance.flows")
+       //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
+          ),
+          waitForAllNodesToFinish = true,
+          isDebug = true,
+          startNodesInProcess = true
+      )
   ) {
     // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
     // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
     val (partyA, partyB) = listOf(
-      startNode(providedName = bankA, rpcUsers = asList(user)),
-      startNode(providedName = bankB, rpcUsers = asList(user))
+        startNode(providedName = bankA, rpcUsers = asList(user)),
+        startNode(providedName = bankB, rpcUsers = asList(user))
     ).map { it.getOrThrow() }
 
     // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
@@ -62,6 +75,5 @@ fun main(args: Array<String>) {
     println("partyB rpc: $partyB.rpcAddress")
 
   }
-
 }
 

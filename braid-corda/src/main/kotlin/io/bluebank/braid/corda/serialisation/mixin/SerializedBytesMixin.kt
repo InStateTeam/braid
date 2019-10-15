@@ -15,7 +15,20 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class FungibleAssetMixin  constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore
-  abstract fun withNewOwnerAndAmount(newAmount: net.corda.core.contracts.Amount<net.corda.core.contracts.Issued<*>>, newOwner: net.corda.core.identity.AbstractParty): net.corda.core.contracts.FungibleAsset<*>
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
+import net.corda.core.contracts.PrivacySalt
+import net.corda.core.crypto.DigitalSignature
+import net.corda.core.crypto.SecureHash
+import net.corda.core.crypto.TransactionSignature
+import net.corda.core.serialization.SerializedBytes
+import net.corda.core.utilities.OpaqueBytes
+
+
+abstract class SerializedBytesMixin : OpaqueBytesMixin() {
+  @get:com.fasterxml.jackson.annotation.JsonIgnore
+  abstract val hash: SecureHash
+
 }

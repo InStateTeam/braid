@@ -69,7 +69,6 @@ class CustomModelConverterV3 : ModelConverter {
             CordaX500Name::class.java.isAssignableFrom(clazz) -> cordaX500NameSchema()
             X509Certificate::class.java.isAssignableFrom(clazz) -> x509Schema()
             CertPath::class.java.isAssignableFrom(clazz) -> certPathSchema()
-            OpaqueBytes::class.java.isAssignableFrom(clazz) -> opaqueBytesSchema()
             Currency::class.java.isAssignableFrom(clazz) -> currencySchema()
             Amount::class.java.isAssignableFrom(clazz) -> geAmountSchema(jsonType)
             Issued::class.java.isAssignableFrom(clazz) -> getIssuedSchema(context, jsonType)

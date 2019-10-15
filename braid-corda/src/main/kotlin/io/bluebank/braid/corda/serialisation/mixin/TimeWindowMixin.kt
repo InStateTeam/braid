@@ -15,7 +15,8 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class TimeWindowMixin constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore abstract fun getLength(): java.time.Duration?
+interface TimeWindowMixin {
+  @com.fasterxml.jackson.annotation.JsonIgnore
+  fun getLength(): java.time.Duration?
 
 }

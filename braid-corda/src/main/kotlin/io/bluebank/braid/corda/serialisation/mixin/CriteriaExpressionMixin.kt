@@ -15,13 +15,11 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
-import net.corda.core.contracts.ContractState
-import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.CriteriaExpression
-import net.corda.core.node.services.vault.QueryCriteria
-import net.corda.core.schemas.StatePersistable
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property = "@class")
 @JsonSubTypes(
@@ -46,5 +44,5 @@ import net.corda.core.schemas.StatePersistable
       CriteriaExpression.ColumnPredicateExpression::class,
       CriteriaExpression.Not::class]
 )
-abstract class CriteriaExpressionMixin {
+interface CriteriaExpressionMixin {
 }

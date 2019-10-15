@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation.mixin
+package io.bluebank.braid.corda.serialisation.serializers
 
-abstract class FungibleAssetMixin  constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore
-  abstract fun withNewOwnerAndAmount(newAmount: net.corda.core.contracts.Amount<net.corda.core.contracts.Issued<*>>, newOwner: net.corda.core.identity.AbstractParty): net.corda.core.contracts.FungibleAsset<*>
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+
+class SingletonDeserializer<T : Any>(val value: T) : StdDeserializer<T>(value.javaClass) {
+  override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): T {
+    return value
+  }
 }

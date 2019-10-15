@@ -25,6 +25,7 @@ import io.bluebank.braid.core.async.onSuccess
 import io.bluebank.braid.core.http.body
 import io.bluebank.braid.core.http.getFuture
 import io.bluebank.braid.core.socket.findFreePort
+import io.bluebank.braid.core.synth.decodeValue
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.VertxOptions
@@ -44,10 +45,6 @@ import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
-import org.junit.AfterClass
-import org.junit.Assert
-import org.junit.BeforeClass
-import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -62,15 +59,19 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
 import net.corda.core.node.services.vault.Sort
+import net.corda.core.transactions.SignedTransaction
 import net.corda.finance.test.SampleCashSchemaV1
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.schemas.CashSchemaV1
 import net.corda.nodeapi.internal.coreContractClasses
+import net.corda.testing.core.SerializationEnvironmentRule
+import net.corda.testing.internal.withTestSerializationEnvIfNotSet
+import org.junit.*
 
 
 /**
  * Run with Either
- *          -DbraidStarted=true and CordaStandalone and BraidMain started on port 8999 in the background if you want this test to run faster.
+ *          -DbraidStarted=true and CordaStandalone and BraidMain started on port 9000 in the background if you want this test to run faster.
  *          -DcordaStarted=true and CordaStandalone in the background if you want this test to run fastish.
  * Otherwise it takes about 45 seconds or more to run.
  */
@@ -79,13 +80,17 @@ import net.corda.nodeapi.internal.coreContractClasses
 class BraidCordaStandaloneServerTest {
 
   companion object {
+
+    init {
+      BraidCordaJacksonSwaggerInit.init()
+    }
     private val log = loggerFor<BraidCordaStandaloneServerTest>()
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
     private val bankA = CordaX500Name("BankA", "", "GB")
     private val bankB = CordaX500Name("BankB", "", "US")
 
-    private val port = if ("true".equals(System.getProperty("braidStarted"))) 8999 else findFreePort()
+    private val port = if ("true".equals(System.getProperty("braidStarted"))) 9000 else findFreePort()
     private val clientVertx = Vertx.vertx()
     private val client = clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
       
@@ -93,8 +98,7 @@ class BraidCordaStandaloneServerTest {
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-      BraidCordaJacksonSwaggerInit.init()
-      val async = testContext.async()
+       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
         async.complete()
@@ -391,16 +395,17 @@ class BraidCordaStandaloneServerTest {
   }
 
   @Test
-  fun shouldStartFlow(context: TestContext) {
+  fun `should Start a CashIssueFlow`(context: TestContext) {
     val async = context.async()
 
     getNotary().map {
       val notary = it
 
+
       val json = JsonObject()
         .put("notary", notary)
         .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-        .put("issuerBankPartyRef", "AABBCC")
+        .put("issuerBankPartyRef",JsonObject().put("bytes","AABBCC"))
 
       val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
       log.info("calling post: http://localhost:$port$path")
@@ -420,6 +425,14 @@ class BraidCordaStandaloneServerTest {
             context.assertThat(reply.getJsonObject("stx"), notNullValue())
             context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
+            val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
+            log.info(signedTransactionJson)
+
+            //  todo round trip SignedTransaction
+            // Failed to decode: Expected exactly 1 of {nodeSerializationEnv, driverSerializationEnv, contextSerializationEnv, inheritableContextSerializationEnv}
+            withTestSerializationEnvIfNotSet {
+              Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
+            }
             async.complete()
           }
         }
@@ -588,7 +601,7 @@ class BraidCordaStandaloneServerTest {
 
 
   @Test
-  fun `should seralize various query`(context: TestContext) {
+  fun `should serialize various query`(context: TestContext) {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
     val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
     val quantityIndex = CashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(0L)
@@ -678,4 +691,51 @@ class BraidCordaStandaloneServerTest {
         .end(json)
   }
 
+
+  @Test
+  @Ignore
+  fun `should issue obligation`(context: TestContext) {
+    val async = context.async()
+
+    getNotary().map {
+      val notary = it
+
+      val json ="""
+{
+  "amount": {
+    "quantity": 100,
+    "displayTokenSize": 0.01,
+    "token": "GBP"
+  },
+  "lender": {
+    "name": "O=PartyB, L=New York, C=US",
+    "owningKey": "GfHq2tTVk9z4eXgyWBgg9GY6LaCcQjjaSFVwKkJ5j1VyaU5nWjEijR28xxay"
+  },
+  "anonymous": false
+}      """.trimIndent()
+
+      val path = "/api/rest/cordapps/kotlin-source/flows/net.corda.examples.obligation.flows.IssueObligation\$Initiator"
+      log.info("calling post: http://localhost:$port$path")
+
+
+      client.post(port, "localhost", path)
+          .putHeader("Accept", "application/json; charset=utf8")
+          .putHeader("Content-length", "" + json.length)
+          .exceptionHandler(context::fail)
+          .handler {
+            context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+            it.bodyHandler {
+              val reply = it.toJsonObject()
+              log.info("reply:" + reply.encodePrettily())
+              context.assertThat(reply, notNullValue())
+              context.assertThat(reply.getJsonObject("stx"), notNullValue())
+              context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+
+              async.complete()
+            }
+          }
+          .end(json)
+    }
+  }
 }

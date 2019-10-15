@@ -15,7 +15,14 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-abstract class FungibleAssetMixin  constructor() {
-  @com.fasterxml.jackson.annotation.JsonIgnore
-  abstract fun withNewOwnerAndAmount(newAmount: net.corda.core.contracts.Amount<net.corda.core.contracts.Issued<*>>, newOwner: net.corda.core.identity.AbstractParty): net.corda.core.contracts.FungibleAsset<*>
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import net.corda.core.contracts.AttachmentConstraint
+import net.corda.core.contracts.ContractState
+
+interface TransactionStateMixin<out T : ContractState> {
+  //  @get:com.fasterxml.jackson.annotation.JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.EXTERNAL_PROPERTY, property="contract")
+  @get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+  val data: T
+  @get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+  val constraint: AttachmentConstraint
 }
