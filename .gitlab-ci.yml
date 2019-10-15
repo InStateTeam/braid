@@ -47,6 +47,7 @@ stages:
 
 # Use runner's local cache
 cache:
+  key: $CI_PROJECT_ID
   paths:
     - $CI_PROJECT_DIR/.m2/repository
     - $CI_PROJECT_DIR/.gradle
