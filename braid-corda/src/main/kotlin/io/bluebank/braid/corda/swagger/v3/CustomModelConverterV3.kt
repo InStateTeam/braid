@@ -81,7 +81,7 @@ class CustomModelConverterV3 : ModelConverter {
         }
       }
     } catch (e: Throwable) {
-      log.error("failed to parse or resolve type: $type")
+      log.error("failed to parse or resolve type: ${type.type}")
       throw e
     }
   }

@@ -21,6 +21,7 @@ import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.github.classgraph.ClassGraph
 import net.corda.core.contracts.ContractState
 import net.corda.finance.contracts.asset.Cash
+import net.corda.node.internal.AbstractNode
 import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.*
 import org.junit.Test
@@ -46,6 +47,12 @@ class CordaClassesTest {
   @Test
   fun `should have cash state`() {
     assertThat(classes, hasItem(Cash.State::class.java))
+  }
+
+
+  @Test
+  fun `should not have ServiceHubInternalImpl`() {
+    assertThat(classes, not(hasItem(AbstractNode.ServiceHubInternalImpl::class.java)))
   }
 
   @Test

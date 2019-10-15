@@ -19,6 +19,10 @@ import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
+import org.hamcrest.CoreMatchers.hasItem
+import org.hamcrest.CoreMatchers.not
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertFalse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -29,20 +33,33 @@ class BraidDocsMainTest {
       "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
       "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
     )
-  }
-
-  @Test
-  fun `that we can generate swagger json`() {
     val swagger = tryWithClassLoader(jars.toJarsClassLoader()) {
       BraidDocsMain().swaggerText(3)
     }
     val openApi = Json.mapper().readValue(swagger, OpenAPI::class.java)
+  }
+
+  @Test
+  fun `that we can generate swagger json`() {
     assertEquals(1, openApi.servers.size)
     assertEquals("http://localhost:8080/api/rest", openApi.servers[0].url)
     assertTrue(openApi.paths.containsKey("/network/nodes"))
     assertTrue(openApi.paths.containsKey("/cordapps"))
     assertTrue(openApi.paths.containsKey("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashPaymentFlow"))
+  }
+
+  @Test
+  fun `that we can generate Error`() {
     assertTrue(openApi.components.schemas.containsKey("Error"))
+  }
+
+  @Test
+  fun `that we can generate Contract json`() {
     assertTrue(openApi.components.schemas.containsKey("net.corda.finance.contracts.Commodity"))
   }
+
+//  @Test
+//  fun `that we dont have ByteSequence`() {
+//    assertThat(openApi.components.schemas.keys,not(hasItem("net.corda.core.utilities.ByteSequence")))
+//  }
 }

@@ -21,7 +21,11 @@ import net.corda.core.CordaInternal
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.serialization.SerializeAsToken
+import net.corda.core.serialization.SingletonSerializeAsToken
+import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.ProgressTracker
+import net.corda.node.internal.AbstractNode
 import rx.Observable
 
 class CordaClasses {
@@ -50,7 +54,9 @@ class CordaClasses {
             "net.corda.client.rpc.internal",
             "net.corda.core.cordapp",
             "net.corda.core.messaging",
-            "net.corda.node.services.statemachine"
+            "net.corda.node.services.statemachine",
+            "net.corda.node.migration",
+            "net.corda.node.internal"
         )
         .blacklistClasses(ProgressTracker::class.java.name)
         .blacklistClasses(ProgressTracker.Change::class.java.name)
@@ -61,10 +67,12 @@ class CordaClasses {
         .blacklistClasses(ProgressTracker.UNSTARTED::class.java.name)
         .blacklistClasses(ProgressTracker.Step::class.java.name)
         .blacklistClasses(Observable::class.java.name)
+        .blacklistClasses(ByteSequence::class.java.name)
         .scan()
 
      return res.allClasses.asSequence()
         .filter {  isCordaSerializedClass(it)   }
+        .filter {  !isSingletonSerializeAsToken(it)   }
         .map { it.loadClass() }
         .toList()
   }
@@ -81,6 +89,9 @@ class CordaClasses {
         !isCompanionClass(it.name) &&
         !isKotlinFileClass(it.name)
   }
+
+  private fun isSingletonSerializeAsToken(type: ClassInfo):Boolean =
+    type.implementsInterface(SerializeAsToken::class.java.name)
 
   private fun isCordaSerializable(type: ClassInfo):Boolean =
       type.hasAnnotation(CordaSerializable::class.java.name)

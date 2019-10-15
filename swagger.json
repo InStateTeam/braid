@@ -1747,11 +1747,6 @@
         "required" : [ "bytes", "offset", "size" ],
         "type" : "object",
         "properties" : {
-          "_bytes" : {
-            "type" : "string",
-            "format" : "binary",
-            "writeOnly" : true
-          },
           "offset" : {
             "type" : "integer",
             "format" : "int32"
@@ -1860,15 +1855,15 @@
       "net.corda.core.contracts.TimeWindow" : {
         "type" : "object",
         "properties" : {
-          "fromTime" : {
-            "type" : "string",
-            "description" : "JSR310 encoded time representation of Instant"
-          },
           "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
           "midpoint" : {
+            "type" : "string",
+            "description" : "JSR310 encoded time representation of Instant"
+          },
+          "fromTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -1944,12 +1939,6 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "inputs" : {
             "type" : "array",
             "items" : {
@@ -1969,6 +1958,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -2015,12 +2010,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
@@ -2028,6 +2017,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -2055,11 +2050,11 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
           "tx" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.WireTransaction"
+          },
+          "coreTransaction" : {
+            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           },
           "inputs" : {
             "type" : "array",
