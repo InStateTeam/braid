@@ -50,11 +50,6 @@ class BraidDocsMainTest {
   }
 
   @Test
-  fun `that we can generate Error`() {
-    assertTrue(openApi.components.schemas.containsKey("Error"))
-  }
-
-  @Test
   fun `that we can generate InvocationError`() {
     assertTrue(openApi.components.schemas.containsKey("InvocationError"))
   }
