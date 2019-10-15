@@ -53,6 +53,9 @@ constructor(@JsonProperty("txBits")
 //  @get:JsonIgnore
 //  val coreTransaction: CoreTransaction
 //
+  //@JsonProperty("cachedTransaction")
+  abstract val cachedTransaction: CoreTransaction
+//
 //  @get:JsonIgnore
 //  val inputs: List<*>
 //
@@ -62,7 +65,7 @@ constructor(@JsonProperty("txBits")
 //  @get:JsonIgnore
 //  val networkParametersHash: SecureHash?
 //
-//  @get:JsonIgnore
-//  val requiredSigningKeys: Set<*>?
+  @get:JsonIgnore
+  abstract val requiredSigningKeys: Set<*>?
 
 }

@@ -17,22 +17,17 @@ package io.bluebank.braid.corda.serialisation
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.services.vault.VaultQuery
-import io.github.classgraph.ClassGraph
 import io.vertx.core.json.Json
-import net.corda.core.CordaInternal
 import net.corda.core.contracts.*
 import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.SignatureMetadata
 import net.corda.core.crypto.TransactionSignature
-import net.corda.core.flows.FlowInitiator
-import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.Party
 import net.corda.core.internal.lazyMapped
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.*
 import net.corda.core.node.services.vault.Builder.equal
 import net.corda.core.node.services.vault.Builder.greaterThanOrEqual
-import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.SerializedBytes
 import net.corda.core.serialization.serialize
 import net.corda.core.transactions.ComponentGroup
@@ -40,25 +35,21 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
-import net.corda.core.utilities.ProgressTracker
 import net.corda.finance.GBP
 import net.corda.finance.`issued by`
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.test.SampleCashSchemaV1
 import net.corda.testing.core.DUMMY_BANK_A_NAME
 import net.corda.testing.core.DUMMY_NOTARY_NAME
-import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
-import org.hamcrest.CoreMatchers
+import net.corda.testing.internal.withTestSerializationEnvIfNotSet
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.*
-import org.objectweb.asm.ClassReader
-import rx.Observable
+import org.junit.BeforeClass
+import org.junit.Test
 import sun.security.provider.X509Factory
 import java.io.ByteArrayInputStream
-import java.io.IOException
 import java.security.PublicKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -78,14 +69,6 @@ class SerialisationTests {
     }
   }
 
-  @Rule
-  @JvmField
-  val testSerialization = SerializationEnvironmentRule()
-
-  @Before
-  fun before() {
-    BraidCordaJacksonSwaggerInit.init()
-  }
 
   //  @Ignore
   @Test     // fails because we cant tell if this is a String or a Currency
@@ -107,7 +90,7 @@ class SerialisationTests {
   @Test
   fun `that Amount of Issued Currency can be serialised and deserialised`() {
     val expected =
-      Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
+        Amount(100, Issued(PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01)), GBP))
     val encoded = Json.encode(expected)
     val actual = Json.decodeValue(encoded, Amount::class.java)
     assertEquals(expected, actual)
@@ -127,15 +110,15 @@ class SerialisationTests {
 
   @Test
   fun `that X509 Should serialize as bytes`() {
-    val base64 = this::class.java.getResource("/serlialization/certificate/x509.pem")
-      .readText()
-      .replace(X509Factory.BEGIN_CERT, "")
-      .replace(X509Factory.END_CERT, "")
-      .replace("\n", "")
-      .replace("\r", "")
+    val base64 = this::class.java.getResource("/serialization/certificate/x509.pem")
+        .readText()
+        .replace(X509Factory.BEGIN_CERT, "")
+        .replace(X509Factory.END_CERT, "")
+        .replace("\n", "")
+        .replace("\r", "")
 
     val certificate = CertificateFactory.getInstance("X.509")
-      .generateCertificate(ByteArrayInputStream(Base64.getDecoder().decode(base64)))
+        .generateCertificate(ByteArrayInputStream(Base64.getDecoder().decode(base64)))
 
     val encoded = Json.encode(certificate)
     val decoded = Json.decodeValue(encoded, X509Certificate::class.java)
@@ -164,8 +147,8 @@ class SerialisationTests {
   fun `should serialize Transaction state of Cash Contract State`() {
     val partyRef = PartyAndReference(DUMMY_BANK_A, OpaqueBytes.of(0x01))
     val state = Cash.State(partyRef,
-      Amount(100, GBP),
-      partyRef.party)
+        Amount(100, GBP),
+        partyRef.party)
 
     val txnState = TransactionState(state, state.javaClass.name, DUMMY_BANK_A)
 
@@ -243,7 +226,7 @@ class SerialisationTests {
   @Test
   fun `should serialize SampleCashSchemaV1$PersistentCashState`() {
     val expression = CriteriaExpression.ColumnPredicateExpression(Column(SampleCashSchemaV1.PersistentCashState::currency),
-      ColumnPredicate.NullExpression(NullOperator.NOT_NULL))
+        ColumnPredicate.NullExpression(NullOperator.NOT_NULL))
 
     val json = Json.encodePrettily(expression)
     Json.decodeValue(json, CriteriaExpression.ColumnPredicateExpression::class.java)
@@ -285,7 +268,7 @@ class SerialisationTests {
   fun `can serialize deserialize OpaqueBytes`() {
     val msg = OpaqueBytes("This is a test message".toByteArray())
 
-    val json=  Json.encode(msg)
+    val json = Json.encode(msg)
     val deserialized = Json.decodeValue(json, OpaqueBytes::class.java)
 
     assertEquals(json, "{\"bytes\":\"VGhpcyBpcyBhIHRlc3QgbWVzc2FnZQ==\"}")
@@ -310,14 +293,30 @@ class SerialisationTests {
     assertEquals(txSig, txSig2)
   }
 
- @Test
+  @Test
   fun `SerializedBytes serialisation`() {
-    val txSig = Command(Cash.Commands.Issue(), listOf(DUMMY_BANK_A.owningKey)).serialize()
-    val encoded = Json.encode(txSig)
-    val txSig2 = Json.decodeValue(encoded, SerializedBytes::class.java)
-    assertEquals(txSig, txSig2)
+    withTestSerializationEnvIfNotSet {
+      val txSig = Command(Cash.Commands.Issue(), listOf(DUMMY_BANK_A.owningKey)).serialize()
+      val encoded = Json.encode(txSig)
+
+      val txSig2 = Json.decodeValue(encoded, SerializedBytes::class.java)
+      assertEquals(txSig, txSig2)
+    }
   }
 
+
+  @Test
+  fun `SignedTransaction serialisation from CashFlowIssue`() {
+    val json = this::class.java.getResource("/serialization/signedTransaction/signedTransaction.json").readText()
+
+    // only works with this set or
+    //  @Rule @JvmField
+    //  val testSerialization = SerializationEnvironmentRule()
+
+    withTestSerializationEnvIfNotSet {
+      val txn = Json.decodeValue(json, SignedTransaction::class.java)
+    }
+  }
 
 
   @Test
@@ -334,20 +333,23 @@ class SerialisationTests {
     val commandGroup = ComponentGroup(ComponentGroupEnum.COMMANDS_GROUP.ordinal, listOf(command).map { it.value }.lazyMapped(serialize))
     val signersGroup = ComponentGroup(ComponentGroupEnum.SIGNERS_GROUP.ordinal, listOf(command).map { it.signers }.lazyMapped(serialize))
 
-    val wtx = WireTransaction(listOf(notaryGroup, outputsGroup, commandGroup, signersGroup), PrivacySalt())
-    val stx = SignedTransaction(wtx, listOf(createTransactionSignature()))
-    val encoded = Json.encode(stx)
-    println(encoded)
-    val decoded = Json.decodeValue(encoded, SignedTransaction::class.java)
-    assertEquals(decoded, stx)
+    withTestSerializationEnvIfNotSet {
+      val wtx = WireTransaction(listOf(notaryGroup, outputsGroup, commandGroup, signersGroup), PrivacySalt())
+      val stx = SignedTransaction(wtx, listOf(createTransactionSignature()))
+      val encoded = Json.encode(stx)
+      println(encoded)
+
+      val decoded = Json.decodeValue(encoded, SignedTransaction::class.java)
+      assertEquals(decoded, stx)
+    }
   }
 
 
   private fun createTransactionSignature(): TransactionSignature {
     val txSig = TransactionSignature(
-      "message".toByteArray(),
-      generatePublicKey(),
-      SignatureMetadata(4, 1)
+        "message".toByteArray(),
+        generatePublicKey(),
+        SignatureMetadata(4, 1)
     )
     return txSig
   }

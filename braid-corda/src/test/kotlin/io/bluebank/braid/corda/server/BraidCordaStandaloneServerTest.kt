@@ -64,6 +64,8 @@ import net.corda.finance.test.SampleCashSchemaV1
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.schemas.CashSchemaV1
 import net.corda.nodeapi.internal.coreContractClasses
+import net.corda.testing.core.SerializationEnvironmentRule
+import net.corda.testing.internal.withTestSerializationEnvIfNotSet
 import org.junit.*
 
 
@@ -78,6 +80,10 @@ import org.junit.*
 class BraidCordaStandaloneServerTest {
 
   companion object {
+
+    init {
+      BraidCordaJacksonSwaggerInit.init()
+    }
     private val log = loggerFor<BraidCordaStandaloneServerTest>()
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
@@ -92,8 +98,7 @@ class BraidCordaStandaloneServerTest {
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-      BraidCordaJacksonSwaggerInit.init()
-      val async = testContext.async()
+       val async = testContext.async()
 
       if ("true".equals(System.getProperty("braidStarted"))) {
         async.complete()
@@ -423,10 +428,11 @@ class BraidCordaStandaloneServerTest {
             val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
             log.info(signedTransactionJson)
 
-            // todo round trip SignedTransaction
+            //  todo round trip SignedTransaction
             // Failed to decode: Expected exactly 1 of {nodeSerializationEnv, driverSerializationEnv, contextSerializationEnv, inheritableContextSerializationEnv}
-            //val signedTransaction = Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
-
+            withTestSerializationEnvIfNotSet {
+              Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
+            }
             async.complete()
           }
         }
