@@ -28,7 +28,7 @@
 variables:
   MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
-
+  DOCKER_IMAGE_NAME: cordite/braid
 before_script:
   - npm set registry $NPM_REPO
   - npm set $NPM_CREDENTIALS
@@ -46,11 +46,11 @@ stages:
   - release
 
 # Use runner's local cache
-#cache:
-#  paths:
-#    - $CI_PROJECT_DIR/.m2/repository
-#    - .gradle/wrapper
-#    - .gradle/caches
+cache:
+  key: $CI_PROJECT_ID
+  paths:
+    - $CI_PROJECT_DIR/.m2/repository
+    - $CI_PROJECT_DIR/.gradle
 
 build:
   stage: build
@@ -83,6 +83,15 @@ deploy:
   image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS deploy -DskipTests
+    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:edge
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:edge
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker push ${CI_REGISTRY_IMAGE}
+    - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
+    - docker push ${DOCKER_IMAGE_NAME}
   only:
     - master
   tags:
@@ -96,7 +105,17 @@ release:
   when: manual
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
+    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P npm-release
+    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker push ${CI_REGISTRY_IMAGE}
+    - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
+    - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
+    - docker push ${DOCKER_IMAGE_NAME}:latest
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
   tags:

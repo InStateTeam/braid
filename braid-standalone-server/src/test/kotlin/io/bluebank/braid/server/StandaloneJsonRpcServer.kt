@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation.mixin
+package io.bluebank.braid.server
 
-import net.corda.core.crypto.SecureHash
+import io.vertx.core.http.HttpServerOptions
 
+class MyService {
+  fun echo(msg: String) = msg
+}
 
-abstract class SerializedBytesMixin : OpaqueBytesMixin() {
-  @get:com.fasterxml.jackson.annotation.JsonIgnore
-  abstract val hash: SecureHash
-
+fun main(args: Array<String>) {
+  JsonRPCServerBuilder.createServerBuilder()
+    .withHttpServerOptions(HttpServerOptions().setSsl(false))
+    .withPort(8090)
+    .withService(MyService())
+    .build()
+    .start()
 }

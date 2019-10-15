@@ -128,10 +128,11 @@
     <snapshotRepository>
       <id>gitlab-maven</id>
       <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+      <layout>default</layout>
     </snapshotRepository>
     <repository>
-      <id>oss</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>gitlab-maven</id>
+      <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
       <layout>default</layout>
     </repository>
   </distributionManagement>

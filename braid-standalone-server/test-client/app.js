@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2018 Royal Bank of Scotland
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.serialisation.mixin
+const {Proxy} = require('braid-client');
 
-import net.corda.core.crypto.SecureHash
+const proxy = new Proxy({url: "http://localhost:8090/api/" }, onOpen, onClose, onError, {strictSSL: false});
 
+async function onOpen() {
+  console.log('opened')
+  const result = await proxy.myservice.echo('message: hello!');
+  console.log(result);
+}
 
-abstract class SerializedBytesMixin : OpaqueBytesMixin() {
-  @get:com.fasterxml.jackson.annotation.JsonIgnore
-  abstract val hash: SecureHash
+function onClose() {
+  console.log('connection closed');
+}
 
+function onError(err) {
+  console.log('error');
+  console.error(err);
 }

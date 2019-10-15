@@ -14,6 +14,7 @@
       "get" : {
         "tags" : [ "network" ],
         "description" : "",
+        "operationId" : "network_nodes",
         "parameters" : [ {
           "name" : "host-and-port",
           "in" : "query",
@@ -46,7 +47,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -56,7 +57,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -68,6 +69,7 @@
       "get" : {
         "tags" : [ "network" ],
         "description" : "",
+        "operationId" : "network_nodes_self",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -85,7 +87,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -95,7 +97,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -107,6 +109,7 @@
       "get" : {
         "tags" : [ "network" ],
         "description" : "",
+        "operationId" : "network_notaries",
         "parameters" : [ {
           "name" : "x500-name",
           "in" : "query",
@@ -133,7 +136,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -143,7 +146,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -155,6 +158,7 @@
       "get" : {
         "tags" : [ "vault" ],
         "description" : "",
+        "operationId" : "vault_vaultQuery",
         "parameters" : [ {
           "name" : "contract-state-type",
           "in" : "query",
@@ -180,7 +184,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -190,7 +194,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -202,6 +206,7 @@
       "post" : {
         "tags" : [ "vault" ],
         "description" : "",
+        "operationId" : "vault_vaultQueryBy",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "vault",
@@ -230,7 +235,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -240,7 +245,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -252,6 +257,7 @@
       "get" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -272,7 +278,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -282,7 +288,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -294,6 +300,7 @@
       "get" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_:cordapp_flows",
         "parameters" : [ {
           "name" : "cordapp",
           "in" : "path",
@@ -321,7 +328,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -331,7 +338,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -343,6 +350,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_core_flows_net.corda.core.flows.ContractUpgradeFlow$Authorise",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -364,7 +372,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -374,7 +382,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -386,6 +394,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_core_flows_net.corda.core.flows.ContractUpgradeFlow$Deauthorise",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -407,7 +416,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -417,7 +426,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -429,6 +438,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashExitFlow",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -457,7 +467,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -467,7 +477,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -479,6 +489,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashIssueAndPaymentFlow",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -507,7 +518,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -517,7 +528,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -529,6 +540,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashIssueFlow",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -557,7 +569,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -567,7 +579,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -579,6 +591,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashPaymentFlow",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -607,7 +620,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -617,7 +630,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -629,6 +642,7 @@
       "post" : {
         "tags" : [ "cordapps" ],
         "description" : "",
+        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.internal.CashConfigDataFlow",
         "parameters" : [ ],
         "requestBody" : {
           "description" : "payload",
@@ -657,7 +671,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -667,7 +681,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Error"
+                  "$ref" : "#/components/schemas/InvocationError"
                 }
               }
             }
@@ -678,7 +692,7 @@
   },
   "components" : {
     "schemas" : {
-      "Error" : {
+      "InvocationError" : {
         "required" : [ "message", "type" ],
         "type" : "object",
         "properties" : {
@@ -1855,15 +1869,15 @@
       "net.corda.core.contracts.TimeWindow" : {
         "type" : "object",
         "properties" : {
+          "untilTime" : {
+            "type" : "string",
+            "description" : "JSR310 encoded time representation of Instant"
+          },
           "midpoint" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
           "fromTime" : {
-            "type" : "string",
-            "description" : "JSR310 encoded time representation of Instant"
-          },
-          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -1939,6 +1953,18 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
+          "outputs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
+            }
+          },
           "inputs" : {
             "type" : "array",
             "items" : {
@@ -1953,18 +1979,6 @@
           },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
-          },
-          "outputs" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
-            }
-          },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
           },
           "id" : {
             "type" : "string",
@@ -2010,8 +2024,11 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "notary" : {
-            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          "outputStates" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
           },
           "outputs" : {
             "type" : "array",
@@ -2019,11 +2036,8 @@
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
             }
           },
-          "outputStates" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
+          "notary" : {
+            "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           },
           "id" : {
             "type" : "string",
@@ -2211,15 +2225,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "requiredSigningKeys" : {
-            "uniqueItems" : true,
-            "type" : "array",
-            "items" : {
-              "type" : "string",
-              "description" : "Base 58 Encoded Public Key",
-              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
           "groupHashes$core" : {
             "type" : "array",
             "items" : {
@@ -2256,6 +2261,15 @@
                 "description" : "Base 58 Encoded Secure Hash",
                 "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
               }
+            }
+          },
+          "requiredSigningKeys" : {
+            "uniqueItems" : true,
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "description" : "Base 58 Encoded Public Key",
+              "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
             }
           }
         }
@@ -2699,11 +2713,11 @@
           "requestSignature" : {
             "$ref" : "#/components/schemas/net.corda.core.flows.NotarisationRequestSignature"
           },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
           "signedTransaction" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.SignedTransaction"
+          },
+          "coreTransaction" : {
+            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           }
         }
       },
@@ -2788,7 +2802,7 @@
         "type" : "object",
         "properties" : {
           "cause" : {
-            "$ref" : "#/components/schemas/Error"
+            "$ref" : "#/components/schemas/InvocationError"
           }
         }
       },
@@ -2796,7 +2810,7 @@
         "type" : "object",
         "properties" : {
           "cause" : {
-            "$ref" : "#/components/schemas/Error"
+            "$ref" : "#/components/schemas/InvocationError"
           }
         }
       },
@@ -2817,7 +2831,7 @@
         "type" : "object",
         "properties" : {
           "cause" : {
-            "$ref" : "#/components/schemas/Error"
+            "$ref" : "#/components/schemas/InvocationError"
           }
         }
       },

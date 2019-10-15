@@ -223,7 +223,7 @@ class CustomModelConvertersV2Test {
     assertEquals(
       encoded, "{\"quantity\":100," +
         "\"displayTokenSize\":0.01," +
-        "\"token\":{\"issuer\":{\"party\":{\"name\":\"O=Bank A, L=London, C=GB\",\"owningKey\":\"GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE\"},\"reference\":{\"bytes\":\"AQ==\"}},\"product\":\"GBP\"}," +
+      "\"token\":{\"issuer\":{\"party\":{\"name\":\"O=Bank A, L=London, C=GB\",\"owningKey\":\"GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE\"},\"reference\":{\"bytes\":\"AQ==\"}},\"product\":\"GBP\"}," +
         "\"_tokenType\":\"net.corda.core.contracts.Issued\"}"
     )
   }

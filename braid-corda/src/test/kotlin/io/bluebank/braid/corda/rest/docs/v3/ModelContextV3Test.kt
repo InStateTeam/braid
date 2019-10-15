@@ -82,8 +82,8 @@ class ModelContextV3Test {
     modelContext.addType(TransactionVerificationException.InvalidAttachmentException::class.java)
 
     assertFalse(modelContext.models.containsKey(TransactionVerificationException.InvalidAttachmentException::class.java.swaggerTypeName()))
-    assertTrue(modelContext.models.containsKey("Error"))
-    val exception = modelContext.models["Error"]
+    assertTrue(modelContext.models.containsKey("InvocationError"))
+    val exception = modelContext.models["InvocationError"]
     assertThat(exception, notNullValue())
     assertThat(exception?.properties?.get("cause"), nullValue())
   }
@@ -93,7 +93,7 @@ class ModelContextV3Test {
     val modelContext = ModelContextV3()
     modelContext.addType(TransactionVerificationException.PackageOwnershipException::class.java)
 
-    val exception = modelContext.models["Error"]
+    val exception = modelContext.models["InvocationError"]
     assertThat(exception, notNullValue())
     assertThat(exception?.properties?.get("cause"), nullValue())
   }
@@ -114,7 +114,7 @@ class ModelContextV3Test {
     val modelContext = ModelContextV3()
     val r2 = modelContext.addType(BraidSwaggerError::class.java)
     assertTrue(
-      modelContext.models.containsKey("Error"),
+      modelContext.models.containsKey("InvocationError"),
       "that the name of the error type is Error without the package name"
     )
   }

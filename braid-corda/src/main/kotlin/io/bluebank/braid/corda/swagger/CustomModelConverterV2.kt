@@ -28,7 +28,6 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.loggerFor
 import java.lang.reflect.Type
 import java.security.PublicKey
@@ -86,12 +85,12 @@ class CustomModelConverterV2 : ModelConverter {
     context: ModelConverterContext
   ): Property? {
     context.defineModel(
-      "Error", ModelImpl()
+      "InvocationError", ModelImpl()
         .type("object")
         .property("message", StringProperty().description("the error message"))
         .property("type", StringProperty().description("the class of error being returned"))
     )
-    return RefProperty("Error")
+    return RefProperty("InvocationError")
   }
 
   private fun processIssuedType(
