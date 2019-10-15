@@ -32,7 +32,7 @@ variables:
 before_script:
   - npm set registry $NPM_REPO
   - npm set $NPM_CREDENTIALS
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+  #  - export GRADLE_USER_HOME=`pwd`/.gradle
   - mkdir -p ~/.m2/repository
   - cp maven/settings.xml ~/.m2/settings.xml
   - rm -rf ~/.gnupg
@@ -50,7 +50,7 @@ cache:
   key: $CI_PROJECT_ID
   paths:
     - $CI_PROJECT_DIR/.m2/
-    - $CI_PROJECT_DIR/.gradle
+#    - $CI_PROJECT_DIR/.gradle
 
 build:
   stage: build

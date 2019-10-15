@@ -18,16 +18,9 @@ package io.bluebank.braid.corda.server
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.rpc.RPCFactory
-import io.github.classgraph.ClassGraph
 import io.vertx.core.Vertx
 import io.vertx.ext.web.impl.RouterImpl
-import net.corda.core.CordaInternal
-import net.corda.core.flows.FlowInitiator
-import net.corda.core.flows.FlowLogic
-import net.corda.core.serialization.CordaSerializable
-import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.contextLogger
-import rx.Observable
 import java.util.concurrent.CountDownLatch
 
 class BraidDocsMain() {
@@ -49,7 +42,7 @@ class BraidDocsMain() {
         .withOpenApiVersion(openApiVersion)
     return try {
       val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-      val classes = CordaClasses().readCordaClasses()
+      val classes = CordaClasses().contractStateClasses.map { it.java }
       classes.forEach { restMounter.docsHandler.addType(it) }
       restMounter.docsHandler.getSwaggerString()
     } finally {

@@ -15,20 +15,14 @@
  */
 package io.bluebank.braid.corda.server
 
-import io.bluebank.braid.corda.server.CordaClassesTest.Companion.classes
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.github.classgraph.ClassGraph
-import net.corda.core.contracts.ContractState
 import net.corda.finance.contracts.asset.Cash
 import net.corda.node.internal.AbstractNode
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.*
+import org.junit.Assert.assertThat
 import org.junit.Test
-
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.BeforeClass
 
 class CordaClassesTest {
   companion object {
@@ -39,7 +33,7 @@ class CordaClassesTest {
 
     val classes =
       tryWithClassLoader(jars.toJarsClassLoader()){
-        CordaClasses().readCordaClasses()
+        CordaClasses().contractStateClasses.map { it.java }
       }
     }
 
@@ -63,7 +57,7 @@ class CordaClassesTest {
         .scan()
         .allClasses[0]
     assertThat(classInfo.loadClass().name, `is`(Cash.State::class.java.name)     )
-    assertThat(CordaClasses().isCordaSerializedClass(classInfo), equalTo(true))
+    assertThat(CordaClasses.isCordaSerializedClass(classInfo), equalTo(true))
   }
 
 

@@ -18,74 +18,97 @@ package io.bluebank.braid.corda.server
 import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import net.corda.core.CordaInternal
+import net.corda.core.contracts.ContractState
+import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.StartableByRPC
+import net.corda.core.internal.toMultiMap
 import net.corda.core.serialization.CordaSerializable
-import net.corda.core.serialization.SerializeAsToken
-import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.ProgressTracker
-import rx.Observable
 
-class CordaClasses {
-  companion object{
+/**
+ * Retrieves a set of jar module names that are cordapps
+ */
+class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread().contextClassLoader) {
+  fun cordapps(): List<String> {
+    return lazyCordapps
+  }
+
+  fun flowsForCordapp(cordapp: String): List<String>? {
+    return flowsByCordapp[cordapp]?.map { it.name } ?: emptyList()
+  }
+
+  val flowClassesByCordapp by lazy {
+    flows.map { it.classpathElementFile.nameWithoutExtension.removeVersion() to classLoader.loadClass(it.name).kotlin }
+      .sortedBy { it.first }
+  }
+
+  val contractStateClasses by lazy {
+    contractStates.map { classLoader.loadClass(it.name).kotlin }
+  }
+
+
+  private val classGraph by lazy {
+    ClassGraph()
+      .addClassLoader(classLoader)
+      .enableClassInfo()
+      .enableAnnotationInfo()
+      .addClassLoader(Thread.currentThread().contextClassLoader)
+      .blacklistClasses(ContractUpgradeFlow.Initiate::class.java.name)
+      .blacklistPackages(
+        "net.corda.internal",
+        "net.corda.client",
+        "net.corda.core.internal",
+        "net.corda.nodeapi.internal",
+        "net.corda.serialization.internal",
+        "net.corda.testing",
+        "net.corda.common.configuration.parsing.internal",
+        "net.corda.finance.internal",
+        "net.corda.common.validation.internal",
+        "net.corda.client.rpc.internal",
+        "net.corda.core.cordapp",
+        "net.corda.core.messaging",
+        "net.corda.node.services.statemachine",
+        "net.corda.node.migration",
+        "net.corda.node.internal",
+        "net.corda.core.flows"
+      )
+      .scan()
+  }
+
+  private val contractStates by lazy {
+    classGraph.getClassesImplementing(ContractState::class.java.name)
+  }
+
+  private val flows by lazy {
+    classGraph.getClassesWithAnnotation(StartableByRPC::class.qualifiedName)
+  }
+
+  private val lazyCordapps by lazy {
+    (contractStates + flows).map { it.classpathElementFile.nameWithoutExtension.removeVersion() }.distinct().sorted()
+  }
+
+  private val flowsByCordapp by lazy {
+    flows.map { it.classpathElementFile.nameWithoutExtension.removeVersion() to it }.toMultiMap()
+  }
+
+
+  companion object {
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
     val isKotlinFileClass = Regex(".*Kt$")::matches
-  }
 
-  fun readCordaClasses(): List<Class<out Any>> {
-    val res = ClassGraph()
-        .enableClassInfo()
-        .enableAnnotationInfo()
-        .addClassLoader(ClassLoader.getSystemClassLoader())
-        .whitelistPackages("net.corda")
-        .blacklistPackages(
-            "net.corda.internal",
-            "net.corda.client",
-            "net.corda.core.internal",
-            "net.corda.nodeapi.internal",
-            "net.corda.serialization.internal",
-            "net.corda.testing",
-            "net.corda.common.configuration.parsing.internal",
-            "net.corda.finance.internal",
-            "net.corda.common.validation.internal",
-            "net.corda.client.rpc.internal",
-            "net.corda.core.cordapp",
-            "net.corda.core.messaging",
-            "net.corda.node.services.statemachine",
-            "net.corda.node.migration",
-            "net.corda.node.internal"
-        )
-        // todo may be these are needed but grags in Progress Tracker and are companions of FlowLogic
-//        .blacklistClasses(AbstractStateReplacementFlow.Acceptor.Companion.APPROVING::class.java.name)
-//        .blacklistClasses(AbstractStateReplacementFlow.Acceptor.Companion.VERIFYING::class.java.name)
-//        .blacklistClasses(AbstractStateReplacementFlow.Instigator.Companion.NOTARY::class.java.name)
-//        .blacklistClasses(AbstractStateReplacementFlow.Instigator.Companion.SIGNING::class.java.name)
-//        .blacklistClasses(CollectSignaturesFlow.Companion.VERIFYING::class.java.name)
-//        .blacklistClasses(FinalityFlow.Companion.BROADCASTING::class.java.name)
-//        .blacklistClasses(FinalityFlow.Companion.NOTARISING::class.java.name)
+    private fun isCordaSerializable(type: ClassInfo): Boolean =
+      type.hasAnnotation(CordaSerializable::class.java.name)
+        || (type.superclass != null && isCordaSerializable(type.superclass))
+        || type.interfaces.stream()
+        .filter { isCordaSerializable(it) }
+        .findFirst()
+        .isPresent
 
-        .blacklistClasses(ProgressTracker::class.java.name)
-        .blacklistClasses(ProgressTracker.Change::class.java.name)
-        .blacklistClasses(ProgressTracker.Change.Position::class.java.name)
-        .blacklistClasses(ProgressTracker.Change.Rendering::class.java.name)
-        .blacklistClasses(ProgressTracker.Change.Structural::class.java.name)
-        .blacklistClasses(ProgressTracker.STARTING::class.java.name)
-        .blacklistClasses(ProgressTracker.UNSTARTED::class.java.name)
-     //   .blacklistClasses(ProgressTracker.Step::class.java.name)       // dont include here as it is needed to xclude subclasses
-        .blacklistClasses(Observable::class.java.name)
-        .blacklistClasses(ByteSequence::class.java.name)
-        .scan()
-
-     return res.allClasses.asSequence()
-        .filter {  isCordaSerializedClass(it)   }
-        .filter {  !isSingletonSerializeAsToken(it)   }
-        .map { it.loadClass() }
-        .toList()
-  }
-
-  internal fun isCordaSerializedClass(it: ClassInfo): Boolean {
-    return isCordaSerializable(it) &&
+    internal fun isCordaSerializedClass(it: ClassInfo): Boolean =
+      isCordaSerializable(it) &&
         !it.hasAnnotation(CordaInternal::class.java.name) &&
         !it.isInterface &&
         !it.isAbstract &&
@@ -96,19 +119,7 @@ class CordaClasses {
         !isFunctionName(it.name) &&
         !isCompanionClass(it.name) &&
         !isKotlinFileClass(it.name) &&
-        !it.name.equals(ProgressTracker.Step::class.java.name)
-
+        it.name != ProgressTracker.Step::class.java.name
   }
-
-  private fun isSingletonSerializeAsToken(type: ClassInfo):Boolean =
-    type.implementsInterface(SerializeAsToken::class.java.name)
-
-  private fun isCordaSerializable(type: ClassInfo):Boolean =
-      type.hasAnnotation(CordaSerializable::class.java.name)
-          || (type.superclass != null && isCordaSerializable(type.superclass))
-          || type.interfaces.stream()
-              .filter{isCordaSerializable(it)}
-              .findFirst()
-              .isPresent()
-        
 }
+

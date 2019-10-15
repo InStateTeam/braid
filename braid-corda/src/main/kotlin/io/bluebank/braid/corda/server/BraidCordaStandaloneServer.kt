@@ -63,7 +63,7 @@ open class BraidCordaStandaloneServer(
 
   fun createRestConfig(rpc: RPCFactory, openApiVersion: Int = 2): RestConfig {
     val classLoader = Thread.currentThread().contextClassLoader
-    val cordappsScanner = CordappScanner(classLoader)
+    val cordappsScanner = CordaClasses(classLoader)
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
     val flowInitiator = FlowInitiator(cordaServicesAdapter)
@@ -71,7 +71,7 @@ open class BraidCordaStandaloneServer(
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
       .withPaths {
-        cordappsScanner.contractStates().forEach {
+        cordappsScanner.contractStateClasses.forEach {
           this.docsHandler.addType(it.java)
         }
         group("network") {
@@ -88,7 +88,7 @@ open class BraidCordaStandaloneServer(
           get("/cordapps", cordappsScanner::cordapps)
           get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)
           try {
-            cordappsScanner.cordappAndFlowList().forEach { (cordapp, flowClass) ->
+            cordappsScanner.flowClassesByCordapp.forEach { (cordapp, flowClass) ->
               try {
                 val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
                 log.info("registering: $path")
