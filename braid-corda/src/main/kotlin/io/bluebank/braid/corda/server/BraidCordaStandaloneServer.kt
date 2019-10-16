@@ -21,7 +21,7 @@ import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
-import io.bluebank.braid.corda.services.SimpleNetworkMapService
+import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.services.vault.VaultService
 import io.bluebank.braid.core.logging.loggerFor
@@ -67,7 +67,7 @@ open class BraidCordaStandaloneServer(
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
     val flowInitiator = FlowInitiator(cordaServicesAdapter)
-    val networkService = SimpleNetworkMapService(cordaServicesAdapter)
+    val networkService = SimpleNetworkMapServiceImpl(cordaServicesAdapter)
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
       .withPaths {
