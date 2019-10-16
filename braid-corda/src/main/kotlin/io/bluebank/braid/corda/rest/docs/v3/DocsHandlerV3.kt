@@ -177,7 +177,11 @@ class DocsHandlerV3(
   }
 
   override fun addType(type: Type) {
-    modelContext.addType(type)
+    try {
+      modelContext.addType(type)
+    } catch (e: Exception) {
+      log.error("Unable to add root type: $type error: ${e.message}")
+    }
   }
 }
 

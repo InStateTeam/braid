@@ -13,3 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.bluebank.braid.corda.serialisation.mixin
+
+
+class ByteSequenceMixin(
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private val _bytes: ByteArray) {
+
+}

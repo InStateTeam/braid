@@ -21,7 +21,7 @@ import net.corda.core.contracts.ContractState
 
 interface TransactionStateMixin<out T : ContractState> {
   //  @get:com.fasterxml.jackson.annotation.JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.EXTERNAL_PROPERTY, property="contract")
-  @get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+  //@get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
   val data: T
   @get:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
   val constraint: AttachmentConstraint

@@ -15,9 +15,11 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.corda.core.identity.AbstractParty
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 interface ContractStateMixin {
-  @get:com.fasterxml.jackson.annotation.JsonIgnore
-  val participants: List<AbstractParty>?
+//  @get:com.fasterxml.jackson.annotation.JsonIgnore
+//  val participants: List<AbstractParty>?
 }

@@ -38,6 +38,7 @@ import net.corda.core.serialization.SerializedBytes
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TraversableTransaction
 import net.corda.core.transactions.WireTransaction
+import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.ProgressTracker
@@ -87,6 +88,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(Throwable::class.java, ThrowableMixin::class.java)
       .setMixInAnnotation(CordaThrowable::class.java, CordaThrowableMixin::class.java)
       .setMixInAnnotation(NonEmptySet::class.java, IgnoreTypeMixin::class.java)
+      .setMixInAnnotation(ByteSequence::class.java, ByteSequenceMixin::class.java)
       .setMixInAnnotation(ProgressTracker::class.java, IgnoreTypeMixin::class.java)
       .setMixInAnnotation(ContractState::class.java, ContractStateMixin::class.java)
       .setMixInAnnotation(QueryCriteria::class.java, QueryCriteriaMixin::class.java)
@@ -95,6 +97,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(ColumnPredicate::class.java, ColumnPredicateMixin::class.java)
       .setMixInAnnotation(PageSpecification::class.java, PageSpecificationMixin::class.java)
       .setMixInAnnotation(TransactionState::class.java, TransactionStateMixin::class.java)
+      .setMixInAnnotation(Issued::class.java, IssuedMixin::class.java)
       .addSerializer(X509Certificate::class.java, X509Serializer())
       .addDeserializer(X509Certificate::class.java, X509Deserializer())
       .addSerializer(CertPath::class.java, CertPathSerializer())
