@@ -26,7 +26,6 @@
 # therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
 
 variables:
-  M2_HOME:
   MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
   DOCKER_IMAGE_NAME: cordite/braid
