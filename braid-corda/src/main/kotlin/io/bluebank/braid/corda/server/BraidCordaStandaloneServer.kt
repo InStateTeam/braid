@@ -71,7 +71,7 @@ open class BraidCordaStandaloneServer(
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
       .withPaths {
-        cordappsScanner.contractStateClasses.forEach {
+        cordappsScanner.cordaSerializableClasses.forEach {
           this.docsHandler.addType(it.java)
         }
         group("network") {

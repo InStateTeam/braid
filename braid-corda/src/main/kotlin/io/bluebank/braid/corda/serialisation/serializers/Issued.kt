@@ -29,7 +29,7 @@ import net.corda.core.contracts.Issued
 import net.corda.core.contracts.PartyAndReference
 import java.util.*
 
-private const val PRODUCT_TYPE_FIELD = "_productType"
+const val PRODUCT_TYPE_FIELD = "_productType"
 private const val ISSUER_FIELD = "issuer"
 private const val PRODUCT_FIELD = "product"
 

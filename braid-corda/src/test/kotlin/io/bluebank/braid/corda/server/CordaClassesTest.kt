@@ -33,7 +33,7 @@ class CordaClassesTest {
 
     val classes =
       tryWithClassLoader(jars.toJarsClassLoader()){
-        CordaClasses().contractStateClasses.map { it.java }
+        CordaClasses().cordaSerializableClasses.map { it.java }
       }
     }
 
@@ -57,8 +57,6 @@ class CordaClassesTest {
         .scan()
         .allClasses[0]
     assertThat(classInfo.loadClass().name, `is`(Cash.State::class.java.name)     )
-    assertThat(CordaClasses.isCordaSerializedClass(classInfo), equalTo(true))
+    assertThat(CordaClasses.isAppropriateForSerialization(classInfo), equalTo(true))
   }
-
-
 }

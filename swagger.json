@@ -720,107 +720,268 @@
           }
         }
       },
-      "Amount": {
+      "net.corda.core.context.Actor": {
         "required": [
-          "displayTokenSize",
-          "quantity",
+          "owningLegalIdentity"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/net.corda.core.context.Actor_Id"
+          },
+          "serviceId": {
+            "$ref": "#/components/schemas/net.corda.core.context.AuthServiceId"
+          },
+          "owningLegalIdentity": {
+            "type": "string",
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
+          }
+        }
+      },
+      "net.corda.core.context.Actor_Id": {
+        "required": [
+          "value"
+        ],
+        "type" : "object",
+        "properties" : {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.core.context.AuthServiceId": {
+        "required": [
+          "value"
+        ],
+        "type" : "object",
+        "properties" : {
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationContext": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/net.corda.core.context.InvocationOrigin"
+          },
+          "trace": {
+            "$ref": "#/components/schemas/net.corda.core.context.Trace"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/net.corda.core.context.Actor"
+          },
+          "externalTrace": {
+            "$ref": "#/components/schemas/net.corda.core.context.Trace"
+          },
+          "impersonatedActor": {
+            "$ref": "#/components/schemas/net.corda.core.context.Actor"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin": {
+        "type": "object"
+      },
+      "net.corda.core.context.Trace": {
+        "type": "object",
+        "properties": {
+          "invocationId": {
+            "$ref": "#/components/schemas/net.corda.core.context.Trace_InvocationId"
+          },
+          "sessionId": {
+            "$ref": "#/components/schemas/net.corda.core.context.Trace_SessionId"
+          }
+        }
+      },
+      "net.corda.core.context.Trace_InvocationId": {
+        "required": [
+          "timestamp",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "entityType": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.core.context.Trace_SessionId": {
+        "required": [
+          "timestamp",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "entityType": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.core.utilities.Id": {
+        "required": [
+          "timestamp",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin_Peer": {
+        "required": [
+          "party"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "type": "string",
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin_RPC": {
+        "type": "object",
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/net.corda.core.context.Actor"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin_Scheduled": {
+        "type": "object",
+        "properties": {
+          "scheduledState": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.ScheduledStateRef"
+          }
+        }
+      },
+      "net.corda.core.contracts.ScheduledStateRef": {
+        "required": [
+          "scheduledAt"
+        ],
+        "type": "object",
+        "properties": {
+          "ref": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.StateRef"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          }
+        }
+      },
+      "net.corda.core.contracts.StateRef": {
+        "required": [
+          "index",
+          "txhash"
+        ],
+        "type": "object",
+        "properties": {
+          "txhash": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin_Service": {
+        "required": [
+          "owningLegalIdentity",
+          "serviceClassName"
+        ],
+        "type": "object",
+        "properties": {
+          "serviceClassName": {
+            "type": "string"
+          },
+          "owningLegalIdentity": {
+            "type": "string",
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
+          }
+        }
+      },
+      "net.corda.core.context.InvocationOrigin_Shell": {
+        "type": "object"
+      },
+      "net.corda.core.contracts.AmountTransfer": {
+        "required": [
+          "destination",
+          "quantityDelta",
+          "source",
           "token"
         ],
         "type": "object",
         "properties": {
-          "quantity": {
+          "quantityDelta": {
             "type": "integer",
-            "description": "total amount in minor units",
-            "format": "int32",
-            "example": 100
+            "format": "int64"
           },
-          "displayTokenSize": {
-            "type": "number",
-            "example": 0.01
-          },
-          "token": {
-            "type": "string",
-            "example": "GBP"
-          },
-          "_tokenType": {
-            "type": "string",
-            "example": "net.corda.core.contracts.Issued"
+          "destination": {
+            "type": "object"
           }
         }
       },
-      "net.corda.core.contracts.FungibleAsset": {
+      "net.corda.core.contracts.LinearPointer": {
         "required": [
-          "amount",
-          "exitKeys",
-          "participants"
-        ],
-        "type" : "object",
-        "properties" : {
-          "amount": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "exitKeys": {
-            "type" : "array",
-            "items" : {
-              "type": "string",
-              "description": "Base 58 Encoded Public Key",
-              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "participants": {
-            "type" : "array",
-            "items" : {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          }
-        }
-      },
-      "net.corda.core.identity.AbstractParty" : {
-        "required" : [ "owningKey" ],
-        "type" : "object",
-        "properties" : {
-          "owningKey" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Public Key",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          }
-        }
-      },
-      "net.corda.core.contracts.FungibleState": {
-        "required": [
-          "amount",
-          "participants"
+          "type"
         ],
         "type": "object",
         "properties": {
-          "amount": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.core.contracts.LinearState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "linearId": {
+          "pointer": {
             "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
           },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
+          "type": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
+          }
+        }
+      },
+      "net.corda.core.contracts.StatePointer": {
+        "required": [
+          "pointer",
+          "type"
+        ],
+        "type" : "object",
+        "properties" : {
+          "pointer": {
+            "type": "object"
+          },
+          "type": {
+            "type" : "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
           }
         }
       },
@@ -839,98 +1000,31 @@
           }
         }
       },
-      "net.corda.core.contracts.OwnableState": {
+      "net.corda.core.contracts.StaticPointer": {
         "required": [
-          "participants"
+          "type"
         ],
         "type": "object",
         "properties": {
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          "pointer": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.StateRef"
           },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.core.contracts.SchedulableState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.core.schemas.QueryableState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "AmountCurrency": {
-        "required": [
-          "displayTokenSize",
-          "quantity",
-          "token"
-        ],
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "type": "integer",
-            "description": "total amount in minor units",
-            "format": "int32",
-            "example": 100
-          },
-          "displayTokenSize": {
-            "type": "number",
-            "example": 0.01
-          },
-          "token": {
+          "type": {
             "type": "string",
-            "example": "GBP"
+            "description": "Java class name",
+            "example": "java.lang.Object"
           }
         }
       },
-      "net.corda.examples.obligation.Obligation": {
+      "net.corda.core.contracts.AttachmentConstraint": {
+        "type": "object"
+      },
+      "net.corda.core.contracts.ContractState": {
         "required": [
-          "amount",
-          "paid",
           "participants"
         ],
         "type": "object",
         "properties": {
-          "amount": {
-            "$ref": "#/components/schemas/AmountCurrency"
-          },
-          "lender": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "borrower": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "paid": {
-            "$ref": "#/components/schemas/AmountCurrency"
-          },
-          "linearId": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
-          },
           "participants": {
             "type": "array",
             "items": {
@@ -939,472 +1033,103 @@
           }
         }
       },
-      "net.corda.core.contracts.PartyAndReference": {
+      "net.corda.core.contracts.TransactionState": {
         "required": [
-          "reference"
+          "contract"
         ],
         "type": "object",
         "properties": {
-          "party": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          "data": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
           },
-          "reference": {
-            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
-          }
-        }
-      },
-      "net.corda.core.utilities.ByteSequence": {
-        "required": [
-          "bytes",
-          "offset",
-          "size"
-        ],
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "format": "int32"
+          "contract": {
+            "type": "string"
           },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bytes": {
-            "type": "string",
-            "format": "binary"
-          }
-        }
-      },
-      "net.corda.core.utilities.OpaqueBytes": {
-        "required": [
-          "bytes"
-        ],
-        "type": "object",
-        "properties": {
-          "bytes": {
-            "type": "string",
-            "format": "binary"
-          }
-        }
-      },
-      "net.corda.finance.contracts.CommercialPaper_State": {
-        "required": [
-          "faceValue",
-          "maturityDate",
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "issuance": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.PartyAndReference"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "faceValue": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "maturityDate": {
-            "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.finance.contracts.DealState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "linearId": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.core.identity.Party" : {
-        "required" : [ "name", "owningKey" ],
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string",
-            "description" : "CordaX500Name encoded Party",
-            "example" : "O=Bank A, L=London, C=GB"
-          },
-          "owningKey" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Public Key",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          }
-        }
-      },
-      "net.corda.finance.contracts.FixableDealState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "oracle": {
+          "notary": {
             "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
-          "linearId": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.finance.contracts.ICommercialPaperState": {
-        "required": [
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.finance.contracts.JavaCommercialPaper_State": {
-        "type": "object",
-        "properties": {
-          "issuance": {
-            "$ref": "#/components/schemas/net.corda.core.contracts.PartyAndReference"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "faceValue": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "maturityDate": {
-            "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "net.corda.finance.contracts.asset.Cash_State": {
-        "required": [
-          "amount",
-          "exitKeys",
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "amount": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "exitKeys": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "Base 58 Encoded Public Key",
-              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          }
-        }
-      },
-      "Issued": {
-        "required": [
-          "_productType",
-          "issuer",
-          "product"
-        ],
-        "type": "object",
-        "properties": {
-          "issuer": {
-            "required": [
-              "reference"
-            ],
-            "type": "object",
-            "properties": {
-              "party": {
-                "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-              },
-              "reference": {
-                "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
-              }
-            }
-          },
-          "product": {
-            "type": "object"
-          },
-          "_productType": {
-            "type": "string",
-            "example": "java.util.Currency"
-          }
-        }
-      },
-      "net.corda.core.utilities.NonEmptySet_net_corda_core_contracts_Issued_Object": {
-        "uniqueItems": true,
-        "required": [
-          "empty",
-          "size"
-        ],
-        "type": "array",
-        "properties": {
-          "elements": {
-            "uniqueItems": true,
-            "type": "array",
-            "writeOnly": true,
-            "items": {
-              "$ref": "#/components/schemas/Issued"
-            }
-          },
-          "empty": {
-            "type": "boolean"
-          },
-          "size": {
+          "encumbrance": {
             "type": "integer",
             "format": "int32"
+          },
+          "constraint": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.AttachmentConstraint"
           }
-        },
-        "items": {
-          "$ref": "#/components/schemas/Issued"
         }
       },
-      "net.corda.core.utilities.NonEmptySet_net_corda_core_crypto_SecureHash": {
-        "uniqueItems": true,
+      "net.corda.core.identity.AbstractParty": {
         "required": [
-          "empty",
-          "size"
-        ],
-        "type": "array",
-        "properties": {
-          "elements": {
-            "uniqueItems": true,
-            "type": "array",
-            "writeOnly": true,
-            "items": {
-              "type": "string",
-              "description": "Base 58 Encoded Secure Hash",
-              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "empty": {
-            "type": "boolean"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "items": {
-          "type": "string",
-          "description": "Base 58 Encoded Secure Hash",
-          "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-        }
-      },
-      "net.corda.finance.contracts.asset.BilateralNetState_Object": {
-        "required": [
-          "partyKeys"
+          "owningKey"
         ],
         "type": "object",
         "properties": {
-          "partyKeys": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "template": {
-            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
+          "owningKey": {
+            "type": "string",
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
-      "net.corda.finance.contracts.asset.MultilateralNetState_Object": {
-        "type": "object",
-        "properties": {
-          "template": {
-            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
-          }
-        }
-      },
-      "net.corda.finance.contracts.asset.Obligation_State": {
+      "net.corda.core.identity.Party": {
         "required": [
-          "amount",
-          "dueBefore",
-          "exitKeys",
-          "lifecycle",
-          "participants",
-          "quantity"
+          "name",
+          "owningKey"
         ],
         "type": "object",
         "properties": {
-          "lifecycle": {
+          "name": {
             "type": "string",
-            "enum": [
-              "NORMAL",
-              "DEFAULTED"
-            ]
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
           },
-          "obligor": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "template": {
-            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "beneficiary": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "amount": {
-            "$ref": "#/components/schemas/Amount"
-          },
-          "exitKeys": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "Base 58 Encoded Public Key",
-              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "dueBefore": {
+          "owningKey": {
             "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
-          },
-          "owner": {
-            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
-          },
-          "bilateralNetState": {
-            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.BilateralNetState_Object"
-          },
-          "multilateralNetState": {
-            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.MultilateralNetState_Object"
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
-      "net.corda.finance.contracts.asset.Obligation_Terms_Object": {
+      "net.corda.core.identity.PartyAndCertificate": {
         "required": [
-          "acceptableContracts",
-          "acceptableIssuedProducts",
-          "dueBefore",
-          "product",
-          "timeTolerance"
+          "certPath",
+          "certificate",
+          "name",
+          "owningKey"
         ],
         "type": "object",
         "properties": {
-          "acceptableContracts": {
-            "uniqueItems": true,
-            "required": [
-              "empty",
-              "size"
-            ],
-            "type": "array",
-            "properties": {
-              "elements": {
-                "uniqueItems": true,
-                "type": "array",
-                "writeOnly": true,
-                "items": {
-                  "type": "string",
-                  "description": "Base 58 Encoded Secure Hash",
-                  "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-                }
-              },
-              "empty": {
-                "type": "boolean"
-              },
-              "size": {
-                "type": "integer",
-                "format": "int32"
-              }
-            },
-            "items": {
-              "type": "string",
-              "description": "Base 58 Encoded Secure Hash",
-              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-            }
-          },
-          "acceptableIssuedProducts": {
-            "uniqueItems": true,
-            "required": [
-              "empty",
-              "size"
-            ],
-            "type": "array",
-            "properties": {
-              "elements": {
-                "uniqueItems": true,
-                "type": "array",
-                "writeOnly": true,
-                "items": {
-                  "$ref": "#/components/schemas/Issued"
-                }
-              },
-              "empty": {
-                "type": "boolean"
-              },
-              "size": {
-                "type": "integer",
-                "format": "int32"
-              }
-            },
-            "items": {
-              "$ref": "#/components/schemas/Issued"
-            }
-          },
-          "dueBefore": {
+          "certPath": {
             "type": "string",
-            "description": "JSR310 encoded time representation of Instant"
+            "description": "X509 encoded certificate PKI path",
+            "format": "byte"
           },
-          "timeTolerance": {
+          "certificate": {
             "type": "string",
-            "description": "JSR310 encoded time representation of Duration"
+            "description": "X509 encoded certificate",
+            "format": "byte"
           },
-          "product": {
-            "type": "object"
+          "party": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "owningKey": {
+            "type": "string",
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "name": {
+            "type": "string",
+            "description": "CordaX500Name encoded Party",
+            "example": "O=Bank A, L=London, C=GB"
           }
         }
       },
-      "io.bluebank.braid.corda.services.SimpleNodeInfo": {
+      "net.corda.core.node.NodeInfo": {
         "required": [
           "addresses",
-          "legalIdentities"
+          "legalIdentities",
+          "legalIdentitiesAndCerts",
+          "platformVersion",
+          "serial"
         ],
         "type": "object",
         "properties": {
@@ -1413,6 +1138,20 @@
             "items": {
               "$ref": "#/components/schemas/net.corda.core.utilities.NetworkHostAndPort"
             }
+          },
+          "legalIdentitiesAndCerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.PartyAndCertificate"
+            }
+          },
+          "platformVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serial": {
+            "type": "integer",
+            "format": "int64"
           },
           "legalIdentities": {
             "type": "array",
@@ -1435,18 +1174,60 @@
           }
         }
       },
-      "net.corda.core.contracts.AttachmentConstraint" : {
-        "type" : "object"
+      "net.corda.core.node.services.NetworkMapCache_MapChange": {
+        "type": "object",
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/net.corda.core.node.NodeInfo"
+          }
+        }
       },
-      "net.corda.core.contracts.ContractState" : {
-        "required" : [ "participants" ],
+      "net.corda.core.node.services.NetworkMapCache_MapChange_Added": {
+        "type": "object",
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/net.corda.core.node.NodeInfo"
+          }
+        }
+      },
+      "net.corda.core.node.services.NetworkMapCache_MapChange_Modified": {
+        "type": "object",
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/net.corda.core.node.NodeInfo"
+          },
+          "previousNode": {
+            "$ref": "#/components/schemas/net.corda.core.node.NodeInfo"
+          }
+        }
+      },
+      "net.corda.core.node.services.NetworkMapCache_MapChange_Removed": {
+        "type": "object",
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/net.corda.core.node.NodeInfo"
+          }
+        }
+      },
+      "net.corda.core.node.services.Vault": {
+        "required": [
+          "states"
+        ],
+        "type": "object",
+        "properties": {
+          "states": {
+            "type": "object"
+          }
+        }
+      },
+      "net.corda.core.node.services.Vault_ConstraintInfo": {
+        "required": [
+          "constraint"
+        ],
         "type" : "object",
         "properties" : {
-          "participants" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
-            }
+          "constraint": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.AttachmentConstraint"
           }
         }
       },
@@ -1458,21 +1239,6 @@
           },
           "ref" : {
             "$ref" : "#/components/schemas/net.corda.core.contracts.StateRef"
-          }
-        }
-      },
-      "net.corda.core.contracts.StateRef" : {
-        "required" : [ "index", "txhash" ],
-        "type" : "object",
-        "properties" : {
-          "txhash" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
-          "index" : {
-            "type" : "integer",
-            "format" : "int32"
           }
         }
       },
@@ -1498,18 +1264,7 @@
           }
         }
       },
-      "net.corda.core.node.services.Vault_ConstraintInfo" : {
-        "required": [
-          "constraint"
-        ],
-        "type" : "object",
-        "properties" : {
-          "constraint" : {
-            "$ref" : "#/components/schemas/net.corda.core.contracts.AttachmentConstraint"
-          }
-        }
-      },
-      "net.corda.core.node.services.Vault_Page_net_corda_core_contracts_ContractState" : {
+      "net.corda.core.node.services.Vault_Page": {
         "required" : [ "otherResults", "stateTypes", "states", "statesMetadata", "totalStatesAvailable" ],
         "type" : "object",
         "properties" : {
@@ -1582,28 +1337,93 @@
           }
         }
       },
-      "io.bluebank.braid.corda.services.vault.VaultQuery" : {
-        "required" : [ "contractStateType" ],
+      "net.corda.core.node.services.Vault_Update": {
+        "required": [
+          "consumed",
+          "empty",
+          "produced",
+          "references",
+          "type"
+        ],
         "type" : "object",
         "properties" : {
-          "criteria" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          "consumed": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
+            }
           },
-          "paging" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.PageSpecification"
+          "produced": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
+            }
           },
-          "sorting" : {
-            "$ref" : "#/components/schemas/net.corda.core.node.services.vault.Sort"
-          },
-          "contractStateType" : {
+          "flowId": {
             "type" : "string",
-            "description" : "Java class name",
-            "example" : "java.lang.Object"
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "GENERAL",
+              "NOTARY_CHANGE",
+              "CONTRACT_UPGRADE"
+            ]
+          },
+          "references": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
+            }
+          },
+          "empty": {
+            "type": "boolean"
           }
         }
       },
-      "net.corda.core.node.services.vault.BaseSort" : {
+      "net.corda.core.node.services.vault.AttachmentQueryCriteria": {
         "type" : "object"
+      },
+      "net.corda.core.node.services.vault.AttachmentQueryCriteria_AndComposition": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.AttachmentQueryCriteria"
+          },
+          "b": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.AttachmentQueryCriteria"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.AttachmentQueryCriteria_AttachmentsQueryCriteria": {
+        "type": "object",
+        "properties": {
+          "uploaderCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_String"
+          },
+          "filenameCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_String"
+          },
+          "uploadDateCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
+          },
+          "contractClassNamesCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_List_String"
+          },
+          "signersCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_List_PublicKey"
+          },
+          "isSignedCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Boolean"
+          },
+          "versionCondition": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Integer"
+          }
+        }
       },
       "net.corda.core.node.services.vault.ColumnPredicate" : {
         "type" : "object",
@@ -1683,6 +1503,9 @@
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
+      "net.corda.core.node.services.vault.ColumnPredicate_Boolean": {
+        "type": "object"
+      },
       "net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression" : {
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
@@ -1749,6 +1572,9 @@
           }
         }
       },
+      "net.corda.core.node.services.vault.ColumnPredicate_Integer": {
+        "type": "object"
+      },
       "net.corda.core.node.services.vault.ColumnPredicate_Likeness" : {
         "required" : [ "operator", "rightLiteral" ],
         "type" : "object",
@@ -1773,20 +1599,11 @@
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
-      "net.corda.core.node.services.vault.ColumnPredicate_Long" : {
-        "type" : "object",
-        "discriminator" : {
-          "propertyName" : "@class",
-          "mapping" : {
-            ".ColumnPredicate$AggregateFunction" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_AggregateFunction",
-            ".ColumnPredicate$Between" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Between",
-            ".ColumnPredicate$BinaryComparison" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison",
-            ".ColumnPredicate$CollectionExpression" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression",
-            ".ColumnPredicate$EqualityComparison" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison",
-            ".ColumnPredicate$NullExpression" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_NullExpression",
-            ".ColumnPredicate$Likeness" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Likeness"
-          }
-        }
+      "net.corda.core.node.services.vault.ColumnPredicate_List_PublicKey": {
+        "type": "object"
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_List_String": {
+        "type": "object"
       },
       "net.corda.core.node.services.vault.ColumnPredicate_NullExpression" : {
         "required" : [ "operator" ],
@@ -1808,6 +1625,82 @@
         }, {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
+      },
+      "net.corda.core.node.services.vault.ColumnPredicate_String": {
+        "type": "object"
+      },
+      "net.corda.core.node.services.vault.AttachmentQueryCriteria_OrComposition": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.AttachmentQueryCriteria"
+          },
+          "b": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.AttachmentQueryCriteria"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.AttachmentSort": {
+        "required": [
+          "columns"
+        ],
+        "type": "object",
+        "properties": {
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.node.services.vault.AttachmentSort_AttachmentSortColumn"
+            }
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.AttachmentSort_AttachmentSortColumn": {
+        "required": [
+          "direction",
+          "sortAttribute"
+        ],
+        "type": "object",
+        "properties": {
+          "sortAttribute": {
+            "type": "string",
+            "enum": [
+              "INSERTION_DATE",
+              "UPLOADER",
+              "FILENAME",
+              "VERSION"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.BaseSort": {
+        "type": "object"
+      },
+      "net.corda.core.node.services.vault.Builder": {
+        "type": "object"
+      },
+      "net.corda.core.node.services.vault.Column": {
+        "required": [
+          "declaringClass",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "declaringClass": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
+          }
+        }
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Object" : {
         "type" : "object",
@@ -1951,18 +1844,6 @@
           }
         }
       },
-      "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean" : {
-        "type" : "object",
-        "discriminator" : {
-          "propertyName" : "@class",
-          "mapping" : {
-            ".CriteriaExpression$AggregateFunctionExpression" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_AggregateFunctionExpression",
-            ".CriteriaExpression$BinaryLogical" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_BinaryLogical",
-            ".CriteriaExpression$ColumnPredicateExpression" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_ColumnPredicateExpression",
-            ".CriteriaExpression$Not" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Not"
-          }
-        }
-      },
       "net.corda.core.node.services.vault.PageSpecification" : {
         "required" : [ "pageNumber", "pageSize" ],
         "type" : "object",
@@ -1977,8 +1858,47 @@
           }
         }
       },
+      "net.corda.core.node.services.vault.ColumnPredicate_Long": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "@class",
+          "mapping": {
+            ".ColumnPredicate$AggregateFunction": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_AggregateFunction",
+            ".ColumnPredicate$Between": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Between",
+            ".ColumnPredicate$BinaryComparison": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_BinaryComparison",
+            ".ColumnPredicate$CollectionExpression": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_CollectionExpression",
+            ".ColumnPredicate$EqualityComparison": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_EqualityComparison",
+            ".ColumnPredicate$NullExpression": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_NullExpression",
+            ".ColumnPredicate$Likeness": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Likeness"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "@class",
+          "mapping": {
+            ".CriteriaExpression$AggregateFunctionExpression": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_AggregateFunctionExpression",
+            ".CriteriaExpression$BinaryLogical": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_BinaryLogical",
+            ".CriteriaExpression$ColumnPredicateExpression": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_ColumnPredicateExpression",
+            ".CriteriaExpression$Not": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Not"
+          }
+        }
+      },
       "net.corda.core.node.services.vault.QueryCriteria" : {
-        "type": "object"
+        "type": "object",
+        "discriminator": {
+          "propertyName": "@class",
+          "mapping": {
+            ".QueryCriteria$VaultQueryCriteria": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria",
+            ".QueryCriteria$VaultCustomQueryCriteria": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_VaultCustomQueryCriteria",
+            ".QueryCriteria$CommonQueryCriteria": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_CommonQueryCriteria",
+            ".QueryCriteria$LinearStateQueryCriteria": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria",
+            ".QueryCriteria$FungibleAssetQueryCriteria": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_FungibleAssetQueryCriteria",
+            ".QueryCriteria$AndComposition": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_AndComposition",
+            ".QueryCriteria$OrComposition": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria_OrComposition"
+          }
+        }
       },
       "net.corda.core.node.services.vault.QueryCriteria_AndComposition" : {
         "required" : [ "a", "b" ],
@@ -2041,14 +1961,6 @@
                   "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
                 }
               },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "UNCONSUMED",
-                  "CONSUMED",
-                  "ALL"
-                ]
-              },
               "contractStateTypes": {
                 "uniqueItems": true,
                 "type": "array",
@@ -2057,6 +1969,14 @@
                   "description": "Java class name",
                   "example": "java.lang.Object"
                 }
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "UNCONSUMED",
+                  "CONSUMED",
+                  "ALL"
+                ]
               }
             }
           }
@@ -2415,6 +2335,40 @@
           }
         } ]
       },
+      "net.corda.core.utilities.ByteSequence": {
+        "required": [
+          "bytes",
+          "offset",
+          "size"
+        ],
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bytes": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "net.corda.core.utilities.OpaqueBytes": {
+        "required": [
+          "bytes"
+        ],
+        "type": "object",
+        "properties": {
+          "bytes": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
       "net.corda.core.node.services.vault.Sort" : {
         "required" : [ "columns" ],
         "type" : "object",
@@ -2440,6 +2394,920 @@
           "direction" : {
             "type" : "string",
             "enum" : [ "ASC", "DESC" ]
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.SortAttribute_Custom": {
+        "required": [
+          "entityStateClass",
+          "entityStateColumnName"
+        ],
+        "type": "object",
+        "properties": {
+          "entityStateClass": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
+          },
+          "entityStateColumnName": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.SortAttribute_Standard": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.Sort_Attribute"
+          }
+        }
+      },
+      "net.corda.core.node.services.vault.Sort_Attribute": {
+        "type": "object"
+      },
+      "net.corda.core.schemas.CommonSchemaV1_FungibleState": {
+        "required": [
+          "issuerRef",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "participants": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issuer": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "issuerRef": {
+            "type": "string",
+            "format": "binary"
+          },
+          "stateRef": {
+            "$ref": "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "net.corda.core.schemas.PersistentState": {
+        "type": "object",
+        "properties": {
+          "stateRef": {
+            "$ref": "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "net.corda.core.schemas.PersistentStateRef": {
+        "required": [
+          "index",
+          "txId"
+        ],
+        "type": "object",
+        "properties": {
+          "txId": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "net.corda.core.schemas.CommonSchemaV1_LinearState": {
+        "required": [
+          "uuid"
+        ],
+        "type": "object",
+        "properties": {
+          "participants": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stateRef": {
+            "$ref": "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "net.corda.core.transactions.ComponentGroup": {
+        "required": [
+          "components",
+          "groupIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "groupIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+            }
+          }
+        }
+      },
+      "net.corda.core.transactions.ContractUpgradeFilteredTransaction_FilteredComponent": {
+        "required": [
+          "nonce"
+        ],
+        "type": "object",
+        "properties": {
+          "component": {
+            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          }
+        }
+      },
+      "AmountCurrency": {
+        "required": [
+          "displayTokenSize",
+          "quantity",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "description": "total amount in minor units",
+            "format": "int32",
+            "example": 100
+          },
+          "displayTokenSize": {
+            "type": "number",
+            "example": 0.01
+          },
+          "token": {
+            "type": "string",
+            "example": "GBP"
+          }
+        }
+      },
+      "net.corda.examples.obligation.Obligation": {
+        "required": [
+          "amount",
+          "paid",
+          "participants"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "lender": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "borrower": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "paid": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "linearId": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.examples.obligation.ObligationContract": {
+        "type": "object"
+      },
+      "net.corda.core.contracts.TypeOnlyCommandData": {
+        "type": "object"
+      },
+      "net.corda.examples.obligation.ObligationContract_Commands_Issue": {
+        "type": "object"
+      },
+      "net.corda.examples.obligation.ObligationContract_Commands_Settle": {
+        "type": "object"
+      },
+      "net.corda.examples.obligation.ObligationContract_Commands_Transfer": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.BusinessCalendar": {
+        "required": [
+          "holidayDates"
+        ],
+        "type": "object",
+        "properties": {
+          "holidayDates": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "JSR310 encoded time representation of LocalDate"
+            }
+          }
+        }
+      },
+      "net.corda.finance.contracts.CommercialPaper": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.CommercialPaper_Commands_Issue": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.CommercialPaper_Commands_Move": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.CommercialPaper_Commands_Redeem": {
+        "type": "object"
+      },
+      "Amount": {
+        "required": [
+          "displayTokenSize",
+          "quantity",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "description": "total amount in minor units",
+            "format": "int32",
+            "example": 100
+          },
+          "displayTokenSize": {
+            "type": "number",
+            "example": 0.01
+          },
+          "token": {
+            "type": "string",
+            "example": "GBP"
+          },
+          "_tokenType": {
+            "type": "string",
+            "example": "net.corda.core.contracts.Issued"
+          }
+        }
+      },
+      "net.corda.core.contracts.PartyAndReference": {
+        "required": [
+          "party",
+          "reference"
+        ],
+        "type": "object",
+        "properties": {
+          "party": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+          }
+        }
+      },
+      "net.corda.finance.contracts.CommercialPaper_State": {
+        "required": [
+          "faceValue",
+          "maturityDate",
+          "participants"
+        ],
+        "type": "object",
+        "properties": {
+          "issuance": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.PartyAndReference"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "faceValue": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "maturityDate": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.finance.contracts.Commodity": {
+        "required": [
+          "commodityCode",
+          "defaultFractionDigits",
+          "displayName",
+          "displayTokenSize"
+        ],
+        "type": "object",
+        "properties": {
+          "commodityCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "defaultFractionDigits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "displayTokenSize": {
+            "type": "number"
+          }
+        }
+      },
+      "net.corda.finance.contracts.Expression": {
+        "required": [
+          "expr"
+        ],
+        "type": "object",
+        "properties": {
+          "expr": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.finance.contracts.Fix": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "of": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.FixOf"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      },
+      "net.corda.finance.contracts.FixOf": {
+        "required": [
+          "forDay",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "forDay": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of LocalDate"
+          },
+          "ofTenor": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.Tenor"
+          }
+        }
+      },
+      "net.corda.finance.contracts.Tenor": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.finance.contracts.JavaCommercialPaper": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.JavaCommercialPaper_Commands_Issue": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.JavaCommercialPaper_Commands_Move": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.JavaCommercialPaper_Commands_Redeem": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.JavaCommercialPaper_State": {
+        "type": "object",
+        "properties": {
+          "issuance": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.PartyAndReference"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "faceValue": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "maturityDate": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Cash": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.asset.OnLedgerAsset": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.asset.Cash_Commands_Exit": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Cash_Commands_Issue": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.asset.Cash_Commands_Move": {
+        "type": "object",
+        "properties": {
+          "contract": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Cash_State": {
+        "required": [
+          "amount",
+          "exitKeys",
+          "participants"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "exitKeys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Base 58 Encoded Public Key",
+              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_Exit": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_Issue": {
+        "type": "object"
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_Move": {
+        "type": "object",
+        "properties": {
+          "contract": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_Net": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CLOSE_OUT",
+              "PAYMENT"
+            ]
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_SetLifecycle": {
+        "required": [
+          "inverse",
+          "lifecycle"
+        ],
+        "type": "object",
+        "properties": {
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "DEFAULTED"
+            ]
+          },
+          "inverse": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "DEFAULTED"
+            ]
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Commands_Settle": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        }
+      },
+      "Issued": {
+        "required": [
+          "_productType",
+          "issuer",
+          "product"
+        ],
+        "type": "object",
+        "properties": {
+          "issuer": {
+            "required": [
+              "party",
+              "reference"
+            ],
+            "type": "object",
+            "properties": {
+              "party": {
+                "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+              },
+              "reference": {
+                "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+              }
+            }
+          },
+          "product": {
+            "type": "object"
+          },
+          "_productType": {
+            "type": "string",
+            "example": "java.util.Currency"
+          }
+        }
+      },
+      "net.corda.core.utilities.NonEmptySet_net_corda_core_contracts_Issued_Object": {
+        "uniqueItems": true,
+        "required": [
+          "empty",
+          "size"
+        ],
+        "type": "array",
+        "properties": {
+          "elements": {
+            "uniqueItems": true,
+            "type": "array",
+            "writeOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/Issued"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "items": {
+          "$ref": "#/components/schemas/Issued"
+        }
+      },
+      "net.corda.core.utilities.NonEmptySet_net_corda_core_crypto_SecureHash": {
+        "uniqueItems": true,
+        "required": [
+          "empty",
+          "size"
+        ],
+        "type": "array",
+        "properties": {
+          "elements": {
+            "uniqueItems": true,
+            "type": "array",
+            "writeOnly": true,
+            "items": {
+              "type": "string",
+              "description": "Base 58 Encoded Secure Hash",
+              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "items": {
+          "type": "string",
+          "description": "Base 58 Encoded Secure Hash",
+          "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+        }
+      },
+      "net.corda.finance.contracts.asset.BilateralNetState_Object": {
+        "required": [
+          "partyKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "partyKeys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          },
+          "template": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.MultilateralNetState_Object": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_State": {
+        "required": [
+          "amount",
+          "dueBefore",
+          "exitKeys",
+          "lifecycle",
+          "participants",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "lifecycle": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "DEFAULTED"
+            ]
+          },
+          "obligor": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "template": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.Obligation_Terms_Object"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "beneficiary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "exitKeys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Base 58 Encoded Public Key",
+              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
+          "dueBefore": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          },
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "bilateralNetState": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.BilateralNetState_Object"
+          },
+          "multilateralNetState": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.asset.MultilateralNetState_Object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Terms_Object": {
+        "required": [
+          "acceptableContracts",
+          "acceptableIssuedProducts",
+          "dueBefore",
+          "product",
+          "timeTolerance"
+        ],
+        "type": "object",
+        "properties": {
+          "acceptableContracts": {
+            "uniqueItems": true,
+            "required": [
+              "empty",
+              "size"
+            ],
+            "type": "array",
+            "properties": {
+              "elements": {
+                "uniqueItems": true,
+                "type": "array",
+                "writeOnly": true,
+                "items": {
+                  "type": "string",
+                  "description": "Base 58 Encoded Secure Hash",
+                  "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+                }
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "size": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "items": {
+              "type": "string",
+              "description": "Base 58 Encoded Secure Hash",
+              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
+          "acceptableIssuedProducts": {
+            "uniqueItems": true,
+            "required": [
+              "empty",
+              "size"
+            ],
+            "type": "array",
+            "properties": {
+              "elements": {
+                "uniqueItems": true,
+                "type": "array",
+                "writeOnly": true,
+                "items": {
+                  "$ref": "#/components/schemas/Issued"
+                }
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "size": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "items": {
+              "$ref": "#/components/schemas/Issued"
+            }
+          },
+          "dueBefore": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "timeTolerance": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Duration"
+          },
+          "product": {
+            "type": "object"
+          }
+        }
+      },
+      "net.corda.finance.contracts.asset.Obligation_Terms": {
+        "required": [
+          "acceptableContracts",
+          "acceptableIssuedProducts",
+          "dueBefore",
+          "product",
+          "timeTolerance"
+        ],
+        "type": "object",
+        "properties": {
+          "acceptableContracts": {
+            "uniqueItems": true,
+            "required": [
+              "empty",
+              "size"
+            ],
+            "type": "array",
+            "properties": {
+              "elements": {
+                "uniqueItems": true,
+                "type": "array",
+                "writeOnly": true,
+                "items": {
+                  "type": "string",
+                  "description": "Base 58 Encoded Secure Hash",
+                  "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+                }
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "size": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "items": {
+              "type": "string",
+              "description": "Base 58 Encoded Secure Hash",
+              "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+            }
+          },
+          "acceptableIssuedProducts": {
+            "uniqueItems": true,
+            "required": [
+              "empty",
+              "size"
+            ],
+            "type": "array",
+            "properties": {
+              "elements": {
+                "uniqueItems": true,
+                "type": "array",
+                "writeOnly": true,
+                "items": {
+                  "$ref": "#/components/schemas/Issued"
+                }
+              },
+              "empty": {
+                "type": "boolean"
+              },
+              "size": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "items": {
+              "$ref": "#/components/schemas/Issued"
+            }
+          },
+          "dueBefore": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "timeTolerance": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Duration"
+          },
+          "product": {
+            "type": "object"
           }
         }
       },
@@ -2477,11 +3345,11 @@
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "fromTime": {
+          "midpoint": {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "midpoint": {
+          "fromTime": {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -2557,6 +3425,12 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
+          "outputStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
           "inputs" : {
             "type" : "array",
             "items" : {
@@ -2578,32 +3452,10 @@
               "$ref": "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
             }
           },
-          "outputStates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "id" : {
             "type" : "string",
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          }
-        }
-      },
-      "net.corda.core.transactions.ComponentGroup" : {
-        "required" : [ "components", "groupIndex" ],
-        "type" : "object",
-        "properties" : {
-          "groupIndex" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "components" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
-            }
           }
         }
       },
@@ -2628,6 +3480,12 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
+          "outputStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
+          },
           "notary": {
             "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
@@ -2635,12 +3493,6 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/net.corda.core.contracts.TransactionState_net_corda_core_contracts_ContractState"
-            }
-          },
-          "outputStates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
             }
           },
           "id" : {
@@ -2663,16 +3515,11 @@
               "$ref" : "#/components/schemas/net.corda.core.crypto.TransactionSignature"
             }
           },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          "tx": {
+            "$ref": "#/components/schemas/net.corda.core.transactions.WireTransaction"
           },
           "coreTransaction" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
-          "tx" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.WireTransaction"
           },
           "inputs" : {
             "type" : "array",
@@ -2696,6 +3543,11 @@
           },
           "notaryChangeTransaction" : {
             "type" : "boolean"
+          },
+          "id": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
           "missingSigners" : {
             "uniqueItems" : true,
@@ -2824,11 +3676,6 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "id" : {
-            "type" : "string",
-            "description" : "Base 58 Encoded Secure Hash",
-            "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "requiredSigningKeys": {
             "uniqueItems": true,
             "type": "array",
@@ -2875,6 +3722,11 @@
                 "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
               }
             }
+          },
+          "id": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
@@ -2886,6 +3738,412 @@
           },
           "recipient" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.AbstractParty"
+          }
+        }
+      },
+      "net.corda.finance.flows.AbstractCashFlow_AbstractRequest": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          }
+        }
+      },
+      "net.corda.finance.flows.CashExitFlow_ExitRequest": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "issuerRef": {
+            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+          }
+        }
+      },
+      "net.corda.finance.flows.CashIssueAndPaymentFlow_IssueAndPaymentRequest": {
+        "required": [
+          "amount",
+          "anonymous"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "issueRef": {
+            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "notary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "anonymous": {
+            "type": "boolean"
+          }
+        }
+      },
+      "net.corda.finance.flows.CashIssueFlow_IssueRequest": {
+        "required": [
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "issueRef": {
+            "$ref": "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
+          },
+          "notary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          }
+        }
+      },
+      "net.corda.finance.flows.CashPaymentFlow_PaymentRequest": {
+        "required": [
+          "amount",
+          "anonymous",
+          "issuerConstraint"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "anonymous": {
+            "type": "boolean"
+          },
+          "issuerConstraint": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.Party"
+            }
+          },
+          "notary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          }
+        }
+      },
+      "net.corda.finance.contracts.DealState": {
+        "required": [
+          "participants"
+        ],
+        "type": "object",
+        "properties": {
+          "linearId": {
+            "$ref": "#/components/schemas/net.corda.core.contracts.UniqueIdentifier"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+            }
+          }
+        }
+      },
+      "net.corda.finance.flows.TwoPartyDealFlow_AutoOffer": {
+        "type": "object",
+        "properties": {
+          "notary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "dealBeingOffered": {
+            "$ref": "#/components/schemas/net.corda.finance.contracts.DealState"
+          }
+        }
+      },
+      "net.corda.core.identity.AnonymousParty": {
+        "required": [
+          "owningKey"
+        ],
+        "type": "object",
+        "properties": {
+          "owningKey": {
+            "type": "string",
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          }
+        }
+      },
+      "net.corda.finance.flows.TwoPartyDealFlow_Handshake": {
+        "required": [
+          "payload"
+        ],
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "object"
+          },
+          "primaryIdentity": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AnonymousParty"
+          },
+          "secondaryIdentity": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AnonymousParty"
+          }
+        }
+      },
+      "net.corda.finance.flows.TwoPartyTradeFlow_SellerTradeInfo": {
+        "required": [
+          "price"
+        ],
+        "type": "object",
+        "properties": {
+          "price": {
+            "$ref": "#/components/schemas/AmountCurrency"
+          },
+          "payToIdentity": {
+            "$ref": "#/components/schemas/net.corda.core.identity.PartyAndCertificate"
+          }
+        }
+      },
+      "net.corda.core.schemas.MappedSchema": {
+        "required": [
+          "mappedTypes",
+          "name",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "schemaFamily": {
+            "type": "string",
+            "description": "Java class name",
+            "writeOnly": true,
+            "example": "java.lang.Object"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mappedTypes": {
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "migrationResource": {
+            "type": "string"
+          }
+        }
+      },
+      "net.corda.finance.schemas.CashSchemaV1": {
+        "required": [
+          "mappedTypes",
+          "migrationResource",
+          "name",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "migrationResource": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mappedTypes": {
+            "type": "object"
+          }
+        }
+      },
+      "net.corda.finance.schemas.CashSchemaV1_PersistentCashState": {
+        "required": [
+          "currency",
+          "issuerPartyHash",
+          "issuerRef",
+          "pennies"
+        ],
+        "type": "object",
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
+          },
+          "pennies": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "issuerPartyHash": {
+            "type": "string"
+          },
+          "issuerRef": {
+            "type": "string",
+            "format": "binary"
+          },
+          "stateRef": {
+            "$ref": "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "net.corda.finance.schemas.CommercialPaperSchemaV1": {
+        "required": [
+          "mappedTypes",
+          "migrationResource",
+          "name",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "migrationResource": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mappedTypes": {
+            "type": "object"
+          }
+        }
+      },
+      "net.corda.finance.schemas.CommercialPaperSchemaV1_PersistentCommercialPaperState": {
+        "required": [
+          "currency",
+          "faceValue",
+          "faceValueIssuerPartyHash",
+          "faceValueIssuerRef",
+          "issuancePartyHash",
+          "issuanceRef",
+          "maturity",
+          "ownerHash"
+        ],
+        "type": "object",
+        "properties": {
+          "issuancePartyHash": {
+            "type": "string"
+          },
+          "issuanceRef": {
+            "type": "string",
+            "format": "binary"
+          },
+          "ownerHash": {
+            "type": "string"
+          },
+          "maturity": {
+            "type": "string",
+            "description": "JSR310 encoded time representation of Instant"
+          },
+          "faceValue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "faceValueIssuerPartyHash": {
+            "type": "string"
+          },
+          "faceValueIssuerRef": {
+            "type": "string",
+            "format": "binary"
+          },
+          "stateRef": {
+            "$ref": "#/components/schemas/net.corda.core.schemas.PersistentStateRef"
+          }
+        }
+      },
+      "io.bluebank.braid.corda.services.SimpleNodeInfo": {
+        "required": [
+          "addresses",
+          "legalIdentities"
+        ],
+        "type": "object",
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.utilities.NetworkHostAndPort"
+            }
+          },
+          "legalIdentities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.identity.Party"
+            }
+          }
+        }
+      },
+      "net.corda.core.node.services.Vault_Page_net_corda_core_contracts_ContractState": {
+        "required": [
+          "otherResults",
+          "stateTypes",
+          "states",
+          "statesMetadata",
+          "totalStatesAvailable"
+        ],
+        "type": "object",
+        "properties": {
+          "states": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.StateAndRef_net_corda_core_contracts_ContractState"
+            }
+          },
+          "statesMetadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.node.services.Vault_StateMetadata"
+            }
+          },
+          "totalStatesAvailable": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stateTypes": {
+            "type": "string",
+            "enum": [
+              "UNCONSUMED",
+              "CONSUMED",
+              "ALL"
+            ]
+          },
+          "otherResults": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "io.bluebank.braid.corda.services.vault.VaultQuery": {
+        "required": [
+          "contractStateType"
+        ],
+        "type": "object",
+        "properties": {
+          "criteria": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          "paging": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.PageSpecification"
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.Sort"
+          },
+          "contractStateType": {
+            "type": "string",
+            "description": "Java class name",
+            "example": "java.lang.Object"
           }
         }
       },

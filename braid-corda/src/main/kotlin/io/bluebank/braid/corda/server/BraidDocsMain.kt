@@ -19,7 +19,7 @@ import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.vertx.core.Vertx
-import io.vertx.ext.web.impl.RouterImpl
+import io.vertx.ext.web.Router
 import net.corda.core.utilities.contextLogger
 import java.util.concurrent.CountDownLatch
 
@@ -37,13 +37,12 @@ class BraidDocsMain() {
    */
   fun swaggerText(openApiVersion: Int): String {
     val vertx = Vertx.vertx()
-    val restConfig =
-      BraidCordaStandaloneServer(vertx = vertx).createRestConfig(RPCFactory.createRpcFactoryStub())
-        .withOpenApiVersion(openApiVersion)
     return try {
-      val restMounter = RestMounter(restConfig, RouterImpl(vertx), vertx)
-      val classes = CordaClasses().contractStateClasses.map { it.java }
-      classes.forEach { restMounter.docsHandler.addType(it) }
+      val restConfig =
+        BraidCordaStandaloneServer(vertx = vertx)
+          .createRestConfig(RPCFactory.createRpcFactoryStub())
+          .withOpenApiVersion(openApiVersion)
+      val restMounter = RestMounter(restConfig, Router.router(vertx), vertx)
       restMounter.docsHandler.getSwaggerString()
     } finally {
       log.info("shutting down Vertx")

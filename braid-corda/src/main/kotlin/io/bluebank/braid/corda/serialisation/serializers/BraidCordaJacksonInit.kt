@@ -97,6 +97,7 @@ object BraidCordaJacksonInit {
       .setMixInAnnotation(ColumnPredicate::class.java, ColumnPredicateMixin::class.java)
       .setMixInAnnotation(PageSpecification::class.java, PageSpecificationMixin::class.java)
       .setMixInAnnotation(TransactionState::class.java, TransactionStateMixin::class.java)
+      .setMixInAnnotation(Issued::class.java, IssuedMixin::class.java)
       .addSerializer(X509Certificate::class.java, X509Serializer())
       .addDeserializer(X509Certificate::class.java, X509Deserializer())
       .addSerializer(CertPath::class.java, CertPathSerializer())

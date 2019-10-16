@@ -19,12 +19,12 @@ import io.github.classgraph.ClassGraph
 import io.github.classgraph.ClassInfo
 import net.corda.core.CordaInternal
 import net.corda.core.contracts.ContractState
-import net.corda.core.flows.ContractUpgradeFlow
 import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.internal.toMultiMap
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.serialization.SerializeAsToken
 import net.corda.core.utilities.ProgressTracker
 
 /**
@@ -48,14 +48,16 @@ class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread()
     contractStates.map { classLoader.loadClass(it.name).kotlin }
   }
 
+  val cordaSerializableClasses by lazy {
+    cordaSerializable.map { classLoader.loadClass(it.name).kotlin }
+  }
 
   private val classGraph by lazy {
     ClassGraph()
       .addClassLoader(classLoader)
       .enableClassInfo()
       .enableAnnotationInfo()
-      .addClassLoader(Thread.currentThread().contextClassLoader)
-      .blacklistClasses(ContractUpgradeFlow.Initiate::class.java.name)
+      .blacklistClasses(ProgressTracker::class.java.name)
       .blacklistPackages(
         "net.corda.internal",
         "net.corda.client",
@@ -81,6 +83,10 @@ class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread()
     classGraph.getClassesImplementing(ContractState::class.java.name)
   }
 
+  private val cordaSerializable by lazy {
+    classGraph.allClasses.filter { isAppropriateForSerialization(it) }
+  }
+
   private val flows by lazy {
     classGraph.getClassesWithAnnotation(StartableByRPC::class.qualifiedName)
   }
@@ -99,16 +105,12 @@ class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread()
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
     val isKotlinFileClass = Regex(".*Kt$")::matches
 
-    private fun isCordaSerializable(type: ClassInfo): Boolean =
-      type.hasAnnotation(CordaSerializable::class.java.name)
-        || (type.superclass != null && isCordaSerializable(type.superclass))
-        || type.interfaces.stream()
-        .filter { isCordaSerializable(it) }
-        .findFirst()
-        .isPresent
+    private fun ClassInfo.isCordaSerializable(): Boolean =
+      !this.implementsInterface(SerializeAsToken::class.java.name) &&
+        hasDeepAnnotation(CordaSerializable::class.java.name)
 
-    internal fun isCordaSerializedClass(it: ClassInfo): Boolean =
-      isCordaSerializable(it) &&
+    internal fun isAppropriateForSerialization(it: ClassInfo): Boolean {
+      val result = it.isCordaSerializable() &&
         !it.hasAnnotation(CordaInternal::class.java.name) &&
         !it.isInterface &&
         !it.isAbstract &&
@@ -116,10 +118,38 @@ class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread()
         !it.extendsSuperclass(FlowLogic::class.java.name) &&
         !it.extendsSuperclass(FlowInitiator::class.java.name) &&
         !it.extendsSuperclass(Throwable::class.java.name) &&
+        !it.extendsSuperclass(ProgressTracker.Change::class.java.name) &&
+        !it.extendsSuperclass(ProgressTracker.Step::class.java.name) &&
         !isFunctionName(it.name) &&
         !isCompanionClass(it.name) &&
         !isKotlinFileClass(it.name) &&
-        it.name != ProgressTracker.Step::class.java.name
+        (it.name != ProgressTracker.Step::class.java.name) &&
+        (it.name != ProgressTracker::class.java.name) &&
+        it.outerClasses.none { it.name == ProgressTracker::class.java.name }
+      return result
+    }
+
   }
 }
+
+internal fun ClassInfo.hasDeepAnnotation(annotationName: String): Boolean {
+  return hasAnnotation(annotationName) ||
+    superClassHasDeepAnnotation(annotationName) ||
+    interfacesHaveDeepAnnotation(annotationName)
+}
+
+internal fun ClassInfo.superClassHasDeepAnnotation(annotationName: String): Boolean {
+  return when {
+    this.superclass != null -> this.superclass.hasDeepAnnotation(annotationName)
+    else -> false
+  }
+}
+
+internal fun ClassInfo.interfacesHaveDeepAnnotation(annotationName: String): Boolean {
+  return when {
+    this.interfaces != null -> this.interfaces.stream().filter { it.hasDeepAnnotation(annotationName) }.findFirst().isPresent
+    else -> false
+  }
+}
+
 

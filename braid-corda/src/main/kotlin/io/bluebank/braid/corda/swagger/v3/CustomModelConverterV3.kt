@@ -60,7 +60,7 @@ class CustomModelConverterV3 : ModelConverter {
         else -> {
           val clazz = jsonType.rawClass
           when {
-            clazz.isBinary()  -> BinarySchema()
+            clazz.isBinary() -> BinarySchema()
             PublicKey::class.java.isAssignableFrom(clazz) -> publicKeySchema()
             Class::class.java.isAssignableFrom(clazz) -> classSchema()
             SecureHash::class.java.isAssignableFrom(clazz) || SecureHash.SHA256::class.java.isAssignableFrom(clazz) -> secureHashSchema()
@@ -161,8 +161,8 @@ class CustomModelConverterV3 : ModelConverter {
     .name("AmountCurrency")
     .addProperties(
       "quantity", IntegerSchema()
-        .example(100)
-        .description("total amount in minor units")
+      .example(100)
+      .description("total amount in minor units")
     )
     .addProperties("displayTokenSize", NumberSchema().example("0.01"))
     .addProperties("token", StringSchema().example("GBP"))
@@ -174,8 +174,8 @@ class CustomModelConverterV3 : ModelConverter {
     .name("Amount")
     .addProperties(
       "quantity", IntegerSchema()
-        .example(100)
-        .description("total amount in minor units")
+      .example(100)
+      .description("total amount in minor units")
     )
     .addProperties("displayTokenSize", NumberSchema().example("0.01"))
     .addProperties("token", StringSchema().example("GBP"))
@@ -184,7 +184,7 @@ class CustomModelConverterV3 : ModelConverter {
     .addRequiredItem("token")
     .addProperties(
       "_tokenType", StringSchema()
-        .example("net.corda.core.contracts.Issued")
+      .example("net.corda.core.contracts.Issued")
     )
 
 }
