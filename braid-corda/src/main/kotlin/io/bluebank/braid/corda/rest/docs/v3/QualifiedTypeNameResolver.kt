@@ -17,8 +17,8 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import com.fasterxml.jackson.databind.JavaType
 import io.swagger.v3.core.jackson.TypeNameResolver
+import io.swagger.v3.core.util.AnnotationsUtils
 import io.swagger.v3.core.util.PrimitiveType
-import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  * A specialised type resolver that preserves package names
@@ -45,22 +45,19 @@ class QualifiedTypeNameResolver : TypeNameResolver() {
 }
 
 fun Class<*>.swaggerTypeName(options: Set<TypeNameResolver.Options> = emptySet()): String {
-  return this.simplerName(options).replace("$", "_")
-//  return when {
-//    Throwable::class.java.isAssignableFrom(this) -> "InvocationError"
-//    else -> this.simplerName(options).replace("$", "_")
-//  }
-}
-
-private fun Class<*>.simplerName(options: Set<TypeNameResolver.Options>): String {
   val className = when {
     this.name.startsWith("java.") -> this.simpleName
     else -> this.name
   }
-  if (options.contains(TypeNameResolver.Options.SKIP_API_MODEL)) {
-    return className
+
+  return when {
+    options.contains(TypeNameResolver.Options.SKIP_API_MODEL) -> className
+    else -> {
+      val annotation = AnnotationsUtils.getSchemaDeclaredAnnotation(this)
+      val preprocessed = annotation?.name?.trimToNull() ?: className
+      preprocessed.replace("$", "_")
+    }
   }
-  return this.getAnnotation(Schema::class.java)?.name?.trimToNull() ?: className
 }
 
 private fun String.trimToNull(): String? {
