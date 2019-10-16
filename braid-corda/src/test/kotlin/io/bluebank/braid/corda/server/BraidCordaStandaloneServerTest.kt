@@ -369,14 +369,7 @@ class BraidCordaStandaloneServerTest {
     client.getFuture("/api/rest/cordapps/corda-core/flows")
       .compose { it.body<List<String>>() }
       .onSuccess { flows ->
-        context.assertThat(
-          flows,
-          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Authorise")
-        )
-        context.assertThat(
-          flows,
-          hasItem("net.corda.core.flows.ContractUpgradeFlow\$Deauthorise")
-        )
+        context.assertEquals(0, flows.size) // should not be exposing anything from corda's own flows
       }
       .compose { client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows") }
       .compose { it.body<List<String>>() }

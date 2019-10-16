@@ -47,4 +47,4 @@ import net.corda.core.node.services.vault.ColumnPredicate
     ],
     subTypes = [ColumnPredicate.AggregateFunction::class]
 )
-interface ColumnPredicateMixin
+interface ColumnPredicateMixin<Long>

@@ -26,13 +26,13 @@
 # therefore, note the steps for copying maven/settings.xml to ~/.m2/settings.xml
 
 variables:
-  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=.m2/repository"
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dhttps.protocols=TLSv1.2"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
   DOCKER_IMAGE_NAME: cordite/braid
 before_script:
   - npm set registry $NPM_REPO
   - npm set $NPM_CREDENTIALS
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+  #  - export GRADLE_USER_HOME=`pwd`/.gradle
   - mkdir -p ~/.m2/repository
   - cp maven/settings.xml ~/.m2/settings.xml
   - rm -rf ~/.gnupg
@@ -46,11 +46,11 @@ stages:
   - release
 
 # Use runner's local cache
-cache:
-  key: $CI_PROJECT_ID
-  paths:
-    - $CI_PROJECT_DIR/.m2/
-    - $CI_PROJECT_DIR/.gradle
+#cache:
+#  key: $CI_PROJECT_ID
+#  paths:
+#    - $CI_PROJECT_DIR/.m2/
+#    - $CI_PROJECT_DIR/.gradle
 
 build:
   stage: build
@@ -58,22 +58,7 @@ build:
   script:
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
-  artifacts:
-    name: "javascript-logs-$CI_JOB_NAME"
-    paths:
-      - braid-corda/target/logs/js.log
-      - braid-client/target
-      - braid-client-js/dist
-      - braid-client-js/target
-      - braid-corda/target
-      - braid-corda-client/target
-      - braid-core/target
-      - braid-quickstart/target
-      - braid-standalone-server/target
-      - braid-server/target
   only:
-    - master
-    - patch-1
     - /^[0-9]+-.*$/
   tags:
     - build-tools
@@ -82,7 +67,7 @@ deploy:
   stage: snapshot_release
   image: dazraf/build-tools:latest
   script:
-    - mvn $MAVEN_CLI_OPTS deploy -DskipTests
+    - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository license:check install deploy
     - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:edge
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
