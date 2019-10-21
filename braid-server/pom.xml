@@ -256,9 +256,12 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.1</version>
         <executions>
           <execution>
             <id>make-assembly</id>
@@ -271,12 +274,17 @@
                 <manifest>
                   <mainClass>io.bluebank.braid.server.BraidMainKt</mainClass>
                 </manifest>
+                <manifestEntries>
+                  <Git-Branch>${git.branch}</Git-Branch>
+                  <Git-Commit>${git.commit.id}</Git-Commit>
+                  <Build-Number>${git.build.number.unique}</Build-Number>
+                  <Build-Time>${git.build.time}</Build-Time>
+                </manifestEntries>
               </archive>
               <descriptorRefs>
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
               <appendAssemblyId>false</appendAssemblyId>
-              <finalName>braid-server</finalName>
               <archiveBaseDirectory>${project.basedir}</archiveBaseDirectory>
             </configuration>
           </execution>
