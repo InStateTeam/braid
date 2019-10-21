@@ -153,6 +153,14 @@
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.0.2</version>
       </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
   <reporting>

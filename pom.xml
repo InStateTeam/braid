@@ -89,7 +89,7 @@
     <rxjava.version>1.3.8</rxjava.version>
     <jackson.version>2.9.5</jackson.version>
     <ant.plugin.version>1.8</ant.plugin.version>
-    <assembly.plugin.version>2.6</assembly.plugin.version>
+    <assembly.plugin.version>3.1.1</assembly.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <javadoc.plugin.version>3.0.0-M1</javadoc.plugin.version>
     <timestamp>${maven.build.timestamp}</timestamp>
@@ -102,7 +102,8 @@
     <swagger.version>2.0.9</swagger.version>
     <node.dir>${user.home}/.node</node.dir>
     <log4j.version>2.11.2</log4j.version>
-
+    <git-commit-id-plugin.version>3.0.1</git-commit-id-plugin.version>
+    <jar.plugin.version>3.1.2</jar.plugin.version>
   </properties>
 
   <modules>
@@ -120,19 +121,24 @@
   </modules>
 
   <distributionManagement>
-<!--    <snapshotRepository>-->
+    <!--    <snapshotRepository>-->
     <!--      <id>oss</id>-->
     <!--      <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
     <!--      <layout>default</layout>-->
-<!--    </snapshotRepository>-->
+    <!--    </snapshotRepository>-->
     <snapshotRepository>
       <id>gitlab-maven</id>
       <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
       <layout>default</layout>
     </snapshotRepository>
+    <!--    <repository>-->
+    <!--      <id>gitlab-maven</id>-->
+    <!--      <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>-->
+    <!--      <layout>default</layout>-->
+    <!--    </repository>-->
     <repository>
-      <id>gitlab-maven</id>
-      <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+      <id>oss</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
       <layout>default</layout>
     </repository>
   </distributionManagement>
@@ -437,6 +443,40 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${jar.plugin.version}</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Git-Branch>${git.branch}</Git-Branch>
+                <Git-Commit>${git.commit.id}</Git-Commit>
+                <Build-Number>${git.build.number.unique}</Build-Number>
+                <Build-Time>${git.build.time}</Build-Time>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>${git-commit-id-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>get-the-git-infos</id>
+              <goals>
+                <goal>revision</goal>
+              </goals>
+              <phase>validate</phase>
+            </execution>
+          </executions>
+          <configuration>
+            <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+            <runOnlyOnce>true</runOnlyOnce>
+          </configuration>
+        </plugin>
+
       </plugins>
     </pluginManagement>
     <plugins>
@@ -492,6 +532,17 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.1</version>
+      </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <configuration>
+          <runOnlyOnce>false</runOnlyOnce>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
