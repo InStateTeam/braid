@@ -975,13 +975,13 @@
         ],
         "type" : "object",
         "properties" : {
-          "pointer": {
-            "type": "object"
-          },
           "type": {
             "type" : "string",
             "description": "Java class name",
             "example": "java.lang.Object"
+          },
+          "pointer": {
+            "type": "object"
           }
         }
       },
@@ -1111,15 +1111,15 @@
           "party": {
             "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
-          "owningKey": {
-            "type": "string",
-            "description": "Base 58 Encoded Public Key",
-            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
-          },
           "name": {
             "type": "string",
             "description": "CordaX500Name encoded Party",
             "example": "O=Bank A, L=London, C=GB"
+          },
+          "owningKey": {
+            "type": "string",
+            "description": "Base 58 Encoded Public Key",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },
@@ -1454,9 +1454,18 @@
             }
           }
         }, {
+          "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Instant"
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Object"
+          },
+          {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Object"
         }, {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.ColumnPredicate_Long"
         } ]
       },
       "net.corda.core.node.services.vault.ColumnPredicate_Between" : {
@@ -1768,6 +1777,12 @@
               "enum" : [ "ASC", "DESC" ]
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
         } ]
       },
       "net.corda.core.node.services.vault.CriteriaExpression_BinaryLogical" : {
@@ -1813,6 +1828,15 @@
         }, {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
         }, {
+          "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_Object_Boolean"
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
+          },
+          {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
         } ]
       },
@@ -1829,6 +1853,12 @@
             }
           }
         }, {
+          "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression"
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
+          },
+          {
           "$ref" : "#/components/schemas/net.corda.core.node.services.vault.CriteriaExpression_net_corda_core_schemas_StatePersistable_Boolean"
         } ]
       },
@@ -1915,6 +1945,15 @@
               "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_CommonQueryCriteria" : {
@@ -1961,6 +2000,14 @@
                   "$ref": "#/components/schemas/net.corda.core.identity.AbstractParty"
                 }
               },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "UNCONSUMED",
+                  "CONSUMED",
+                  "ALL"
+                ]
+              },
               "contractStateTypes": {
                 "uniqueItems": true,
                 "type": "array",
@@ -1969,16 +2016,11 @@
                   "description": "Java class name",
                   "example": "java.lang.Object"
                 }
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "UNCONSUMED",
-                  "CONSUMED",
-                  "ALL"
-                ]
               }
             }
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
           }
         ]
       },
@@ -2050,6 +2092,15 @@
               }
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_FungibleStateQueryCriteria" : {
@@ -2102,6 +2153,15 @@
               }
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_LinearStateQueryCriteria" : {
@@ -2164,6 +2224,15 @@
               }
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_OrComposition" : {
@@ -2181,6 +2250,15 @@
               "$ref" : "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_SoftLockingCondition" : {
@@ -2266,6 +2344,15 @@
               }
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
+          },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.node.services.vault.QueryCriteria_VaultQueryCriteria" : {
@@ -2333,6 +2420,9 @@
               }
             }
           }
+        },
+          {
+            "$ref": "#/components/schemas/net.corda.core.node.services.vault.QueryCriteria"
         } ]
       },
       "net.corda.core.utilities.ByteSequence": {
@@ -3341,15 +3431,15 @@
       "net.corda.core.contracts.TimeWindow" : {
         "type" : "object",
         "properties" : {
-          "untilTime" : {
+          "fromTime": {
+            "type" : "string",
+            "description" : "JSR310 encoded time representation of Instant"
+          },
+          "untilTime": {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
           "midpoint": {
-            "type" : "string",
-            "description" : "JSR310 encoded time representation of Instant"
-          },
-          "fromTime": {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -3425,12 +3515,6 @@
         "required" : [ "id", "inputs", "outputStates", "outputs", "references" ],
         "type" : "object",
         "properties" : {
-          "outputStates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
-            }
-          },
           "inputs" : {
             "type" : "array",
             "items" : {
@@ -3445,6 +3529,12 @@
           },
           "notary" : {
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
+          },
+          "outputStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
+            }
           },
           "outputs": {
             "type": "array",
@@ -3480,14 +3570,14 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
+          "notary": {
+            "$ref": "#/components/schemas/net.corda.core.identity.Party"
+          },
           "outputStates": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/net.corda.core.contracts.ContractState"
             }
-          },
-          "notary": {
-            "$ref": "#/components/schemas/net.corda.core.identity.Party"
           },
           "outputs" : {
             "type" : "array",
@@ -3515,11 +3605,16 @@
               "$ref" : "#/components/schemas/net.corda.core.crypto.TransactionSignature"
             }
           },
+          "id": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
+          "coreTransaction": {
+            "$ref": "#/components/schemas/net.corda.core.transactions.CoreTransaction"
+          },
           "tx": {
             "$ref": "#/components/schemas/net.corda.core.transactions.WireTransaction"
-          },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           },
           "inputs" : {
             "type" : "array",
@@ -3543,11 +3638,6 @@
           },
           "notaryChangeTransaction" : {
             "type" : "boolean"
-          },
-          "id": {
-            "type": "string",
-            "description": "Base 58 Encoded Secure Hash",
-            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
           "missingSigners" : {
             "uniqueItems" : true,
@@ -3676,6 +3766,11 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
+          "id": {
+            "type": "string",
+            "description": "Base 58 Encoded Secure Hash",
+            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
+          },
           "requiredSigningKeys": {
             "uniqueItems": true,
             "type": "array",
@@ -3722,11 +3817,6 @@
                 "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
               }
             }
-          },
-          "id": {
-            "type": "string",
-            "description": "Base 58 Encoded Secure Hash",
-            "example": "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           }
         }
       },

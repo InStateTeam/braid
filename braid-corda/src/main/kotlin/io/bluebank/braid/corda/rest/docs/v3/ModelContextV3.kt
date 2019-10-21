@@ -16,10 +16,7 @@
 package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
-import io.bluebank.braid.corda.swagger.v3.CustomModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.JSR310ModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.MixinModelConverterV3
-import io.bluebank.braid.corda.swagger.v3.SuperClassModelConverterV3
+import io.bluebank.braid.corda.swagger.v3.*
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
@@ -43,7 +40,7 @@ class ModelContextV3 {
     addConverter(JSR310ModelConverterV3())
     addConverter(MixinModelConverterV3(io.vertx.core.json.Json.mapper))
     addConverter(SuperClassModelConverterV3())
-    //   addConverter(ComposedSchemaFixV3())
+    addConverter(ComposedSchemaFixV3())
     addConverter(CustomModelConverterV3())
   }
 

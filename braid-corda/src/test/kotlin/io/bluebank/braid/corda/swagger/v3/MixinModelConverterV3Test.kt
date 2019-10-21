@@ -27,15 +27,18 @@ import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import io.swagger.v3.oas.models.media.ComposedSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.json.Json
+import io.vertx.core.json.JsonObject
 import net.corda.core.node.services.vault.QueryCriteria
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasKey
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 
-class MiximModelConverterV3Test {
+class MixinModelConverterV3Test {
    var schemas: MutableMap<String, Schema<Any>>? = null
 
   @Before
@@ -80,8 +83,13 @@ class MiximModelConverterV3Test {
   fun `should round trip Dog`() {
     val dog = Dog(true, 4)
     val json = Json.encode(dog)
-
-    assertThat(json, equalTo("""{"@class":".MiximModelConverterV3Test${'$'}Dog","noisy":true,"legs":4}"""))
+    val parsed = JsonObject(json)
+    val expected = JsonObject()
+      .put("@class", ".MixinModelConverterV3Test${'$'}Dog")
+      .put("noisy", true)
+      .put("legs", 4)
+    assertEquals(expected, parsed)
+//    assertThat(json, equalTo("""{"@class":".MiximModelConverterV3Test${'$'}Dog","noisy":true,"legs":4}"""))
   }
 
   @Test
@@ -103,7 +111,7 @@ class MiximModelConverterV3Test {
 
   @Test
   fun `should exclude mixin`() {
-    assertThat(schemas, not(hasKey("PetMixin")))
+    assertFalse(schemas?.containsKey("PetMixin") ?: false)
   }
 
   @Test
