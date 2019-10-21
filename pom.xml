@@ -136,6 +136,11 @@
       <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
       <layout>default</layout>
     </repository>
+    <repository>
+      <id>oss</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <layout>default</layout>
+    </repository>
   </distributionManagement>
 
   <repositories>
