@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.deser.std.NumberDeserializers
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.bluebank.braid.core.jsonrpc.JsonRPCRequest
 import io.bluebank.braid.core.jsonrpc.JsonRPCResultResponse
 import io.vertx.core.json.Json
@@ -27,8 +27,7 @@ import java.math.BigDecimal
 
 object BraidJacksonInit {
   init {
-    listOf(
-      KotlinModule(),
+    val modules = listOf(
       JavaTimeModule(),
       SimpleModule()
         .addSerializer(JsonRPCRequest::class.java, JsonRPCReqestSerializer())
@@ -44,10 +43,15 @@ object BraidJacksonInit {
           BigDecimal::class.java,
           NumberDeserializers.BigDecimalDeserializer()
         )
-    ).forEach {
-      Json.mapper.registerModule(it)
-      Json.prettyMapper.registerModule(it)
+    )
+
+    listOf(Json.mapper, Json.prettyMapper).forEach { mapper ->
+      mapper.registerKotlinModule()
+      modules.forEach { module ->
+        mapper.registerModule(module)
+      }
     }
+
     Json.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     Json.prettyMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
   }

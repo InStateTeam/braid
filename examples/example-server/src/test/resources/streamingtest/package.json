@@ -9,7 +9,7 @@
     "build": "webpack --progress -p",
     "watch": "webpack --progress --watch"
   },
-  "repository": "https://gitlab.bluebank.io/em-tech/hermes",
+  "repository": "https://gitlab.com/bluebank/braid",
   "keywords": [],
   "author": "",
   "license": "ISC",
