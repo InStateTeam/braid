@@ -19,7 +19,7 @@
   <version>4.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>braid docs</name>
-  <url>https://gitlab.bluebank.io/em-tech/hermes</url>
+  <url>https://gitlab.com/bluebank/braid</url>
   <description>a library to make it easy to write new services and apps with fewer
     configuration headaches
   </description>
