@@ -262,6 +262,11 @@
       <version>1.5.23</version>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
       <groupId>net.corda</groupId>
       <artifactId>corda-core</artifactId>
       <version>${corda.version}</version>
