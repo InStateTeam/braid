@@ -34,6 +34,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
+import net.corda.core.contracts.ContractState
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.Builder.equal
@@ -46,6 +47,7 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
 import net.corda.finance.AMOUNT
 import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.contracts.asset.Obligation
 import net.corda.finance.schemas.CashSchemaV1
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
@@ -55,6 +57,7 @@ import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
 import org.junit.*
 import org.junit.runner.RunWith
+import sun.net.util.URLUtil
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
@@ -505,10 +508,31 @@ class BraidCordaStandaloneServerTest {
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
 
-
-
     log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery")
     client.get(port, "localhost", "/api/rest/vault/vaultQuery")
+        .putHeader("Accept", "application/json; charset=utf8")
+        .exceptionHandler(context::fail)
+        .handler {
+          context.assertEquals(200, it.statusCode(), it.statusMessage())
+
+          it.bodyHandler {
+            val nodes = it.toJsonObject()
+
+            vertxAssertThat(context,nodes, notNullValue())
+
+            async.complete()
+          }
+        }
+        .end()
+  }
+
+
+  @Test
+  fun `should query the vault for a specific type`(context: TestContext) {
+    val async = context.async()
+
+    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + Obligation.State::class.java.name)
+    client.get(port, "localhost", "/api/rest/vault/vaultQuery?contract-state-type=" + Obligation.State::class.java.name)
         .putHeader("Accept", "application/json; charset=utf8")
         .exceptionHandler(context::fail)
         .handler {
