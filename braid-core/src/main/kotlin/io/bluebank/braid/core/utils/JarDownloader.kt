@@ -29,8 +29,9 @@ class JarDownloader {
   }
 
   fun uriToFile(url: URL): URL {
-    val filename = url.path.let { File(it) }.name
+    val filename = url.path.replace(url.protocol,"")
     val destination = File(dir, filename)
+    destination.parentFile.mkdirs()
    // if (!destination.exists()) {
       Channels.newChannel(url.openStream()).use { rbc ->
         FileOutputStream(destination).use { fos ->
