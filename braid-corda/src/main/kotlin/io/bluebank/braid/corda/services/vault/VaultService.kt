@@ -22,27 +22,34 @@ import net.corda.core.contracts.ContractState
 import net.corda.core.node.services.Vault
 import javax.ws.rs.QueryParam
 
-class VaultService(val rpc: RPCFactory){
+class VaultService(val rpc: RPCFactory) {
   @ApiOperation(value = "Queries the vault")
   fun vaultQueryBy(
       @ApiParam(
-      value = "Vault query parameters"
-  ) vault: VaultQuery): Vault.Page<ContractState> {
+          value = "Vault query parameters"
+      ) vault: VaultQuery): Vault.Page<ContractState> {
     val vaultQueryBy = rpc.validConnection()
         .vaultQueryBy(vault.criteria, vault.paging, vault.sorting, vault.contractStateType)
     return vaultQueryBy
   }
 
 
-
   @ApiOperation(value = "Queries the vault for contract states of the supplied type")
   fun vaultQuery(
       @QueryParam(value = "contract-state-type")
       @ApiParam(
-      value = "Vault query by contract state type"
-  ) type: Class<ContractState>?): Vault.Page<ContractState> {
-    val vaultQuery = rpc.validConnection().vaultQuery(type ?: ContractState::class.java)
-    return vaultQuery
+          value = "The NAME of the Vault query by contract state type class e.g. \"net.corda.finance.contracts.asset.Obligation.State\""
+      ) type: String?): Vault.Page<ContractState> {
+    return try {
+      val forName =
+          if (type != null && type != "")
+            Class.forName(type, false, Thread.currentThread().contextClassLoader) as Class<ContractState>
+          else ContractState::class.java
+
+      rpc.validConnection().vaultQuery(forName)
+    } catch (e: Exception) {
+      throw RuntimeException("Unable to query contract state:" + type, e)
+    }
   }
 
 }
