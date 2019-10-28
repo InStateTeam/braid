@@ -531,8 +531,8 @@ class BraidCordaStandaloneServerTest {
   fun `should query the vault for a specific type`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + Obligation.State::class.java.name)
-    client.get(port, "localhost", "/api/rest/vault/vaultQuery?contract-state-type=" + Obligation.State::class.java.name)
+    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + CashSchemaV1.PersistentCashState::class.java.name)
+    client.get(port, "localhost", "/api/rest/vault/vaultQuery?contract-state-type=" + CashSchemaV1.PersistentCashState::class.java.name)
         .putHeader("Accept", "application/json; charset=utf8")
         .exceptionHandler(context::fail)
         .handler {
