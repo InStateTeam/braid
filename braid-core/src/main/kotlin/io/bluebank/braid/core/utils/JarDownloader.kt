@@ -31,13 +31,13 @@ class JarDownloader {
   fun uriToFile(url: URL): URL {
     val filename = url.path.let { File(it) }.name
     val destination = File(dir, filename)
-    if (!destination.exists()) {
+   // if (!destination.exists()) {
       Channels.newChannel(url.openStream()).use { rbc ->
         FileOutputStream(destination).use { fos ->
           fos.channel.transferFrom(rbc, 0, Long.MAX_VALUE);
         }
       }
-    }
+  //  }
     return destination.toURI().toURL()
   }
 }
