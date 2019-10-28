@@ -42,7 +42,7 @@ class VaultService(val rpc: RPCFactory) {
       ) type: String?): Vault.Page<ContractState> {
     return try {
       val forName =
-          if (type != null)
+          if (type != null && type != "")
             Class.forName(type, false, Thread.currentThread().contextClassLoader) as Class<ContractState>
           else ContractState::class.java
 
