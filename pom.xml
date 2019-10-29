@@ -573,13 +573,27 @@
   </build>
   <profiles>
     <profile>
+      <id>gitlab-release</id>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>gitlab-maven</id>
+          <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+          <layout>default</layout>
+        </snapshotRepository>
+        <repository>
+          <id>gitlab-maven</id>
+          <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+          <layout>default</layout>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
       <id>release</id>
       <properties>
         <gpg.executable>gpg</gpg.executable>
         <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
-
       <build>
         <plugins>
           <plugin>
