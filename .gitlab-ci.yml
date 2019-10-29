@@ -90,6 +90,7 @@ release:
   when: manual
   script:
     - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
+    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P gitlab-release
     - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P release,npm-release
     - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
     - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge}
@@ -101,34 +102,7 @@ release:
     - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
     - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
     - docker push ${DOCKER_IMAGE_NAME}:latest
-  
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
   tags:
     - build-tools
-
-release-gitlab:
-  stage: release
-  image: dazraf/build-tools:latest
-  variables:
-    BRAID_VERSION: $CI_COMMIT_REF_NAME
-  when: manual
-  script:
-    - mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=${BRAID_VERSION:1}
-    - mvn $MAVEN_CLI_OPTS clean dokka:javadocJar deploy -DskipTests -P gitlab-release
-    - docker tag bluebank/braid-server ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG:-edge}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${CI_REGISTRY_IMAGE}:latest
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID} ${DOCKER_IMAGE_NAME}:latest
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker push ${CI_REGISTRY_IMAGE}
-    - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
-    - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
-    - docker push ${DOCKER_IMAGE_NAME}:latest
-  
-  only:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
-  tags:
-    - build-tools
-
