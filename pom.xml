@@ -572,21 +572,44 @@
     </plugins>
   </build>
   <profiles>
-    <profile>
-      <id>gitlab-release</id>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>gitlab-maven</id>
-          <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
-          <layout>default</layout>
-        </snapshotRepository>
-        <repository>
-          <id>gitlab-maven</id>
-          <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
-          <layout>default</layout>
-        </repository>
-      </distributionManagement>
-    </profile>
+   <profile>
+        <id>gitlab-release</id>
+        <distributionManagement>
+          <snapshotRepository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+            <layout>default</layout>
+          </snapshotRepository>
+          <repository>
+            <id>gitlab-maven</id>
+            <url>https://gitlab.com/api/v4/projects/5172644/packages/maven</url>
+            <layout>default</layout>
+          </repository>
+        </distributionManagement>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.jetbrains.dokka</groupId>
+              <artifactId>dokka-maven-plugin</artifactId>
+              <version>${dokka.version}</version>
+              <executions>
+                <execution>
+                  <phase>pre-site</phase>
+                  <goals>
+                    <goal>javadocJar</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <outputFormat>javadoc</outputFormat>
+                <jdkVersion>8</jdkVersion>
+                <reportNotDocumented>false</reportNotDocumented>
+                <externalDocumentationLinks></externalDocumentationLinks>
+              </configuration>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
     <profile>
       <id>release</id>
       <properties>
