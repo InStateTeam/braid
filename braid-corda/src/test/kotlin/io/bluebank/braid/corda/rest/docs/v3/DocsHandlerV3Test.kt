@@ -41,11 +41,14 @@ class DocsHandlerV3Test {
   init {
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
+    docs.add("group", false, HttpMethod.POST, "stringPath", this::myFunctionReturningString)
+    docs.add("group", false, HttpMethod.POST, "byteArrayPath", this::myFunctionReturningByteArray)
     openApi = docs.createOpenAPI()
   }
 
-  fun myFunction(type: aType) {
-  }
+  fun myFunction(type: aType) {}
+  fun myFunctionReturningString(type: aType) :String { return "yeeehhhhaaa"}
+  fun myFunctionReturningByteArray(type: aType) :ByteArray { return ByteArray(2)}
 
   data class aType(
       val requiredString: String,
@@ -58,6 +61,25 @@ class DocsHandlerV3Test {
   fun `should generate openApi`() {
     val path = openApi.paths["path"]
     assertThat(path, notNullValue())
+  }
+
+
+  @Test
+  fun `should generate text_plain mediatype for string`() {
+    val path = openApi.paths["stringPath"]
+    val content = path?.post?.responses?.get("200")?.content
+    assertThat(content?.get("application/json"), nullValue())
+    assertThat(content?.get("text/plain"), notNullValue())
+  }
+
+
+  @Test
+  fun `should generate application_octet-stream mediatype for byte array`() {
+    val path = openApi.paths["byteArrayPath"]
+    val content = path?.post?.responses?.get("200")?.content
+    assertThat(content?.get("application/json"), nullValue())
+    assertThat(content?.get("text/plain"), nullValue())
+    assertThat(content?.get("application/octet-stream"), notNullValue())
   }
 
 

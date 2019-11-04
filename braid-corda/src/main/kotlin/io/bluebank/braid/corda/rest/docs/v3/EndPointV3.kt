@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.HTTP_UNPROCESSABLE_STATUS_CODE
 import io.bluebank.braid.corda.rest.docs.getKType
+import io.bluebank.braid.corda.rest.docs.isBinary
 import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.nonEmptyOrNull
@@ -173,10 +174,18 @@ abstract class EndPointV3(
         .content(
           Content()
             .addMediaType(
-              MediaType.APPLICATION_JSON,
+                returnType(type),
               io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
             )
         )
+    }
+  }
+
+  private fun returnType(type:Type): String {
+    return when{
+      type.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
+      String::class.java.equals(type)-> MediaType.TEXT_PLAIN
+      else -> MediaType.APPLICATION_JSON
     }
   }
 }
