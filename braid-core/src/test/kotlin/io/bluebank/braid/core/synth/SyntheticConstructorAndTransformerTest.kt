@@ -17,14 +17,11 @@ package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
-import org.hamcrest.CoreMatchers.*
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert
 import org.junit.Ignore
 import org.junit.Test
-import kotlin.reflect.full.findAnnotation
 import kotlin.test.assertEquals
-import javax.validation.constraints.NotNull
 
 class ProgressTracker {
   companion object {
@@ -98,24 +95,7 @@ class SyntheticConstructorAndTransformerTest {
     val result = fn.call(payload)
     assertEquals(1100L, result)
   }
-
- @Test
-  fun `that we can annotate the fields as required @NotNull`() {
-    val boundTypes = createBoundParameterTypes()
-    val constructor = FooFlow::class.java.preferredConstructor()
-    val fn = trampoline(constructor, boundTypes, "MyPayloadName") {
-      constructor.newInstance(*it).call()
-      // println(it)
-    }
-
-
-    fn.parameters.forEach{
-      assertThat(it.isOptional, equalTo(false))
-      val notNull = it.findAnnotation<NotNull>()
-      Assert.assertThat(notNull, notNullValue())
-    }
-
-  }
+  
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
     return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
