@@ -20,9 +20,15 @@ import io.bluebank.braid.core.synth.ClassFromParametersBuilder.Companion.acquire
 import io.swagger.converter.ModelConverters
 import io.swagger.models.Model
 import io.vertx.core.json.Json
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl
+import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.notNullValue
+import org.junit.Assert
 import org.junit.Test
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
+import javax.validation.constraints.NotNull
+import kotlin.reflect.full.findAnnotation
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -98,6 +104,22 @@ class ClassFromParametersBuilderTest {
     val json = Json.encodePrettily(input)
     val parsed = Json.decodeValue(json, payloadClazz)
     assertFieldsAreEqual(input, parsed)
+  }
+
+  @Test
+  fun `that synthesized types have annotation NotNull`() {
+    sampleValues.forEach { assertSynthesizedTypeHasNonNullAnnotations(it) }
+  }
+
+  private fun <T : Any> assertSynthesizedTypeHasNonNullAnnotations(input: T) {
+    val payloadClazz = acquireClass(
+      input.javaClass.constructors.first(),
+      ClassLoader.getSystemClassLoader()
+    )
+    payloadClazz.fields.forEach {
+      val notNull = it.getAnnotation(NotNull::class.java)
+      Assert.assertThat(notNull, notNullValue())
+    }
   }
 }
 
