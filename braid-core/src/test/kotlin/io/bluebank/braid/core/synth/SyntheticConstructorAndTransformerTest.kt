@@ -95,6 +95,7 @@ class SyntheticConstructorAndTransformerTest {
     val result = fn.call(payload)
     assertEquals(1100L, result)
   }
+  
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
     return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())

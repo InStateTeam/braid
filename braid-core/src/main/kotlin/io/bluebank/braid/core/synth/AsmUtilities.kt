@@ -15,11 +15,13 @@
  */
 package io.bluebank.braid.core.synth
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureVisitor
 import org.objectweb.asm.signature.SignatureWriter
 import java.lang.reflect.*
+import javax.validation.constraints.NotNull
 import org.objectweb.asm.Type as AsmType
 
 private val objectClassRef = Object::class.java.canonicalName.replace('.', '/')
@@ -27,6 +29,15 @@ private val objectClassRef = Object::class.java.canonicalName.replace('.', '/')
 /**
  * Writes out to the bytecode a default constructor
  * This is usually done by the Java / Kotlin compiler, but here using ASM we need to be explicit`
+ *
+ *  From https://asm.ow2.io/asm4-guide.pdf
+ * The methods of the ClassVisitor class must be called in the following order,
+specified in the Javadoc of this class:
+visit visitSource?
+visitOuterClass? ( visitAnnotation | visitAttribute )*
+( visitInnerClass | visitField | visitMethod )*
+visitEnd
+ 
  */
 fun ClassWriter.writeDefaultConstructor() {
   val constructorMethod = visitMethod(
@@ -92,13 +103,18 @@ fun ClassWriter.addFields(parameters: Array<Parameter>) =
  * add a parameter as a field to the class being written
  */
 fun ClassWriter.addField(it: Parameter) {
-  visitField(
-    Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL,   // access permissions
-    it.name,                                  // field name
-    AsmType.getDescriptor(it.type),           // raw type description
-    it.parameterizedType.genericSignature(),  // generic parameterisation
-    null                                      // default value is null
-  ).visitEnd()
+  val visitField = visitField(
+      Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL,   // access permissions
+      it.name,                                  // field name
+      AsmType.getDescriptor(it.type),           // raw type description
+      it.parameterizedType.genericSignature(),  // generic parameterisation
+      null                                      // default value is null
+  )
+  val visitAnnotation = visitField
+      .visitAnnotation(AsmType.getDescriptor(NotNull::class.java), true)
+  visitAnnotation.visitEnd()
+  visitField.visitEnd()
+  
 }
 
 /**
