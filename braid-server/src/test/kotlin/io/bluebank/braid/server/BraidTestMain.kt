@@ -21,9 +21,12 @@ import io.bluebank.braid.core.logging.loggerFor
 
 private val log = loggerFor<BraidCordaStandaloneServer>()
 
+/**
+ * BraidTestMainKt class
+ */
 fun main(args: Array<String>) {
   if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
+    throw IllegalArgumentException("Usage: BraidTestMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
   }
 
   val networkAndPort = args[0]
@@ -39,7 +42,7 @@ fun main(args: Array<String>) {
 
 private fun openBrowser(port: Int?, it: String?) {
   log.info("Started Vertical:$it on port:$port")
-  ProcessBuilder().command("open", "http://localhost:$port/swagger.json").start()
-  ProcessBuilder().command("open", "http://localhost:$port/api/rest/cordapps/flows")
+  ProcessBuilder().command("open", "https://localhost:$port/swagger.json").start()
+  ProcessBuilder().command("open", "https://localhost:$port/api/rest/cordapps")
     .start()
 }

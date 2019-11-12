@@ -88,7 +88,12 @@ class BraidCordaStandaloneServerTest {
 
     private val port = if ("true".equals(System.getProperty("braidStarted"))) 9000 else findFreePort()
     private val clientVertx = Vertx.vertx()
-    private val client = clientVertx.createHttpClient(HttpClientOptions().setDefaultHost("localhost").setDefaultPort(port))
+    private val client = clientVertx.createHttpClient(HttpClientOptions()
+        .setDefaultHost("localhost")
+        .setDefaultPort(port)
+        .setSsl(true)
+        .setTrustAll(true)
+        .setVerifyHost(false))
       
 
     @BeforeClass
@@ -196,7 +201,7 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNodesByHostAndPort(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
+    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
     client.get(port, "localhost", "/api/rest/network/nodes?host-and-port=localhost:10004")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -248,7 +253,7 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNodesByX509Name(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
+    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
     client.get(
       port,
       "localhost",
@@ -285,7 +290,7 @@ class BraidCordaStandaloneServerTest {
   fun `should return empty list if node not found`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
+    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
     client.get(
       port,
       "localhost",
@@ -309,7 +314,7 @@ class BraidCordaStandaloneServerTest {
   fun shouldListSelf(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:$port/api/rest/network/nodes/self")
+    log.info("calling get: https://localhost:$port/api/rest/network/nodes/self")
     client.get(port, "localhost", "/api/rest/network/nodes/self")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -340,7 +345,7 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNotaries(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:$port/api/rest/network/notaries")
+    log.info("calling get: https://localhost:$port/api/rest/network/notaries")
     client.get(port, "localhost", "/api/rest/network/notaries")
       .putHeader("Accept", "application/json; charset=utf8")
       .exceptionHandler(context::fail)
@@ -368,7 +373,7 @@ class BraidCordaStandaloneServerTest {
   @Test
   fun shouldListFlows(context: TestContext) {
     val async = context.async()
-    log.info("calling get: http://localhost:$port/api/rest/cordapps/flows")
+    log.info("calling get: https://localhost:$port/api/rest/cordapps/flows")
     client.getFuture("/api/rest/cordapps/corda-core/flows")
       .compose { it.body<List<String>>() }
       .onSuccess { flows ->
@@ -397,7 +402,7 @@ class BraidCordaStandaloneServerTest {
         .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
 
       val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-      log.info("calling post: http://localhost:$port$path")
+      log.info("calling post: https://localhost:$port$path")
 
       val encodePrettily = json.encodePrettily()
       client.post(port, "localhost", path)
@@ -443,7 +448,7 @@ class BraidCordaStandaloneServerTest {
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-      log.info("calling post: http://localhost:$port$path")
+      log.info("calling post: https://localhost:$port$path")
 
       val encodePrettily = json.encodePrettily()
       client.post(port, "localhost", path)
@@ -508,7 +513,7 @@ class BraidCordaStandaloneServerTest {
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery")
+    log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
     client.get(port, "localhost", "/api/rest/vault/vaultQuery")
         .putHeader("Accept", "application/json; charset=utf8")
         .exceptionHandler(context::fail)
@@ -531,7 +536,7 @@ class BraidCordaStandaloneServerTest {
   fun `should query the vault for a specific type`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: http://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
+    log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
     client.get(port, "localhost", "/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
         .putHeader("Accept", "application/json; charset=utf8")
         .exceptionHandler(context::fail)
@@ -589,7 +594,7 @@ class BraidCordaStandaloneServerTest {
 """
 
 
-    log.info("calling post: http://localhost:${port}/api/rest/vault/vaultQueryBy")
+    log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
         .putHeader("Accept", "application/json; charset=utf8")
         .putHeader("Content-length", ""+json.length)
@@ -682,7 +687,7 @@ class BraidCordaStandaloneServerTest {
   "contractStateType" : "net.corda.finance.contracts.asset.Cash${'$'}State"
 }"""
 
-    log.info("calling post: http://localhost:${port}/api/rest/vault/vaultQueryBy")
+    log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
         .putHeader("Accept", "application/json; charset=utf8")
         .putHeader("Content-length", ""+json.length)
@@ -725,7 +730,7 @@ class BraidCordaStandaloneServerTest {
 }      """.trimIndent()
 
       val path = "/api/rest/cordapps/kotlin-source/flows/net.corda.examples.obligation.flows.IssueObligation\$Initiator"
-      log.info("calling post: http://localhost:$port$path")
+      log.info("calling post: https://localhost:$port$path")
 
 
       client.post(port, "localhost", path)

@@ -50,7 +50,7 @@ open class BraidCordaStandaloneServer(
     val result = Future.future<String>()
     BraidConfig()
       .withPort(port)
-      .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+    //  .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
       .withRestConfig(createRestConfig())
       .withVertx(vertx)
       .bootstrapBraid(null, result)

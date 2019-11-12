@@ -42,7 +42,6 @@ class BraidVerticle(
   }
 
   override fun start(startFuture: Future<Void>) {
-    log.info("starting with ", config)
     // setupRouter takes 3500 msec to run on my machine, even for a simple test
     // (though it's only slow when running Braid in a separate server and using the class path scanner,
     // because when using braid within a cordapp it's reasonably fast).
