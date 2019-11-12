@@ -109,7 +109,7 @@ class BraidMainTest {
   }
 
   private fun BraidMain.createHttpClient(port: Int) =
-    vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost"))
+    vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost").setSsl(true).setTrustAll(true).setVerifyHost(false))
 
   private fun verifyOpenApi(context: TestContext, openApi: OpenAPI) {
     context.assertEquals(1, openApi.servers.size)
