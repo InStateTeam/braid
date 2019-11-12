@@ -31,14 +31,17 @@ class JarDownloader {
   fun uriToFile(url: URL): URL {
     val filename = url.path.replace(url.protocol,"")
     val destination = File(dir, filename)
-    destination.parentFile.mkdirs()
-   // if (!destination.exists()) {
+    if (shouldDownload(url, destination.exists())) {
+      destination.parentFile.mkdirs()
       Channels.newChannel(url.openStream()).use { rbc ->
         FileOutputStream(destination).use { fos ->
           fos.channel.transferFrom(rbc, 0, Long.MAX_VALUE);
         }
       }
-  //  }
+    }
     return destination.toURI().toURL()
   }
+
+  fun shouldDownload(destination: URL, destinationExists: Boolean) =
+      destination.path.contains("SNAPSHOT") || !destinationExists
 }
