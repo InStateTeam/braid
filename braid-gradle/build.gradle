@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.bluebank.braid'
-version '0.0.8-SNAPSHOT'
+version '0.0.9-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -14,6 +14,9 @@ repositories {
     mavenCentral()
     maven {
         url 'https://repo1.maven.org/maven2'
+    }
+    maven {
+        url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases'
     }
 }
 
@@ -24,7 +27,7 @@ dependencies {
     testCompile 'io.vertx:vertx-unit:3.7.1'
     compile 'io.bluebank.braid:braid-corda:4.1.2-RC08'
     runtime 'net.corda:corda-core:4.1'
-    runtime 'net.corda:corda-jackson:4.0'
+    runtime 'net.corda:corda-jackson:4.1'
     runtime 'net.corda:corda-node-api:4.1'
 }
 
