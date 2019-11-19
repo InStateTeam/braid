@@ -9,7 +9,7 @@ The plugin is built from here
 ./gradlew assemble
 ```
 
-## Releasing the plugin
+## Releasing the Braid plugin
 1. You need to copy the correct keys (from Fuzz/Robin) for publishing to
 Add the keys into ~/.gradle/gradle.properties
 
@@ -28,7 +28,7 @@ gradle.publish.secret=BY3...
 1. Add the following to your (corda samples) build.gradle file
 ```
 plugins {
-    id "io.bluebank.braid" version "0.0.7-SNAPSHOT"
+    id "io.bluebank.braid" version "....."
 }
 
 

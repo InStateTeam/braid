@@ -18,6 +18,9 @@ package io.bluebank.braid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
+import java.nio.channels.Channels
 
 open class BraidPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -37,12 +40,16 @@ open class BraidPlugin : Plugin<Project> {
                         it.fileMode = executableFileMode
                         it.into("${project.buildDir}/braid")
                     }
+
+                    val url = URL("https://repo1.maven.org/maven2/io/bluebank/braid/braid-server/4.1.2-RC08/braid-server-4.1.2-RC08.jar")
+                    Channels.newChannel(url.openStream()).use { rbc ->
+                        FileOutputStream("${project.buildDir}/braid/braid.jar")
+                            .use { fos ->
+                                fos.channel.transferFrom(rbc, 0, Long.MAX_VALUE);
+                            }
+                    }
                 }
-//
-//        project.copy {
-//            it.from(project.configurations.getByName("runtime"))
-//            it.into("${project.buildDir}/braid/libs")
-//        }
+
     }
 
     val executableFileMode = "0755".toInt(8)
