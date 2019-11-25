@@ -47,10 +47,11 @@ class PathsClassLoaderTest {
     assertNotNull(clazz)
   }
 
+
   @Test
-  fun `3 that we can load classes from directory`() {
+  fun `3 that we can load classes from absolute path`() {
     val homeDir = System.getProperty("user.home")
-    val path = File("$homeDir/.downloaded-cordapps").path
+    val path = File("$homeDir/.downloaded-cordapps").absolutePath
 
     val classLoader = PathsClassLoader.jarsClassLoader(path)
     val clazz = classLoader.loadClass("net.corda.finance.flows.CashIssueFlow")
