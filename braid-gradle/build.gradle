@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'io.bluebank.braid'
-version '0.0.9-SNAPSHOT'
+version System.getProperty('version')
 
 sourceCompatibility = 1.8
 
