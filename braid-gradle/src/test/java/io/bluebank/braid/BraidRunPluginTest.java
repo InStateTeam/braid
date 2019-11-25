@@ -13,7 +13,7 @@ public class BraidRunPluginTest {
     @Test
     public void startBraid(TestContext ctx) {
         Async async = ctx.async();
-        BraidPluginExtension extension = new BraidPluginExtension();
+        BraidRunPluginExtension extension = new BraidRunPluginExtension();
         extension.setPort(9000);
         extension.setNetworkAndPort("localhost:10003");
         extension.setUsername("user1");

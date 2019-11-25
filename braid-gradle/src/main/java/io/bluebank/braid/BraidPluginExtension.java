@@ -1,51 +1,31 @@
 package io.bluebank.braid;
 
 public class BraidPluginExtension {
-    private int port = 8080;
-    private String cordAppsDirectory = "";
+    private String version;
+    private String releaseRepo = "https://repo1.maven.org/maven2";
+    private String snapshotRepo = "https://repo1.maven.org/maven2";
 
-    // rPC details
-    private String username = "user1";
-    private String password = "password";
-    private String networkAndPort = "localhost:10003";
-
-    public int getPort() {
-        return port;
+    public String getVersion() {
+        return version;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public String getCordAppsDirectory() {
-        return cordAppsDirectory;
+    public String getReleaseRepo() {
+        return releaseRepo;
     }
 
-    public void setCordAppsDirectory(String cordAppsDirectory) {
-        this.cordAppsDirectory = cordAppsDirectory;
+    public void setReleaseRepo(String releaseRepo) {
+        this.releaseRepo = releaseRepo;
     }
 
-    public String getUsername() {
-        return username;
+    public String getSnapshotRepo() {
+        return snapshotRepo;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getNetworkAndPort() {
-        return networkAndPort;
-    }
-
-    public void setNetworkAndPort(String networkAndPort) {
-        this.networkAndPort = networkAndPort;
+    public void setSnapshotRepo(String snapshotRepo) {
+        this.snapshotRepo = snapshotRepo;
     }
 }
