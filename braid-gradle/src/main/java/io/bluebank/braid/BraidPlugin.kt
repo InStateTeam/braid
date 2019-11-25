@@ -25,7 +25,6 @@ import java.nio.channels.Channels
 
 open class BraidPlugin : Plugin<Project> {
   companion object {
-    val repo = "https://repo1.maven.org/maven2"
     val reader = HoconReader()
   }
 
@@ -62,9 +61,18 @@ open class BraidPlugin : Plugin<Project> {
       File("${project.buildDir}/nodes").listFiles().filter { it.isDirectory && !it.name.startsWith(".") }
 
   private fun downloadBraid(project: Project, extension: BraidPluginExtension) {
-    val version = extension.version ?: ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
-    val url = URL("$repo/io/bluebank/braid/braid-server/$version/braid-server-$version.jar")
-    url.downloadTo("${project.buildDir}/braid.jar")
+    val version = extension.version ?: ManifestReader("${extension.releaseRepo}/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
+    val repo = if (version.contains("SNAPSHOT")) extension.snapshotRepo else extension.releaseRepo
+
+    val path = "$repo/io/bluebank/braid/braid-server/$version/braid-server-$version.jar"
+    if(repo.startsWith("http")) {
+      URL(path).downloadTo("${project.buildDir}/braid.jar")
+    } else {
+      project.copy {
+        it.from(path)
+        it.into("${project.buildDir}/braid.jar")
+      }
+    }
   }
 
   private fun installBraidTo(project: Project, destinationDirectory: String, extension: BraidRunPluginExtension) {
