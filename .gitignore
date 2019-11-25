@@ -2,7 +2,6 @@
 **/.idea
 **/.gradle
 **/.vertx
-**/.gradle
 .gradle
 **/*.iml
 **/service-scripts

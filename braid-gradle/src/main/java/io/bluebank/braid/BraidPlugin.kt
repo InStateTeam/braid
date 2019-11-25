@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid
 
+import com.typesafe.config.Config
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
@@ -25,22 +26,33 @@ import java.nio.channels.Channels
 open class BraidPlugin : Plugin<Project> {
   companion object {
     val repo = "https://repo1.maven.org/maven2"
+    val reader = HoconReader()
   }
 
   override fun apply(project: Project) {
-    val extension = project.extensions
-        .create("braid", BraidPluginExtension::class.java)
-
     project.buildDir
+
     project.task("braid")
         .doLast {
           downloadBraid(project)
           nodeDirectories(project).forEach {
-            installBraidTo(project,  "${it.absolutePath}/braid", extension)
+            val config = reader.read("${it.absolutePath}/web-server.conf")
+            if(config.hasPath("webAddress"))
+              installBraidTo(project,  "${it.absolutePath}/braid", braidProperties(config))
+            else
+              println("Cant find:${it.absolutePath}/web-server.conf so not creating braid")
           }
-
         }
+  }
 
+  private fun braidProperties(config: Config): BraidPluginExtension {
+    val extension = BraidPluginExtension()
+    extension.setNetworkAndPort(config.getString("rpcSettings.address"))
+    extension.setUsername(config.getConfigList("security.authService.dataSource.users").get(0).getString("user"))
+    extension.setPassword(config.getConfigList("security.authService.dataSource.users").get(0).getString("password"))
+    extension.setPort(Integer.parseInt(config.getString("webAddress").split(":")[1]))
+    extension.setCordAppsDirectory("../cordapps")
+    return extension
   }
 
   private fun nodeDirectories(project: Project) =
