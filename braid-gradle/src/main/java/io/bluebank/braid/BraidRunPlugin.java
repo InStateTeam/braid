@@ -17,10 +17,10 @@ import io.vertx.core.Future;
 public class BraidRunPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        BraidPluginExtension extension = project.getExtensions()
-                .create("braid", BraidPluginExtension.class);
+        BraidRunPluginExtension extension = project.getExtensions()
+                .create("runBraid", BraidRunPluginExtension.class);
 
-        project.task("braid")
+        project.task("runBraid")
                 .doLast(task -> {
                     startBraid(extension).setHandler(h->{
                         System.out.println("Braid started on port:" + extension.getPort());
@@ -32,7 +32,7 @@ public class BraidRunPlugin implements Plugin<Project> {
         userInput.nextLine();
     }
 
-    public Future<String> startBraid(BraidPluginExtension extension) {
+    public Future<String> startBraid(BraidRunPluginExtension extension) {
         System.out.println(
                 "this will in future start braid on port port" + extension.getPort());
         System.out.println(

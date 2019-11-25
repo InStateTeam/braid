@@ -30,11 +30,14 @@ open class BraidPlugin : Plugin<Project> {
   }
 
   override fun apply(project: Project) {
+    val extension = project.extensions
+        .create("braid", BraidPluginExtension::class.java)
+
     project.buildDir
 
     project.task("braid")
         .doLast {
-          downloadBraid(project)
+          downloadBraid(project,extension)
           nodeDirectories(project).forEach {
             val config = reader.read("${it.absolutePath}/web-server.conf")
             if(config.hasPath("webAddress"))
@@ -45,8 +48,8 @@ open class BraidPlugin : Plugin<Project> {
         }
   }
 
-  private fun braidProperties(config: Config): BraidPluginExtension {
-    val extension = BraidPluginExtension()
+  private fun braidProperties(config: Config): BraidRunPluginExtension {
+    val extension = BraidRunPluginExtension()
     extension.setNetworkAndPort(config.getString("rpcSettings.address"))
     extension.setUsername(config.getConfigList("security.authService.dataSource.users").get(0).getString("user"))
     extension.setPassword(config.getConfigList("security.authService.dataSource.users").get(0).getString("password"))
@@ -58,13 +61,13 @@ open class BraidPlugin : Plugin<Project> {
   private fun nodeDirectories(project: Project) =
       File("${project.buildDir}/nodes").listFiles().filter { it.isDirectory && !it.name.startsWith(".") }
 
-  private fun downloadBraid(project: Project) {
-    val latest = ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
-    val url = URL("$repo/io/bluebank/braid/braid-server/$latest/braid-server-$latest.jar")
+  private fun downloadBraid(project: Project, extension: BraidPluginExtension) {
+    val version = extension.version ?: ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
+    val url = URL("$repo/io/bluebank/braid/braid-server/$version/braid-server-$version.jar")
     url.downloadTo("${project.buildDir}/braid.jar")
   }
 
-  private fun installBraidTo(project: Project, destinationDirectory: String, extension: BraidPluginExtension) {
+  private fun installBraidTo(project: Project, destinationDirectory: String, extension: BraidRunPluginExtension) {
 
     project.copy {
       it.from(project.getPluginFile("/braid.bat"))
