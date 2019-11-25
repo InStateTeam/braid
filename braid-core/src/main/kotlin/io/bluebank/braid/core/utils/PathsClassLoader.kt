@@ -44,9 +44,7 @@ object PathsClassLoader {
     return try {
       // attempt to download the file if available
       asList(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
-    } catch (err: IllegalArgumentException) {
-      localFiles(File(urlOrFileName))
-    } catch (err: URISyntaxException) {
+    } catch (err: Exception) {
       // URI throws this exception if urlOrFileName starts with like "C:\" on Windows
       localFiles(File(urlOrFileName))
     }

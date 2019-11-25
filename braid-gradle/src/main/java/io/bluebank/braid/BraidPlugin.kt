@@ -34,33 +34,54 @@ open class BraidPlugin : Plugin<Project> {
     project.buildDir
     project.task("braid")
         .doLast {
-          project.copy {
-            it.from(project.getPluginFile("/braid.bat"))
-            it.into("${project.buildDir}/braid")
+          downloadBraid(project)
+          nodeDirectories(project).forEach {
+            installBraidTo(project,  "${it.absolutePath}/braid", extension)
           }
 
-          project.copy {
-            it.from(project.getPluginFile("/braid"))
-            it.fileMode = executableFileMode
-            it.into("${project.buildDir}/braid")
-          }
-
-          val latest = ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
-          val url = URL("$repo/io/bluebank/braid/braid-server/$latest/braid-server-$latest.jar")
-          url.downloadTo("${project.buildDir}/braid/braid.jar")
-
-
-          // <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2>
-          File("${project.buildDir}/braid/startBraid.bat")
-              .writeText("braid.bat ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 2 ${extension.cordAppsDirectory}")
-
-          val file = File("${project.buildDir}/braid/startBraid")
-          file.writeText("braid.bat ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 2 ${extension.cordAppsDirectory}")
-          file.setWritable(true)
-          file.setExecutable(true, false)
-          file.setReadable(true,false)
         }
 
+  }
+
+  private fun nodeDirectories(project: Project) =
+      File("${project.buildDir}/nodes").listFiles().filter { it.isDirectory && !it.name.startsWith(".") }
+
+  private fun downloadBraid(project: Project) {
+    val latest = ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
+    val url = URL("$repo/io/bluebank/braid/braid-server/$latest/braid-server-$latest.jar")
+    url.downloadTo("${project.buildDir}/braid.jar")
+  }
+
+  private fun installBraidTo(project: Project, destinationDirectory: String, extension: BraidPluginExtension) {
+
+    project.copy {
+      it.from(project.getPluginFile("/braid.bat"))
+      it.into("$destinationDirectory")
+    }
+
+    project.copy {
+      it.from(project.getPluginFile("/braid"))
+      it.fileMode = executableFileMode
+      it.into("$destinationDirectory")
+    }
+
+    project.copy {
+      it.from("${project.buildDir}/braid.jar")
+      it.fileMode = executableFileMode
+      it.into("$destinationDirectory")
+    }
+
+    // <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2>
+    File("$destinationDirectory/startBraid.bat")
+        .writeText("braid.bat ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 2 ${extension.cordAppsDirectory}")
+
+    val file = File("$destinationDirectory/startBraid")
+    file.writeText("./braid ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 2 ${extension.cordAppsDirectory}")
+    file.setWritable(true)
+    file.setExecutable(true, false)
+    file.setReadable(true, false)
+
+    println("Braid installed at: $destinationDirectory")
   }
 
 
