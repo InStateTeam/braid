@@ -57,7 +57,7 @@ build:
   image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
-    - braid-gradle/gradlew assemble
+    - ./braid-gradle/gradlew assemble -b ./braid-gradle/build.gradle
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
   only:
     - /^[0-9]+-.*$/
