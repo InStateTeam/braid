@@ -45,7 +45,7 @@ open class BraidPlugin : Plugin<Project> {
             it.into("${project.buildDir}/braid")
           }
 
-          val latest = ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").latest()
+          val latest = ManifestReader("$repo/io/bluebank/braid/braid-server/maven-metadata.xml").releaseVersion()
           val url = URL("$repo/io/bluebank/braid/braid-server/$latest/braid-server-$latest.jar")
           url.downloadTo("${project.buildDir}/braid/braid.jar")
 
