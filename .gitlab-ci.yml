@@ -57,6 +57,7 @@ build:
   image: dazraf/build-tools:latest
   script:
     - mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=settings.localRepository clean license:check install
+    - ./braid-gradle/gradlew assemble -b ./braid-gradle/build.gradle
     - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
   only:
     - /^[0-9]+-.*$/
@@ -102,6 +103,8 @@ release:
     - docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
     - docker push ${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG:-edge}
     - docker push ${DOCKER_IMAGE_NAME}:latest
+    - ./braid-gradle/gradlew publishPlugins -b ./braid-gradle/build.gradle -Dversion=${BRAID_VERSION:1}
+#    - braid-gradle/gradlew publishPlugins need to work out how to get release version number
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+.*$/
   tags:
