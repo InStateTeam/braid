@@ -17,6 +17,8 @@ package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.utils.JarDownloader
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.toPath
 import net.corda.core.utilities.getOrThrow
@@ -58,12 +60,20 @@ fun main(args: Array<String>) {
       startNode(providedName = bankB, rpcUsers = listOf(user))
     ).map { it.getOrThrow() }
 
-    BraidMain(jarFiles, 3).apply {
-      start(partyA.rpcAddress.toString(), "user1", "test", 8080)
+    val braidMain = BraidMain()
+    braidMain
+        .start(JsonObject()
+            .put("cordapps", JsonArray(jarFiles) )
+            .put("networkAndPort", partyA.rpcAddress.toString())
+            .put("port",8080))
         .compose {
-          start(partyB.rpcAddress.toString(), "user1", "test", 8081)
+          braidMain.start(
+              JsonObject()
+                  .put("cordapps", JsonArray(jarFiles) )
+                  .put("networkAndPort", partyB.rpcAddress.toString())
+                  .put("port",8081))
         }
-    }
+
   }
 }
 

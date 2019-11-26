@@ -29,6 +29,8 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.vertx.core.Future
 import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.contracts.Amount
@@ -141,7 +143,7 @@ class BraidMainTest {
         startNode(providedName = bankB, rpcUsers = listOf(user))
       ).map { it.getOrThrow() }
 
-      val braidMain = BraidMain(jarFiles, 3)
+      val braidMain = BraidMain()
       var result: T? = null
 
       val async = context.async()
@@ -158,9 +160,16 @@ class BraidMainTest {
 
   private fun setupBraidServers(braidMain: BraidMain, partyA: NodeHandle, partyB: NodeHandle): Future<String> {
     return braidMain
-      .start(partyA.rpcAddress.toString(), "user1", "test", braidAPort)
+      .start(JsonObject()
+          .put("cordapps", JsonArray(jarFiles) )
+          .put("networkAndPort", partyA.rpcAddress.toString())
+          .put("port",braidAPort))
       .compose {
-        braidMain.start(partyB.rpcAddress.toString(), "user1", "test", braidBPort)
+        braidMain.start(
+            JsonObject()
+            .put("cordapps", JsonArray(jarFiles) )
+            .put("networkAndPort", partyB.rpcAddress.toString())
+            .put("port",braidAPort))
       }
   }
 }

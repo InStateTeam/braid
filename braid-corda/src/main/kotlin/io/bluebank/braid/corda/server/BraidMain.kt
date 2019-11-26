@@ -22,6 +22,8 @@ import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<BraidMain>()
@@ -30,15 +32,8 @@ private val log = loggerFor<BraidMain>()
  * The top level entry point for running braid as an executable
  */
 class BraidMain(
-  private val jarsClassLoader: ClassLoader = Thread.currentThread().contextClassLoader,
-  private val openApiVersion: Int = 3,
-  externalVertx: Vertx? = null
-) {
-  constructor(
-    cordappPaths: List<String> = emptyList(),
-    openApiVersion: Int = 3,
     externalVertx: Vertx? = null
-  ) : this(cordappPaths.toJarsClassLoader(), openApiVersion, externalVertx)
+) {
 
   val vertx: Vertx
   private val internallyCreated: Boolean
@@ -54,22 +49,17 @@ class BraidMain(
     }
   }
 
-  /**
-   * start a braid server on [vertx] instance
-   */
-  fun start(
-    networkAndPort: String,
-    userName: String,
-    password: String,
-    port: Int
+    fun start(
+        config: JsonObject
   ): Future<String> {
-    return tryWithClassLoader(jarsClassLoader) {
+      val cordApps = config.getJsonArray("cordapps", JsonArray()).toList() as List<String>
+      return tryWithClassLoader(cordApps.toJarsClassLoader()) {
       BraidCordaStandaloneServer(
-        port = port,
-        userName = userName,
-        password = password,
-        nodeAddress = NetworkHostAndPort.parse(networkAndPort),
-        openApiVersion = openApiVersion,
+        port = config.getInteger("port",8080),
+        userName = config.getString("user","user1"),
+        password = config.getString("password","test"),
+        nodeAddress = NetworkHostAndPort.parse(config.getString("networkAndPort")),
+        openApiVersion = config.getInteger("openApiVersion",3),
         vertx = vertx
       )
         .startServer()

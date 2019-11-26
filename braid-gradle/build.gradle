@@ -43,7 +43,7 @@ gradlePlugin {
         braidPlugin {
             id = 'io.bluebank.braid'
             displayName = 'Braid RPC Server for Corda'
-            description = 'Plugin for starting Braid from a gradle script, to be used in conjuction with Cordas deployNodes task'
+            description = 'Plugin for deploy Braid from a gradle script, to be used in conjuction with Cordas deployNodes task.\n Run\n\n ./gradlew deployNodes braid\n\n Braid is deployed to /nodes/PartyX/braid \n\n to run\n\n cd /nodes/PartyX/braid\n./startBraid'
             implementationClass = 'io.bluebank.braid.BraidPlugin'
         }
     }
