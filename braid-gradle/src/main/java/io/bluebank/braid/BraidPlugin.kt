@@ -22,7 +22,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.channels.Channels
+import java.nio.file.CopyOption
 import java.nio.file.Files
+import java.nio.file.Files.copy
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 open class BraidPlugin : Plugin<Project> {
   companion object {
@@ -69,7 +73,7 @@ open class BraidPlugin : Plugin<Project> {
     if(repo.startsWith("http")) {
       URL(path).downloadTo("${project.buildDir}/braid.jar")
     } else {
-      Files.copy(File(path).toPath(),File("${project.buildDir}/braid.jar").toPath())
+      copy(File(path).toPath(),File("${project.buildDir}/braid.jar").toPath(), REPLACE_EXISTING)
     }
   }
 
