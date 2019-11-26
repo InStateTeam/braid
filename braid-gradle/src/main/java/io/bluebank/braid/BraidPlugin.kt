@@ -16,16 +16,15 @@
 package io.bluebank.braid
 
 import com.typesafe.config.Config
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.channels.Channels
-import java.nio.file.CopyOption
-import java.nio.file.Files
 import java.nio.file.Files.copy
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 open class BraidPlugin : Plugin<Project> {
@@ -45,20 +44,20 @@ open class BraidPlugin : Plugin<Project> {
           nodeDirectories(project).forEach {
             val config = reader.read("${it.absolutePath}/web-server.conf")
             if(config.hasPath("webAddress"))
-              installBraidTo(project,  "${it.absolutePath}/braid", braidProperties(config))
+              installBraidTo(project,  "${it.absolutePath}", braidProperties(config))
             else
               println("Cant find:${it.absolutePath}/web-server.conf so not creating braid")
           }
         }
   }
 
-  private fun braidProperties(config: Config): BraidRunPluginExtension {
-    val extension = BraidRunPluginExtension()
-    extension.setNetworkAndPort(config.getString("rpcSettings.address"))
-    extension.setUsername(config.getConfigList("security.authService.dataSource.users").get(0).getString("user"))
-    extension.setPassword(config.getConfigList("security.authService.dataSource.users").get(0).getString("password"))
-    extension.setPort(Integer.parseInt(config.getString("webAddress").split(":")[1]))
-    extension.setCordAppsDirectory("../cordapps")
+  private fun braidProperties(config: Config): JsonObject {
+    val extension = JsonObject()
+    extension.put("networkAndPort",config.getString("rpcSettings.address"))
+    extension.put("username",config.getConfigList("security.authService.dataSource.users").get(0).getString("user"))
+    extension.put("password",config.getConfigList("security.authService.dataSource.users").get(0).getString("password"))
+    extension.put("port",Integer.parseInt(config.getString("webAddress").split(":")[1]))
+    extension.put("cordapps", JsonArray().add("cordapps"))
     return extension
   }
 
@@ -77,7 +76,7 @@ open class BraidPlugin : Plugin<Project> {
     }
   }
 
-  private fun installBraidTo(project: Project, destinationDirectory: String, extension: BraidRunPluginExtension) {
+  private fun installBraidTo(project: Project, destinationDirectory: String, config: JsonObject) {
 
     project.copy {
       it.from(project.getPluginFile("/braid.bat"))
@@ -97,14 +96,8 @@ open class BraidPlugin : Plugin<Project> {
     }
 
     // <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2>
-    File("$destinationDirectory/startBraid.bat")
-        .writeText("braid.bat ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 3 ${extension.cordAppsDirectory}")
-
-    val file = File("$destinationDirectory/startBraid")
-    file.writeText("./braid ${extension.networkAndPort} ${extension.username} ${extension.password} ${extension.port} 3 ${extension.cordAppsDirectory}")
-    file.setWritable(true)
-    file.setExecutable(true, false)
-    file.setReadable(true, false)
+    File("$destinationDirectory/braid.conf")
+        .writeText(config.encodePrettily())
 
     println("Braid installed at: $destinationDirectory")
   }

@@ -25,19 +25,9 @@ private val log = loggerFor<BraidCordaStandaloneServer>()
  * BraidTestMainKt class
  */
 fun main(args: Array<String>) {
-  if (args.size < 4) {
-    throw IllegalArgumentException("Usage: BraidTestMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
-  }
-
-  val networkAndPort = args[0]
-  val userName = args[1]
-  val password = args[2]
-  val port = Integer.valueOf(args[3])
-  val openApiVersion = Integer.valueOf(args[4])
-  val additionalPaths = args.asList().drop(5)
-
-  BraidMain(additionalPaths, openApiVersion).start(networkAndPort, userName, password, port)
-    .map { openBrowser(port, it) }
+  val config = BraidConfig.config(args)
+  BraidMain().start(config)
+    .map { openBrowser(config.getInteger("port"), it) }
 }
 
 private fun openBrowser(port: Int?, it: String?) {
