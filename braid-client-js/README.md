@@ -11,7 +11,7 @@ followed by something along the lines of:
 ```javascript
 const Proxy = require('braid-client').Proxy;
 
-const alpha1 = new Proxy({url: 'https://alpha-one.cordite.foundation:8080/api/'}, onOpen, onClose, onError, {strictSSL: false})
+const alpha1 = new Proxy({url: 'https://amer-test.cordite.foundation/api/'}, onOpen, onClose, onError, {strictSSL: false})
 
 let saltedDaoName = 'testDao-'+new Date().getTime()
 
