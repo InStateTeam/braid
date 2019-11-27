@@ -14,16 +14,16 @@ This is a top-level introduction to the implementation architecture.
 
 There are various ways to use this project -- various functions which it implements.
 
-In any given project you'll probably choose one type of client, talking to one type of server, using one network protocol.
+In any given project you'll probably choose a type of client, talking to one type of server, using one network protocol.
 
 <table>
 
 <tr>
 <td>Clients</td>
 <td><ul>
-<li>JavaScript library for your Node.js clients -- Corda or non-Corda server</li>
-<li>Kotlin library for your JVM clients -- non-Corda server</li>
-<li>Kotlin library for your JVM clients -- Corda server</li>
+<li>JavaScript library for your Node.js clients ⇨ Corda or non-Corda server</li>
+<li>Kotlin library for your JVM clients ⇨ non-Corda server</li>
+<li>Kotlin library for your JVM clients ⇨ Corda server</li>
 </ul></td>
 </tr>
 
@@ -136,8 +136,8 @@ these expose braid's client-side API, which is used by your client-side applicat
 
 <tr>
   <td><code>example-server</code></td>
-  <td>?? -- the source code for this has been maintained but it doesn't appear to be Corda-specific</td>
-  <td>?? - <a href="./examples/example-server/DEPLOY.md">DEPLOY.md</a> says "Bluebank" so it's probably obsolete.</td>
+  <td>a standalone server using braid</td>
+  <td>-</td>
 </tr>
 
 <tr>
@@ -149,12 +149,6 @@ these expose braid's client-side API, which is used by your client-side applicat
   <td>This project builds a one-page document hosted here:
   <a href="https://gitlab.com/bluebank/braid/blob/master/braid-docs/src/site/sphinx/index.rst">braid 3.1.4 documentation</a></td>
   <td>-</td>
-</tr>
-
-<tr>
-  <td><code>braid-quickstart</code></td>
-  <td>?? -- maybe similar to the <code>./example/example-server</code> project</td>
-  <td>?? -- refers to <code>https://openshift.ocp-bluebank.io</code> so it's maybe obsolete?</td>
 </tr>
 
 </table>
@@ -175,25 +169,6 @@ Here are the inter-module dependencies -- shown as an inverted tree -- with the 
     - other servers (e.g. `braid-standalone-server`) depends on `braid-core` but not Corda
 
 This is an illustration of these dependencies:
-<!-- created using http://asciiflow.com/ could similarly be done with https://textik.com -->
-
-                 SERVER-SIDE                                       CLIENT-SIDE
-
-
-            braid-server                                                     braid-corda-client
-                        +-+                                                +-+
-                          +-+                                           +--+
-                            v                                           v
-                            braid-corda                      braid-client
-                                      +-+                +-+
-                                        +---+        +---+
-    braid-standalone-server                 v        v
-                          +-------------->  braid-core
-
-
-                                              SHARED COMMON LIBRARY
-
-(OR, WOULD A NON-ASCII PNG IMAGE BE PREFERABLE HERE?)
 
 ![](./MODULES.png)
 
@@ -207,36 +182,6 @@ In theory you can view the dependency tree using ...
 ```
 mvn dependency:tree
 ```
-
-... but, its output is cluttered.
-
-See [`DEPENDENCIES.md`](./DEPENDENCIES.md) --
-which, is a machine-generated summary of what's in all the `pom.xml` files.
-
-Like "a system" is defined by its data I/O, a program's functionality may be understood (at a very high level, the "big picture") by looking at what capabilities it imports, from external dependencies i.e. libraries.
-
-Here is a very brief summary of the functionality provided by each external dependency.
-
-`artifactId`|Description
----|---
-`com.fasterxml.jackson`|support for JSON, annotations like `@JsonTypeInfo`, and the JSON Schema (Kotlin and the JVM have no native built-in support for JSON)
-`com.squareup.okhttp3`|an HTTP client
-`commons-beanutils`|assists reflection and class inspection -- NOT USED SO MIGHT BE REMOVED? `braid-server` still builds and runs if it's removed
-`io.bluebank.braid`|braid modules -- i.e. in this project
-`io.github.classgraph`|a classpath scanner and module scanner
-`io.netty`|network I/O -- the `io.vertx` package also depends on this package
-`io.reactivex`|IS THIS OBSOLETE TOO? `braid-core` and `braid-standalone-server` still build and run after it's removed
-`io.swagger`|Swagger's OpenAPI for documenting a REST interface
-`io.vertx`|Network, I/O, and thread-scheduling -- plus extensions for HTTP, web applications, authentication, and unit tests
-`javax.ws.rs`|interfaces and annotations used to create RESTful service resources
-`net.corda`|Corda
-`org.apache.commons`|locale API (only to implement the HTTP Accept-Language header)
-`org.apache.logging`|logging
-`org.jetbrains.kotlin`|kotlin's standard library, and reflection
-`org.ow2.asm`|Java bytecode manipulation
-`org.slf4j`|logging
-
----
 
 ## Testing
 
@@ -262,7 +207,7 @@ These files start the various types of Braid server, after which you can do your
 
 You might want to edit these files slightly before you run them, for example to tweak:
 
-- Which port number[s] to bind to
+- Which port number(s) to bind to
 - How many Corda nodes to start
 - Whether to run the Corda nodes in-process or out-of-process
 
@@ -274,7 +219,6 @@ Module|Test
 `braid-client-js`|none -- but the [README](./braid-client-js/README.md) describes how to create a simple program which use the client
 `braid-corda`|[`integration/CordaNet`](./braid-corda/src/test/kotlin/io/bluebank/braid/corda/integration/CordaNet.kt) -- WHICH KIND OF SERVER IS THIS? -- you can run this manually but it's run automatically,to start a server, in the [`JavascriptIntegrationTests`](./braid-corda/src/test/kotlin/io/bluebank/braid/corda/integration/JavascriptIntegrationTests.kt)
 `braid-corda`|[`rest/TestServiceApp`](./braid-corda/src/test/kotlin/io/bluebank/braid/corda/rest/TestServiceApp.kt) -- this is a non-Corda server -- you can run this manually but it's run automatically,to start a server, in the [`AbstractRestMounterTest`](./braid-corda/src/test/kotlin/io/bluebank/braid/corda/rest/AbstractRestMounterTest.kt)
-`braid-corda`|[`server/RPCTest`](./braid-corda/src/test/kotlin/io/bluebank/braid/corda/server/RPCTest.kt) -- WHAT IS THIS?
 `braid-corda-client`|none
 `braid-core`|none
 `braid-server`|there are several -- see the [`braid-server/readme`](./braid-server/readme.md) for details.
