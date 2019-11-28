@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.server
+package io.bluebank.braid.corda.standalone
 
 import io.bluebank.braid.corda.server.BraidMain
 import io.bluebank.braid.core.utils.JarDownloader

@@ -69,7 +69,7 @@ class BraidServer(private val services: AppServiceHub?, private val config: Brai
         log.error(msg, it.cause())
         fDeployId.fail(RuntimeException(msg, it.cause()))
       } else {
-        log.info("Braid server started successfully on ${config.port}")
+        log.info("Braid server started successfully on ${config.protocol}://localhost:${config.port}")
         fDeployId.complete(it.result())
       }
       fn?.handle(it)
