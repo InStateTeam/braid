@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.core.synth
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureVisitor

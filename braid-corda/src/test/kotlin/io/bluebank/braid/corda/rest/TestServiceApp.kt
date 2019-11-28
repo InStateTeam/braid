@@ -17,7 +17,6 @@ package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.BraidServer
-import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.security.JWTUtils
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -28,7 +27,7 @@ import io.vertx.ext.auth.jwt.JWTOptions
 import java.io.File
 import java.io.FileOutputStream
 
-class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 2) {
+class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 3) {
   companion object {
     const val SWAGGER_ROOT = ""
     const val REST_API_ROOT = "/rest"
@@ -50,7 +49,7 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
       .withPort(port)
       .withService(service)
       .withAuthConstructor(this::createAuthProvider)
-      .withHttpServerOptions(HttpServerConfig.defaultServerOptions().setSsl(false))
+      .applyTLSOptions()
       .withRestConfig(
         RestConfig()
           .withServiceName("my-service")
