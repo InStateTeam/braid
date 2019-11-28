@@ -46,7 +46,7 @@ The server will look for the following list of system properties or environment 
 <tbody>
 <tr>
 <td>braid.server.tls.cert.path</td><td>BRAID_SERVER_TLS_CERT_PATH</td>
-<td>Path to a certificate file. Supported formats are jks, p12 or pfx, and pem</td>
+<td>Path to a certificate file. Supported formats are jks, p12/pfx, and pem</td>
 </tr>
 <tr>
 <td>braid.server.tls.cert.secret</td><td>BRAID_SERVER_TLS_CERT_SECRET</td>
@@ -59,6 +59,10 @@ The server will look for the following list of system properties or environment 
 </tr>
 </tbody>
 </table>
+
+### Creating your own self-signed certs 
+There is an example script in [../braid-corda/src/test/resources/certs/generate.sh](../braid-corda/src/test/resources/certs/generate.sh) 
+that generates pem, pfx, or jks certs. The example also associates the certs with localhost so it's suitable for server-to-server testing.
 
 ## Running locally in an IDE
 
