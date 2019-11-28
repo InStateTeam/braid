@@ -18,6 +18,7 @@ package io.bluebank.braid.corda.rest
 import io.bluebank.braid.core.socket.findFreePort
 import io.netty.handler.codec.http.HttpHeaderValues
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
@@ -41,7 +42,13 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
   private val port = findFreePort()
   private val service = TestServiceApp(port = port, service = TestService(), openApiVersion = openApiVersion)
-  private val client = service.server.vertx.createHttpClient()
+  private val client = service.server.vertx.createHttpClient(HttpClientOptions().apply {
+    defaultHost = "localhost"
+    defaultPort = port
+    isSsl = true
+    isTrustAll = true
+    isVerifyHost = false
+  })
 
   @Before
   fun before(context: TestContext) {
@@ -58,7 +65,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
   fun `test that we can mount rest endpoints and access via swagger`(context: TestContext) {
     val async1 = context.async()
     log.info("calling GET ${TestServiceApp.SWAGGER_ROOT}/swagger.json")
-    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/swagger.json") { httpResponse ->
+    client.get("${TestServiceApp.SWAGGER_ROOT}/swagger.json") { httpResponse ->
       httpResponse.bodyHandler { buffer ->
         try {
           val s = buffer.toString()
@@ -75,7 +82,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async2 = context.async()
     log.info("calling GET ${TestServiceApp.SWAGGER_ROOT}/")
-    client.get(port, "localhost", "${TestServiceApp.SWAGGER_ROOT}/") { httpResponse ->
+    client.get("${TestServiceApp.SWAGGER_ROOT}/") { httpResponse ->
       httpResponse.bodyHandler { buffer ->
         val body = buffer.toString()
         context.assertTrue(body.contains("<title>Swagger UI</title>", true))
@@ -88,7 +95,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async3 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/hello")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/hello") {
+    client.get("${TestServiceApp.REST_API_ROOT}/hello") {
       it.bodyHandler {
         context.assertEquals("hello", it.toString())
         async3.complete()
@@ -100,7 +107,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async4 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/buffer")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/buffer") { response ->
+    client.get("${TestServiceApp.REST_API_ROOT}/buffer") { response ->
       response.bodyHandler { body ->
         context.assertEquals(
           HttpHeaderValues.APPLICATION_OCTET_STREAM.toString(),
@@ -116,7 +123,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async5 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytearray")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytearray")
+    client.get("${TestServiceApp.REST_API_ROOT}/bytearray")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -133,7 +140,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async6 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytebuf")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytebuf")
+    client.get("${TestServiceApp.REST_API_ROOT}/bytebuf")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -150,7 +157,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async7 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/bytebuffer")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/bytebuffer")
+    client.get("${TestServiceApp.REST_API_ROOT}/bytebuffer")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -168,7 +175,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val async8 = context.async()
     val bytes = Buffer.buffer("hello")
     log.info("calling POST ${TestServiceApp.REST_API_ROOT}/doublebuffer")
-    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/doublebuffer")
+    client.post("${TestServiceApp.REST_API_ROOT}/doublebuffer")
       .putHeader(HttpHeaders.CONTENT_TYPE, HttpHeaderValues.APPLICATION_OCTET_STREAM)
       .putHeader(HttpHeaders.CONTENT_LENGTH, bytes.length().toString())
       .exceptionHandler(context::fail)
@@ -189,7 +196,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val async9 = context.async()
     var token = ""
     log.info("calling POST ${TestServiceApp.REST_API_ROOT}/login")
-    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/login")
+    client.post("${TestServiceApp.REST_API_ROOT}/login")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -204,7 +211,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async10 = context.async()
     log.info("calling POST ${TestServiceApp.REST_API_ROOT}/echo")
-    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/echo")
+    client.post("${TestServiceApp.REST_API_ROOT}/echo")
       .exceptionHandler(context::fail)
       .handler { response ->
         response.bodyHandler { body ->
@@ -221,7 +228,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val async11 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/list/string with the required header 'x-list-string'. Should return an array containing the value of the header")
     val headerValues = listOf(1, 2, 3)
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/list/string")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers/list/string")
       .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -236,7 +243,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async12 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/list/int with the required header 'x-list-string'. Should return an array containing the value of the header")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/list/int")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers/list/int")
       .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -251,7 +258,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async13 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers with the header 'x-string'. Should return an array containing the value of the x-string header")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers")
       .putHeader(X_HEADER_LIST_STRING, headerValues.map { it.toString() })
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -267,7 +274,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val async14 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/optional with the header 'x-string'. Should return the value of the x-string header")
     val testString = "this is a test"
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/optional")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers/optional")
       .putHeader(X_HEADER_STRING, testString)
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -281,7 +288,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async15 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/optional without the optioinal header 'x-string'. Should return 'null'")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/optional")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers/optional")
       // N.B. no header set
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -295,7 +302,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
 
     val async16 = context.async()
     log.info("calling GET ${TestServiceApp.REST_API_ROOT}/headers/non-optional without the required header 'x-string'. This will expect an assertion to fail in the server. This is okay.")
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/headers/non-optional")
+    client.get("${TestServiceApp.REST_API_ROOT}/headers/non-optional")
       // N.B. no header set
       .exceptionHandler(context::fail)
       .handler { response ->
@@ -309,7 +316,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
   @Test
   fun `test that method that fails returns all headers`(context: TestContext) {
     val async1 = context.async()
-    client.get(port, "localhost", "${TestServiceApp.REST_API_ROOT}/willfail")
+    client.get("${TestServiceApp.REST_API_ROOT}/willfail")
       .exceptionHandler(context::fail)
       .handler {
         context.assertEquals(HTTP_UNPROCESSABLE_STATUS_CODE, it.statusCode())
@@ -333,7 +340,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val expected = request.map {
       it.key.toString() to it.value.toString()
     }.toMap()
-    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/map-numbers-to-string")
+    client.post("${TestServiceApp.REST_API_ROOT}/map-numbers-to-string")
       .exceptionHandler(context::fail)
       .handler { response ->
         context.assertEquals(200, response.statusCode())
@@ -353,7 +360,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
     val expected = result.map { entry ->
       entry.key.toString() to entry.value.map { value -> value.toString() }
     }.toMap()
-    client.post(port, "localhost", "${TestServiceApp.REST_API_ROOT}/map-list-of-numbers-to-map-of-list-of-string")
+    client.post("${TestServiceApp.REST_API_ROOT}/map-list-of-numbers-to-map-of-list-of-string")
       .exceptionHandler(context::fail)
       .handler { response ->
         context.assertEquals(200, response.statusCode())

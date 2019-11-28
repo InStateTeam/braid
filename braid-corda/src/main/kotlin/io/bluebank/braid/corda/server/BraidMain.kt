@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
+import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
@@ -55,12 +56,13 @@ class BraidMain(
       val cordApps = config.getJsonArray("cordapps", JsonArray()).toList() as List<String>
       return tryWithClassLoader(cordApps.toJarsClassLoader()) {
       BraidCordaStandaloneServer(
-        port = config.getInteger("port",8080),
-        userName = config.getString("user","user1"),
-        password = config.getString("password","test"),
+        port = config.getInteger("port", 8080),
+        userName = config.getString("user", "user1"),
+        password = config.getString("password", "test"),
         nodeAddress = NetworkHostAndPort.parse(config.getString("networkAndPort")),
-        openApiVersion = config.getInteger("openApiVersion",3),
-        vertx = vertx
+        openApiVersion = config.getInteger("openApiVersion", 3),
+        vertx = vertx,
+        httpServerOptions = HttpServerConfig.buildFromPropertiesAndVars()
       )
         .startServer()
         .onSuccess {

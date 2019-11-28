@@ -24,6 +24,7 @@ import io.bluebank.braid.core.async.catch
 import io.bluebank.braid.core.async.onSuccess
 import io.bluebank.braid.core.http.body
 import io.bluebank.braid.core.http.getFuture
+import io.bluebank.braid.core.http.postFuture
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -47,7 +48,6 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.core.utilities.loggerFor
 import net.corda.finance.AMOUNT
 import net.corda.finance.contracts.asset.Cash
-import net.corda.finance.contracts.asset.Obligation
 import net.corda.finance.schemas.CashSchemaV1
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
@@ -57,7 +57,6 @@ import net.corda.testing.node.User
 import org.hamcrest.CoreMatchers.*
 import org.junit.*
 import org.junit.runner.RunWith
-import sun.net.util.URLUtil
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
@@ -80,21 +79,22 @@ class BraidCordaStandaloneServerTest {
     init {
       BraidCordaJacksonSwaggerInit.init()
     }
+
     private val log = loggerFor<BraidCordaStandaloneServerTest>()
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
     private val bankA = CordaX500Name("BankA", "", "GB")
     private val bankB = CordaX500Name("BankB", "", "US")
 
-    private val port = if ("true".equals(System.getProperty("braidStarted"))) 9000 else findFreePort()
+    private val port = if ("true" == System.getProperty("braidStarted")) 9000 else findFreePort()
     private val clientVertx = Vertx.vertx()
-    private val client = clientVertx.createHttpClient(HttpClientOptions()
-        .setDefaultHost("localhost")
-        .setDefaultPort(port)
-        .setSsl(true)
-        .setTrustAll(true)
-        .setVerifyHost(false))
-      
+    private val client = clientVertx.createHttpClient(HttpClientOptions().apply {
+      defaultHost = "localhost"
+      defaultPort = port
+      isSsl = true
+      isVerifyHost = false
+      isTrustAll = true
+    })
 
     @BeforeClass
     @JvmStatic
@@ -286,7 +286,7 @@ class BraidCordaStandaloneServerTest {
       .end()
   }
 
- @Test
+  @Test
   fun `should return empty list if node not found`(context: TestContext) {
     val async = context.async()
 
@@ -392,47 +392,37 @@ class BraidCordaStandaloneServerTest {
   fun `should Start a CashIssueFlow`(context: TestContext) {
     val async = context.async()
 
-    getNotary().map {
-      val notary = it
+    getNotary()
+      .compose { notary ->
+        val json = JsonObject()
+          .put("notary", notary)
+          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
+        val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+        log.info("calling post: https://localhost:$port$path")
+        val encodePrettily = json.encodePrettily()
+        client.postFuture(path, mapOf("Accept" to "application/json; charset=utf8", "Content-length" to "${encodePrettily.length}"), body = encodePrettily)
+      }
+      .compose { it.body<JsonObject>() }
+      .onSuccess { reply ->
+        log.info("reply:" + reply.encodePrettily())
+        context.assertThat(reply, notNullValue())
+        context.assertThat(reply.getJsonObject("stx"), notNullValue())
+        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
+        val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
+        log.info(signedTransactionJson)
 
-      val json = JsonObject()
-        .put("notary", notary)
-        .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-        .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
-
-      val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-      log.info("calling post: https://localhost:$port$path")
-
-      val encodePrettily = json.encodePrettily()
-      client.post(port, "localhost", path)
-        .putHeader("Accept", "application/json; charset=utf8")
-        .putHeader("Content-length", "" + encodePrettily.length)
-        .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(200, it.statusCode(), it.statusMessage())
-
-          it.bodyHandler {
-            val reply = it.toJsonObject()
-            log.info("reply:" + reply.encodePrettily())
-            context.assertThat(reply, notNullValue())
-            context.assertThat(reply.getJsonObject("stx"), notNullValue())
-            context.assertThat(reply.getJsonObject("recipient"), notNullValue())
-
-            val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
-            log.info(signedTransactionJson)
-
-            //  todo round trip SignedTransaction
-            // Failed to decode: Expected exactly 1 of {nodeSerializationEnv, driverSerializationEnv, contextSerializationEnv, inheritableContextSerializationEnv}
-            withTestSerializationEnvIfNotSet {
-              Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
-            }
-            async.complete()
-          }
+        //  todo round trip SignedTransaction
+        // Failed to decode: Expected exactly 1 of {nodeSerializationEnv, driverSerializationEnv, contextSerializationEnv, inheritableContextSerializationEnv}
+        withTestSerializationEnvIfNotSet {
+          Json.decodeValue(signedTransactionJson, SignedTransaction::class.java)
         }
-        .end(encodePrettily)
-    }
+      }
+      .onSuccess { async.complete() }
+      .catch { context.fail(it.cause) }
   }
+
 
   @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
@@ -508,27 +498,26 @@ class BraidCordaStandaloneServerTest {
   }
 
 
-
   @Test
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
 
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
     client.get(port, "localhost", "/api/rest/vault/vaultQuery")
-        .putHeader("Accept", "application/json; charset=utf8")
-        .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(200, it.statusCode(), it.statusMessage())
+      .putHeader("Accept", "application/json; charset=utf8")
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(200, it.statusCode(), it.statusMessage())
 
-          it.bodyHandler {
-            val nodes = it.toJsonObject()
+        it.bodyHandler {
+          val nodes = it.toJsonObject()
 
-            vertxAssertThat(context,nodes, notNullValue())
+          vertxAssertThat(context, nodes, notNullValue())
 
-            async.complete()
-          }
+          async.complete()
         }
-        .end()
+      }
+      .end()
   }
 
 
@@ -538,29 +527,28 @@ class BraidCordaStandaloneServerTest {
 
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
     client.get(port, "localhost", "/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
-        .putHeader("Accept", "application/json; charset=utf8")
-        .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(200, it.statusCode(), it.statusMessage())
+      .putHeader("Accept", "application/json; charset=utf8")
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(200, it.statusCode(), it.statusMessage())
 
-          it.bodyHandler {
-            val nodes = it.toJsonObject()
+        it.bodyHandler {
+          val nodes = it.toJsonObject()
 
-            vertxAssertThat(context,nodes, notNullValue())
+          vertxAssertThat(context, nodes, notNullValue())
 
-            async.complete()
-          }
+          async.complete()
         }
-        .end()
+      }
+      .end()
   }
-
 
 
   @Test
   fun `should query the vault by type`(context: TestContext) {
     val async = context.async()
 
-    val json ="""
+    val json = """
 {
   "criteria" : {
     "@class" : ".QueryCriteria${'$'}VaultQueryCriteria",
@@ -596,23 +584,22 @@ class BraidCordaStandaloneServerTest {
 
     log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
-        .putHeader("Accept", "application/json; charset=utf8")
-        .putHeader("Content-length", ""+json.length)
-        .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(200, it.statusCode(), it.statusMessage())
+      .putHeader("Accept", "application/json; charset=utf8")
+      .putHeader("Content-length", "" + json.length)
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(200, it.statusCode(), it.statusMessage())
 
-          it.bodyHandler {
-            val nodes = it.toJsonObject()
+        it.bodyHandler {
+          val nodes = it.toJsonObject()
 
-            vertxAssertThat(context,nodes, notNullValue())
-            println(nodes.encodePrettily())
-            async.complete()
-          }
+          vertxAssertThat(context, nodes, notNullValue())
+          println(nodes.encodePrettily())
+          async.complete()
         }
-        .end(json)
+      }
+      .end(json)
   }
-
 
 
   @Test
@@ -625,20 +612,19 @@ class BraidCordaStandaloneServerTest {
     val customCriteria1 = VaultCustomQueryCriteria(currencyIndex)
 
     val criteria = generalCriteria
-        .and(customCriteria1)
-        .and(customCriteria2)
+      .and(customCriteria1)
+      .and(customCriteria2)
 
-    val query = VaultQuery(criteria, contractStateType =  Cash.State::class.java)
+    val query = VaultQuery(criteria, contractStateType = Cash.State::class.java)
 
     val json = Json.encodePrettily(query)
     println(json)
   }
 
 
-
   @Test
   fun `should query the vault by various criteria`(context: TestContext) {
-                                         val async=   context.async()
+    val async = context.async()
     val json = """{
   "criteria" : {
     "@class" : ".QueryCriteria${'$'}AndComposition",
@@ -689,21 +675,21 @@ class BraidCordaStandaloneServerTest {
 
     log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.post(port, "localhost", "/api/rest/vault/vaultQueryBy")
-        .putHeader("Accept", "application/json; charset=utf8")
-        .putHeader("Content-length", ""+json.length)
-        .exceptionHandler(context::fail)
-        .handler {
-          context.assertEquals(200, it.statusCode(), it.statusMessage())
+      .putHeader("Accept", "application/json; charset=utf8")
+      .putHeader("Content-length", "" + json.length)
+      .exceptionHandler(context::fail)
+      .handler {
+        context.assertEquals(200, it.statusCode(), it.statusMessage())
 
-          it.bodyHandler {
-            val nodes = it.toJsonObject()
+        it.bodyHandler {
+          val nodes = it.toJsonObject()
 
-            vertxAssertThat(context,nodes, notNullValue())
+          vertxAssertThat(context, nodes, notNullValue())
 
-            async.complete()
-          }
+          async.complete()
         }
-        .end(json)
+      }
+      .end(json)
   }
 
 

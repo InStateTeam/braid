@@ -24,9 +24,11 @@ import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
 import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.services.vault.VaultService
+import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
 
 open class BraidCordaStandaloneServer(
@@ -35,7 +37,8 @@ open class BraidCordaStandaloneServer(
   val password: String = "",
   val nodeAddress: NetworkHostAndPort = NetworkHostAndPort("localhost", 8080),
   val openApiVersion: Int = 3,
-  val vertx: Vertx = Vertx.vertx()
+  val vertx: Vertx = Vertx.vertx(),
+  val httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()
 ) {
   companion object {
     private val log = loggerFor<BraidCordaStandaloneServer>()
@@ -50,7 +53,7 @@ open class BraidCordaStandaloneServer(
     val result = Future.future<String>()
     BraidConfig()
       .withPort(port)
-      .applyTLSOptions()
+      .withHttpServerOptions(httpServerOptions)
       .withRestConfig(createRestConfig())
       .withVertx(vertx)
       .bootstrapBraid(null, result)

@@ -17,7 +17,6 @@ package io.bluebank.braid.corda
 
 import com.google.common.io.Resources
 import io.bluebank.braid.corda.rest.RestConfig
-import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.http.HttpServerConfig.Companion.defaultServerOptions
 import io.bluebank.braid.core.logging.LogInitialiser
 import io.bluebank.braid.core.logging.loggerFor
@@ -133,10 +132,6 @@ data class BraidConfig(
   }
 
   fun withVertx(vertx: Vertx) = this.copy(vertx = vertx)
-
-  fun applyTLSOptions(): BraidConfig {
-    return withHttpServerOptions(HttpServerConfig.buildFromPropertiesAndVars())
-  }
 
   internal val protocol: String get() = if (httpServerOptions.isSsl) "https" else "http"
 

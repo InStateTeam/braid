@@ -99,7 +99,7 @@ class TestServiceWithTLSTest {
   }
 
   private fun callService(context: TestContext, client: HttpClient) {
-    val app = TestServiceApp(port, service)
+    val app = TestServiceApp(port, service, httpServerOptions = HttpServerConfig.buildFromPropertiesAndVars())
     val async = context.async()
     app.whenReady()
       .compose { client.getFuture("/swagger.json") }

@@ -17,9 +17,11 @@ package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.BraidServer
+import io.bluebank.braid.core.http.HttpServerConfig
 import io.bluebank.braid.core.security.JWTUtils
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.jwt.JWTAuth
@@ -27,7 +29,7 @@ import io.vertx.ext.auth.jwt.JWTOptions
 import java.io.File
 import java.io.FileOutputStream
 
-class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 3) {
+class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 3, private val httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()) {
   companion object {
     const val SWAGGER_ROOT = ""
     const val REST_API_ROOT = "/rest"
@@ -49,7 +51,7 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
       .withPort(port)
       .withService(service)
       .withAuthConstructor(this::createAuthProvider)
-      .applyTLSOptions()
+      .withHttpServerOptions(httpServerOptions)
       .withRestConfig(
         RestConfig()
           .withServiceName("my-service")
@@ -73,7 +75,7 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
                 get("/bytebuf", service::getByteBuf)
                 get("/bytebuffer", service::getByteBuffer)
                 post("/doublebuffer", service::doubleBuffer)
-                post("/custo•m", service::somethingCustom)
+                post("/custom", service::somethingCustom)
                 get("/stringlist", service::returnsListOfStuff)
                 get("/willfail", service::willFail)
                 get("/headers/list/string", service::headerListOfStrings)
