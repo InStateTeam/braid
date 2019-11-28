@@ -1,5 +1,4 @@
 
-
 ## To Run braid from the standalone jar
 
 Either build or download the latest jar from [https://repo1.maven.org/maven2/io/bluebank/braid/braid-server/](https://repo1.maven.org/maven2/io/bluebank/braid/braid-server/).
@@ -18,6 +17,22 @@ Start it using
 ```bash
 docker run -p 8080:8080 -v "<cordapps-directory>":/opt/braid/cordapps cordite/braid:<version>
 ```
+
+Environment variables that can be passed to Docker:
+
+<table>
+<thead>
+<tr><th>Variable</th><th>Description</th><th>Default</th></tr>
+</thead>
+<tbody>
+<tr><td>NODE_RPC_ADDRESS</td><td>Corda RPC `host:port`</td><td>localhost:10003</td></tr>
+<tr><td>NODE_RPC_USERNAME</td><td>Corda RPC username</td><td>user1</td></tr>
+<tr><td>NODE_RPC_PASSWORD</td><td>Corda RPC password</td><td>password</td></tr>
+<tr><td>PORT</td><td>Braid http port</td><td>8080</td></tr>
+<tr><td>OPEN_API_VERSION</td><td>OpenAPI version. Deprecated.</td><td>3</td></tr>
+<tr><td>CORDAPP_DIRECTORY</td><td>Cordapp directory that Braid will scan</td><td>/opt/braid/cordapps</td></tr>
+</tbody>
+</table>
 
 ## Enabling TLS
 
