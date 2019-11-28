@@ -27,7 +27,6 @@ import io.bluebank.braid.corda.services.vault.VaultService
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
 
 open class BraidCordaStandaloneServer(
@@ -40,6 +39,7 @@ open class BraidCordaStandaloneServer(
 ) {
   companion object {
     private val log = loggerFor<BraidCordaStandaloneServer>()
+
     init {
       BraidCordaJacksonSwaggerInit.init()
     }
@@ -50,7 +50,7 @@ open class BraidCordaStandaloneServer(
     val result = Future.future<String>()
     BraidConfig()
       .withPort(port)
-    //  .withHttpServerOptions(HttpServerOptions().apply { isSsl = false })
+      .applyTLSOptions()
       .withRestConfig(createRestConfig())
       .withVertx(vertx)
       .bootstrapBraid(null, result)
