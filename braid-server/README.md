@@ -1,4 +1,3 @@
-
 ## To Run braid from the standalone jar
 
 Either build or download the latest jar from [https://repo1.maven.org/maven2/io/bluebank/braid/braid-server/](https://repo1.maven.org/maven2/io/bluebank/braid/braid-server/).
@@ -17,6 +16,8 @@ Start it using
 ```bash
 docker run -p 8080:8080 -v "<cordapps-directory>":/opt/braid/cordapps cordite/braid:<version>
 ```
+You will need to use the volume mount `-v "<cordapps-directory>":/opt/braid/cordapps` to mount the cordapps that are hosted by the Corda node. 
+A future version of Corda may have the feature to acquire these cordapps.
 
 Environment variables that can be passed to Docker:
 
