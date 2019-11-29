@@ -91,7 +91,7 @@ class HttpHeadersImpl(val context: RoutingContext) : HttpHeaders {
 
   override fun getMediaType(): MediaType? {
     val contentType = getHeaderString(HttpHeaders.CONTENT_TYPE) ?: return null
-    return okhttp3.MediaType.parse(contentType).let { MediaType(it.type(), it.subtype()) }
+    return okhttp3.MediaType.parse(contentType)?.let { MediaType(it.type(), it.subtype()) }
   }
 
   override fun getLanguage(): Locale? {
