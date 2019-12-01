@@ -133,6 +133,10 @@
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -210,15 +214,33 @@
       <artifactId>jackson-module-jsonSchema</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.reactivex</groupId>
+      <artifactId>rxjava</artifactId>
+      <version>${rxjava.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java</artifactId>
       <version>${vertx.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.reactivex</groupId>
+          <artifactId>rxjava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-jwt</artifactId>
       <version>${vertx.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -239,22 +261,11 @@
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core</artifactId>
       <version>${swagger.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-models</artifactId>
       <version>${swagger.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-models</artifactId>
-      <version>1.5.23</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -277,6 +288,24 @@
       <artifactId>mockito-kotlin</artifactId>
       <version>1.5.0</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.bytebuddy</groupId>
+          <artifactId>byte-buddy</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-stdlib</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.objenesis</groupId>
+          <artifactId>objenesis</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-reflect</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

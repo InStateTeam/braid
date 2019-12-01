@@ -17,17 +17,8 @@
   <name>braid-corda-client</name>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-reflect</artifactId>
-      <version>${kotlin.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
-      <version>${kotlin.version}</version>
-    </dependency>
-    <dependency>
+
+  <dependency>
       <groupId>io.bluebank.braid</groupId>
       <artifactId>braid-core</artifactId>
       <version>${project.version}</version>

@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.http
 
+import com.fasterxml.jackson.core.type.TypeReference
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientResponse
@@ -22,6 +23,7 @@ import io.vertx.core.impl.NoStackTraceThrowable
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.web.handler.impl.HttpStatusException
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -45,7 +47,7 @@ inline fun <reified T : Any> HttpClientResponse.body(): Future<T> {
               BigInteger::class.java -> result.complete(buffer.toString().toBigInteger())
               JsonObject::class.java -> result.complete(buffer.toJsonObject())
               JsonArray::class.java -> result.complete(buffer.toJsonArray())
-              else -> result.complete(Json.decodeValue(buffer, T::class.java))
+              else -> result.complete(Json.decodeValue(buffer, object: TypeReference<T>() {}))
             }
           } catch (e: Throwable) {
             result.fail(e)
@@ -55,10 +57,11 @@ inline fun <reified T : Any> HttpClientResponse.body(): Future<T> {
         result as Future<T>
       }
       else -> {
-        Future.failedFuture(NoStackTraceThrowable("http request failed with status code ${statusCode()} and status message ${statusMessage()}"))
+        Future.failedFuture(HttpStatusException(statusCode(), statusMessage()))
       }
     }
   } catch (e: Throwable) {
     Future.failedFuture(e)
   }
 }
+

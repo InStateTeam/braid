@@ -22,7 +22,7 @@ import io.bluebank.braid.core.http.parseQueryParams
 import io.bluebank.braid.core.jsonrpc.Converter
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.buffer.ByteBuf
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Parameter
 import io.vertx.codegen.annotations.Nullable
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
@@ -46,6 +46,7 @@ class Router{
      val LOG = loggerFor<Router>()
   }
 }
+
 
 fun <R> Route.bind(fn: KCallable<R>) {
   fn.validateParameters()
@@ -73,7 +74,11 @@ private fun parseBodyParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  return parseComplexType(parameter, context.body)
+  try {
+    return parseComplexType(parameter, context.body)
+  } catch (ex: Throwable) {
+    throw RuntimeException("failed to parse body parameter for ${parameter.name}: ${ex.message}", ex)
+  }
 }
 
 private fun parseComplexType(parameter: KParameter, body: @Nullable Buffer): ParseResult {
@@ -155,34 +160,47 @@ private val parameterParser = ::parsePathParameter
   .then(::parseBodyParameter)
 
 private fun KParameter.parseParameter(context: RoutingContext): Any? {
-  return parameterParser(this, context).result
+  try {
+    return parameterParser(this, context).result
+  } catch(ex: Throwable) {
+    LOG.error("failed to parse parameter ${this.name}", ex)
+    throw RuntimeException("failed to parse parameter ${this.name}: ${ex.message}", ex)
+  }
 }
 
 private fun parseContextParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  parameter.findAnnotation<Context>() ?: return ParseResult.NOT_FOUND
-  // we always map and pass HttpHeaders
-  assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}") }
-  return ParseResult(HttpHeadersImpl(context))
+  try {
+    parameter.findAnnotation<Context>() ?: return ParseResult.NOT_FOUND
+    // we always map and pass HttpHeaders
+    assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}") }
+    return ParseResult(HttpHeadersImpl(context))
+  } catch(ex: Throwable) {
+    throw RuntimeException("failed to parse context parameter for ${parameter.name}: ${ex.message}", ex)
+  }
 }
 
 private fun parseHeaderParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  val annotation = parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
-  val headerName = annotation.value
-  val values = context.request().headers().getAll(headerName)
-  return when (parameter.type.classifier) {
-    List::class -> ParseResult(parameter.parseHeaderValuesAsList(values))
-    Set::class -> ParseResult(parameter.parseHeaderValuesAsSet(values))
-    else -> {
-      val result = parameter.type.parseHeaderValue(values.firstOrNull())
-      assert(parameter.type.isMarkedNullable || result != null) { "method requires header $headerName but it was missing" }
-      ParseResult(true, result)
+  try {
+    val annotation = parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
+    val headerName = annotation.value
+    val values = context.request().headers().getAll(headerName)
+    return when (parameter.type.classifier) {
+      List::class -> ParseResult(parameter.parseHeaderValuesAsList(values))
+      Set::class -> ParseResult(parameter.parseHeaderValuesAsSet(values))
+      else -> {
+        val result = parameter.type.parseHeaderValue(values.firstOrNull())
+        assert(parameter.type.isMarkedNullable || result != null) { "method requires header $headerName but it was missing" }
+        ParseResult(true, result)
+      }
     }
+  } catch(ex: Throwable) {
+    throw RuntimeException("failed to parse header parameter for ${parameter.name}: ${ex.message}", ex)
   }
 }
 
@@ -210,20 +228,24 @@ private fun parseQueryParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
-  val queryParam = context.request().query()?.parseQueryParams()?.get(parameterName)
-  return when {
-    queryParam != null -> {
-      if (parameter.isSimpleType()) {
-        // TODO: handle arrays
-        ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
-      } else {
-        parseComplexType(parameter, Buffer.buffer(URLDecoder.decode(queryParam, "UTF-8")))
+  try {
+    val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
+    val queryParam = context.request().query().parseQueryParams()[parameterName]
+    return when {
+      queryParam != null -> {
+        if (parameter.isSimpleType()) {
+          // TODO: handle arrays
+          ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
+        } else {
+          parseComplexType(parameter, Buffer.buffer(URLDecoder.decode(queryParam, "UTF-8")))
+        }
+      }
+      else -> {
+        ParseResult.NOT_FOUND
       }
     }
-    else -> {
-      ParseResult.NOT_FOUND
-    }
+  } catch(ex: Throwable) {
+    throw RuntimeException("failed to parse query parameter ${parameter.name}: ${ex.message}", ex)
   }
 }
 
@@ -231,19 +253,23 @@ private fun parsePathParameter(
   parameter: KParameter,
   context: RoutingContext
 ): ParseResult {
-  return when {
-    parameter.isSimpleType() -> {
-      val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
-      val paramString = context.pathParam(parameterName)
-      if (paramString == null) {
+  try {
+    return when {
+      parameter.isSimpleType() -> {
+        val parameterName = parameter.parameterName() ?: return ParseResult.NOT_FOUND
+        val paramString = context.pathParam(parameterName)
+        if (paramString == null) {
+          ParseResult.NOT_FOUND
+        } else {
+          ParseResult(parameter.parseSimpleType(paramString))
+        }
+      }
+      else -> {
         ParseResult.NOT_FOUND
-      } else {
-        ParseResult(parameter.parseSimpleType(paramString))
       }
     }
-    else -> {
-      ParseResult.NOT_FOUND
-    }
+  } catch (ex: Throwable) {
+    throw RuntimeException("failed to parse path parameter for ${parameter.name}: ${ex.message}", ex)
   }
 }
 
@@ -253,7 +279,7 @@ private fun KParameter.isSimpleType(): Boolean {
 }
 
 internal fun KParameter.parameterName(): String? {
-  return this.findAnnotation<ApiParam>()?.name?.nonEmptyOrNull()
+  return this.findAnnotation<Parameter>()?.name?.nonEmptyOrNull()
     ?: this.findAnnotation<QueryParam>()?.value?.nonEmptyOrNull()
     ?: this.findAnnotation<PathParam>()?.value?.nonEmptyOrNull()
     ?: this.findAnnotation<HeaderParam>()?.value?.nonEmptyOrNull()

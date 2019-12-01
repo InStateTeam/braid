@@ -17,7 +17,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 
 
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
@@ -56,18 +56,21 @@ class ImplicitParamsEndPointV3(
 
   override val parameterTypes: List<Type>
     //todo add array schema
-    get() = implicitParams.map {
-      it.content
+    get() = implicitParams.map { parameter ->
+      parameter.content
           .map { it.schema.allOf + it.schema.anyOf + it.schema.oneOf + it.schema.implementation }
           .flatMap { it.asIterable() }
           .map { it.java }
     }.flatMap { it.asIterable() }
 
   override val returnType: Type
-    get() = annotations.filter { it is ApiOperation }.map { it as ApiOperation }.map {
-      it.response.java
-    }.firstOrNull()
-      ?: Unit::class.java
+    get() {
+      return annotations.filterIsInstance<Operation>()
+        .flatMap { it.responses.toList() }
+        .flatMap { it.content.toList() }
+        .map { it.schema.implementation.java }
+        .firstOrNull() ?: Unit::class.java
+    }
 
   private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
   private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }

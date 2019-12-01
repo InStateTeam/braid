@@ -56,5 +56,5 @@ import net.corda.core.node.services.vault.QueryCriteria
 )
 abstract class QueryCriteriaMixin
 @JsonCreator
-constructor(@JsonProperty("status") status: Vault.StateStatus) {
+constructor(@Suppress("UNUSED_PARAMETER") @JsonProperty("status") status: Vault.StateStatus) {
 }

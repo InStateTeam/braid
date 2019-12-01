@@ -18,9 +18,9 @@ package io.bluebank.braid.corda.swagger.v3
 import com.fasterxml.jackson.databind.JavaType
 import io.bluebank.braid.corda.rest.docs.BraidSwaggerError
 import io.netty.buffer.ByteBuf
-import io.swagger.util.Json
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.media.*
 import io.vertx.core.buffer.Buffer
 import net.corda.core.contracts.Amount

@@ -21,20 +21,8 @@ import io.bluebank.braid.core.socket.findConsecutiveFreePorts
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.driver.*
-import java.net.ServerSocket
 
-class DynamicPortAllocation : PortAllocation() {
-  override fun nextPort(): Int {
-    return ServerSocket(0).use {
-      it.localPort
-    }
-  }
-}
-
-class CordaNet(
-  private val cordaStartingPort: Int = 5005,
-  internal val braidStartingPort: Int = 8080
-) {
+class CordaNet {
 
   companion object {
     init {
@@ -44,23 +32,23 @@ class CordaNet(
 
     @JvmStatic
     fun main(args: Array<String>) {
-      CordaNet(5005, 8080).withCluster {
+      CordaNet().withCluster {
         readLine()
       }
     }
 
     fun createCordaNet(): CordaNet {
       val startPort = findConsecutiveFreePorts(200)
-      return CordaNet(startPort, startPort + 150)
+      return CordaNet()
     }
   }
 
   fun withCluster(callback: DriverDSL.() -> Unit) {
     val parties = listOf("PartyA")
-    val portAllocation = DynamicPortAllocation()
+    val portAllocation = PortAllocation.defaultAllocator
 
     // setup braid ports per party
-    val systemProperties = setupBraidPortsPerParty(parties, braidStartingPort)
+    val systemProperties = setupBraidPortsPerParty(parties, portAllocation)
 
     driver(
       DriverParameters(
@@ -79,7 +67,6 @@ class CordaNet(
 
       // run the rest of the programme
       callback()
-
       nodeHandles.map { it.stop() }
     }
   }
@@ -98,10 +85,10 @@ class CordaNet(
 
   private fun setupBraidPortsPerParty(
     parties: List<String>,
-    braidStartingPort: Int
+    portAllocation: PortAllocation
   ): Map<String, String> {
     return parties
-      .mapIndexed { idx, party -> "braid.$party.port" to (idx + braidStartingPort).toString() }
+      .map { party -> "braid.$party.port" to portAllocation.nextPort().toString() }
       .toMap()
       .apply {
         println("braid port map")

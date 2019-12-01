@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.swagger
 
+import io.bluebank.braid.corda.swagger.v3.CustomModelConvertersV3Test
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.Issued
 import net.corda.core.crypto.SecureHash
@@ -34,7 +35,6 @@ data class ClassWithTypes(
     , val hash: SecureHash
     , val issuedString: Issued<String>
     , val issuedCurrency: Issued<Currency>
-    , val issued: Issued<CustomModelConvertersV2Test.IssuedType>
     , val signed: SignedTransaction
     , val wire: WireTransaction
     , val clazz: Class<*>

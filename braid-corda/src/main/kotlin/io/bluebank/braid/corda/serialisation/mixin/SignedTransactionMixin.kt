@@ -26,10 +26,10 @@ import net.corda.core.transactions.WireTransaction
 @JsonIgnoreProperties(ignoreUnknown = true)
 abstract class SignedTransactionMixin
 @JsonCreator
-constructor(@JsonProperty("txBits")
+constructor(@Suppress("UNUSED_PARAMETER") @JsonProperty("txBits")
             txBits: SerializedBytes<net.corda.core.transactions.CoreTransaction>,
 
-            @JsonProperty("sigs")
+            @Suppress("UNUSED_PARAMETER") @JsonProperty("sigs")
             sign: List<net.corda.core.crypto.TransactionSignature>) {
   @get:JsonIgnore
   abstract val notaryChangeTx: WireTransaction            // avoids WireTransaction cannot be cast to net.corda.core.transactions.NotaryChangeWireTransaction

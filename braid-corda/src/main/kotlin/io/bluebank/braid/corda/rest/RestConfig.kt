@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.corda.rest
 
-import io.swagger.models.Scheme
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.web.Router
 import java.net.URI
@@ -27,7 +26,7 @@ RestConfig(
   val hostAndPortUri: String = DEFAULT_HOST_AND_PORT_URI,
   val apiPath: String = DEFAULT_API_PATH,
   val swaggerPath: String = DEFAULT_SWAGGER_PATH,
-  val openApiVersion: Int = 2,
+  val openApiVersion: Int = 3,
   val authSchema: AuthSchema = DEFAULT_AUTH_SCHEMA,
   internal val authProvider: AuthProvider? = DEFAULT_AUTH_PROVIDER,
   val debugMode: Boolean = false,
@@ -40,14 +39,6 @@ RestConfig(
     const val DEFAULT_SWAGGER_PATH = "/"
     val DEFAULT_AUTH_PROVIDER: AuthProvider? = null
     val DEFAULT_AUTH_SCHEMA = AuthSchema.None
-  }
-
-  val scheme: Scheme by lazy {
-    when (URI.create(hostAndPortUri).scheme.toLowerCase()) {
-      "https" -> Scheme.HTTPS
-      "http" -> Scheme.HTTP
-      else -> throw RuntimeException("unsupported protocol scheme for $hostAndPortUri")
-    }
   }
 
   @Suppress("unused")
@@ -65,13 +56,6 @@ RestConfig(
 
   @Suppress("unused")
   fun withOpenApiVersion(value: Int) = this.copy(openApiVersion = value)
-
-  @Suppress("unused")
-  @Deprecated("please use other withContact method")
-  fun withContact(value: io.swagger.models.Contact) = this.withContact(ContactInfo()
-      .email(value.email)
-          .name(value.name)
-          .url(value.url))
 
   @Suppress("unused")
   fun withContact(value: ContactInfo) = this.withSwaggerInfo(swaggerInfo.withContact(value))

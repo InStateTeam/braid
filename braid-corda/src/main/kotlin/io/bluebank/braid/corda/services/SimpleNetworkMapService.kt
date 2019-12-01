@@ -17,8 +17,8 @@
 
 package io.bluebank.braid.corda.services
 
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.AppServiceHub
@@ -44,25 +44,25 @@ fun NodeInfo.toSimpleNodeInfo(): SimpleNodeInfo {
 }
 
 interface SimpleNetworkMapService {
-  @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   fun myNodeInfo(): SimpleNodeInfo
 
-  @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   fun nodes(
-      @ApiParam(
-      value = "[host]:[port] for the Corda P2P of the node",
+    @Parameter(
+      description = "[host]:[port] for the Corda P2P of the node",
       example = "localhost:10000"
     ) @QueryParam(value = "host-and-port") hostAndPort: String? = null,
-      @ApiParam(
-      value = "the X500 name for the node",
+    @Parameter(
+      description = "the X500 name for the node",
       example = "O=PartyB, L=New York, C=US"
     ) @QueryParam(value = "x500-name") x500Name: String? = null
   ): List<SimpleNodeInfo>
 
   // example http://localhost:8080/api/rest/network/notaries?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH
   fun notaries(
-    @ApiParam(
-      value = "the X500 name for the node",
+    @Parameter(
+      description = "the X500 name for the node",
       example = "O=PartyB, L=New York, C=US"
     ) @QueryParam(value = "x500-name") x500Name: String? = null
   ): List<Party>
@@ -106,19 +106,19 @@ class SimpleNetworkMapServiceImpl(
     )
   }
 
-  @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   override fun myNodeInfo(): SimpleNodeInfo {
     return networkMapServiceAdapter.nodeInfo().toSimpleNodeInfo()
   }
 
-  @ApiOperation(value = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
   override fun nodes(
-      @ApiParam(
-      value = "[host]:[port] for the Corda P2P of the node",
+    @Parameter(
+      description = "[host]:[port] for the Corda P2P of the node",
       example = "localhost:10000"
     ) @QueryParam(value = "host-and-port") hostAndPort: String?,
-      @ApiParam(
-      value = "the X500 name for the node",
+    @Parameter(
+      description = "the X500 name for the node",
       example = "O=PartyB, L=New York, C=US"
     ) @QueryParam(value = "x500-name") x500Name: String?
   ): List<SimpleNodeInfo> {
@@ -133,7 +133,7 @@ class SimpleNetworkMapServiceImpl(
       x500Name?.isNotEmpty() ?: false -> {
         val x500Name1 = CordaX500Name.parse(x500Name!!)
         val party = networkMapServiceAdapter.wellKnownPartyFromX500Name(x500Name1)
-        listOfNotNull(party?.let { networkMapServiceAdapter.nodeInfoFromParty(party)?.toSimpleNodeInfo() } )
+        listOfNotNull(party?.let { networkMapServiceAdapter.nodeInfoFromParty(party)?.toSimpleNodeInfo() })
       }
       else -> networkMapServiceAdapter.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
         Collectors.toList()
@@ -143,8 +143,8 @@ class SimpleNetworkMapServiceImpl(
 
   // example http://localhost:8080/api/rest/network/notaries?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH
   override fun notaries(
-    @ApiParam(
-      value = "the X500 name for the node",
+    @Parameter(
+      description = "the X500 name for the node",
       example = "O=PartyB, L=New York, C=US"
     ) @QueryParam(value = "x500-name") x500Name: String?
   ): List<Party> {

@@ -20,7 +20,12 @@ package io.bluebank.braid.corda.rest
 //import io.swagger.v3.oas.annotations.
 import io.netty.buffer.ByteBuf
 import io.netty.handler.codec.http.HttpHeaderValues
-import io.swagger.annotations.*
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.parameters.RequestBody
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
@@ -55,26 +60,10 @@ class TestService {
     throw CordaException("something went wrong", java.lang.RuntimeException("sub exception"))
   }
 
-  @ApiOperation(
-    value = "do something custom",
-    response = String::class,
-    consumes = MediaType.TEXT_PLAIN,
-    produces = MediaType.TEXT_PLAIN
-  )
-  @ApiImplicitParams(
-    ApiImplicitParam(
-      name = "name",
-      value = "name parameter",
-      dataTypeClass = String::class,
-      paramType = "path",
-      defaultValue = "Margaret",
-      required = true,
-      examples = Example(
-        ExampleProperty("Satoshi"),
-        ExampleProperty("Margaret"),
-        ExampleProperty("Alan")
-      )
-    )
+  @Operation(
+    description = "do something custom",
+    responses = [ApiResponse(content = arrayOf(Content(mediaType = MediaType.TEXT_PLAIN, schema = Schema(implementation = String::class))))],
+    requestBody = RequestBody(content = arrayOf(Content(mediaType = MediaType.TEXT_PLAIN)))
   )
   fun somethingCustom(rc: RoutingContext) {
     val name = rc.request().getParam("foo") ?: "Margaret"
@@ -82,10 +71,9 @@ class TestService {
       .setChunked(true).end(Json.encode("Hello, $name!"))
   }
 
-  @ApiOperation(
-    value = "return list of strings",
-    response = String::class,
-    responseContainer = "List"
+  @Operation(
+    description = "return list of strings",
+    responses = [ApiResponse(content = arrayOf(Content(mediaType = MediaType.TEXT_PLAIN, array = ArraySchema(schema = Schema(implementation = String::class)))))]
   )
   fun returnsListOfStuff(context: RoutingContext) {
     context.response()
@@ -146,11 +134,12 @@ class TestService {
 }
 
 data class LoginRequest(
-  @ApiModelProperty(
-    value = "user name",
+  @Schema(
+    description = "user name",
     example = "sa"
-  ) val user: String, @ApiModelProperty(
-    value = "password",
+  ) val user: String,
+  @Schema(
+    description = "password",
     example = "admin"
   ) val password: String
 )

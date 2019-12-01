@@ -48,14 +48,6 @@ class TestAppServiceHub : AppServiceHub {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun withEntityManager(block: Consumer<EntityManager>) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun <T : Any> withEntityManager(block: EntityManager.() -> T): T {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
   override val attachments: AttachmentStorage
     get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
   override val clock: Clock
@@ -117,6 +109,14 @@ class TestAppServiceHub : AppServiceHub {
   }
 
   override fun <T> startTrackedFlow(flow: FlowLogic<T>): FlowProgressHandle<T> {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun withEntityManager(block: Consumer<EntityManager>) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun <T> withEntityManager(block: EntityManager.() -> T): T {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 }

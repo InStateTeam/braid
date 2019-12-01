@@ -16,17 +16,17 @@
 package io.bluebank.braid.corda.services.vault
 
 import io.bluebank.braid.corda.server.rpc.RPCFactory
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import net.corda.core.contracts.ContractState
 import net.corda.core.node.services.Vault
 import javax.ws.rs.QueryParam
 
 class VaultService(val rpc: RPCFactory) {
-  @ApiOperation(value = "Queries the vault")
+  @Operation(description = "Queries the vault")
   fun vaultQueryBy(
-      @ApiParam(
-          value = "Vault query parameters"
+      @Parameter(
+          description = "Vault query parameters"
       ) vault: VaultQuery): Vault.Page<ContractState> {
     val vaultQueryBy = rpc.validConnection()
         .vaultQueryBy(vault.criteria, vault.paging, vault.sorting, vault.contractStateType)
@@ -34,11 +34,11 @@ class VaultService(val rpc: RPCFactory) {
   }
 
 
-  @ApiOperation(value = "Queries the vault for contract states of the supplied type")
+  @Operation(description = "Queries the vault for contract states of the supplied type")
   fun vaultQuery(
       @QueryParam(value = "contract-state-type")
-      @ApiParam(
-          value = "The NAME of the Vault query by contract state type class e.g. \"net.corda.finance.contracts.asset.Obligation.State\""
+      @Parameter(
+          description = "The NAME of the Vault query by contract state type class e.g. \"net.corda.finance.contracts.asset.Obligation.State\""
       ) type: String?): Vault.Page<ContractState> {
     return try {
       val forName =

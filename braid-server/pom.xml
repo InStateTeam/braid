@@ -76,6 +76,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-kotlin</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-reflect</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -88,22 +94,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-auth-shiro</artifactId>
-      <version>${vertx.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-auth-common</artifactId>
-      <version>${vertx.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -150,11 +140,15 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>net.corda</groupId>
+      <artifactId>corda-core</artifactId>
+      <version>${corda.version}</version>
+    </dependency>
     <dependency><!--needed  for json serialization-->
       <groupId>net.corda</groupId>
       <artifactId>corda-jackson</artifactId>
       <version>${corda.version}</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
