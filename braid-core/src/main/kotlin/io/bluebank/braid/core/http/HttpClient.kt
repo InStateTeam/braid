@@ -89,8 +89,7 @@ fun HttpClient.requestFuture(
           putHeader(k, v.toString())
         }
         when {
-          body == null -> {
-          }
+          body == null -> { }
           body.javaClass.isPrimitive || body is String -> putHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
           else -> putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
         }
@@ -107,8 +106,16 @@ fun HttpClient.requestFuture(
       .apply {
         when {
           body == null -> end()
-          body.javaClass.isPrimitive || body is String -> end(body.toString())
-          else -> end(Json.encode(body))
+          body.javaClass.isPrimitive || body is String -> {
+            val payload = body.toString()
+            putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
+            end(payload)
+          }
+          else -> {
+            val payload = Json.encode(body)
+            putHeader(HttpHeaders.CONTENT_LENGTH, payload.length.toString())
+            end(payload)
+          }
         }
       }
   } catch (e: Throwable) {
@@ -127,7 +134,9 @@ private fun String.appendQueryParameters(
         else -> "$this?"
       }
       val queryString = queryParameters.map { (name, value) ->
-        URLEncoder.encode("$name=$value", Charsets.UTF_8.name())
+        val nameEnc = URLEncoder.encode(name, Charsets.UTF_8.name())
+        val valueEnc = URLEncoder.encode(value.toString(), Charsets.UTF_8.name())
+        "$nameEnc=$valueEnc"
       }.joinToString("&")
       interimPath + queryString
     }

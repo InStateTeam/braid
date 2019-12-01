@@ -74,7 +74,6 @@ class JsonRPCServerTest {
 
   @Test
   fun `that we can list services and create them`(testContext: TestContext) {
-    val serviceName = "myservice"
     httpGetAsJsonObject("/api/")
 //      .compose {
 //        testContext.assertEquals(0, it.size())

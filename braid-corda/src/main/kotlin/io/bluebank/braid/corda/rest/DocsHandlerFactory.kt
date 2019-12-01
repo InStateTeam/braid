@@ -16,14 +16,8 @@
 package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.rest.docs.DocsHandler
-import io.bluebank.braid.corda.rest.docs.DocsHandlerV2
 import io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3
-import io.swagger.models.auth.ApiKeyAuthDefinition
-import io.swagger.models.auth.BasicAuthDefinition
-import io.swagger.models.auth.In
-import io.swagger.models.auth.SecuritySchemeDefinition
 import io.swagger.v3.oas.models.security.SecurityScheme
-import io.vertx.core.http.HttpHeaders
 import net.corda.core.utilities.contextLogger
 
 class DocsHandlerFactory(
@@ -43,16 +37,6 @@ class DocsHandlerFactory(
           debugMode = config.debugMode,
           basePath = "${config.hostAndPortUri}/$path",
           auth = getV3SecurityType()
-        )
-      }
-      2 -> {
-        log.info("activating OpenAPI V2")
-        DocsHandlerV2(
-          swaggerInfo = config.swaggerInfo,
-          scheme = config.scheme,
-          debugMode = config.debugMode,
-          basePath = "${config.hostAndPortUri}/$path",
-          auth = getV2SecuritySchemeDefinition()
         )
       }
       else -> error("Unknown OpenAPI version ${config.openApiVersion}")
@@ -75,20 +59,6 @@ class DocsHandlerFactory(
         }
       }
       AuthSchema.None -> null
-    }
-  }
-
-  private fun getV2SecuritySchemeDefinition(): SecuritySchemeDefinition? {
-    return when (config.authSchema) {
-      AuthSchema.Basic -> {
-        BasicAuthDefinition()
-      }
-      AuthSchema.Token -> {
-        ApiKeyAuthDefinition(HttpHeaders.AUTHORIZATION.toString(), In.HEADER)
-      }
-      else -> {
-        null
-      }
     }
   }
 }

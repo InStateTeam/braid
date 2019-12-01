@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.rest
+package io.bluebank.braid.corda.utils
 
-import io.vertx.ext.unit.junit.VertxUnitRunner
-import org.junit.runner.RunWith
+import io.vertx.core.Future
+import net.corda.core.concurrent.CordaFuture
+import net.corda.core.utilities.getOrThrow
 
-@Suppress("DEPRECATION")
-@RunWith(VertxUnitRunner::class)
-class RestMounterTest : AbstractRestMounterTest(openApiVersion = 2)
-
+fun <T> CordaFuture<T>.toVertxFuture() : Future<T> {
+  val result = Future.future<T>()
+  this.then { f ->
+    try {
+      result.complete(f.getOrThrow())
+    } catch (err: Throwable) {
+      result.fail(err)
+    }
+  }
+  return result
+}

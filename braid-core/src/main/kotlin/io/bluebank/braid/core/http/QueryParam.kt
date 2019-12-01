@@ -16,9 +16,12 @@
 package io.bluebank.braid.core.http
 
 import io.vertx.core.MultiMap
+import java.net.URLDecoder
 
-fun String.parseQueryParams(): MultiMap {
+private val UTF8 = Charsets.UTF_8.name()
+
+fun String?.parseQueryParams(): MultiMap {
   val mm = MultiMap.caseInsensitiveMultiMap()
-  this.split('&').map { it.split('=') }.forEach { mm.add(it[0], it[1]) }
+  this?.split('&')?.map { it.split('=') }?.forEach { mm.add(URLDecoder.decode(it[0], UTF8), URLDecoder.decode(it[1], UTF8)) }
   return mm
 }

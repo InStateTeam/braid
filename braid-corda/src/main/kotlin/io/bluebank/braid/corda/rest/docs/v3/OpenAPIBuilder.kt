@@ -21,17 +21,6 @@ import io.swagger.v3.oas.models.PathItem
 import io.vertx.core.http.HttpMethod
 import kotlin.reflect.KCallable
 
-fun <Response> OpenAPI.path(groupName: String,
-                            protected: Boolean,
-                            method: HttpMethod,
-                            path: String,
-                            handler: KCallable<Response>): OpenAPI {
-
-  // path(path, PathItem().method(method, operation()))
-
-  return this;
-}
-
 fun PathItem.method(method:HttpMethod, operation: Operation):PathItem{
   when(method){
     HttpMethod.GET-> get(operation)

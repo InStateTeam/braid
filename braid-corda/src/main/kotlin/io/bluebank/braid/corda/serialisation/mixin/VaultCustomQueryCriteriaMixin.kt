@@ -24,15 +24,15 @@ import net.corda.core.schemas.StatePersistable
 
 abstract class VaultCustomQueryCriteriaMixin<L : StatePersistable>
 @JsonCreator
-constructor(@JsonProperty("expression")
+constructor(@Suppress("UNUSED_PARAMETER") @JsonProperty("expression")
             expression: CriteriaExpression<L, Boolean>,
 
-            @JsonProperty("status")
+            @Suppress("UNUSED_PARAMETER") @JsonProperty("status")
             status: Vault.StateStatus,
 
-            @JsonProperty("contractStateTypes")
+            @Suppress("UNUSED_PARAMETER") @JsonProperty("contractStateTypes")
             contractStateTypes: Set<Class<out ContractState>>?,
 
-            @JsonProperty("relevancyStatus")
+            @Suppress("UNUSED_PARAMETER") @JsonProperty("relevancyStatus")
             relevancyStatus: Vault.RelevancyStatus) {
 }

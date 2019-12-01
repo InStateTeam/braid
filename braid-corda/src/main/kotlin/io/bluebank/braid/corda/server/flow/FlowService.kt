@@ -16,10 +16,10 @@
 package io.bluebank.braid.corda.server.flow
 
 import io.bluebank.braid.corda.server.rpc.RPCFactory
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
 
 class FlowService(val rpc: RPCFactory) {
-  @ApiOperation(value = "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow\$Authorise\"]")
+  @Operation(description = "Retrieves a list of callable flows. Example [\"net.corda.core.flows.ContractUpgradeFlow\$Authorise\"]")
   fun flows(): List<String> {
     return rpc.validConnection().registeredFlows()
   }

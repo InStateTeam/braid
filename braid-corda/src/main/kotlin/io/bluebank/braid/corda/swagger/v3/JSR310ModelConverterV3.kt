@@ -15,9 +15,9 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import io.swagger.util.Json
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
 import net.corda.core.utilities.loggerFor
