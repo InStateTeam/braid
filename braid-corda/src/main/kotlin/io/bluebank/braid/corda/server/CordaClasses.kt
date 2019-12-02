@@ -99,7 +99,6 @@ class CordaClasses(private val classLoader: ClassLoader = Thread.currentThread()
     flows.map { it.classpathElementFile.nameWithoutExtension.removeVersion() to it }.toMultiMap()
   }
 
-
   companion object {
     val isFunctionName = Regex(".*\\$[a-z].*\\$[0-9]+.*")::matches
     val isCompanionClass = Regex(".*\\$" + "Companion")::matches
@@ -151,5 +150,3 @@ internal fun ClassInfo.interfacesHaveDeepAnnotation(annotationName: String): Boo
     else -> false
   }
 }
-
-

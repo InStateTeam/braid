@@ -28,9 +28,8 @@ class BraidConfig {
         try {
           return JsonObject(File("braid.conf").readText(Charsets.UTF_8))
         } catch (e: Exception) {
-          println("Problem reading braid.conf")
-          println("Usage: Please supply braid.conf or BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
-          e.printStackTrace()
+          println("No braid.conf using defaults")
+          return JsonObject()
         }
       }
 

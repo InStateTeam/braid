@@ -36,12 +36,7 @@ class ComposedSchemaFixV3() : ModelConverter {
       context: ModelConverterContext,
       chain: MutableIterator<ModelConverter>?
   ): Schema<*>? {
-
-    val subClass = chain?.next()?.resolve(type,  FixingUpContext(context), chain)
-
-
-
-    return subClass
+    return chain?.next()?.resolve(type,  FixingUpContext(context), chain)
   }
 
 
@@ -65,8 +60,6 @@ class ComposedSchemaFixV3() : ModelConverter {
      override fun getDefinedModels(): MutableMap<String, Schema<Any>>? {
         return context.definedModels
      }
-
-
 
      private fun fixUp(schema: Schema<*>?): Schema<*>? {
        if(schema is ComposedSchema){

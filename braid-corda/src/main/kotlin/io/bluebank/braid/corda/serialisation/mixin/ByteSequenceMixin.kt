@@ -15,9 +15,7 @@
  */
 package io.bluebank.braid.corda.serialisation.mixin
 
-
 class ByteSequenceMixin(
     @com.fasterxml.jackson.annotation.JsonIgnore
     private val _bytes: ByteArray) {
-
 }

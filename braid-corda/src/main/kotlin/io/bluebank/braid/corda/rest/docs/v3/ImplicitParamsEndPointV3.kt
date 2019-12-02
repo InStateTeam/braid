@@ -15,16 +15,12 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-
-
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.*
-
-
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
@@ -112,7 +108,6 @@ class ImplicitParamsEndPointV3(
          .addMediaType(this.mediaType,MediaType().schema(this.schema.toModel()))
   }
 
-
   private fun io.swagger.v3.oas.annotations.media.Schema.toModel(): Schema<*> {
      return  Schema<Any>()
 
@@ -134,20 +129,3 @@ class ImplicitParamsEndPointV3(
           .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
 
     }
-
-
-//  private fun io.swagger.v3.oas.annotations.Parameter.getDataType(): Type {
-//    return when {
-//      this.dataType != "" -> Class.forName(this.dataType)
-//      else -> this.dataTypeClass.java
-//    }
-//  }
-//
-//  private fun io.swagger.v3.oas.annotations.Parameter.firstExample(): String {
-//    return when {
-//      example != "" -> example
-//      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
-//      else -> ""
-//    }
-//  }
-}

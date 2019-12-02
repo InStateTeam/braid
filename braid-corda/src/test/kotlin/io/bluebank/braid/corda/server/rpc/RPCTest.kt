@@ -143,7 +143,7 @@ private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
 
   //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
-  val sorting = Sort(asList(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
+  val sorting = Sort(listOf(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
 
 
   val q = VaultQuery(criteria = criteria)

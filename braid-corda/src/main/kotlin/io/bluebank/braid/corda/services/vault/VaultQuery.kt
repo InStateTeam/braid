@@ -36,11 +36,9 @@ data class VaultQuery(
     return copy(paging = paging )
   }
 
-
   fun withSorting(sorting: Sort) : VaultQuery{
     return copy(sorting = sorting )
   }
-
 
   fun withContractStateType(clazz: Class<ContractState>) : VaultQuery{
     return copy(contractStateType = contractStateType )
