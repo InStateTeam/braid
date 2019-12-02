@@ -23,9 +23,6 @@ import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
-import net.corda.core.utilities.NetworkHostAndPort
 
 private val log = loggerFor<BraidMain>()
 
@@ -50,17 +47,14 @@ class BraidMain(
     }
   }
 
-    fun start(
-        config: JsonObject
-  ): Future<String> {
-      val cordApps = config.getJsonArray("cordapps", JsonArray()).toList() as List<String>
-      return tryWithClassLoader(cordApps.toJarsClassLoader()) {
+  fun start(config: BraidServerConfig): Future<String> {
+    return tryWithClassLoader(config.cordapps.toJarsClassLoader()) {
       BraidCordaStandaloneServer(
-        port = config.getInteger("port", 8080),
-        userName = config.getString("user", "user1"),
-        password = config.getString("password", "test"),
-        nodeAddress = NetworkHostAndPort.parse(config.getString("networkAndPort")),
-        openApiVersion = config.getInteger("openApiVersion", 3),
+        port = config.port,
+        userName = config.user,
+        password = config.password,
+        nodeAddress = config.networkHostAndPort,
+        openApiVersion = config.openApiVersion,
         vertx = vertx,
         httpServerOptions = HttpServerConfig.buildFromPropertiesAndVars()
       )

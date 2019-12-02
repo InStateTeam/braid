@@ -17,10 +17,8 @@ package io.bluebank.braid.core.utils
 
 import java.io.File
 import java.net.URI
-import java.net.URISyntaxException
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.Arrays.asList
 
 object PathsClassLoader {
   private val tempFileDownloader = JarDownloader()
@@ -40,25 +38,24 @@ object PathsClassLoader {
     }
   }
 
-  fun urlOrFiles(urlOrFileName: String): List<URL> {
+  private fun urlOrFiles(urlOrFileName: String): List<URL> {
     return try {
       // attempt to download the file if available
-      asList(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
+      listOf(tempFileDownloader.uriToFile(URI(urlOrFileName).toURL()))
     } catch (err: Exception) {
       // URI throws this exception if urlOrFileName starts with like "C:\" on Windows
       localFiles(File(urlOrFileName))
     }
   }
 
- private fun localFiles(file: File): List<URL> {
-      // attempt to create as a path
-      if(file.isDirectory){
-        val list = file.listFiles()
-        val toList = list.map { localFiles(it) }.flatMap { it }.toList()
-        return toList
-      }
-      return asList(file.toURI().toURL())
+  private fun localFiles(directoryOrFile: File): List<URL> {
+    return when {
+      !directoryOrFile.exists() -> emptyList() // if the file doesn't exist we return an emptyList
+      directoryOrFile.isDirectory -> directoryOrFile.listFiles()?.map { localFiles(it) }?.flatten()
+        ?: emptyList()
+      else -> listOf(directoryOrFile.toURI().toURL())
     }
+  }
 }
 
 fun List<String>.toJarsClassLoader(): ClassLoader {
