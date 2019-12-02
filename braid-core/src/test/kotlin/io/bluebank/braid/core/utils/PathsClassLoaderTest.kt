@@ -15,15 +15,11 @@
  */
 package io.bluebank.braid.core.utils
 
-import org.hamcrest.CoreMatchers.endsWith
-import org.hamcrest.CoreMatchers.hasItem
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThat
 import org.junit.FixMethodOrder
 import org.junit.Test
-import java.io.File
 import org.junit.runners.MethodSorters
-import java.net.URL
+import java.io.File
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PathsClassLoaderTest {
@@ -47,7 +43,7 @@ class PathsClassLoaderTest {
     assertNotNull(clazz)
   }
 
-@Test
+  @Test
   fun `3 that we can load classes from absolute path`() {
     val homeDir = System.getProperty("user.home")
     val path = File("$homeDir/.downloaded-cordapps").absolutePath

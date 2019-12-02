@@ -68,8 +68,8 @@ class MixinModelConverterV3(val mapper: ObjectMapper) : ModelConverter {
   private fun addMixinSchema(mixin: Class<*>,type:AnnotatedType, context: ModelConverterContext, schema: Schema<Any>): Schema<*> {
     val mixinSchema = mixinModelConverter(context).resolve(AnnotatedType(mixin))
     schema.discriminator(mixinSchema.discriminator)   // to do add others?
-    if(schema.name != null)
-      context.defineModel(schema.name,schema, type,null)
+    if (schema.name != null)
+      context.defineModel(schema.name, schema, type, null)
 
     return schema
 

@@ -122,11 +122,16 @@ class MixinModelConverterV3Test {
     assertThat(schemas?.get("Pet")?.discriminator, notNullValue())
   }
 
-@JsonSubTypes(
-      Type(value = Dog::class, name = "Dog"),
-      Type(value = Cat::class, name = "Cat")
+  @JsonSubTypes(
+    Type(value = Dog::class, name = "Dog"),
+    Type(value = Cat::class, name = "Cat")
   )
-  @JsonTypeInfo(use = MINIMAL_CLASS, include = PROPERTY, property = "@class", defaultImpl=Pet::class)
+  @JsonTypeInfo(
+    use = MINIMAL_CLASS,
+    include = PROPERTY,
+    property = "@class",
+    defaultImpl = Pet::class
+  )
   @io.swagger.v3.oas.annotations.media.Schema(
       type = "object",
       title = "Pet",

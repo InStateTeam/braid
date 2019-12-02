@@ -22,9 +22,7 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.utilities.NetworkHostAndPort
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
-import org.junit.Ignore
 import org.junit.Test
-import java.util.Arrays.asList
 
 class NetworkServiceTest {
 

@@ -15,7 +15,9 @@
  */
 package io.bluebank.braid.corda.swagger.v3
 
-import io.swagger.v3.core.converter.*
+import io.swagger.v3.core.converter.AnnotatedType
+import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.converter.ModelConverterContext
 import io.swagger.v3.oas.models.media.ComposedSchema
 import io.swagger.v3.oas.models.media.Schema
 import net.corda.core.utilities.loggerFor
@@ -36,7 +38,7 @@ class ComposedSchemaFixV3() : ModelConverter {
       context: ModelConverterContext,
       chain: MutableIterator<ModelConverter>?
   ): Schema<*>? {
-    return chain?.next()?.resolve(type,  FixingUpContext(context), chain)
+    return chain?.next()?.resolve(type, FixingUpContext(context), chain)
   }
 
    class FixingUpContext(val context: ModelConverterContext) : ModelConverterContext {

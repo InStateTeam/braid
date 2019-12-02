@@ -33,7 +33,6 @@ import net.corda.core.serialization.serialize
 import net.corda.core.transactions.ComponentGroup
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
-import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
@@ -213,7 +212,7 @@ class SerialisationTests {
     Json.decodeValue(json, VaultQuery::class.java)
   }
 
-@Test
+  @Test
   fun `should serialize criteria`() {
     val currencyIndex = SampleCashSchemaV1.PersistentCashState::currency.equal("USD")
     val customCriteria1 = QueryCriteria.VaultCustomQueryCriteria(currencyIndex)
@@ -303,7 +302,7 @@ class SerialisationTests {
     }
   }
 
-@Test
+  @Test
   fun `SignedTransaction serialisation from CashFlowIssue`() {
     val json = this::class.java.getResource("/serialization/signedTransaction/signedTransaction.json").readText()
 
@@ -316,7 +315,7 @@ class SerialisationTests {
     }
   }
 
-@Test
+  @Test
   fun `SignedTransaction serialisation`() {
     val notary = Party(DUMMY_NOTARY_NAME, generatePublicKey())
     val serialize = { value: Any, _: Int -> value.serialize() }
@@ -341,7 +340,7 @@ class SerialisationTests {
     }
   }
 
-private fun createTransactionSignature(): TransactionSignature {
+  private fun createTransactionSignature(): TransactionSignature {
     val txSig = TransactionSignature(
       "message".toByteArray(),
       generatePublicKey(),

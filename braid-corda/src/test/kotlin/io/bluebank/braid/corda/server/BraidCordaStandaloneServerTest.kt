@@ -389,7 +389,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
 
@@ -446,7 +446,7 @@ class BraidCordaStandaloneServerTest {
       }
   }
 
-@Test
+  @Test
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
@@ -459,7 +459,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should query the vault for a specific type`(context: TestContext) {
     val async = context.async()
 
@@ -476,7 +476,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should query the vault by type`(context: TestContext) {
     val async = context.async()
     val json = """
@@ -524,7 +524,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should serialize various query`(context: TestContext) {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
     val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
@@ -543,7 +543,7 @@ class BraidCordaStandaloneServerTest {
     println(json)
   }
 
-@Test
+  @Test
   fun `should query the vault by various criteria`(context: TestContext) {
     val async = context.async()
     val json = """{
@@ -604,7 +604,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   @Ignore
   fun `should issue obligation`(context: TestContext) {
     val async = context.async()
