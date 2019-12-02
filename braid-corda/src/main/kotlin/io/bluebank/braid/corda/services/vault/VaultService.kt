@@ -33,7 +33,6 @@ class VaultService(val rpc: RPCFactory) {
     return vaultQueryBy
   }
 
-
   @Operation(description = "Queries the vault for contract states of the supplied type")
   fun vaultQuery(
       @QueryParam(value = "contract-state-type")
@@ -51,5 +50,4 @@ class VaultService(val rpc: RPCFactory) {
       throw RuntimeException("Unable to query contract state:" + type, e)
     }
   }
-
 }

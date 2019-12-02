@@ -63,8 +63,8 @@ private fun startStandalone() {
     // This starts two nodes simultaneously with startNode, which returns a future that completes when the node
     // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
     val (partyA, partyB) = listOf(
-      startNode(providedName = bankA, rpcUsers = asList(user)),
-      startNode(providedName = bankB, rpcUsers = asList(user))
+      startNode(providedName = bankA, rpcUsers = listOf(user)),
+      startNode(providedName = bankB, rpcUsers = listOf(user))
     ).map { it.getOrThrow() }
 
     // This test makes an RPC call to retrieve another node's name from the network map, to verify that the

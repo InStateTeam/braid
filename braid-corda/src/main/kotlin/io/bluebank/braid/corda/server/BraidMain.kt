@@ -53,13 +53,13 @@ class BraidMain(
     fun start(
         config: JsonObject
   ): Future<String> {
-      val cordApps = config.getJsonArray("cordapps", JsonArray()).toList() as List<String>
+      val cordApps = config.getJsonArray("cordapps", JsonArray().add("cordapps")).toList() as List<String>
       return tryWithClassLoader(cordApps.toJarsClassLoader()) {
       BraidCordaStandaloneServer(
-        port = config.getInteger("port", 8080),
+        port = config.getInteger("port", 9000),
         userName = config.getString("user", "user1"),
         password = config.getString("password", "test"),
-        nodeAddress = NetworkHostAndPort.parse(config.getString("networkAndPort")),
+        nodeAddress = NetworkHostAndPort.parse(config.getString("networkAndPort","localhost:10006")),
         openApiVersion = config.getInteger("openApiVersion", 3),
         vertx = vertx,
         httpServerOptions = HttpServerConfig.buildFromPropertiesAndVars()

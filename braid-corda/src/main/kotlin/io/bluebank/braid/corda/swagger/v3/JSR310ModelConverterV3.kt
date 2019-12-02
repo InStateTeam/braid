@@ -105,7 +105,5 @@ class JSR310ModelConverterV3 : ModelConverter {
       throw RuntimeException("Unable to resolve type: ${type.type}", e)
     }
   }
-
-
 }
 

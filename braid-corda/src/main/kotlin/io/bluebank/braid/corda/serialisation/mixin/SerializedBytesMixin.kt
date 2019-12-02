@@ -17,9 +17,7 @@ package io.bluebank.braid.corda.serialisation.mixin
 
 import net.corda.core.crypto.SecureHash
 
-
 abstract class SerializedBytesMixin : OpaqueBytesMixin() {
   @get:com.fasterxml.jackson.annotation.JsonIgnore
   abstract val hash: SecureHash
-
 }

@@ -149,7 +149,6 @@ private fun <D : GenericDeclaration> SignatureVisitor.writeTypeVariableSignature
   visitTypeVariable(type.name)
 }
 
-
 private fun SignatureVisitor.writeWildCardTypeSignature(type: WildcardType) {
   when {
     type.upperBounds.size == 1 -> {

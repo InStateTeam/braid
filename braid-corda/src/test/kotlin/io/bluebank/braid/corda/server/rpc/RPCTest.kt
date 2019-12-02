@@ -69,8 +69,7 @@ fun main(args: Array<String>) {
     val connection = client.start(username, password)
     val ops = connection.proxy
 
-
-    BraidCordaJacksonInit.init()
+BraidCordaJacksonInit.init()
 
     val it = SimpleModule()
       .addSerializer(rx.Observable::class.java, ToStringSerializer())
@@ -85,8 +84,7 @@ fun main(args: Array<String>) {
     //println(ops.vaultQuery(Cash.State::class.java))
     //printJson(vaultQueryBy1(ops))
 
-
-    printJson(vaultQueryBy2(ops))
+printJson(vaultQueryBy2(ops))
 
     connection.notifyServerAndClose()
   } catch (e: Exception) {
@@ -113,7 +111,6 @@ fun printJson(output: Any) {
 //  return results
 //}
 
-
 private fun vaultQueryBy2(ops: CordaRPCOps): Vault.Page<ContractState> {
   val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
   val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
@@ -133,7 +130,6 @@ private fun vaultQueryBy2(ops: CordaRPCOps): Vault.Page<ContractState> {
   return results
 }
 
-
 private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val start = Instant.now().minus(15, ChronoUnit.DAYS)
   val end = start.plus(30, ChronoUnit.DAYS)
@@ -143,17 +139,14 @@ private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
 
   //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
-  val sorting = Sort(asList(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
+  val sorting = Sort(listOf(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
 
-
-  val q = VaultQuery(criteria = criteria)
+val q = VaultQuery(criteria = criteria)
   println(Json.encodePrettily(q))
 
-
-  val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
+val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
   return results
 }
-
 
 private fun issueCash(ops: CordaRPCOps): Future<AbstractCashFlow.Result> {
 
@@ -183,5 +176,4 @@ private fun info(ops: CordaRPCOps) {
   log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed()))
   log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
 }
-
 

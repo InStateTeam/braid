@@ -69,5 +69,4 @@ class BraidDocsMainKtTest {
     assertThat(schemaNames.toString(), schemaNames.size, equalTo(0));
   }
 
-
 }
