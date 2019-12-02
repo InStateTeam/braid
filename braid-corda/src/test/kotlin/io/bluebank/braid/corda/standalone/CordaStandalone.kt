@@ -23,7 +23,6 @@ import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.TestCordapp
 import net.corda.testing.node.User
-import java.util.Arrays.asList
 
 /*
  Use this with BraidTest -DcordaStarted=true when running locally

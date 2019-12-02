@@ -62,7 +62,7 @@ class DocsHandlerV3Test {
     assertThat(path, notNullValue())
   }
 
-@Test
+  @Test
   fun `should generate text_plain mediatype for string`() {
     val path = openApi.paths["stringPath"]
     val content = path?.post?.responses?.get("200")?.content
@@ -70,7 +70,7 @@ class DocsHandlerV3Test {
     assertThat(content?.get("text/plain"), notNullValue())
   }
 
-@Test
+  @Test
   fun `should generate application_octet-stream mediatype for byte array`() {
     val path = openApi.paths["byteArrayPath"]
     val content = path?.post?.responses?.get("200")?.content
@@ -79,7 +79,7 @@ class DocsHandlerV3Test {
     assertThat(content?.get("application/octet-stream"), notNullValue())
   }
 
-@Test
+  @Test
   fun `should mark requiredString as required`() {
     val schema =  openApi.components.schemas["io.bluebank.braid.corda.rest.docs.v3.DocsHandlerV3Test_aType"]
     assertThat(schema?.required, hasItem("requiredString"))
@@ -98,7 +98,7 @@ class DocsHandlerV3Test {
     assertThat(schema?.required, not(hasItem("optionalString")))
   }
 
-@Test
+  @Test
   fun `should Print the swagger`() {
     val swagger = ObjectMapper()
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)

@@ -97,8 +97,8 @@ class SyntheticConstructorAndTransformerTest {
   }
 
 private fun createBoundParameterTypes(): Map<Class<*>, Any> {
-    return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
-  }
+  return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
+}
 
   @Test
   fun shouldNotIncludeSyntheticConstructors() {
