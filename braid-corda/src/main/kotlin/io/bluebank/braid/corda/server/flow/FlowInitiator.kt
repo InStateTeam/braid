@@ -25,7 +25,6 @@ import io.vertx.core.Future
 import net.corda.core.flows.FlowLogic
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
-import java.util.*
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
@@ -44,7 +43,7 @@ class FlowInitiator(private val flowStarter: FlowStarterAdapter) {
       val excludeProgressTracker = it.toMutableList()
       //todo might have other classes that aren't in startFlowDynamic
       excludeProgressTracker.removeIf { l -> l is ProgressTracker }
-      log.info("About to start $kClass with args: ${Arrays.asList(it)}")
+      log.info("About to start $kClass with args: ${listOf(it)}")
 
       @Suppress("UNCHECKED_CAST")
       flowStarter.startFlowDynamic(

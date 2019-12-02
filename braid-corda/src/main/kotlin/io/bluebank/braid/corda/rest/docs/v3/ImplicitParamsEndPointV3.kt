@@ -15,16 +15,12 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
-
-
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.*
-
-
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.RoutingContext
 import java.lang.reflect.Type
@@ -45,7 +41,8 @@ class ImplicitParamsEndPointV3(
   private val implicitParams: List<io.swagger.v3.oas.annotations.Parameter> =
     annotations.filter {
       it is io.swagger.v3.oas.annotations.Parameters
-        || it is io.swagger.v3.oas.annotations.Parameter }
+        || it is io.swagger.v3.oas.annotations.Parameter
+    }
       .flatMap {
         when (it) {
           is io.swagger.v3.oas.annotations.Parameters -> it.value.toList()
@@ -75,7 +72,7 @@ class ImplicitParamsEndPointV3(
   private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
   private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }
   private val bodyParam = annotations
-      .filter {it is io.swagger.v3.oas.annotations.parameters.RequestBody}
+    .filter { it is io.swagger.v3.oas.annotations.parameters.RequestBody }
       .map { it as io.swagger.v3.oas.annotations.parameters.RequestBody }
       .firstOrNull()
 
@@ -108,19 +105,18 @@ class ImplicitParamsEndPointV3(
   }
 
   private fun io.swagger.v3.oas.annotations.media.Content.toModel(): Content {
-     return Content()
-         .addMediaType(this.mediaType,MediaType().schema(this.schema.toModel()))
+    return Content()
+      .addMediaType(this.mediaType, MediaType().schema(this.schema.toModel()))
   }
 
-
   private fun io.swagger.v3.oas.annotations.media.Schema.toModel(): Schema<*> {
-     return  Schema<Any>()
+    return Schema<Any>()
 
   }
 
   private fun io.swagger.v3.oas.annotations.Parameter.toModel(): Parameter {
     val ip = this
-    val parameter= when (ip.`in`) {
+    val parameter = when (ip.`in`) {
       ParameterIn.QUERY -> QueryParameter()
       ParameterIn.PATH -> PathParameter()
       ParameterIn.HEADER -> HeaderParameter()
@@ -128,26 +124,9 @@ class ImplicitParamsEndPointV3(
       ParameterIn.DEFAULT -> TODO()
     }
 
-      return parameter
-          .example(ip.example)
-          .description(ip.description)
-          .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
-
-    }
-
-
-//  private fun io.swagger.v3.oas.annotations.Parameter.getDataType(): Type {
-//    return when {
-//      this.dataType != "" -> Class.forName(this.dataType)
-//      else -> this.dataTypeClass.java
-//    }
-//  }
-//
-//  private fun io.swagger.v3.oas.annotations.Parameter.firstExample(): String {
-//    return when {
-//      example != "" -> example
-//      examples.value.isNotEmpty() && examples.value.first().value != "" -> examples.value.first().value
-//      else -> ""
-//    }
-//  }
+    return parameter
+      .example(ip.example)
+      .description(ip.description)
+      .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
+  }
 }

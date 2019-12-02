@@ -24,10 +24,7 @@ import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.contracts.Amount
 import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.Issued
-import net.corda.core.contracts.PartyAndReference
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
@@ -44,12 +41,9 @@ import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.AbstractCashFlow
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.finance.schemas.CashSchemaV1
-import net.corda.finance.test.SampleCashSchemaV1
-import net.corda.finance.test.SampleCashSchemaV3
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.Arrays.asList
 
 class RPCTest
 
@@ -69,8 +63,7 @@ fun main(args: Array<String>) {
     val connection = client.start(username, password)
     val ops = connection.proxy
 
-
-    BraidCordaJacksonInit.init()
+BraidCordaJacksonInit.init()
 
     val it = SimpleModule()
       .addSerializer(rx.Observable::class.java, ToStringSerializer())
@@ -84,7 +77,6 @@ fun main(args: Array<String>) {
 
     //println(ops.vaultQuery(Cash.State::class.java))
     //printJson(vaultQueryBy1(ops))
-
 
     printJson(vaultQueryBy2(ops))
 
@@ -113,7 +105,6 @@ fun printJson(output: Any) {
 //  return results
 //}
 
-
 private fun vaultQueryBy2(ops: CordaRPCOps): Vault.Page<ContractState> {
   val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
   val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
@@ -133,7 +124,6 @@ private fun vaultQueryBy2(ops: CordaRPCOps): Vault.Page<ContractState> {
   return results
 }
 
-
 private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val start = Instant.now().minus(15, ChronoUnit.DAYS)
   val end = start.plus(30, ChronoUnit.DAYS)
@@ -143,17 +133,21 @@ private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
 
   //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
-  val sorting = Sort(asList(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
-
+  val sorting = Sort(
+    listOf(
+      Sort.SortColumn(
+        SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE),
+        Sort.Direction.ASC
+      )
+    )
+  )
 
   val q = VaultQuery(criteria = criteria)
   println(Json.encodePrettily(q))
 
-
   val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
   return results
 }
-
 
 private fun issueCash(ops: CordaRPCOps): Future<AbstractCashFlow.Result> {
 
@@ -183,5 +177,4 @@ private fun info(ops: CordaRPCOps) {
   log.info("networkMapFeed:" + Json.encodePrettily(ops.networkMapFeed()))
   log.info("registeredFlows:" + Json.encodePrettily(ops.registeredFlows()))
 }
-
 

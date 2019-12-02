@@ -33,7 +33,6 @@ import net.corda.core.serialization.serialize
 import net.corda.core.transactions.ComponentGroup
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
-import net.corda.core.utilities.ByteSequence
 import net.corda.core.utilities.NonEmptySet
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.GBP
@@ -70,8 +69,7 @@ class SerialisationTests {
     }
   }
 
-
-  //  @Ignore
+//  @Ignore
   @Test     // fails because we cant tell if this is a String or a Currency
   fun `that Amount of String token can be serialised and deserialised`() {
     val expected = Amount(100, "GBP")
@@ -214,7 +212,6 @@ class SerialisationTests {
     Json.decodeValue(json, VaultQuery::class.java)
   }
 
-
   @Test
   fun `should serialize criteria`() {
     val currencyIndex = SampleCashSchemaV1.PersistentCashState::currency.equal("USD")
@@ -305,7 +302,6 @@ class SerialisationTests {
     }
   }
 
-
   @Test
   fun `SignedTransaction serialisation from CashFlowIssue`() {
     val json = this::class.java.getResource("/serialization/signedTransaction/signedTransaction.json").readText()
@@ -318,7 +314,6 @@ class SerialisationTests {
       val txn = Json.decodeValue(json, SignedTransaction::class.java)
     }
   }
-
 
   @Test
   fun `SignedTransaction serialisation`() {
@@ -344,7 +339,6 @@ class SerialisationTests {
       assertEquals(decoded, stx)
     }
   }
-
 
   private fun createTransactionSignature(): TransactionSignature {
     val txSig = TransactionSignature(

@@ -205,7 +205,7 @@ class CustomModelConvertersV3Test {
 
 //   @Test
 //    fun `that SignedTransaction can be serialised and deserialised`() {
-//        val expected = SignedTransaction(CoreTransaction(),asList())
+//        val expected = SignedTransaction(CoreTransaction(),listOf())
 //        val encoded = Json.encode(expected)
 //        assertEquals(encoded, "{\"quantity\":100,\"displayTokenSize\":0.01,\"token\":\"GBP\"}")
 //    }

@@ -35,12 +35,12 @@ data class BraidServerConfig(
 ) {
 
   companion object {
-    val DEFAULT_NODE_ADDRESS = NetworkHostAndPort.parse("localhost:10000")
+    val DEFAULT_NODE_ADDRESS = NetworkHostAndPort.parse("localhost:10006")
     const val DEFAULT_USER = "user1"
     const val DEFAULT_PASSWORD = "password"
     @Suppress("SpellCheckingInspection")
     const val DEFAULT_OPENAPI_VERSION = 3
-    const val DEFAULT_PORT = 8080
+    const val DEFAULT_PORT = 9000
     @Suppress("SpellCheckingInspection")
     const val DEFAULT_CORDAPPS_DIR = "./cordapps"
     private val configFile = File("braid.conf")

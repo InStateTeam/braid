@@ -54,5 +54,4 @@ class JSR310Test{
     assertEquals("{\"duration\":\"PT240H\"}", encoded)
   }
 
-
 }

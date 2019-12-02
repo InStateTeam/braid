@@ -73,7 +73,6 @@ import java.util.*
 import javax.ws.rs.core.Response
 import kotlin.test.assertEquals
 
-
 /**
  * Run with Either
  *          -DbraidStarted=true and CordaStandalone and BraidMain started on port 9000 in the background if you want this test to run faster.
@@ -241,8 +240,7 @@ class BraidCordaStandaloneServerTest {
     assertThat(encode, `is`("O%3DPartyB%2C+L%3DNew+York%2C+C%3DUS"))
   }
 
-
-  @Test
+@Test
   fun shouldDecode(context: TestContext) {
     val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS")
     val parse = CordaX500Name.parse(encode)
@@ -391,7 +389,6 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-
   @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
@@ -449,7 +446,6 @@ class BraidCordaStandaloneServerTest {
       }
   }
 
-
   @Test
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
@@ -462,7 +458,6 @@ class BraidCordaStandaloneServerTest {
       .onSuccess { async.complete() }
       .catch(context::fail)
   }
-
 
   @Test
   fun `should query the vault for a specific type`(context: TestContext) {
@@ -480,7 +475,6 @@ class BraidCordaStandaloneServerTest {
       }
       .catch(context::fail)
   }
-
 
   @Test
   fun `should query the vault by type`(context: TestContext) {
@@ -530,7 +524,6 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-
   @Test
   fun `should serialize various query`(context: TestContext) {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
@@ -549,7 +542,6 @@ class BraidCordaStandaloneServerTest {
     val json = Json.encodePrettily(query)
     println(json)
   }
-
 
   @Test
   fun `should query the vault by various criteria`(context: TestContext) {
@@ -611,7 +603,6 @@ class BraidCordaStandaloneServerTest {
       }
       .catch(context::fail)
   }
-
 
   @Test
   @Ignore

@@ -37,12 +37,10 @@ class CordaClassesTest {
       }
     }
 
-  
-  @Test
+@Test
   fun `should have cash state`() {
     assertThat(classes, hasItem(Cash.State::class.java))
   }
-
 
   @Test
   fun `should not have ServiceHubInternalImpl`() {

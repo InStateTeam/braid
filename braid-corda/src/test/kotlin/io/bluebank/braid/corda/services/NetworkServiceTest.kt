@@ -22,11 +22,8 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.utilities.NetworkHostAndPort
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
-import org.junit.Ignore
 import org.junit.Test
-import java.util.Arrays.asList
 
-@Ignore
 class NetworkServiceTest {
 
   @Test
@@ -36,7 +33,7 @@ class NetworkServiceTest {
 
     val partyAndCertificate = mock<PartyAndCertificate> { }
 
-    val addresses = asList(NetworkHostAndPort.parse("localhost:123"))
+    val addresses = listOf(NetworkHostAndPort.parse("localhost:123"))
     val legalIdentitiesAndCerts = listOf(partyAndCertificate)
     val nodeInfo = NodeInfo(addresses, legalIdentitiesAndCerts, 1, 2)
     val ops = mock<CordaServicesAdapter> {
@@ -46,6 +43,6 @@ class NetworkServiceTest {
     val network = SimpleNetworkMapServiceImpl(ops)
     val simpleInfo = network.myNodeInfo()
     assertThat(simpleInfo.addresses, `is`(addresses))
-    assertThat(simpleInfo.legalIdentities, `is`(asList()))
+    assertThat(simpleInfo.legalIdentities.size, `is`(1))
   }
 }

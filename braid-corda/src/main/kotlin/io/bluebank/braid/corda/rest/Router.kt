@@ -47,7 +47,6 @@ class Router{
   }
 }
 
-
 fun <R> Route.bind(fn: KCallable<R>) {
   fn.validateParameters()
   this.handler { rc ->

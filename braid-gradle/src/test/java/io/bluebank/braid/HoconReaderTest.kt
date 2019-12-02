@@ -31,8 +31,7 @@ class HoconReaderTest{
     val config = HoconReader().read("web-server.conf")
   }
 
-
-  @Test
+@Test
   fun `read boolean`() {
     assertThat(config.getBoolean("devMode"), equalTo(true))
   }

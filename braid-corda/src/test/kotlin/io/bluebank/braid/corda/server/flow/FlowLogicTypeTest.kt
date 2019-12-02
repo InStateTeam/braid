@@ -26,8 +26,7 @@ import kotlin.test.assertEquals
 
 class FlowLogicTypeTest {
 
-
-  @Test
+@Test
   fun shouldGetReturnType() {
     val returnType = BraidTestFlow::class.flowLogicType()
     assertEquals(returnType.jvmErasure, SignedTransaction::class)

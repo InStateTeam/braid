@@ -101,11 +101,8 @@ open class BraidPlugin : Plugin<Project> {
 
     println("Braid installed at: $destinationDirectory")
   }
-
-
   val executableFileMode = "0755".toInt(8)
 }
-
 
 private fun Project.getPluginFile(filePathInJar: String): File {
   val tmpDir = File(this.buildDir, "tmp")

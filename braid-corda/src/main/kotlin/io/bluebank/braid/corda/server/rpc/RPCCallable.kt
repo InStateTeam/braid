@@ -48,5 +48,3 @@ class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<T>) 
   override val returnType: KType
     get() = flow.flowLogicType()
 }
-
-

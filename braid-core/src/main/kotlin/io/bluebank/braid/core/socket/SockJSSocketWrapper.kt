@@ -73,5 +73,3 @@ interface SockJSSocketWrapper : Socket<Buffer, Buffer> {
     }
   }
 }
-
-

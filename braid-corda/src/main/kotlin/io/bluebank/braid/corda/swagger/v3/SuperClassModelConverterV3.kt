@@ -16,9 +16,9 @@
 package io.bluebank.braid.corda.swagger.v3
 
 import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.type.SimpleType
-import io.swagger.v3.core.converter.*
+import io.swagger.v3.core.converter.AnnotatedType
+import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.converter.ModelConverterContext
 import io.swagger.v3.oas.models.media.Schema
 import net.corda.core.utilities.loggerFor
 
@@ -54,9 +54,6 @@ class SuperClassModelConverterV3() : ModelConverter {
       return this.type as Class<*>
     if(this.type is JavaType)
       return (this.type as JavaType).rawClass
-
     return null;
   }
-
-
 }
