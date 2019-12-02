@@ -37,7 +37,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-
 class MixinModelConverterV3Test {
    var schemas: MutableMap<String, Schema<Any>>? = null
 
@@ -117,15 +116,13 @@ class MixinModelConverterV3Test {
   @Test
   fun `should generate discriminator on Pet`() {
 
-
-    // AnnotatedType(Pet::class.java).ctxAnnotations(PetMixin::class.annotations.toTypedArray())
+// AnnotatedType(Pet::class.java).ctxAnnotations(PetMixin::class.annotations.toTypedArray())
 
     assertThat(schemas, hasKey("Pet"))
     assertThat(schemas?.get("Pet")?.discriminator, notNullValue())
   }
 
-
-  @JsonSubTypes(
+@JsonSubTypes(
       Type(value = Dog::class, name = "Dog"),
       Type(value = Cat::class, name = "Cat")
   )

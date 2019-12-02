@@ -54,9 +54,6 @@ class SuperClassModelConverterV3() : ModelConverter {
       return this.type as Class<*>
     if(this.type is JavaType)
       return (this.type as JavaType).rawClass
-
     return null;
   }
-
-
 }

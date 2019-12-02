@@ -39,7 +39,6 @@ class ComposedSchemaFixV3() : ModelConverter {
     return chain?.next()?.resolve(type,  FixingUpContext(context), chain)
   }
 
-
    class FixingUpContext(val context: ModelConverterContext) : ModelConverterContext {
      override fun resolve(p0: AnnotatedType?): Schema<*>? { return context.resolve(p0) }
 

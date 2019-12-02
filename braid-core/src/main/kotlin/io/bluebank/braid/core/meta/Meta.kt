@@ -50,6 +50,3 @@ data class ServiceDescriptor(val endpoint: String, val documentation: String) {
     }
   }
 }
-
-
-
