@@ -29,8 +29,6 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.vertx.core.Future
 import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.contracts.Amount
@@ -52,13 +50,15 @@ import kotlin.test.Test
 @Ignore
 @RunWith(VertxUnitRunner::class)
 class BraidMainTest {
+
   companion object {
     private val jarFiles = listOf(
       "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
       "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
     )
     private val cordapps = JarDownloader().let { downloader ->
-      jarFiles.map { downloader.uriToFile(URL(it)).toPath() }.map { TestCordappJar(jarFile = it) }
+      jarFiles.map { downloader.uriToFile(URL(it)).toPath() }
+        .map { TestCordappJar(jarFile = it) }
     }
 
     private val user = User("user1", "test", permissions = setOf("ALL"))
@@ -83,7 +83,8 @@ class BraidMainTest {
         .compose { client.getFuture("/api/rest/network/nodes") }
         .compose { it.body<Array<SimpleNodeInfo>>() }
         .map { nodes ->
-          nodes.map { node -> node.legalIdentities.first().name to node.legalIdentities.first() }.toMap()
+          nodes.map { node -> node.legalIdentities.first().name to node.legalIdentities.first() }
+            .toMap()
         }
         .compose { nodes ->
           val payload = mapOf(
@@ -95,7 +96,8 @@ class BraidMainTest {
           )
           client.postFuture(
             path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueAndPaymentFlow",
-            body = payload)
+            body = payload
+          )
         }
         .compose { it.body<AbstractCashFlow.Result>() }
         .onSuccess {
@@ -111,11 +113,18 @@ class BraidMainTest {
   }
 
   private fun BraidMain.createHttpClient(port: Int) =
-    vertx.createHttpClient(HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost").setSsl(true).setTrustAll(true).setVerifyHost(false))
+    vertx.createHttpClient(
+      HttpClientOptions().setDefaultPort(port).setDefaultHost("localhost").setSsl(
+        true
+      ).setTrustAll(true).setVerifyHost(false)
+    )
 
   private fun verifyOpenApi(context: TestContext, openApi: OpenAPI) {
     context.assertEquals(1, openApi.servers.size)
-    context.assertEquals("http://localhost:${braidAPort}/api/rest", openApi.servers[0].url)
+    context.assertEquals(
+      "http://localhost:${braidAPort}/api/rest",
+      openApi.servers[0].url
+    )
     context.assertTrue(openApi.paths.containsKey("/network/nodes"))
     context.assertTrue(openApi.paths.containsKey("/cordapps"))
     context.assertTrue(openApi.paths.containsKey("/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashPaymentFlow"))
@@ -129,7 +138,10 @@ class BraidMainTest {
       .map { Json.mapper().readValue(it, OpenAPI::class.java) }
   }
 
-  private fun <T> withNetwork(context: TestContext, fn: (BraidMain) -> Future<T>): Future<T> {
+  private fun <T> withNetwork(
+    context: TestContext,
+    fn: (BraidMain) -> Future<T>
+  ): Future<T> {
     return driver(
       DriverParameters(
         cordappsForAllNodes = cordapps,
@@ -158,19 +170,26 @@ class BraidMainTest {
     }
   }
 
-  private fun setupBraidServers(braidMain: BraidMain, partyA: NodeHandle, partyB: NodeHandle): Future<String> {
-    return braidMain
-      .start(JsonObject()
-          .put("cordapps", JsonArray(jarFiles) )
-          .put("networkAndPort", partyA.rpcAddress.toString())
-          .put("port",braidAPort))
-      .compose {
-        braidMain.start(
-            JsonObject()
-            .put("cordapps", JsonArray(jarFiles) )
-            .put("networkAndPort", partyB.rpcAddress.toString())
-            .put("port",braidAPort))
-      }
+  private fun setupBraidServers(
+    braidMain: BraidMain,
+    partyA: NodeHandle,
+    partyB: NodeHandle
+  ): Future<String> {
+    return braidMain.start(
+      BraidServerConfig(
+        networkHostAndPort = partyA.rpcAddress,
+        port = braidAPort,
+        cordapps = jarFiles
+      )
+    ).compose {
+      braidMain.start(
+        BraidServerConfig(
+          networkHostAndPort = partyB.rpcAddress,
+          port = braidBPort,
+          cordapps = jarFiles
+        )
+      )
+    }
   }
 }
 

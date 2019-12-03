@@ -16,9 +16,8 @@
 package io.bluebank.braid.corda.standalone
 
 import io.bluebank.braid.corda.server.BraidMain
+import io.bluebank.braid.corda.server.BraidServerConfig
 import io.bluebank.braid.core.utils.JarDownloader
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.internal.toPath
 import net.corda.core.utilities.getOrThrow
@@ -43,7 +42,8 @@ fun main(args: Array<String>) {
 
   val downloader = JarDownloader()
 
-  val cordapps = jarFiles.map { downloader.uriToFile(URL(it)).toPath() }.map { TestCordappJar(jarFile = it) }
+  val cordapps = jarFiles.map { downloader.uriToFile(URL(it)).toPath() }
+    .map { TestCordappJar(jarFile = it) }
 
   driver(
     DriverParameters(
@@ -61,23 +61,30 @@ fun main(args: Array<String>) {
     ).map { it.getOrThrow() }
 
     val braidMain = BraidMain()
-    braidMain
-        .start(JsonObject()
-            .put("cordapps", JsonArray(jarFiles) )
-            .put("networkAndPort", partyA.rpcAddress.toString())
-            .put("port",8080))
-        .compose {
-          braidMain.start(
-              JsonObject()
-                  .put("cordapps", JsonArray(jarFiles) )
-                  .put("networkAndPort", partyB.rpcAddress.toString())
-                  .put("port",8081))
-        }
+
+    braidMain.start(
+      BraidServerConfig(
+        networkHostAndPort = partyA.rpcAddress,
+        port = 8080,
+        cordapps = jarFiles
+      )
+    ).compose {
+      braidMain.start(
+        BraidServerConfig(
+          networkHostAndPort = partyB.rpcAddress,
+          port = 8081,
+          cordapps = jarFiles
+        )
+      )
+    }
 
   }
 }
 
-class TestCordappJar(override val config: Map<String, Any> = emptyMap(), override val jarFile: Path) :
+class TestCordappJar(
+  override val config: Map<String, Any> = emptyMap(),
+  override val jarFile: Path
+) :
   TestCordappInternal() {
 
   override fun withOnlyJarContents(): TestCordappInternal {

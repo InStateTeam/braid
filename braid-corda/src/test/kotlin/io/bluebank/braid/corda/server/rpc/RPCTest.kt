@@ -24,10 +24,7 @@ import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.Future
 import io.vertx.core.json.Json
 import net.corda.client.rpc.CordaRPCClient
-import net.corda.core.contracts.Amount
 import net.corda.core.contracts.ContractState
-import net.corda.core.contracts.Issued
-import net.corda.core.contracts.PartyAndReference
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
@@ -44,12 +41,9 @@ import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.AbstractCashFlow
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.finance.schemas.CashSchemaV1
-import net.corda.finance.test.SampleCashSchemaV1
-import net.corda.finance.test.SampleCashSchemaV3
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.Arrays.asList
 
 class RPCTest
 
@@ -84,7 +78,7 @@ BraidCordaJacksonInit.init()
     //println(ops.vaultQuery(Cash.State::class.java))
     //printJson(vaultQueryBy1(ops))
 
-printJson(vaultQueryBy2(ops))
+    printJson(vaultQueryBy2(ops))
 
     connection.notifyServerAndClose()
   } catch (e: Exception) {
@@ -139,12 +133,19 @@ private fun vaultQueryBy1(ops: CordaRPCOps): Vault.Page<ContractState> {
   val criteria = QueryCriteria.VaultQueryCriteria(timeCondition = recordedBetweenExpression)
 
   //val criteria = QueryCriteria.LinearStateQueryCriteria(participants = asList(notary(ops) as AbstractParty))
-  val sorting = Sort(listOf(Sort.SortColumn(SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE), Sort.Direction.ASC)))
+  val sorting = Sort(
+    listOf(
+      Sort.SortColumn(
+        SortAttribute.Standard(Sort.VaultStateAttribute.CONTRACT_STATE_TYPE),
+        Sort.Direction.ASC
+      )
+    )
+  )
 
-val q = VaultQuery(criteria = criteria)
+  val q = VaultQuery(criteria = criteria)
   println(Json.encodePrettily(q))
 
-val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
+  val results = ops.vaultQueryBy(q.criteria, q.paging, q.sorting, q.contractStateType)
   return results
 }
 

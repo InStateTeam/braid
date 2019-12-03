@@ -42,7 +42,7 @@ class CordaClassesTest {
     assertThat(classes, hasItem(Cash.State::class.java))
   }
 
-@Test
+  @Test
   fun `should not have ServiceHubInternalImpl`() {
     assertThat(classes, not(hasItem(AbstractNode.ServiceHubInternalImpl::class.java)))
   }

@@ -16,11 +16,9 @@
 package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.server.BraidMain
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
-import java.io.File
+import io.bluebank.braid.corda.server.BraidServerConfig
 
 fun main(args: Array<String>) {
-  BraidMain().start(BraidConfig.config(args))
+  BraidMain().start(BraidServerConfig.config(args))
 }
 

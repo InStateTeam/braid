@@ -17,6 +17,7 @@ package io.bluebank.braid.server
 
 import io.bluebank.braid.corda.server.BraidCordaStandaloneServer
 import io.bluebank.braid.corda.server.BraidMain
+import io.bluebank.braid.corda.server.BraidServerConfig
 import io.bluebank.braid.core.logging.loggerFor
 
 private val log = loggerFor<BraidCordaStandaloneServer>()
@@ -25,9 +26,9 @@ private val log = loggerFor<BraidCordaStandaloneServer>()
  * BraidTestMainKt class
  */
 fun main(args: Array<String>) {
-  val config = BraidConfig.config(args)
+  val config = BraidServerConfig.config(args)
   BraidMain().start(config)
-    .map { openBrowser(config.getInteger("port"), it) }
+    .map { openBrowser(config.port, it) }
 }
 
 private fun openBrowser(port: Int?, it: String?) {

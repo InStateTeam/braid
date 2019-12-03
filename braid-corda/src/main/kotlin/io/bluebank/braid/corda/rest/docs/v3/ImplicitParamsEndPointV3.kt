@@ -27,29 +27,29 @@ import java.lang.reflect.Type
 import kotlin.reflect.KAnnotatedElement
 
 class ImplicitParamsEndPointV3(
-    groupName: String,
-    protected: Boolean,
-    method: HttpMethod,
-    path: String,
-    fn: (RoutingContext) -> Unit,
-    modelContextV3: ModelContextV3
+  groupName: String,
+  protected: Boolean,
+  method: HttpMethod,
+  path: String,
+  fn: (RoutingContext) -> Unit,
+  modelContextV3: ModelContextV3
 ) : EndPointV3(groupName, protected, method, path, modelContextV3) {
 
   private val annotated = (fn as KAnnotatedElement)
   override val annotations: List<Annotation> = annotated.annotations
 
   private val implicitParams: List<io.swagger.v3.oas.annotations.Parameter> =
-      annotations.filter {
-        it is io.swagger.v3.oas.annotations.Parameters
-            || it is io.swagger.v3.oas.annotations.Parameter
+    annotations.filter {
+      it is io.swagger.v3.oas.annotations.Parameters
+        || it is io.swagger.v3.oas.annotations.Parameter
+    }
+      .flatMap {
+        when (it) {
+          is io.swagger.v3.oas.annotations.Parameters -> it.value.toList()
+          is io.swagger.v3.oas.annotations.Parameter -> listOf(it)
+          else -> throw IllegalArgumentException()
+        }
       }
-          .flatMap {
-            when (it) {
-              is io.swagger.v3.oas.annotations.Parameters -> it.value.toList()
-              is io.swagger.v3.oas.annotations.Parameter -> listOf(it)
-              else -> throw IllegalArgumentException()
-            }
-          }
 
   override val parameterTypes: List<Type>
     //todo add array schema
@@ -63,17 +63,17 @@ class ImplicitParamsEndPointV3(
   override val returnType: Type
     get() {
       return annotations.filterIsInstance<Operation>()
-          .flatMap { it.responses.toList() }
-          .flatMap { it.content.toList() }
-          .map { it.schema.implementation.java }
-          .firstOrNull() ?: Unit::class.java
+        .flatMap { it.responses.toList() }
+        .flatMap { it.content.toList() }
+        .map { it.schema.implementation.java }
+        .firstOrNull() ?: Unit::class.java
     }
 
   private val headerParams = implicitParams.filter { it.`in` == ParameterIn.HEADER }
   private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
   private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }
   private val bodyParam = annotations
-      .filter { it is io.swagger.v3.oas.annotations.parameters.RequestBody }
+    .filter { it is io.swagger.v3.oas.annotations.parameters.RequestBody }
       .map { it as io.swagger.v3.oas.annotations.parameters.RequestBody }
       .firstOrNull()
 
@@ -113,7 +113,7 @@ class ImplicitParamsEndPointV3(
 
   private fun io.swagger.v3.oas.annotations.media.Content.toModel(): Content {
     return Content()
-        .addMediaType(this.mediaType, MediaType().schema(this.schema.toModel()))
+      .addMediaType(this.mediaType, MediaType().schema(this.schema.toModel()))
   }
 
   private fun io.swagger.v3.oas.annotations.media.Schema.toModel(): Schema<*> {
@@ -132,8 +132,8 @@ class ImplicitParamsEndPointV3(
     }
 
     return parameter
-        .example(ip.example)
-        .description(ip.description)
-        .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
+      .example(ip.example)
+      .description(ip.description)
+      .schema(ip.schema.implementation.java.getSwaggerProperty().schema)
   }
 }
