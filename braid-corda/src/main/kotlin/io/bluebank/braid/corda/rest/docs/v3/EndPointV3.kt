@@ -149,8 +149,21 @@ abstract class EndPointV3(
   protected abstract fun mapPathParameters(): List<PathParameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
-    return mapPathParameters() + mapQueryParameters() + mapHeaderParameters()
+    return mapPathParameters() + mapQueryParameters() + mapHeaderParameters() + annotatedParameters()
   }
+
+  private fun annotatedParameters(): List<Parameter> =
+    apiOperation?.parameters?.map { p ->
+      Parameter()
+        .name(p.name)
+        .description(p.description)
+        .`$ref`(p.ref)
+        // .examples(p.examples)    todo
+        .required(p.required)
+        .deprecated(p.deprecated)
+        .allowEmptyValue(p.allowEmptyValue)
+    } ?: emptyArray<Parameter>().toList()
+
 
   protected fun KType.getSwaggerProperty(): ResolvedSchema {
     return getKType().javaTypeIncludingSynthetics().getSwaggerProperty()
@@ -172,17 +185,17 @@ abstract class EndPointV3(
         .content(
           Content()
             .addMediaType(
-                returnType(type),
+              returnType(type),
               io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
             )
         )
     }
   }
 
-  private fun returnType(type:Type): String {
-    return when{
+  private fun returnType(type: Type): String {
+    return when {
       type.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
-      String::class.java.equals(type)-> MediaType.TEXT_PLAIN
+      String::class.java.equals(type) -> MediaType.TEXT_PLAIN
       else -> MediaType.APPLICATION_JSON
     }
   }

@@ -17,9 +17,19 @@ package io.bluebank.braid.corda.server.progress
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpResponseStatus
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.media.ArraySchema
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.models.parameters.HeaderParameter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.ext.web.RoutingContext
+import javax.ws.rs.HeaderParam
+import javax.ws.rs.core.MediaType
 
 class TrackerHandler(private val tracker: ProgressTrackerManager) {
 
@@ -27,6 +37,15 @@ class TrackerHandler(private val tracker: ProgressTrackerManager) {
     var log = loggerFor<TrackerHandler>()
   }
 
+  @Operation(
+    description = "Connect to the Progress Tracker of a flow. " +
+      "This call will return chunked responses of all progress trackers for this flow",
+    parameters = [Parameter(name="invocation-id", `in` = ParameterIn.HEADER, required = true)],
+    responses = [ApiResponse(
+      content = arrayOf(
+                Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = Schema(implementation = Progress::class))))]
+  )
   fun invoke(ctx: RoutingContext) {
     val invocationId = ctx.request().getHeader("invocation-id")
     val flowProgress = tracker.get(invocationId)
