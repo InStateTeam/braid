@@ -54,7 +54,7 @@ class FlowInitiator(
       boundTypes = createBoundParameterTypes(),
       // This says that `@Context user: User` is an additional parameter; I couldn't make
       // it work properly as a `User?` type, so don't specify it at all if `!isAuth`.
-      additionalParams = if (!isAuth) emptyList() else listOf(
+      additionalParams = listOf(
         KParameterSynthetic("user", User::class.java, listOf(annotation))
       )
     ) {
@@ -67,11 +67,11 @@ class FlowInitiator(
       // and return a Future
 
       // because of additionalParams above, expect this extra `user` parameter at run-time
-      val user: User? = if (isAuth) parameters.first() as User else null
+      val user: User? = parameters.first() as User?
 
       // drop the user parameter, and filter out the ProgressTracker if there is one
       val excludeProgressTracker = parameters
-        .drop(if (isAuth) 1 else 0)
+        .drop(1)
         .filter { p -> p !is ProgressTracker }
       log.info("About to start $kClass with args: ${listOf(parameters)}")
 

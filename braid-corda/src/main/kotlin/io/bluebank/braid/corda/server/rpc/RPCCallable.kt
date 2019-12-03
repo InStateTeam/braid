@@ -42,8 +42,8 @@ class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<Flow
     get() = fn.visibility
 
   override fun call(vararg args: Any?): Future<T> {
-    val call = fn.call(args[0])
-    val invocationId = args[1]
+    val call = fn.call(args[0], args[1])
+    val invocationId = args.last()
     if(invocationId != null)
       tracker.put(invocationId as String, call)
     return call.returnValue.toObservable().toFuture()

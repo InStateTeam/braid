@@ -27,8 +27,7 @@ class RPCInvocationParameter {
     }
   }
 
-  fun template(
-               @HeaderParam("invocation-id")
+  fun template(@HeaderParam("invocation-id")
                invocationId: String?) {
   }
 }
