@@ -19,6 +19,7 @@ package io.bluebank.braid.corda.services
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.vertx.ext.auth.User
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.node.AppServiceHub
@@ -29,6 +30,7 @@ import rx.Observable
 import rx.Subscription
 import java.util.stream.Collectors
 import javax.ws.rs.QueryParam
+import javax.ws.rs.core.Context
 
 data class SimpleNodeInfo(
   val addresses: List<NetworkHostAndPort>,
@@ -43,29 +45,8 @@ fun NodeInfo.toSimpleNodeInfo(): SimpleNodeInfo {
   return SimpleNodeInfo(this.addresses, this.legalIdentities)
 }
 
+// This is exposed via RPC only, not REST: a different set of methods is exposed for REST
 interface SimpleNetworkMapService {
-  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
-  fun myNodeInfo(): SimpleNodeInfo
-
-  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
-  fun nodes(
-    @Parameter(
-      description = "[host]:[port] for the Corda P2P of the node",
-      example = "localhost:10000"
-    ) @QueryParam(value = "host-and-port") hostAndPort: String? = null,
-    @Parameter(
-      description = "the X500 name for the node",
-      example = "O=PartyB, L=New York, C=US"
-    ) @QueryParam(value = "x500-name") x500Name: String? = null
-  ): List<SimpleNodeInfo>
-
-  // example http://localhost:8080/api/rest/network/notaries?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH
-  fun notaries(
-    @Parameter(
-      description = "the X500 name for the node",
-      example = "O=PartyB, L=New York, C=US"
-    ) @QueryParam(value = "x500-name") x500Name: String? = null
-  ): List<Party>
 
   fun allNodes(): List<SimpleNodeInfo>
   fun state(): Observable<Any>
@@ -104,58 +85,6 @@ class SimpleNetworkMapServiceImpl(
         else -> null
       }
     )
-  }
-
-  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
-  override fun myNodeInfo(): SimpleNodeInfo {
-    return networkMapServiceAdapter.nodeInfo().toSimpleNodeInfo()
-  }
-
-  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
-  override fun nodes(
-    @Parameter(
-      description = "[host]:[port] for the Corda P2P of the node",
-      example = "localhost:10000"
-    ) @QueryParam(value = "host-and-port") hostAndPort: String?,
-    @Parameter(
-      description = "the X500 name for the node",
-      example = "O=PartyB, L=New York, C=US"
-    ) @QueryParam(value = "x500-name") x500Name: String?
-  ): List<SimpleNodeInfo> {
-    return when {
-      hostAndPort?.isNotEmpty() ?: false -> {
-        val address = NetworkHostAndPort.parse(hostAndPort!!)
-        networkMapServiceAdapter.networkMapSnapshot().stream()
-          .filter { node -> node.addresses.contains(address) }
-          .map { node -> node.toSimpleNodeInfo() }
-          .collect(Collectors.toList())
-      }
-      x500Name?.isNotEmpty() ?: false -> {
-        val x500Name1 = CordaX500Name.parse(x500Name!!)
-        val party = networkMapServiceAdapter.wellKnownPartyFromX500Name(x500Name1)
-        listOfNotNull(party?.let { networkMapServiceAdapter.nodeInfoFromParty(party)?.toSimpleNodeInfo() })
-      }
-      else -> networkMapServiceAdapter.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
-        Collectors.toList()
-      )
-    }
-  }
-
-  // example http://localhost:8080/api/rest/network/notaries?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH
-  override fun notaries(
-    @Parameter(
-      description = "the X500 name for the node",
-      example = "O=PartyB, L=New York, C=US"
-    ) @QueryParam(value = "x500-name") x500Name: String?
-  ): List<Party> {
-    return when {
-      x500Name?.isNotEmpty() ?: false -> listOfNotNull(
-        networkMapServiceAdapter.notaryPartyFromX500Name(
-          CordaX500Name.parse(x500Name!!)
-        )
-      )
-      else -> networkMapServiceAdapter.notaryIdentities()
-    }
   }
 
   override fun allNodes(): List<SimpleNodeInfo> {
@@ -205,4 +134,74 @@ private fun NetworkMapCache.MapChange.asSimple(): SimpleNetworkMapServiceImpl.Ma
 
 fun <T> AppServiceHub.transaction(fn: () -> T): T {
   return fn()
+}
+
+/**
+ * The SimpleNetworkMapService interface and its *Impl class are the API exposed to clients via the RPC protocol.
+ * Conversely this here is the API which Braid exposes to its clients via its REST protocol.
+ */
+class RestNetworkMapService(
+  private val getNetworkMapServiceAdapter: (User?) -> NetworkMapServiceAdapter
+) {
+
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  fun myNodeInfo(
+    @Context user: User?
+  ): SimpleNodeInfo {
+    val networkMapServiceAdapter = getNetworkMapServiceAdapter(user)
+    return networkMapServiceAdapter.nodeInfo().toSimpleNodeInfo()
+  }
+
+  @Operation(description = "Retrieves all nodes if neither query parameter is supplied. Otherwise returns a list of one node matching the supplied query parameter.")
+  fun nodes(
+    @Parameter(
+      description = "[host]:[port] for the Corda P2P of the node",
+      example = "localhost:10000"
+    ) @QueryParam(value = "host-and-port") hostAndPort: String?,
+    @Parameter(
+      description = "the X500 name for the node",
+      example = "O=PartyB, L=New York, C=US"
+    ) @QueryParam(value = "x500-name") x500Name: String?,
+    @Context user: User?
+  ): List<SimpleNodeInfo> {
+    val networkMapServiceAdapter = getNetworkMapServiceAdapter(user)
+    return when {
+      hostAndPort?.isNotEmpty() ?: false -> {
+        val address = NetworkHostAndPort.parse(hostAndPort!!)
+        networkMapServiceAdapter.networkMapSnapshot().stream()
+          .filter { node -> node.addresses.contains(address) }
+          .map { node -> node.toSimpleNodeInfo() }
+          .collect(Collectors.toList())
+      }
+      x500Name?.isNotEmpty() ?: false -> {
+        val x500Name1 = CordaX500Name.parse(x500Name!!)
+        val party = networkMapServiceAdapter.wellKnownPartyFromX500Name(x500Name1)
+        listOfNotNull(party?.let {
+          networkMapServiceAdapter.nodeInfoFromParty(party)?.toSimpleNodeInfo()
+        })
+      }
+      else -> networkMapServiceAdapter.networkMapSnapshot().stream().map { node -> node.toSimpleNodeInfo() }.collect(
+        Collectors.toList()
+      )
+    }
+  }
+
+  // example http://localhost:8080/api/rest/network/notaries?x500-name=O%3DNotary%20Service,%20L%3DZurich,%20C%3DCH
+  fun notaries(
+    @Parameter(
+      description = "the X500 name for the node",
+      example = "O=PartyB, L=New York, C=US"
+    ) @QueryParam(value = "x500-name") x500Name: String?,
+    @Context user: User?
+  ): List<Party> {
+    val networkMapServiceAdapter = getNetworkMapServiceAdapter(user)
+    return when {
+      x500Name?.isNotEmpty() ?: false -> listOfNotNull(
+        networkMapServiceAdapter.notaryPartyFromX500Name(
+          CordaX500Name.parse(x500Name!!)
+        )
+      )
+      else -> networkMapServiceAdapter.notaryIdentities()
+    }
+  }
 }

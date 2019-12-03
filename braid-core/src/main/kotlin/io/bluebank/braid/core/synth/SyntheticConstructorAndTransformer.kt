@@ -17,8 +17,8 @@ package io.bluebank.braid.core.synth
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.bluebank.braid.core.utils.tryWithClassLoader
-import java.lang.reflect.Constructor
-import java.lang.reflect.Parameter
+import org.apache.commons.lang3.AnnotationUtils
+import java.lang.reflect.*
 import kotlin.reflect.*
 import kotlin.reflect.full.createType
 
@@ -27,7 +27,8 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   className: String = constructor.declaringClass.payloadClassName(),
   private val boundTypes: Map<Class<*>, Any>,
   private val classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
-  private val transformer: (Array<Any?>) -> R
+  private val transformer: (Array<Any?>) -> R,
+  private val additionalParams: List<KParameter> = emptyList()
 ) : KFunction<R> {
 
   companion object {
@@ -50,11 +51,19 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
     acquirePayloadClass(constructor, boundTypes, classLoader, className)
 
   fun annotations(): Array<Annotation> = constructor.annotations
-  fun invoke(payload: Any): R {
+  fun invoke(vararg args: Any): R {
+    // args is additionalParams (if any) followed by the single payload parameter
+    val additionalParamArgs = args.take(additionalParams.size)
+    // get the payload
+    val constructorParam = args.last()
+
     return tryWithClassLoader(classLoader) {
+      // get the constructor parameter values
       val parameterValues =
-        constructor.parameters.map { getFieldValue(payload, it) }.toTypedArray()
-       transformer(parameterValues)
+        constructor.parameters.map { getFieldValue(constructorParam, it) }
+      // prepent the additional parameters (if any) again
+      val allParams = (additionalParamArgs + parameterValues).toTypedArray()
+      transformer(allParams)
     }
   }
 
@@ -63,7 +72,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   override val isFinal: Boolean = true
   override val isOpen: Boolean = false
   override val name: String = className
-  override val parameters: List<KParameter> = listOf(
+  override val parameters: List<KParameter> = additionalParams + listOf(
     KParameterSynthetic(
       "payload",
       payloadClass
@@ -84,8 +93,9 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   override val isSuspend: Boolean = false
 
   override fun call(vararg args: Any?): R {
-    assert(args.size == 1 && args[0] != null) { "there should be only one non null parameter but instead got $args" }
-    return invoke(args[0]!!)
+    assert(args.size == additionalParams.size + 1 && args.all { it != null }) { "there should be only one non null parameter but instead got $args" }
+    @Suppress("UNCHECKED_CAST") val nonNullArgs = args as Array<Any>
+    return invoke(*nonNullArgs)
   }
 
   override fun callBy(args: Map<KParameter, Any?>): R {
@@ -107,8 +117,8 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
 @Suppress("UNCHECKED_CAST")
 fun <T> Class<T>.preferredConstructor(): Constructor<T> {
   return this.constructors
-      .filter { c->!c.isSynthetic }
-      .maxBy { c -> c.parameterCount } as Constructor<T>
+    .filter { c -> !c.isSynthetic }
+    .maxBy { c -> c.parameterCount } as Constructor<T>
 }
 
 fun ObjectMapper.decodeValue(json: String, fn: KFunction<*>): Any {
@@ -123,6 +133,7 @@ fun <K : Any, R> trampoline(
   boundTypes: Map<Class<*>, Any>,
   className: String = constructor.declaringClass.payloadClassName(),
   classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
+  additionalParams: List<KParameter> = emptyList(),
   transform: (Array<Any?>) -> R
 ): KFunction<R> {
   @Suppress("UNCHECKED_CAST")
@@ -131,6 +142,39 @@ fun <K : Any, R> trampoline(
     className,
     boundTypes,
     classLoader,
-    transform
+    transform,
+    additionalParams
   )
+}
+
+// https://stackoverflow.com/questions/16299717/how-to-create-an-instance-of-an-annotation#answer-57373532
+inline fun <reified T : Any> KClass<T>.createAnnotationProxy(properties: Map<String, Any> = emptyMap()): T {
+  val handler = object : InvocationHandler {
+    override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
+      val annotation = proxy as Annotation
+      val methodName = method.name
+      when (methodName) {
+        "toString" -> return AnnotationUtils.toString(annotation)
+        "hashCode" -> return AnnotationUtils.hashCode(annotation)
+        "equals" -> return AnnotationUtils.equals(annotation, args[0] as Annotation)
+        "annotationType" -> return T::class.java
+        else -> {
+          if (!properties.containsKey(methodName)) {
+            throw NoSuchMethodException(
+              String.format(
+                "Missing value for mocked annotation property '%s'. Pass the correct value in the 'properties' parameter",
+                methodName
+              )
+            )
+          }
+          return properties[methodName]
+        }
+      }
+    }
+  }
+  return Proxy.newProxyInstance(
+    Thread.currentThread().contextClassLoader,
+    arrayOf(T::class.java),
+    handler
+  ) as T
 }

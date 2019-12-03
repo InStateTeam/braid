@@ -19,10 +19,13 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
 
-class KParameterSynthetic(override val name: String, val clazz: Class<*>) :
+class KParameterSynthetic(
+  override val name: String,
+  val clazz: Class<*>,
+  override val annotations: List<Annotation> = emptyList()
+) :
   KParameter {
 
-  override val annotations: List<Annotation> = emptyList()
   override val index: Int = 0
   override val isOptional: Boolean = false
   override val isVararg: Boolean = false

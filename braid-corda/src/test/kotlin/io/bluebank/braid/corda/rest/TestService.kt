@@ -30,6 +30,7 @@ import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
+import io.vertx.ext.auth.User
 import io.vertx.ext.web.RoutingContext
 import net.corda.core.CordaException
 import java.nio.ByteBuffer
@@ -57,7 +58,10 @@ class TestService {
       .appendBytes(bytes.bytes)
 
   fun throwCordaException(): String {
-    throw CordaException("something went wrong", java.lang.RuntimeException("sub exception"))
+    throw CordaException(
+      "something went wrong",
+      java.lang.RuntimeException("sub exception")
+    )
   }
 
   @Operation(
@@ -130,7 +134,11 @@ class TestService {
     }.toMap()
   }
 
-  fun sum(request: SumRequest): SumResponse = SumResponse(request.lhs + request.rhs, request.nonce)
+  fun sum(request: SumRequest): SumResponse =
+    SumResponse(request.lhs + request.rhs, request.nonce)
+
+  fun whoami(@Context user: User?): String =
+    user?.principal()?.toString() ?: "not logged in"
 }
 
 data class LoginRequest(

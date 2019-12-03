@@ -55,7 +55,7 @@ private fun startStandalone() {
         //       ,TestCordapp.findCordapp("net.corda.examples.obligation")
       ),
       waitForAllNodesToFinish = true,
-      isDebug = true,
+      isDebug = false,
       startNodesInProcess = true
     )
   ) {
@@ -66,13 +66,8 @@ private fun startStandalone() {
       startNode(providedName = bankB, rpcUsers = listOf(user))
     ).map { it.getOrThrow() }
 
-    // This test makes an RPC call to retrieve another node's name from the network map, to verify that the
-    // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
-    // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
-    // working as intended.
     println("partyA rpc: ${partyA.rpcAddress}")
     println("partyB rpc: ${partyB.rpcAddress}")
-
   }
 }
 

@@ -20,31 +20,63 @@ import io.bluebank.braid.corda.server.rpc.RPCCallable
 import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
+import io.bluebank.braid.core.synth.KParameterSynthetic
+import io.bluebank.braid.core.synth.createAnnotationProxy
 import io.bluebank.braid.core.synth.preferredConstructor
 import io.bluebank.braid.core.synth.trampoline
 import io.vertx.core.Future
+import io.vertx.ext.auth.User
 import net.corda.core.flows.FlowLogic
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
+import javax.ws.rs.core.Context
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(private val flowStarter: FlowStarterAdapter, private val tracker: ProgressTrackerManager) {
+class FlowInitiator(
+  private val getFlowStarter: (User?) -> FlowStarterAdapter,
+  private val tracker: ProgressTrackerManager,
+  private val isAuth: Boolean = true
+) {
+
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
     val constructor = kClass.java.preferredConstructor()
 
-    //val constructor = FooFlow::class.java.preferredConstructor()
-    val fn = trampoline(constructor, createBoundParameterTypes()) {
+    // this is a simulated `@Context` instance -- cheat like this, to create it, because
+    // `@Context` is difficult to instantiate, because it's an interface and final
+    val annotation: Annotation = Context::class.createAnnotationProxy()
+
+    // trampoline is to make the kClass constructor look like a callable function
+    val fn = trampoline(
+      constructor = constructor,
+      boundTypes = createBoundParameterTypes(),
+      // This says that `@Context user: User` is an additional parameter; I couldn't make
+      // it work properly as a `User?` type, so don't specify it at all if `!isAuth`.
+      additionalParams = if (!isAuth) emptyList() else listOf(
+        KParameterSynthetic("user", User::class.java, listOf(annotation))
+      )
+    ) {
+      // this is passed to the transform parameter of the trampoline function
+      // it's the body of the function which is invoked at run-time
+        parameters ->
       // do what you want here ...
       // e.g. call the flow directly
       // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
       // and return a Future
-      val excludeProgressTracker = it.toMutableList()
-      //todo might have other classes that aren't in startFlowDynamic
-      excludeProgressTracker.removeIf { l -> l is ProgressTracker }
-      log.info("About to start $kClass with args: ${listOf(it)}")
+
+      // because of additionalParams above, expect this extra `user` parameter at run-time
+      val user: User? = if (isAuth) parameters.first() as User else null
+
+      // drop the user parameter, and filter out the ProgressTracker if there is one
+      val excludeProgressTracker = parameters
+        .drop(if (isAuth) 1 else 0)
+        .filter { p -> p !is ProgressTracker }
+      log.info("About to start $kClass with args: ${listOf(parameters)}")
+
+      // get the FlowStarterAdapter instance which wraps this user's RPC connection
+      val flowStarter: FlowStarterAdapter = getFlowStarter(user)
 
       val flowProgress = flowStarter.startTrackedFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
@@ -54,6 +86,7 @@ class FlowInitiator(private val flowStarter: FlowStarterAdapter, private val tra
       flowProgress
     }
 
+    // RPCCallable is a KCallable instance (which can act as a path handler)
     return RPCCallable(kClass, fn,tracker)
   }
 

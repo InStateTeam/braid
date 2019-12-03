@@ -29,7 +29,13 @@ import io.vertx.ext.auth.jwt.JWTOptions
 import java.io.File
 import java.io.FileOutputStream
 
-class TestServiceApp(port: Int, private val service: TestService, openApiVersion: Int = 3, private val httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()) {
+class TestServiceApp(
+  port: Int,
+  private val service: TestService,
+  openApiVersion: Int = 3,
+  private val httpServerOptions: HttpServerOptions = HttpServerConfig.defaultServerOptions()
+) {
+
   companion object {
     const val SWAGGER_ROOT = ""
     const val REST_API_ROOT = "/rest"
@@ -84,12 +90,16 @@ class TestServiceApp(port: Int, private val service: TestService, openApiVersion
                 get("/headers/optional", service::optionalHeader)
                 get("/headers/non-optional", service::nonOptionalHeader)
                 post("/map-numbers-to-string", service::mapNumbersToStrings)
-                post("/map-list-of-numbers-to-map-of-list-of-string", service::mapMapOfNumbersToMapOfStrings)
+                post(
+                  "/map-list-of-numbers-to-map-of-list-of-string",
+                  service::mapMapOfNumbersToMapOfStrings
+                )
                 get("/throws-error", service::throwCordaException)
                 post("/sum", service::sum)
               }
               protected {
                 post("/echo", service::echo)
+                get("/whoami", service::whoami)
               }
             }
           })

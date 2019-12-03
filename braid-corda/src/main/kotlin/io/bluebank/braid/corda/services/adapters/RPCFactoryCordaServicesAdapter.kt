@@ -15,7 +15,6 @@
  */
 package io.bluebank.braid.corda.services.adapters
 
-import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.services.CordaServicesAdapter
 import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.AbstractParty
@@ -28,12 +27,14 @@ import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
 import net.corda.core.utilities.NetworkHostAndPort
 
-class RPCFactoryCordaServicesAdapter(private val rpcFactory: RPCFactory) : CordaServicesAdapter {
-  private val delegate: CordaServicesAdapter by lazy {
-    rpcFactory.validConnection().toCordaServicesAdapter()
-  }
+class RPCFactoryCordaServicesAdapter(
+  private val delegate: CordaServicesAdapter
+) : CordaServicesAdapter {
 
-  override fun <T> startFlowDynamic(logicType: Class<out FlowLogic<T>>, vararg args: Any?): FlowHandle<T> {
+  override fun <T> startFlowDynamic(
+    logicType: Class<out FlowLogic<T>>,
+    vararg args: Any?
+  ): FlowHandle<T> {
     return delegate.startFlowDynamic(logicType, *args)
   }
 
