@@ -168,17 +168,6 @@
         <artifactId>frontend-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>clean project</id>
-            <phase>clean</phase>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <workingDirectory>test-client</workingDirectory>
-              <arguments>run clean</arguments>
-            </configuration>
-          </execution>
-          <execution>
             <id>link braid-client-js to global npm repo</id>
             <phase>initialize</phase>
             <goals>
