@@ -675,7 +675,9 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
         client.postFuture(path,
           mapOf("Accept" to "application/json; charset=utf8",
             "Content-length" to "${encodePrettily.length}",
-            "invocation-id" to "123"),
+            "invocation-id" to "123")
+            .addBearerToken(loginToken)
+          ,
           body = encodePrettily)
       }
       .compose { it.body<JsonObject>()  }
@@ -687,7 +689,9 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
 
         client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
           headers = mapOf("Accept" to "application/json; charset=utf8",
-            "invocation-id" to "123"))
+            "invocation-id" to "123")
+            .addBearerToken(loginToken)
+        )
       }
       .compose {
         context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
