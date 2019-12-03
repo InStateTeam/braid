@@ -15,26 +15,20 @@
  */
 package io.bluebank.braid.corda.server.rpc
 
-import io.bluebank.braid.corda.server.BraidTestFlow
-import net.corda.core.transactions.SignedTransaction
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Test
-import kotlin.reflect.jvm.javaType
+import javax.ws.rs.HeaderParam
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.declaredFunctions
 
-class RPCCallableTest {
-  @Test
-  // @Ignore
-  fun shouldBeCallableAndReturnTypeOfFlow() {
-
-    val flow = BraidTestFlow::class
-
-    val rpcCallable = RPCCallable(flow, flow.constructors.iterator().next())
-
-    assertThat(
-      rpcCallable.returnType.javaType.typeName,
-      `is`(SignedTransaction::class.java.name)
-    )
+class RPCInvocationParameter {
+  companion object {
+    fun invocationId(): KParameter {
+      val template = RPCInvocationParameter::class.declaredFunctions.iterator().next()
+      return template.parameters.get(2)
+    }
   }
 
+  fun template(arg0: Any,
+               @HeaderParam("invocation-id")
+               invocationId: String) {
+  }
 }

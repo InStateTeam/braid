@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.server.flow
 
+import io.bluebank.braid.corda.server.progress.ProgressTrackerManager
 import io.bluebank.braid.corda.server.rpc.RPCCallable
 import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
@@ -25,11 +26,10 @@ import io.vertx.core.Future
 import net.corda.core.flows.FlowLogic
 import net.corda.core.toObservable
 import net.corda.core.utilities.ProgressTracker
-import java.util.*
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-class FlowInitiator(private val flowStarter: FlowStarterAdapter) {
+class FlowInitiator(private val flowStarter: FlowStarterAdapter, private val tracker: ProgressTrackerManager) {
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
@@ -46,14 +46,15 @@ class FlowInitiator(private val flowStarter: FlowStarterAdapter) {
       excludeProgressTracker.removeIf { l -> l is ProgressTracker }
       log.info("About to start $kClass with args: ${listOf(it)}")
 
-      @Suppress("UNCHECKED_CAST")
-      flowStarter.startFlowDynamic(
+      val flowProgress = flowStarter.startTrackedFlowDynamic(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
-      ).returnValue.toObservable().toFuture()
+      )
+      @Suppress("UNCHECKED_CAST")
+      flowProgress
     }
 
-    return RPCCallable(kClass, fn)
+    return RPCCallable(kClass, fn,tracker)
   }
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {

@@ -16,6 +16,7 @@
 package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
+import io.bluebank.braid.corda.server.progress.Progress
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.corda.util.VertxMatcher.vertxAssertThat
@@ -31,6 +32,7 @@ import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
 import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
@@ -100,7 +102,7 @@ class BraidCordaStandaloneServerTest {
     private val client = clientVertx.createHttpClient(HttpClientOptions().apply {
       defaultHost = "localhost"
       defaultPort = port
-      isSsl = true
+      isSsl = ("true" != getProperty("braidStarted"))
       isVerifyHost = false
       isTrustAll = true
     })
@@ -240,7 +242,7 @@ class BraidCordaStandaloneServerTest {
     assertThat(encode, `is`("O%3DPartyB%2C+L%3DNew+York%2C+C%3DUS"))
   }
 
-@Test
+  @Test
   fun shouldDecode(context: TestContext) {
     val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS")
     val parse = CordaX500Name.parse(encode)
@@ -389,7 +391,54 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+
+  @Test
+  fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
+    val async = context.async()
+
+    getNotary()
+      .compose { notary ->
+        val json = JsonObject()
+          .put("notary", notary)
+          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
+        val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+        log.info("calling post: https://localhost:$port$path")
+        val encodePrettily = json.encodePrettily()
+        client.postFuture(path,
+          mapOf("Accept" to "application/json; charset=utf8",
+            "Content-length" to "${encodePrettily.length}",
+            "invocation-id" to "123"),
+          body = encodePrettily)
+      }
+      .compose { it.body<JsonObject>()  }
+      .compose { reply ->
+        log.info("reply:" + reply.encodePrettily())
+        context.assertThat(reply, notNullValue())
+        context.assertThat(reply.getJsonObject("stx"), notNullValue())
+        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+
+        client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+          headers = mapOf("Accept" to "application/json; charset=utf8",
+            "invocation-id" to "123"))
+      }
+      .compose {
+        context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
+        val future = Future.future<Buffer>()
+        it.handler{buffer -> future.complete(buffer) }
+        future
+      }
+      .onSuccess { buffer ->
+        log.info("progress tracker 1st reply:" + buffer.toString())
+        val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
+        context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
+        context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
+      }
+      .onSuccess { async.complete() }
+      .catch(context::fail)
+  }
+
+  @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
 
@@ -446,7 +495,7 @@ class BraidCordaStandaloneServerTest {
       }
   }
 
-@Test
+  @Test
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
@@ -459,7 +508,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should query the vault for a specific type`(context: TestContext) {
     val async = context.async()
 
@@ -476,7 +525,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should query the vault by type`(context: TestContext) {
     val async = context.async()
     val json = """
@@ -524,7 +573,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   fun `should serialize various query`(context: TestContext) {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
     val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
@@ -543,7 +592,7 @@ class BraidCordaStandaloneServerTest {
     println(json)
   }
 
-@Test
+  @Test
   fun `should query the vault by various criteria`(context: TestContext) {
     val async = context.async()
     val json = """{
@@ -604,7 +653,7 @@ class BraidCordaStandaloneServerTest {
       .catch(context::fail)
   }
 
-@Test
+  @Test
   @Ignore
   fun `should issue obligation`(context: TestContext) {
     val async = context.async()

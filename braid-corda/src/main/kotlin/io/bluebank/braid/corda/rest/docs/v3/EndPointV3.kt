@@ -26,8 +26,7 @@ import io.swagger.v3.core.converter.ResolvedSchema
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.Schema
-import io.swagger.v3.oas.models.parameters.Parameter
-import io.swagger.v3.oas.models.parameters.RequestBody
+import io.swagger.v3.oas.models.parameters.*
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
@@ -145,13 +144,12 @@ abstract class EndPointV3(
   }
 
   protected abstract fun mapBodyParameter(): RequestBody?
-  protected abstract fun mapQueryParameters(): List<Parameter>
-  protected abstract fun mapPathParameters(): List<Parameter>
+  protected abstract fun mapQueryParameters(): List<QueryParameter>
+  protected abstract fun mapHeaderParameters(): List<HeaderParameter>
+  protected abstract fun mapPathParameters(): List<PathParameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
-    val pathParams = mapPathParameters()
-    val queryParams = mapQueryParameters()
-    return pathParams + queryParams
+    return mapPathParameters() + mapQueryParameters() + mapHeaderParameters()
   }
 
   protected fun KType.getSwaggerProperty(): ResolvedSchema {

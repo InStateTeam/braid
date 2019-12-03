@@ -26,6 +26,7 @@ import net.corda.core.identity.Party
 import net.corda.core.internal.uncheckedCast
 import net.corda.core.messaging.DataFeed
 import net.corda.core.messaging.FlowHandle
+import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.node.AppServiceHub
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
@@ -106,6 +107,21 @@ class AppServiceHubAdapter(private val serviceHub: AppServiceHub) : CordaService
       buildParams(constructor, argsMap) ?: error("could not find matching constructor")
     val flowLogic = constructor.callBy(params)
     return serviceHub.startFlow(flowLogic)
+  }
+
+  override fun <T> startTrackedFlowDynamic(
+    logicType: Class<out FlowLogic<T>>,
+    vararg args: Any?
+    ): FlowProgressHandle<T> {
+      val argTypes = args.map { it?.javaClass }
+      val constructor: KFunction<FlowLogic<T>> =
+        uncheckedCast(findConstructor(logicType, argTypes))
+      val argsMap =
+        args.zip(constructor.parameters).map { Pair(it.second.name!!, it.first) }.toMap()
+      val params =
+        buildParams(constructor, argsMap) ?: error("could not find matching constructor")
+      val flowLogic = constructor.callBy(params)
+      return serviceHub.startTrackedFlow(flowLogic)
   }
 
   private fun findConstructor(

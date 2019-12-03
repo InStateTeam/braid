@@ -16,9 +16,14 @@
 package io.bluebank.braid.corda.server.rpc
 
 import io.bluebank.braid.corda.server.flow.flowLogicType
+import io.bluebank.braid.corda.server.progress.ProgressTrackerManager
+import io.bluebank.braid.core.async.toFuture
+import io.vertx.core.Future
+import net.corda.core.messaging.FlowProgressHandle
+import net.corda.core.toObservable
 import kotlin.reflect.*
 
-class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<T>) : KCallable<T> {
+class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<FlowProgressHandle<T>>, private val tracker: ProgressTrackerManager) : KCallable<Future<T>> {
   override val annotations: List<Annotation>
     get() = fn.annotations
   override val isAbstract: Boolean
@@ -30,18 +35,22 @@ class RPCCallable<T>(private val flow: KClass<*>, private val fn: KCallable<T>) 
   override val name: String
     get() = fn.name
   override val parameters: List<KParameter>
-    get() = fn.parameters
+    get() = fn.parameters + RPCInvocationParameter.invocationId()
   override val typeParameters: List<KTypeParameter>
     get() = fn.typeParameters
   override val visibility: KVisibility?
     get() = fn.visibility
 
-  override fun call(vararg args: Any?): T {
-    return fn.call(*args)
+  override fun call(vararg args: Any?): Future<T> {
+    val call = fn.call(args[0])
+    val invocationId = args[1]
+    if(invocationId != null)
+      tracker.put(invocationId as String, call)
+    return call.returnValue.toObservable().toFuture()
   }
 
-  override fun callBy(args: Map<KParameter, Any?>): T {
-    return fn.callBy(args)
+  override fun callBy(args: Map<KParameter, Any?>): Future<T> {
+    throw RuntimeException("RPCCallable.callBy Not implemented")
   }
 
   // change the return type for swagger to be able to see

@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.core.utils
 
+import io.bluebank.braid.core.logging.loggerFor
 import java.io.File
 import java.net.URI
 import java.net.URL
@@ -22,6 +23,8 @@ import java.net.URLClassLoader
 import java.util.Arrays.asList
 
 object PathsClassLoader {
+      var log = loggerFor<PathsClassLoader>()
+
   private val tempFileDownloader = JarDownloader()
 
   fun jarsClassLoader(vararg jarPaths: String) =
@@ -34,6 +37,7 @@ object PathsClassLoader {
         val urls = jarPaths.asSequence().map {
           urlOrFiles(it)
         }.flatMap { it.asSequence() }.toList().toTypedArray()
+        log.info("Using jars:$urls")
         URLClassLoader(urls, Thread.currentThread().contextClassLoader)
       }
     }

@@ -71,8 +71,8 @@ private fun startStandalone() {
     // nodes have started and can communicate. This is a very basic test, in practice tests would be starting
     // flows, and verifying the states in the vault and other important metrics to ensure that your CorDapp is
     // working as intended.
-    println("partyA rpc: $partyA.rpcAddress")
-    println("partyB rpc: $partyB.rpcAddress")
+    println("partyA rpc: ${partyA.rpcAddress}")
+    println("partyB rpc: ${partyB.rpcAddress}")
 
   }
 }

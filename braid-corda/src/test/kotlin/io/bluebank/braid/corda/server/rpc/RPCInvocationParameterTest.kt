@@ -13,8 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.server
+package io.bluebank.braid.corda.server.rpc
 
-class BraidCordaStandaloneServerTLSTest  {
+import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.notNullValue
+import org.junit.Assert.*
+import org.junit.Test
+import javax.ws.rs.HeaderParam
+import kotlin.reflect.full.findAnnotation
 
+class RPCInvocationParameterTest{
+  @Test
+  fun `should find HeaderParam Annotation`(){
+    val findAnnotation = RPCInvocationParameter.invocationId().findAnnotation<HeaderParam>()
+    assertThat(findAnnotation,notNullValue())
+  }
 }

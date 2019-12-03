@@ -13,23 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.services
+package io.bluebank.braid.corda.server.progress
 
-import net.corda.core.flows.FlowLogic
-import net.corda.core.messaging.FlowHandle
-import net.corda.core.messaging.FlowProgressHandle
-
-/**
- * interface for starting a flow either within the node or via Corda RPC
- */
-interface FlowStarterAdapter {
-  fun <T> startFlowDynamic(
-    logicType: Class<out FlowLogic<T>>,
-    vararg args: Any?
-  ): FlowHandle<T>
-
-  fun <T> startTrackedFlowDynamic(
-    logicType: Class<out FlowLogic<T>>,
-    vararg args: Any?
-  ): FlowProgressHandle<T>
-}
+data class Progress (
+  val invocationId: String,
+  val step: String
+)

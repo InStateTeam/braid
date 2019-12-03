@@ -24,6 +24,7 @@ import net.corda.core.identity.Party
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.DataFeed
 import net.corda.core.messaging.FlowHandle
+import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
 import net.corda.core.utilities.NetworkHostAndPort
@@ -82,5 +83,9 @@ class CordaRpcOpsAdapter(private val cordaRpcOps: CordaRPCOps) : CordaServicesAd
     vararg args: Any?
   ): FlowHandle<T> {
     return cordaRpcOps.startFlowDynamic(logicType, *args)
+  }
+
+  override fun <T> startTrackedFlowDynamic(logicType: Class<out FlowLogic<T>>, vararg args: Any?): FlowProgressHandle<T> {
+    return cordaRpcOps.startTrackedFlowDynamic(logicType, *args)
   }
 }

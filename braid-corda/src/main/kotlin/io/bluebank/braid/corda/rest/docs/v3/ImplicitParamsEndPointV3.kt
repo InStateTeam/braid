@@ -69,6 +69,7 @@ class ImplicitParamsEndPointV3(
           .firstOrNull() ?: Unit::class.java
     }
 
+  private val headerParams = implicitParams.filter { it.`in` == ParameterIn.HEADER }
   private val pathParams = implicitParams.filter { it.`in` == ParameterIn.PATH }
   private val queryParams = implicitParams.filter { it.`in` == ParameterIn.QUERY }
   private val bodyParam = annotations
@@ -78,6 +79,12 @@ class ImplicitParamsEndPointV3(
 
   override fun mapBodyParameter(): RequestBody? {
     return bodyParam?.toModel()
+  }
+
+  override fun mapHeaderParameters(): List<HeaderParameter> {
+    return headerParams.map { headerParam ->
+      headerParam.toModel() as HeaderParameter
+    }
   }
 
   override fun mapQueryParameters(): List<QueryParameter> {

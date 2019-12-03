@@ -18,9 +18,13 @@ package io.bluebank.braid.corda.server
 import io.bluebank.braid.corda.BraidConfig
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestConfig
+import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.flow.FlowInitiator
+import io.bluebank.braid.corda.server.progress.ProgressTrackerManager
+import io.bluebank.braid.corda.server.progress.TrackerHandler
 import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.bluebank.braid.corda.server.rpc.RPCFactory.Companion.createRpcFactory
+import io.bluebank.braid.corda.services.CordaServicesAdapter
 import io.bluebank.braid.corda.services.SimpleNetworkMapServiceImpl
 import io.bluebank.braid.corda.services.adapters.toCordaServicesAdapter
 import io.bluebank.braid.corda.services.vault.VaultService
@@ -30,6 +34,7 @@ import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServerOptions
 import net.corda.core.utilities.NetworkHostAndPort
+import kotlin.reflect.KClass
 
 open class BraidCordaStandaloneServer(
   val port: Int = 8080,
@@ -69,7 +74,6 @@ open class BraidCordaStandaloneServer(
     val cordappsScanner = CordaClasses(classLoader)
 
     val cordaServicesAdapter = rpc.toCordaServicesAdapter()
-    val flowInitiator = FlowInitiator(cordaServicesAdapter)
     val networkService = SimpleNetworkMapServiceImpl(cordaServicesAdapter)
     return RestConfig()
       .withOpenApiVersion(openApiVersion)
@@ -92,18 +96,24 @@ open class BraidCordaStandaloneServer(
           get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)
           try {
             cordappsScanner.flowClassesByCordapp.forEach { (cordapp, flowClass) ->
-              try {
-                val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
-                log.info("registering: $path")
-                post(path, flowInitiator.getInitiator(flowClass))
-              } catch (e: Throwable) {
-                log.warn("unable to register flow:${flowClass.java.name}", e);
-              }
+              addFlow(cordapp, flowClass, cordaServicesAdapter)
             }
           } catch (e: Throwable) {
             log.error("failed to register flows", e)
           }
         }
       }
+  }
+
+  private fun RestMounter.addFlow(cordapp: String, flowClass: KClass<out Any>, cordaServicesAdapter: CordaServicesAdapter) {
+    try {
+      val tracker = ProgressTrackerManager()
+      val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
+      log.info("registering: $path")
+      post(path, FlowInitiator(cordaServicesAdapter,tracker).getInitiator(flowClass))
+      get(path + "/progress-tracker", TrackerHandler(tracker)::invoke)
+    } catch (e: Throwable) {
+      log.warn("unable to register flow:${flowClass.java.name}", e);
+    }
   }
 }
