@@ -30,7 +30,7 @@ private val log = loggerFor<BraidMain>()
  * The top level entry point for running braid as an executable
  */
 class BraidMain(
-    externalVertx: Vertx? = null
+  externalVertx: Vertx? = null
 ) {
 
   val vertx: Vertx

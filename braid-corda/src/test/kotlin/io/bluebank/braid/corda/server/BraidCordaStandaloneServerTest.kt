@@ -30,12 +30,16 @@ import io.bluebank.braid.core.http.postFuture
 import io.bluebank.braid.core.socket.findFreePort
 import io.vertx.core.Future
 import io.vertx.core.Future.succeededFuture
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
+import io.vertx.ext.unit.impl.TestContextImpl
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import io.vertx.ext.web.handler.impl.HttpStatusException
 import net.corda.core.contracts.ContractState
@@ -66,21 +70,39 @@ import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.System.getProperty
+import org.junit.runners.Suite
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import javax.ws.rs.core.Response
 import kotlin.test.assertEquals
 
-/**
- * Run with Either
- *          -DbraidStarted=true and CordaStandalone and BraidMain started on port 9000 in the background if you want this test to run faster.
- *          -DcordaStarted=true and CordaStandalone in the background if you want this test to run fastish.
- * Otherwise it takes about 45 seconds or more to run.
+/*
+ * This test will:
+ * - Start Corda
+ * - Start Braid with user-login enabled and run tests
+ * - Restart Braid with user-login disabled and rerun tests
+ * When you want to run this test repeatedly can alternatively prestart Corda
+ * (e.g. by running ../standalone/CordaStandalone.kt
+ * and set the DcordaStarted property e.g. -DcordaStarted=true on the Java command-line),
+ * otherwise it takes about 45 seconds or more to run.
+ * See also ./experiment/TestSuite.kt which prototypes the architecture of this suite.
+ *
+ * Prestarting Corda isn't always tested recently.
+ * There's a new `driver!!.dsl.defaultNotaryIdentity` expression in one of the test cases.
  */
-@Suppress("DEPRECATION")
-@RunWith(VertxUnitRunner::class)
+
+/**
+ * This class just starts Corda in its beforeClass function --
+ * or doesn't if Corda is pre-started --
+ * after which @RunWith(Suite::class) runs the identified SuiteClasses.
+ */
+@RunWith(Suite::class)
+@Suite.SuiteClasses(
+  SuiteClassStandaloneServerAuth::class,
+  SuiteClassStandaloneServerShared::class
+)
 class BraidCordaStandaloneServerTest {
 
   companion object {
@@ -90,73 +112,83 @@ class BraidCordaStandaloneServerTest {
     }
 
     private val log = loggerFor<BraidCordaStandaloneServerTest>()
-
+    val isCordaPrestarted =
+      System.getProperty("cordaStarted")?.toBoolean() ?: false
     private val user = User("user1", "test", permissions = setOf("ALL"))
-    private val bankA = CordaX500Name("BankA", "", "GB")
-    private val bankB = CordaX500Name("BankB", "", "US")
+    val bankA = CordaX500Name("BankA", "", "GB")
+    val bankB = CordaX500Name("BankB", "", "US")
 
-    private val port = if ("true" == getProperty("braidStarted")) 9000 else findFreePort()
-    private val clientVertx = Vertx.vertx()
-    private val client = clientVertx.createHttpClient(HttpClientOptions().apply {
-      defaultHost = "localhost"
-      defaultPort = port
-      isSsl = true
-      isVerifyHost = false
-      isTrustAll = true
-    })
-    private var driver: TestDriver? = null
-    private var nodeA: NodeHandle? = null
-    private var nodeB: NodeHandle? = null
-    private val nodeAPort: Int
-      get() {
-        return when {
-          nodeA != null -> nodeA!!.p2pAddress.port
-          else -> 10_004
-        }
-      }
+    val clientVertx = Vertx.vertx()
+    var driver: TestDriver? = null
+    var nodeA: NodeHandle? = null
+    var nodeB: NodeHandle? = null
 
-    private val nodeBPort: Int
-      get() {
-        return when {
-          nodeB != null -> nodeB!!.p2pAddress.port
-          else -> 10_004
-        }
-      }
-
-    private val notaryAddress: NetworkHostAndPort
-      get() {
-        return when {
-          driver != null -> driver!!.dsl.defaultNotaryHandle.nodeHandles.getOrThrow().first().p2pAddress
-          else -> NetworkHostAndPort("localhost", 10_000)
-        }
-      }
-
-    @BeforeClass
-    @JvmStatic
-    fun beforeClass(testContext: TestContext) {
-      val async = testContext.async()
-      val braidStarted = getBooleanProperty("braidStarted")
-      val cordaStarted = getBooleanProperty("cordaStarted")
+    fun beforeClassWithContext(testContext: TestContext) {
+      val finished: Async = testContext.async()
       when {
-        braidStarted -> succeededFuture(Unit)
-        cordaStarted -> startBraid(NetworkHostAndPort("localhost", 10005))
-        else -> startNodesAndBraid()
+        isCordaPrestarted -> succeededFuture(Unit)
+        else -> startNodes()
       }
-        .onSuccess { async.complete() }
+        .onSuccess { finished.complete() }
         .catch { testContext.fail(it.cause) }
     }
 
-    private fun getBooleanProperty(propertyName: String) = getProperty(propertyName)?.toBoolean() ?: false
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass() {
+      /*
+       * This class is @RunWith(Suite::class)
+       * so it can't be @RunWith(VertxUnitRunner::class)
+       * so the @BeforeClass function has no `testContext: TestContext` parameter
+       * so `beforeClass` does not have the @BeforeClass annotation and instead this
+       * function tries to do what VertxUnitRunner.invokeExplosively would do --
+       * i.e. create a testContext with which to call beforeClassWithContext.
+       *
+       * This is a hack.
+       * An alternative could be to create a new class named VertxSuiteRunner which
+       * would include VertxUnitRunner and Suite behaviour, but
+       * this hack is fewer lines of code so possibly easier and/or more maintainable.
+       */
 
-    private fun startNodesAndBraid(): Future<Unit> {
-      driver = TestDriver.driver(DriverParameters(
-        cordappsForAllNodes = listOf(
-          TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
-          TestCordapp.findCordapp("net.corda.finance.schemas"),
-          TestCordapp.findCordapp("net.corda.finance.flows")
-        ),
-        isDebug = true, startNodesInProcess = true
-      ))
+      // https://github.com/vert-x3/vertx-unit/blob/master/src/main/java/io/vertx/ext/unit/junit/VertxUnitRunner.java
+      val testContext = TestContextImpl(emptyMap(), null)
+      val future = CompletableFuture<Throwable>();
+      val test = Handler<TestContext> { beforeClassWithContext(it) }
+      val eh = Handler<Throwable> { future.complete(it) }
+      log.info("beforeClass starting")
+      testContext.run(
+        null,
+        120_000,
+        test,
+        eh
+      )
+      log.info("beforeClass waiting")
+      val failure: Throwable? = try {
+        future.get()
+      } catch (e: InterruptedException) {
+        // Should we do something else ?
+        Thread.currentThread().interrupt()
+        throw e
+      } finally {
+        // currentRunner.set(null)
+      }
+      log.info("beforeClass ending")
+      if (failure != null) {
+        throw failure
+      }
+    }
+
+    private fun startNodes(): Future<Unit> {
+      driver = TestDriver.driver(
+        DriverParameters(
+          cordappsForAllNodes = listOf(
+            TestCordapp.findCordapp("net.corda.finance.contracts.asset"),
+            TestCordapp.findCordapp("net.corda.finance.schemas"),
+            TestCordapp.findCordapp("net.corda.finance.flows")
+          ),
+          isDebug = true, startNodesInProcess = true
+        )
+      )
       val nodeAFuture = driver!!.startNode(providedName = bankA, rpcUsers = listOf(user))
       val nodeBFuture = driver!!.startNode(providedName = bankB, rpcUsers = listOf(user))
       return all(nodeAFuture.toVertxFuture(), nodeBFuture.toVertxFuture())
@@ -165,42 +197,239 @@ class BraidCordaStandaloneServerTest {
           nodeB = it.last()
           println("partyAHandle:${nodeA!!.rpcAddress}")
         }
-        .compose { startBraid(nodeA!!.rpcAddress) }
         .mapUnit()
     }
 
-    private fun startBraid(networkHostAndPort: NetworkHostAndPort): Future<String> {
-      // compile time check that we can inherit from BraidCordaStandaloneServer
-      return BraidCordaStandaloneServer(
-        userName = "user1",
-        password = "test",
-        port = port,
-        nodeAddress = networkHostAndPort
-      ).startServer()
+    @AfterClass
+    @JvmStatic
+    fun closeDown() {
+      log.info("closeDown()")
+      val testContext: TestContext = TestContextImpl(emptyMap(), null)
+      if (driver != null) driver!!.close()
+      // todo instead perhaps clientVertx should be local to each suite class
+      clientVertx.close(testContext.asyncAssertSuccess())
+    }
+  }
+}
+
+/*
+ * All the properties like `driver` which are currently in the companion object of the
+ * BraidCordaStandaloneServerTest class could instead have been defined outside any class
+ * at the top of this file.
+ * In that case, all classes in this file would have been able to see/share them.
+ *
+ * Instead I encapsulate them list this, so that it will be possible to define suite
+ * classes in other files.
+ * If you create a new suite class, then let it use the properties of this object,
+ * and add it to the @Suite.SuiteClasses annotation.
+ */
+object BraidCordaTestEnvironment {
+  /*
+    Properties initialised by BraidCordaStandaloneServerTest
+    Implemented as get() functions so they're not called until run time
+    so I needn't predict which objects are initialised first
+   */
+
+  val isCordaPrestarted: Boolean
+    get() = BraidCordaStandaloneServerTest.isCordaPrestarted
+  val bankA: CordaX500Name
+    get() = BraidCordaStandaloneServerTest.bankA
+  val bankB: CordaX500Name
+    get() = BraidCordaStandaloneServerTest.bankB
+  val nodeA: NodeHandle?
+    get() = BraidCordaStandaloneServerTest.nodeA
+  val nodeB: NodeHandle?
+    get() = BraidCordaStandaloneServerTest.nodeB
+  val clientVertx: Vertx
+    get() = BraidCordaStandaloneServerTest.clientVertx
+  val driver: TestDriver?
+    get() = BraidCordaStandaloneServerTest.driver
+  val nodeAPort: Int
+    get() {
+      return when {
+        nodeA != null -> nodeA!!.p2pAddress.port
+        else -> 10_004
+      }
+    }
+
+  val nodeBPort: Int
+    get() {
+      return when {
+        nodeB != null -> nodeB!!.p2pAddress.port
+        else -> 10_004
+      }
+    }
+
+  val notaryAddress: NetworkHostAndPort
+    get() {
+      return when {
+        driver != null -> driver!!.dsl.defaultNotaryHandle.nodeHandles.getOrThrow().first().p2pAddress
+        else -> NetworkHostAndPort("localhost", 10_000)
+      }
+    }
+}
+
+data class BraidCordaStandaloneServerSetup(
+  val loginToken: String?,
+  val client: HttpClient,
+  val port: Int
+)
+
+class SuiteClassStandaloneServerAuth : SuiteClassStandaloneServerEither(setup) {
+
+  companion object {
+    private lateinit var setup: BraidCordaStandaloneServerSetup
+
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass(testContext: TestContext) {
+      log.info("BraidCordaStandaloneServerAuth beforeClass starting")
+      val finished = testContext.async()
+      setup = startBraidAndLogin(testContext, true)
+      log.info("BraidCordaStandaloneServerAuth beforeClass finished")
+      finished.complete()
     }
 
     @AfterClass
     @JvmStatic
     fun closeDown(context: TestContext) {
-      if (driver != null) driver!!.close()
-      client.close()
-      clientVertx.close(context.asyncAssertSuccess())
+      log.info("BraidCordaStandaloneServerAuth closeDown")
+      setup.client.close()
     }
   }
+}
+
+/**
+ * This is identical to BraidCordaStandaloneServerAuth except userMustLogin is false
+ */
+class SuiteClassStandaloneServerShared : SuiteClassStandaloneServerEither(setup) {
+
+  companion object {
+    private lateinit var setup: BraidCordaStandaloneServerSetup
+
+    @BeforeClass
+    @JvmStatic
+    fun beforeClass(testContext: TestContext) {
+      log.info("BraidCordaStandaloneServerAuth beforeClass starting")
+      val finished = testContext.async()
+      setup = startBraidAndLogin(testContext, false)
+      log.info("BraidCordaStandaloneServerAuth beforeClass finished")
+      finished.complete()
+    }
+
+    @AfterClass
+    @JvmStatic
+    fun closeDown(context: TestContext) {
+      log.info("BraidCordaStandaloneServerAuth closeDown")
+      setup.client.close()
+    }
+  }
+}
+
+@RunWith(VertxUnitRunner::class)
+open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandaloneServerSetup) {
+
+  companion object {
+    val log = loggerFor<SuiteClassStandaloneServerEither>()
+
+    /*
+      * Define synonyms for the properties defined in BraidCordaTestEnvironment
+      */
+
+    val isCordaPrestarted: Boolean get() = BraidCordaTestEnvironment.isCordaPrestarted
+    val bankA: CordaX500Name get() = BraidCordaTestEnvironment.bankA
+    val bankB: CordaX500Name get() = BraidCordaTestEnvironment.bankB
+    val nodeA: NodeHandle? get() = BraidCordaTestEnvironment.nodeA
+    val nodeB: NodeHandle? get() = BraidCordaTestEnvironment.nodeB
+    val clientVertx: Vertx get() = BraidCordaTestEnvironment.clientVertx
+    val driver: TestDriver? get() = BraidCordaTestEnvironment.driver
+    val nodeAPort: Int get() = BraidCordaTestEnvironment.nodeAPort
+    val nodeBPort: Int get() = BraidCordaTestEnvironment.nodeBPort
+    val notaryAddress: NetworkHostAndPort get() = BraidCordaTestEnvironment.notaryAddress
+
+    /**
+     * Start or restart Braid and maybe login as well
+     */
+    fun startBraidAndLogin(
+      testContext: TestContext,
+      userMustLogin: Boolean
+    ): BraidCordaStandaloneServerSetup {
+      val port: Int = findFreePort()
+      val networkHostAndPort: NetworkHostAndPort = if (isCordaPrestarted)
+        NetworkHostAndPort("localhost", 10005) else nodeA!!.rpcAddress
+      var loginToken: String? = null
+      val client = clientVertx.createHttpClient(HttpClientOptions().apply {
+        defaultHost = "localhost"
+        defaultPort = port
+        isSsl = true
+        isVerifyHost = false
+        isTrustAll = true
+      })
+      log.info("startBraidAndLogin starting")
+      val async = testContext.async()
+      startBraid(networkHostAndPort, userMustLogin, port)
+        .onSuccess {
+          if (userMustLogin) {
+            loginToken = client.login(testContext)
+            log.info("loginToken is $loginToken")
+            async.complete()
+          } else {
+            log.info("loginToken is null")
+            async.complete()
+          }
+        }
+        .catch { testContext.fail(it.cause) }
+      log.info("startBraidAndLogin waiting")
+      async.awaitSuccess()
+      log.info("startBraidAndLogin finished")
+      return BraidCordaStandaloneServerSetup(loginToken, client, port)
+    }
+
+    private fun startBraid(
+      networkHostAndPort: NetworkHostAndPort,
+      userMustLogin: Boolean,
+      port: Int
+    ): Future<String> {
+      // compile time check that we can inherit from BraidCordaStandaloneServer
+      return BraidCordaStandaloneServer(
+        userName = if (userMustLogin) "" else "user1",
+        password = if (userMustLogin) "" else "test",
+        port = port,
+        nodeAddress = networkHostAndPort
+      ).startServer()
+    }
+  }
+
+  val loginToken = setup.loginToken
+  val client = setup.client
+  val port = setup.port
 
   @Test
   fun shouldListNetworkNodes(context: TestContext) {
     val async = context.async()
     log.info("calling get: http://localhost:$port/api/rest/network/nodes")
-    client.getFuture("/api/rest/network/nodes", headers = mapOf("Accept" to "application/json; charset=utf8"))
+    client.getFuture(
+      "/api/rest/network/nodes",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<List<SimpleNodeInfo>>() }
       .onSuccess { nodes ->
         context.assertThat(nodes.size, equalTo(3))
-        val nodeInfoA = nodes.first { node -> node.legalIdentities.any { party -> party.name == bankA } }
-        context.assertThat(nodeInfoA.addresses, hasItem(NetworkHostAndPort("localhost", nodeAPort)))
-        val nodeInfoB = nodes.first { node -> node.legalIdentities.any { party -> party.name == bankB } }
-        context.assertThat(nodeInfoB.addresses, hasItem(NetworkHostAndPort("localhost", nodeBPort)))
-        val nodeInfoNotary = nodes.first { node -> node.legalIdentities.any { party -> party == driver!!.dsl.defaultNotaryIdentity } }
+        val nodeInfoA =
+          nodes.first { node -> node.legalIdentities.any { party -> party.name == bankA } }
+        context.assertThat(
+          nodeInfoA.addresses,
+          hasItem(NetworkHostAndPort("localhost", nodeAPort))
+        )
+        val nodeInfoB =
+          nodes.first { node -> node.legalIdentities.any { party -> party.name == bankB } }
+        context.assertThat(
+          nodeInfoB.addresses,
+          hasItem(NetworkHostAndPort("localhost", nodeBPort))
+        )
+        val nodeInfoNotary =
+          nodes.first { node -> node.legalIdentities.any { party -> party == driver!!.dsl.defaultNotaryIdentity } }
         context.assertThat(nodeInfoNotary.addresses, hasItem(notaryAddress))
       }
       .onSuccess { async.complete() }
@@ -211,9 +440,12 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNodesByHostAndPort(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:$port/api/rest/network/nodes")
-    client.getFuture("/api/rest/network/nodes",
-      headers = mapOf("Accept" to "application/json; charset=utf8"),
-      queryParameters = mapOf("host-and-port" to "localhost:${nodeBPort}"))
+    client.getFuture(
+      "/api/rest/network/nodes",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken),
+      queryParameters = mapOf("host-and-port" to "localhost:${nodeBPort}")
+    )
       .compose { it.body<JsonArray>() }
       .onSuccess { nodes ->
         val node = nodes.getJsonObject(0)
@@ -240,7 +472,7 @@ class BraidCordaStandaloneServerTest {
     assertThat(encode, `is`("O%3DPartyB%2C+L%3DNew+York%2C+C%3DUS"))
   }
 
-@Test
+  @Test
   fun shouldDecode(context: TestContext) {
     val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS")
     val parse = CordaX500Name.parse(encode)
@@ -252,9 +484,12 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNodesByX509Name(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:$port/api/rest/network/nodes")
-    client.getFuture("/api/rest/network/nodes",
+    client.getFuture(
+      "/api/rest/network/nodes",
       queryParameters = mapOf("x500-name" to driver!!.dsl.defaultNotaryIdentity.name.toString()),
-      headers = mapOf("Accept" to "application/json; charset=utf8"))
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonArray>() }
       .onSuccess { nodes ->
         assertThat(nodes.size(), equalTo(1))
@@ -279,12 +514,13 @@ class BraidCordaStandaloneServerTest {
     val async = context.async()
 
     log.info("calling get: https://localhost:$port/api/rest/network/nodes")
-    client.get(
-      "/api/rest/network/nodes?x500-name=O%3DPartyB%2CL%3DNew+York%2CC%3DUS"
+    client.getFuture(
+      "/api/rest/network/nodes?x500-name=O%3DPartyB%2CL%3DNew+York%2CC%3DUS",
+      mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
     )
-      .putHeader("Accept", "application/json; charset=utf8")
-      .exceptionHandler(context::fail)
-      .handler {
+      // .exceptionHandler(context::fail)
+      .onSuccess {
         context.assertEquals(200, it.statusCode(), it.statusMessage())
 
         it.bodyHandler {
@@ -293,7 +529,8 @@ class BraidCordaStandaloneServerTest {
           async.complete()
         }
       }
-      .end()
+      .onSuccess { async.complete() }
+      .catch(context::fail)
   }
 
   @Test
@@ -301,7 +538,11 @@ class BraidCordaStandaloneServerTest {
     val async = context.async()
 
     log.info("calling get: https://localhost:$port/api/rest/network/nodes/self")
-    client.getFuture("/api/rest/network/nodes/self", headers = mapOf("Accept" to "application/json; charset=utf8"))
+    client.getFuture(
+      "/api/rest/network/nodes/self",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonObject>() }
       .onSuccess { node ->
         val addresses = node.getJsonArray("addresses")
@@ -323,7 +564,11 @@ class BraidCordaStandaloneServerTest {
   fun shouldListNetworkNotaries(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:$port/api/rest/network/notaries")
-    client.getFuture("/api/rest/network/notaries", headers = mapOf("Accept" to "application/json; charset=utf8"))
+    client.getFuture(
+      "/api/rest/network/notaries",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<List<Party>>() }
       .onSuccess { nodes ->
         context.assertThat(nodes.size, equalTo(1))
@@ -340,12 +585,23 @@ class BraidCordaStandaloneServerTest {
   fun shouldListFlows(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:$port/api/rest/cordapps/flows")
-    client.getFuture("/api/rest/cordapps/corda-core/flows")
+    client.getFuture(
+      "/api/rest/cordapps/corda-core/flows",
+      emptyMap<String, Any>().addBearerToken(loginToken)
+    )
       .compose { it.body<List<String>>() }
       .onSuccess { flows ->
-        context.assertEquals(0, flows.size) // should not be exposing anything from corda's own flows
+        context.assertEquals(
+          0,
+          flows.size
+        ) // should not be exposing anything from corda's own flows
       }
-      .compose { client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows") }
+      .compose {
+        client.getFuture(
+          "/api/rest/cordapps/corda-finance-workflows/flows",
+          emptyMap<String, Any>().addBearerToken(loginToken)
+        )
+      }
       .compose { it.body<List<String>>() }
       .onSuccess { flows ->
         context.assertThat(flows, hasItem("net.corda.finance.flows.CashIssueFlow"))
@@ -362,12 +618,23 @@ class BraidCordaStandaloneServerTest {
       .compose { notary ->
         val json = JsonObject()
           .put("notary", notary)
-          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+          .put(
+            "amount",
+            JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP"))))
+          )
           .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
-        val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+        val path =
+          "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
         log.info("calling post: https://localhost:$port$path")
         val encodePrettily = json.encodePrettily()
-        client.postFuture(path, mapOf("Accept" to "application/json; charset=utf8", "Content-length" to "${encodePrettily.length}"), body = encodePrettily)
+        client.postFuture(
+          path,
+          mapOf(
+            "Accept" to "application/json; charset=utf8",
+            "Content-length" to "${encodePrettily.length}"
+          ).addBearerToken(loginToken),
+          body = encodePrettily
+        )
       }
       .compose { it.body<JsonObject>() }
       .onSuccess { reply ->
@@ -398,15 +665,20 @@ class BraidCordaStandaloneServerTest {
 
       val json = JsonObject()
         .put("notary", notary)
-        .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+        .put(
+          "amount",
+          JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP"))))
+        )
         .put("issuerBaaaaaankPartyRef", JsonObject().put("junk", "sdsa"))
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
       log.info("calling post: https://localhost:$port$path")
 
-      client.postFuture(path,
-        headers = mapOf("Accept" to "application/json; charset=utf8"),
+      client.postFuture(
+        path,
+        headers = mapOf("Accept" to "application/json; charset=utf8")
+          .addBearerToken(loginToken),
         body = json
       )
         .compose { it.body<String>() }
@@ -414,7 +686,11 @@ class BraidCordaStandaloneServerTest {
         .catch {
           assertTrue("should have failed", it is HttpStatusException)
           val cause = it as HttpStatusException
-          assertEquals(Response.Status.BAD_REQUEST.statusCode, cause.statusCode, cause.message)
+          assertEquals(
+            Response.Status.BAD_REQUEST.statusCode,
+            cause.statusCode,
+            cause.message
+          )
           context.assertThat(cause.payload, containsString("issuerBaaaaaankPartyRef"))
           async.complete()
         }
@@ -426,7 +702,7 @@ class BraidCordaStandaloneServerTest {
   fun `should list cordapps`(context: TestContext) {
     val async = context.async()
     val path = "/api/rest/cordapps"
-    client.getFuture(path)
+    client.getFuture(path, emptyMap<String, Any>().addBearerToken(loginToken))
       .compose { it.body<List<String>>() }
       .onSuccess { list ->
         context.assertTrue(list.contains("corda-core"))
@@ -438,7 +714,11 @@ class BraidCordaStandaloneServerTest {
   }
 
   private fun getNotary(): Future<JsonObject> {
-    return client.getFuture("/api/rest/network/notaries", headers = mapOf("Accept" to "application/json; charset=utf8"))
+    return client.getFuture(
+      "/api/rest/network/notaries",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonArray>() }
       .map { nodes ->
         //   val nodes = Json.decodeValue(it, object : TypeReference<List<Party>>() {})
@@ -450,7 +730,11 @@ class BraidCordaStandaloneServerTest {
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
-    client.getFuture("/api/rest/vault/vaultQuery", headers = mapOf("Accept" to "application/json; charset=utf8"))
+    client.getFuture(
+      "/api/rest/vault/vaultQuery",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->
         vertxAssertThat(context, nodes, notNullValue())
@@ -464,10 +748,12 @@ class BraidCordaStandaloneServerTest {
     val async = context.async()
 
     log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
-    client.getFuture("/api/rest/vault/vaultQuery", headers = mapOf(
-      "Accept" to "application/json; charset=utf8",
-      "contract-state-type" to ContractState::class.java.name
-    ))
+    client.getFuture(
+      "/api/rest/vault/vaultQuery", headers = mapOf(
+        "Accept" to "application/json; charset=utf8",
+        "contract-state-type" to ContractState::class.java.name
+      ).addBearerToken(loginToken)
+    )
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->
         vertxAssertThat(context, nodes, notNullValue())
@@ -512,9 +798,12 @@ class BraidCordaStandaloneServerTest {
 }
 """
     log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
-    client.postFuture("/api/rest/vault/vaultQueryBy",
+    client.postFuture(
+      "/api/rest/vault/vaultQueryBy",
       body = json,
-      headers = mapOf("Accept" to "application/json; charset=utf8"))
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->
         vertxAssertThat(context, nodes, notNullValue())
@@ -595,7 +884,12 @@ class BraidCordaStandaloneServerTest {
 }"""
 
     log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
-    client.postFuture("/api/rest/vault/vaultQueryBy", body = json, headers = mapOf("Accept" to "application/json; charset=utf8"))
+    client.postFuture(
+      "/api/rest/vault/vaultQueryBy",
+      body = json,
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    )
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->
         vertxAssertThat(context, nodes, notNullValue())
@@ -624,10 +918,16 @@ class BraidCordaStandaloneServerTest {
   "anonymous": false
 }      """.trimIndent()
 
-      val path = "/api/rest/cordapps/kotlin-source/flows/net.corda.examples.obligation.flows.IssueObligation\$Initiator"
+      val path =
+        "/api/rest/cordapps/kotlin-source/flows/net.corda.examples.obligation.flows.IssueObligation\$Initiator"
       log.info("calling post: https://localhost:$port$path")
 
-      client.postFuture(path, body = json, headers = mapOf("Accept" to "application/json; charset=utf8"))
+      client.postFuture(
+        path,
+        body = json,
+        headers = mapOf("Accept" to "application/json; charset=utf8")
+          .addBearerToken(loginToken)
+      )
         .compose { it.body<JsonObject>() }
         .onSuccess { reply ->
           log.info("reply:" + reply.encodePrettily())

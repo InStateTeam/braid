@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.server
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.toJarsClassLoader
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import io.github.classgraph.ClassGraph
@@ -24,20 +25,34 @@ import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.assertThat
 import org.junit.Test
 
+private val log = loggerFor<CordaClassesTest>()
+
+// @Ignore
 class CordaClassesTest {
+
   companion object {
     val jars = listOf(
-        "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
-        "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
+      "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-workflows/4.1/corda-finance-workflows-4.1.jar",
+      "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases/net/corda/corda-finance-contracts/4.1/corda-finance-contracts-4.1.jar"
     )
 
-    val classes =
-      tryWithClassLoader(jars.toJarsClassLoader()){
-        CordaClasses().cordaSerializableClasses.map { it.java }
-      }
-    }
+    val classes = loadClasses()
 
-@Test
+    fun loadClasses(): List<Class<out Any>> {
+      try {
+
+        return tryWithClassLoader(jars.toJarsClassLoader()) {
+          CordaClasses().cordaSerializableClasses.map { it.java }
+        }
+      } catch (err: Throwable) {
+        log.info("CordaClassesTest init error", err)
+        throw err;
+      }
+
+    }
+  }
+
+  @Test
   fun `should have cash state`() {
     assertThat(classes, hasItem(Cash.State::class.java))
   }
@@ -50,11 +65,11 @@ class CordaClassesTest {
   @Test
   fun `should match cash state`() {
     val classInfo = ClassGraph()
-        .whitelistClasses(Cash.State::class.java.name)
-        .enableAnnotationInfo()
-        .scan()
-        .allClasses[0]
-    assertThat(classInfo.loadClass().name, `is`(Cash.State::class.java.name)     )
+      .whitelistClasses(Cash.State::class.java.name)
+      .enableAnnotationInfo()
+      .scan()
+      .allClasses[0]
+    assertThat(classInfo.loadClass().name, `is`(Cash.State::class.java.name))
     assertThat(CordaClasses.isAppropriateForSerialization(classInfo), equalTo(true))
   }
 }

@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.server
 
+import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.JsonObject
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -22,6 +23,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import java.util.stream.Collectors.toSet
+
+private val log = loggerFor<BraidDocsMainKtTest>()
 
 class BraidDocsMainKtTest {
   private lateinit var json: JsonObject
@@ -34,9 +37,13 @@ class BraidDocsMainKtTest {
       "https://repo1.maven.org/maven2/net/corda/corda-finance-contracts/4.0/corda-finance-contracts-4.0.jar",
       "https://repo1.maven.org/maven2/net/corda/corda-finance-workflows/4.0/corda-finance-workflows-4.0.jar"
     )
-    swagger = generateSwaggerText(3, jars)
-    json = JsonObject(swagger)
-
+    try {
+      swagger = generateSwaggerText(3, jars)
+      json = JsonObject(swagger)
+    } catch (err: Throwable) {
+      log.info("BraidDocsMainKtTest init error", err)
+      throw err;
+    }
   }
 
   @Test
