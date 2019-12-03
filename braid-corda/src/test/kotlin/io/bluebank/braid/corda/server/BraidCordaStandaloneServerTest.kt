@@ -364,8 +364,8 @@ class BraidCordaStandaloneServerTest {
       .compose { notary ->
         val json = JsonObject()
           .put("notary", notary)
-          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
+          .put("amount", JsonObject(Json.encode(AMOUNT(15.00, Currency.getInstance("GBP")))))
+          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCCDD"))
         val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
         log.info("calling post: https://localhost:$port$path")
         val encodePrettily = json.encodePrettily()

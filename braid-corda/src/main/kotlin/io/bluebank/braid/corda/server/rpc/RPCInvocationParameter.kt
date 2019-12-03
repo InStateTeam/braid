@@ -23,12 +23,12 @@ class RPCInvocationParameter {
   companion object {
     fun invocationId(): KParameter {
       val template = RPCInvocationParameter::class.declaredFunctions.iterator().next()
-      return template.parameters.get(2)
+      return template.parameters.get(1)
     }
   }
 
-  fun template(arg0: Any,
+  fun template(
                @HeaderParam("invocation-id")
-               invocationId: String) {
+               invocationId: String?) {
   }
 }
