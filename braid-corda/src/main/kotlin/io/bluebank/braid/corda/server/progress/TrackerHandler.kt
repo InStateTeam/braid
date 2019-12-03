@@ -17,6 +17,8 @@ package io.bluebank.braid.corda.server.progress
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpResponseStatus
+import io.vertx.core.http.HttpHeaders
+import io.vertx.core.json.Json
 import io.vertx.ext.web.RoutingContext
 
 class TrackerHandler(private val tracker: ProgressTrackerManager) {
@@ -32,9 +34,15 @@ class TrackerHandler(private val tracker: ProgressTrackerManager) {
     when (flowProgress) {
       null -> replyNotFound(ctx)
       else -> {
-        ctx.response().setChunked(true)
+        ctx.response()
+          .setChunked(true)
+          .putHeader("Content-Type","application/json; charset=utf-8")
+          .putHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+          .putHeader("Pragma", "no-cache")
+          .putHeader(HttpHeaders.EXPIRES, "0")
+
         flowProgress.progress.subscribe(
-          { ctx.response().write(it) },
+          { ctx.response().write(Json.encode(Progress().withInvocationId(invocationId).withStep(it))) },
           { replyWithError(it, ctx) },
           { ctx.response().end() }
         )
