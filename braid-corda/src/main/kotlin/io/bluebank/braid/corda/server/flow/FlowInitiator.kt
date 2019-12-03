@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.server.flow
 
 import io.bluebank.braid.corda.server.progress.ProgressTrackerManager
 import io.bluebank.braid.corda.server.rpc.RPCCallable
+import io.bluebank.braid.corda.server.rpc.RPCInvocationParameter
 import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
@@ -55,7 +56,8 @@ class FlowInitiator(
       // This says that `@Context user: User` is an additional parameter; I couldn't make
       // it work properly as a `User?` type, so don't specify it at all if `!isAuth`.
       additionalParams = listOf(
-        KParameterSynthetic("user", User::class.java, listOf(annotation))
+        KParameterSynthetic("user", User::class.java, listOf(annotation)) ,
+        RPCInvocationParameter.invocationId()
       )
     ) {
       // this is passed to the transform parameter of the trampoline function
@@ -68,10 +70,11 @@ class FlowInitiator(
 
       // because of additionalParams above, expect this extra `user` parameter at run-time
       val user: User? = parameters.first() as User?
+      val invocationId: String? = parameters.get(1) as String?
 
       // drop the user parameter, and filter out the ProgressTracker if there is one
       val excludeProgressTracker = parameters
-        .drop(1)
+        .drop(2)
         .filter { p -> p !is ProgressTracker }
       log.info("About to start $kClass with args: ${listOf(parameters)}")
 
@@ -82,12 +85,14 @@ class FlowInitiator(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
       )
+      invocationId?.let { tracker.put(it,flowProgress) }
+
       @Suppress("UNCHECKED_CAST")
-      flowProgress
+      flowProgress.returnValue.toObservable().toFuture()
     }
 
     // RPCCallable is a KCallable instance (which can act as a path handler)
-    return RPCCallable(kClass, fn,tracker)
+    return RPCCallable(kClass, fn)
   }
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
