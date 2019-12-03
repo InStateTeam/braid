@@ -17,7 +17,6 @@ package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
 import io.bluebank.braid.corda.rest.RestMounter
-import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import net.corda.core.utilities.contextLogger
@@ -33,15 +32,20 @@ class BraidDocsMain() {
   }
 
   /**
+   * This will document the user-authenticating API.
+   * To document the other API, you would need to pass a userName when
+   * you instantiate BraidCordaStandaloneServer.
+   *
    * @param openApiVersion - 2 or 3
    */
   fun swaggerText(openApiVersion: Int): String {
     val vertx = Vertx.vertx()
     return try {
-      val restConfig =
-        BraidCordaStandaloneServer(vertx = vertx)
-          .createRestConfig(RPCFactory.createRpcFactoryStub())
-          .withOpenApiVersion(openApiVersion)
+      val server = BraidCordaStandaloneServer(vertx = vertx)
+      val restConfig = server
+        .createRestConfig()
+        .withOpenApiVersion(openApiVersion)
+        .withAuth(server.authConstructor?.invoke(vertx))
       val restMounter = RestMounter(restConfig, Router.router(vertx), vertx)
       restMounter.docsHandler.getSwaggerString()
     } finally {

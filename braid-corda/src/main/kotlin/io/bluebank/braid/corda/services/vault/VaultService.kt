@@ -15,37 +15,50 @@
  */
 package io.bluebank.braid.corda.services.vault
 
-import io.bluebank.braid.corda.server.rpc.RPCFactory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.vertx.ext.auth.User
 import net.corda.core.contracts.ContractState
+import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.node.services.Vault
 import javax.ws.rs.QueryParam
+import javax.ws.rs.core.Context
 
-class VaultService(val rpc: RPCFactory) {
+class VaultService(
+  private val getCordaRPCOps: (User?) -> CordaRPCOps
+) {
+
   @Operation(description = "Queries the vault")
   fun vaultQueryBy(
-      @Parameter(
-          description = "Vault query parameters"
-      ) vault: VaultQuery): Vault.Page<ContractState> {
-    val vaultQueryBy = rpc.validConnection()
-        .vaultQueryBy(vault.criteria, vault.paging, vault.sorting, vault.contractStateType)
+    @Parameter(
+      description = "Vault query parameters"
+    ) vault: VaultQuery,
+    @Context user: User?
+  ): Vault.Page<ContractState> {
+    val vaultQueryBy = getCordaRPCOps(user)
+      .vaultQueryBy(vault.criteria, vault.paging, vault.sorting, vault.contractStateType)
     return vaultQueryBy
   }
 
   @Operation(description = "Queries the vault for contract states of the supplied type")
   fun vaultQuery(
-      @QueryParam(value = "contract-state-type")
-      @Parameter(
-          description = "The NAME of the Vault query by contract state type class e.g. \"net.corda.finance.contracts.asset.Obligation.State\""
-      ) type: String?): Vault.Page<ContractState> {
+    @QueryParam(value = "contract-state-type")
+    @Parameter(
+      description = "The NAME of the Vault query by contract state type class e.g. \"net.corda.finance.contracts.asset.Obligation.State\""
+    ) type: String?,
+    @Context user: User?
+  ): Vault.Page<ContractState> {
     return try {
       val forName =
-          if (type != null && type != "")
-            Class.forName(type, false, Thread.currentThread().contextClassLoader) as Class<ContractState>
-          else ContractState::class.java
+        if (type != null && type != "")
+          Class.forName(
+            type,
+            false,
+            Thread.currentThread().contextClassLoader
+          ) as Class<ContractState>
+        else ContractState::class.java
 
-      rpc.validConnection().vaultQuery(forName)
+      getCordaRPCOps(user).vaultQuery(forName)
     } catch (e: Exception) {
       throw RuntimeException("Unable to query contract state:" + type, e)
     }

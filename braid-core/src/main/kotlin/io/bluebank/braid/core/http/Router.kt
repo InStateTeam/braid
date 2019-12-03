@@ -64,7 +64,11 @@ fun Router.setupOptionsMethod() {
 
 var log = loggerFor<Router>()
 
-fun HttpServerResponse.end(error: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
+fun HttpServerResponse.end(
+  error: Throwable,
+  statusCode: Int = 500,
+  statusMessage: String? = null
+) {
   val e = if (error is InvocationTargetException) error.targetException else error
   log.trace("returning error to client", e)
   val payload = Json.encode(e)
@@ -72,7 +76,7 @@ fun HttpServerResponse.end(error: Throwable, statusCode: Int = 500, statusMessag
   this
     .putHeader(CONTENT_TYPE, APPLICATION_JSON)
     .putHeader(CONTENT_LENGTH, payload.length.toString())
-    .setStatusMessage(message.replace("\n","").replace("\r",""))
+    .setStatusMessage(message.replace("\n", "").replace("\r", ""))
     .setStatusCode(statusCode)
     .end(payload)
 }
@@ -82,7 +86,20 @@ fun <T> HttpServerResponse.end(future: Future<T>) {
     if (it.succeeded()) {
       this.end(it.result())
     } else {
-      this.end(it.cause())
+      val cause = it.cause()
+      when (cause) {
+        is io.vertx.ext.web.handler.impl.HttpStatusException -> this.end(
+          cause,
+          cause.statusCode,
+          cause.message
+        )
+        is javax.xml.ws.http.HTTPException -> this.end(
+          cause,
+          cause.statusCode,
+          cause.message
+        )
+        else -> this.end(it.cause())
+      }
     }
   }
 }
@@ -166,7 +183,11 @@ fun <T : Any> RoutingContext.end(obj: T) {
   response().end(obj)
 }
 
-fun RoutingContext.end(err: Throwable, statusCode: Int = 500, statusMessage: String? = null) {
+fun RoutingContext.end(
+  err: Throwable,
+  statusCode: Int = 500,
+  statusMessage: String? = null
+) {
   response().end(err, statusCode, statusMessage)
 }
 
