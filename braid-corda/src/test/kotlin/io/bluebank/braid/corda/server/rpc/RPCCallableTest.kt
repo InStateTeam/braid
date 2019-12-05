@@ -24,7 +24,6 @@ import kotlin.reflect.jvm.javaType
 
 class RPCCallableTest {
   @Test
-  // @Ignore
   fun shouldBeCallableAndReturnTypeOfFlow() {
 
     val flow = BraidTestFlow::class

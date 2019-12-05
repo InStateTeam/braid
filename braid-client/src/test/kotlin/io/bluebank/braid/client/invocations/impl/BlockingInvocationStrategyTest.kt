@@ -35,7 +35,7 @@ class BlockingInvocationStrategyTest {
 
     val invocations = MockInvocations {
       requestId = it.id
-      log.info("invoking", it)
+      log.trace("invoking", it)
       receive(JsonRPCResultResponse(id = requestId, result = "hello"))
       Future.succeededFuture()
     }
@@ -88,7 +88,7 @@ class BlockingInvocationStrategyTest {
 
     val invocations = MockInvocations {
       requestId = it.id
-      log.info("invoking", it)
+      log.trace("invoking", it)
       Future.succeededFuture()
     }
 

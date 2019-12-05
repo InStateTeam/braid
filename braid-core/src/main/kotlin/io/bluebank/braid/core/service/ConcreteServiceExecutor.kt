@@ -91,11 +91,11 @@ class ConcreteServiceExecutor(private val service: Any) : ServiceExecutor {
       .map { it to request.computeScore(it) }
       .filter { (_, score) -> score > 0 }
       .sortedByDescending { (_, score) -> score }
-      .also {
+      .also { candidates ->
         if (log.isTraceEnabled) {
           log.trace("scores for candidate methods for {}:", request)
-          it.forEach {
-            println("${it.second}: ${it.first.asSimpleString()}")
+          candidates.forEach { candidate ->
+            println("${candidate.second}: ${candidate.first.asSimpleString()}")
           }
         }
       }

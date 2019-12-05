@@ -59,21 +59,21 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   }
 
   override fun add(lhs: Double, rhs: Double): Double {
-    log.info("adding $lhs to $rhs")
+    log.trace("adding $lhs to $rhs")
     return lhs + rhs
   }
 
   override fun noArgs(): Int {
-    log.info("given no args, returning a number")
+    log.trace("given no args, returning a number")
     return 5
   }
 
   override fun noResult() {
-    log.info("returning no result")
+    log.trace("returning no result")
   }
 
   override fun longRunning(): Future<Int> {
-    log.info("running long running job")
+    log.trace("running long running job")
     val result = future<Int>()
     vertx.setTimer(100) {
       result.complete(5)
@@ -82,27 +82,27 @@ class MyServiceImpl(private val vertx: Vertx) : MyService {
   }
 
   override fun stream(): Observable<Int> {
-    log.info("streaming")
+    log.trace("streaming")
     return Observable.from(0..10)
   }
 
   override fun largelyNotStream(): Observable<Int> {
-    log.info("returning a stream error")
+    log.trace("returning a stream error")
     return Observable.error(RuntimeException("stream error"))
   }
 
   override fun echoComplexObject(inComplexObject: ComplexObject): ComplexObject {
-    log.info("echoing ...")
+    log.trace("echoing ...")
     return inComplexObject
   }
 
   override fun blowUp() {
-    log.info("about to blow up on purpose")
+    log.trace("about to blow up on purpose")
     throw RuntimeException("expected exception")
   }
 
   override fun stuffedJsonObject(): JsonStuffedObject {
-    log.info("returning stuffed json object")
+    log.trace("returning stuffed json object")
     return JsonStuffedObject("this is hosed")
   }
 

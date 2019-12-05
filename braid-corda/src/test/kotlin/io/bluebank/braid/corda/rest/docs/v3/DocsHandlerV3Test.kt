@@ -41,22 +41,39 @@ class DocsHandlerV3Test {
   init {
     val docs = DocsHandlerV3()
     docs.add("group", false, HttpMethod.POST, "path", this::myFunction)
-    docs.add("group", false, HttpMethod.POST, "stringPath", this::myFunctionReturningString)
-    docs.add("group", false, HttpMethod.POST, "byteArrayPath", this::myFunctionReturningByteArray)
+    docs.add(
+      "group",
+      false,
+      HttpMethod.POST,
+      "stringPath",
+      this::myFunctionReturningString
+    )
+    docs.add(
+      "group",
+      false,
+      HttpMethod.POST,
+      "byteArrayPath",
+      this::myFunctionReturningByteArray
+    )
     openApi = docs.createOpenAPI()
   }
 
-  fun myFunction(type: aType) {}
-  fun myFunctionReturningString(type: aType) :String { return "yeeehhhhaaa"}
-  fun myFunctionReturningByteArray(type: aType) :ByteArray { return ByteArray(2)}
+  fun myFunction(@Suppress("UNUSED_PARAMETER") type: aType) {}
+  fun myFunctionReturningString(@Suppress("UNUSED_PARAMETER") type: aType): String {
+    return "yeeehhhhaaa"
+  }
+
+  fun myFunctionReturningByteArray(@Suppress("UNUSED_PARAMETER") type: aType): ByteArray {
+    return ByteArray(2)
+  }
 
   data class aType(
-      val requiredString: String,
-      val requiredDefaultString: String = "",
-      val optionalString: String?
+    val requiredString: String,
+    val requiredDefaultString: String = "",
+    val optionalString: String?
   )
 
-@Test
+  @Test
   fun `should generate openApi`() {
     val path = openApi.paths["path"]
     assertThat(path, notNullValue())
@@ -104,6 +121,6 @@ class DocsHandlerV3Test {
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .writerWithDefaultPrettyPrinter()
       .writeValueAsString(openApi)
-    println(swagger)
+//    println(swagger)
   }
 }

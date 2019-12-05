@@ -311,7 +311,7 @@ class SerialisationTests {
     //  val testSerialization = SerializationEnvironmentRule()
 
     withTestSerializationEnvIfNotSet {
-      val txn = Json.decodeValue(json, SignedTransaction::class.java)
+      Json.decodeValue(json, SignedTransaction::class.java)
     }
   }
 
@@ -333,8 +333,6 @@ class SerialisationTests {
       val wtx = WireTransaction(listOf(notaryGroup, outputsGroup, commandGroup, signersGroup), PrivacySalt())
       val stx = SignedTransaction(wtx, listOf(createTransactionSignature()))
       val encoded = Json.encode(stx)
-      println(encoded)
-
       val decoded = Json.decodeValue(encoded, SignedTransaction::class.java)
       assertEquals(decoded, stx)
     }
@@ -354,5 +352,5 @@ class SerialisationTests {
     return publicKey
   }
 
-  private fun f(set: NonEmptySet<String>) {}
+  private fun f(@Suppress("UNUSED_PARAMETER") set: NonEmptySet<String>) {}
 }

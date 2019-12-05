@@ -64,7 +64,7 @@ class QualifiedTypeNameResolverTest {
 
   private fun javatype(type: Type) = TypeFactory.defaultInstance().constructType(type)
 
-  private fun f1(appleBox: Box<Apple>) {
+  private fun f1(@Suppress("UNUSED_PARAMETER") appleBox: Box<Apple>) {
   }
   private class Inner
 

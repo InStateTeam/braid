@@ -32,7 +32,7 @@ class ProgressTracker {
   }
 
   fun ping() {
-    log.info("ping")
+    log.trace("ping")
   }
 }
 
@@ -58,7 +58,7 @@ class UnboundParameterFooFlow<OldState>(
 ) : FlowLogic<OldState> {
 
   override fun call(): OldState {
-    return l.get("key")!!;
+    return l.get("key")!!
   }
 }
 
@@ -68,13 +68,13 @@ class UnboundFooFlow<OldState>(
 ) : FlowLogic<OldState> {
 
   override fun call(): OldState {
-    return l;
+    return l
   }
 }
 
 class BadlyAnnotatedFlow(
   private val i: Int,
-  @Context user: User
+  @Suppress("UNUSED_PARAMETER") @Context user: User
 ) : FlowLogic<Int> {
 
   override fun call(): Int {

@@ -30,14 +30,10 @@ import java.net.URL
 import java.nio.file.Path
 
 fun main(args: Array<String>) {
-  run(onlyOne = false);
+  run();
 }
 
-fun run(
-  // optionally set this to true to load only one node, which may be faster startup
-  // and all you need for the specific test[s] which you intend to run.
-  onlyOne: Boolean = false
-) {
+fun run() {
   val user = User("user1", "test", permissions = setOf("ALL"))
   val bankA = CordaX500Name("PartyA", "London", "GB")
   val bankB = CordaX500Name("PartyB", "New York", "US")

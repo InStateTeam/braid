@@ -36,7 +36,7 @@ data class TestDriver(
   companion object {
     fun driver(defaultParameters: DriverParameters = DriverParameters()): TestDriver {
       val serializationEnv = setDriverSerialization()
-      val driverDSL = DriverDSLImpl(
+      @Suppress("DEPRECATION") val driverDSL = DriverDSLImpl(
         portAllocation = defaultParameters.portAllocation,
         debugPortAllocation = defaultParameters.debugPortAllocation,
         systemProperties = defaultParameters.systemProperties,
