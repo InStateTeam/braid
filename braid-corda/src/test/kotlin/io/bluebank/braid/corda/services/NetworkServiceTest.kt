@@ -42,7 +42,7 @@ class NetworkServiceTest {
       on { nodeInfo() } doReturn nodeInfo
     }
 
-    fun getAdapter(user: User?): NetworkMapServiceAdapter {
+    fun getAdapter(@Suppress("UNUSED_PARAMETER") user: User?): NetworkMapServiceAdapter {
       return ops
     }
 

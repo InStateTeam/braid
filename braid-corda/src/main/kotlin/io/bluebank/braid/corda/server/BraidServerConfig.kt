@@ -36,8 +36,8 @@ data class BraidServerConfig(
 
   companion object {
     val DEFAULT_NODE_ADDRESS = NetworkHostAndPort.parse("localhost:10006")
-    const val DEFAULT_USER = "user1"
-    const val DEFAULT_PASSWORD = "password"
+    const val DEFAULT_USER = ""
+    const val DEFAULT_PASSWORD = ""
     @Suppress("SpellCheckingInspection")
     const val DEFAULT_OPENAPI_VERSION = 3
     const val DEFAULT_PORT = 9000
@@ -69,8 +69,44 @@ data class BraidServerConfig(
       )
     }
 
+    private val argsHandlers =
+      listOf<(BraidServerConfig, Array<String>) -> BraidServerConfig>(
+        { config: BraidServerConfig, args ->
+          config.copy(
+            networkHostAndPort = NetworkHostAndPort.parse(
+              args[0]
+            )
+          )
+        },
+        { config: BraidServerConfig, args -> config.copy(user = args[1]) },
+        { config: BraidServerConfig, args -> config.copy(user = args[2]) },
+        { config: BraidServerConfig, args -> config.copy(port = args[3].toInt()) },
+        { config: BraidServerConfig, args -> config.copy(openApiVersion = args[4].toInt()) },
+        { config: BraidServerConfig, args -> config.copy(cordapps = args.drop(5)) }
+      )
+
     fun config(args: Array<String>): BraidServerConfig {
-      val config = when {
+      val parsedConfig = parseConfig(args)
+      return processArgs(args, parsedConfig)
+        .also {
+          println("Running with config: $it")
+        }
+    }
+
+    private fun processArgs(
+      args: Array<String>,
+      parsedConfig: BraidServerConfig
+    ): BraidServerConfig {
+      return if (args.isEmpty()) {
+        println("no arguments provided. using the default config ${parsedConfig}")
+        parsedConfig
+      } else {
+        argsHandlers.take(args.size).fold(parsedConfig) { c, op -> op(c, args) }
+      }
+    }
+
+    private fun parseConfig(args: Array<String>): BraidServerConfig {
+      val parsedConfig = when {
         !configFile.exists() && args.isEmpty() -> {
           println("Did not find braid.conf and no command line arguments provided")
           println("Usage: Please supply braid.conf or BraidMainKt <node address> <username> <password> <port> <openApiVersion> [<cordaAppJar1> <cordAppJar2> ....]")
@@ -83,16 +119,7 @@ data class BraidServerConfig(
           )
         else -> BraidServerConfig()
       }
-
-      return when (args.size) {
-        1 -> config.copy(networkHostAndPort = NetworkHostAndPort.parse(args[0]))
-        2 -> config.copy(user = args[1])
-        3 -> config.copy(password = args[2])
-        4 -> config.copy(port = Integer.valueOf(args[3]))
-        5 -> config.copy(openApiVersion = Integer.valueOf(args[4]))
-        6 -> config.copy(cordapps = args.drop(5))
-        else -> config
-      }
+      return parsedConfig
     }
   }
 }

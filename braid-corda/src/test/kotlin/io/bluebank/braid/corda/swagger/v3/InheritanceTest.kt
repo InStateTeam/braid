@@ -63,10 +63,7 @@ class InheritanceTest {
     val oapi = OpenAPI().components(Components()).paths(Paths()).info(Info().title("test").version("1.0.0"))
 
     addToSwagger(schemas, oapi)
-    val json = Json.pretty(oapi)
     // TODO: code-gen here
-//    File(System.getProperty("user.home"), "/tmp/output2.json").writeText(json)
-//    println(json)
   }
 }
 

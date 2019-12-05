@@ -77,7 +77,7 @@ class SuiteClassFirst : SuiteClassEither(suiteClassSetup) {
     fun beforeClass(testContext: TestContext) {
       log.info("first beforeClass")
       val finished = testContext.async()
-      suiteClassSetup = startBraidAndLogin(testContext, true)
+      suiteClassSetup = startBraidAndLogin(true)
       finished.complete()
     }
   }
@@ -92,18 +92,17 @@ class SuiteClassSecond : SuiteClassEither(suiteClassSetup) {
     fun beforeClass(testContext: TestContext) {
       log.info("second beforeClass")
       val finished = testContext.async()
-      suiteClassSetup = startBraidAndLogin(testContext, true)
+      suiteClassSetup = startBraidAndLogin(true)
       finished.complete()
     }
   }
 }
 
 @RunWith(VertxUnitRunner::class)
-open class SuiteClassEither(val suiteClassSetup: SuiteClassSetup) {
+open class SuiteClassEither(private val suiteClassSetup: SuiteClassSetup) {
 
   companion object {
     fun startBraidAndLogin(
-      testContext: TestContext,
       userLogin: Boolean
     ): SuiteClassSetup {
       log.info("startBraidAndLogin $userLogin")
@@ -118,7 +117,7 @@ open class SuiteClassEither(val suiteClassSetup: SuiteClassSetup) {
   }
 
   @Test
-  fun secondTest(testContext: TestContext) {
+  fun secondTest() {
     log.info("secondTest ${suiteClassSetup.loginToken != null}")
   }
 }

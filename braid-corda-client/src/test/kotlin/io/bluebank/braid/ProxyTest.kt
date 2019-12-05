@@ -68,7 +68,7 @@ class ProxyTest {
         myService = braidClient.bind(MyService::class.java)
         async.complete()
       } catch (ex: Throwable) {
-        println(ex.message)
+//        println(ex.message)
         throw ex
       }
     }
@@ -175,7 +175,7 @@ class ProxyTest {
     (0..10).toList()
       .asSequence()
       .map {
-        println(it)
+        //        println(it)
         it
       }.firstOrNull()
 

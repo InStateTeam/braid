@@ -155,14 +155,14 @@ class ControlledService {
   }
 
   fun block(): Future<String> {
-    log.info("starting block()")
+    log.trace("starting block()")
     val result = Future.future<String>()
     object : Thread() {
       override fun run() {
         serviceReady()
-        log.info("waiting for trigger ")
+        log.trace("waiting for trigger ")
         trigger.await()
-        log.info("completing")
+        log.trace("completing")
         result.complete("result")
       }
     }.start()

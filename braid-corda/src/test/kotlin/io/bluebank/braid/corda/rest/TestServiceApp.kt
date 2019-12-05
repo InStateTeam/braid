@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("DEPRECATION")
+
 package io.bluebank.braid.corda.rest
 
 import io.bluebank.braid.corda.BraidConfig

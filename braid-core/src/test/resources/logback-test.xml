@@ -30,7 +30,7 @@
     <appender-ref ref="console"/>
   </logger>
   <logger name="io.netty" level="warn"/>
-  <logger name="io.bluebank.braid" level="trace"/>
+  <logger name="io.bluebank.braid" level="info"/>
   <root level="info">
     <appender-ref ref="console"/>
   </root>

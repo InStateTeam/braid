@@ -101,7 +101,7 @@ class BraidMainTest {
         }
         .compose { it.body<AbstractCashFlow.Result>() }
         .onSuccess {
-          println(it)
+//          println(it)
         }
         .compose {
 

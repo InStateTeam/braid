@@ -112,7 +112,7 @@ class ModelContextV3Test {
   @Test
   fun `that we model errors correctly`() {
     val modelContext = ModelContextV3()
-    val r2 = modelContext.addType(BraidSwaggerError::class.java)
+    modelContext.addType(BraidSwaggerError::class.java)
     assertTrue(
       modelContext.models.containsKey("InvocationError"),
       "that the name of the error type is Error without the package name"

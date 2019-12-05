@@ -172,7 +172,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>deployNodes</id>
+            <id>build</id>
             <phase>compile</phase>
             <goals>
               <goal>run</goal>
@@ -182,15 +182,15 @@
                 <exec executable="cmd" dir="${project.basedir}" failonerror="true" osfamily="windows">
                   <arg value="/c"/>
                   <arg value="gradlew"/>
-                  <arg value="deployNodes"/>
+                  <arg value="build"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
                 <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="unix">
-                  <arg value="deployNodes"/>
+                  <arg value="build"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
                 <exec executable="./gradlew" dir="${project.basedir}" failonerror="true" osfamily="mac">
-                  <arg value="deployNodes"/>
+                  <arg value="build"/>
                   <arg value="-Pext.braid_version=${project.version}"/>
                 </exec>
               </target>

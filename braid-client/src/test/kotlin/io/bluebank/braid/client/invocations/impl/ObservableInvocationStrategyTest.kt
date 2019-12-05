@@ -38,7 +38,7 @@ class ObservableInvocationStrategyTest {
   @Test
   fun `that if Invocations provides the wrong requestId or payload an exception is raised`() {
     val invocations = MockInvocations {
-      log.info("invoking", it)
+      log.trace("invoking", it)
       Future.succeededFuture()
     }
 
