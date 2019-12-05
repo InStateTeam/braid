@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest
 
-import io.bluebank.braid.corda.rest.Router.Companion.LOG
+import io.bluebank.braid.corda.rest.Router.Companion.log
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.vertx.codegen.annotations.Nullable
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.Json
+import io.vertx.ext.auth.User
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.RoutingContext
 import java.net.URLDecoder
@@ -41,9 +42,9 @@ import kotlin.reflect.full.isSuperclassOf
 
 const val HTTP_UNPROCESSABLE_STATUS_CODE = 422
 
-class Router{
-  companion object{
-     val LOG = loggerFor<Router>()
+class Router {
+  companion object {
+    val log = loggerFor<Router>()
   }
 }
 
@@ -55,11 +56,11 @@ fun <R> Route.bind(fn: KCallable<R>) {
       try {
         rc.response().end(fn.call(*args))
       } catch (e: Throwable) {
-        LOG.warn("Unable to call: ${rc.request().path()}", e)
+        log.warn("Unable to call: ${rc.request().path()}", e)
         rc.response().end(e, HTTP_UNPROCESSABLE_STATUS_CODE)
       }
     } catch (e: Throwable) {
-      LOG.warn("Unable to parse parameters: ${rc.request().path()}", e)
+      log.warn("Unable to parse parameters: ${rc.request().path()}", e)
       rc.response().end(e, Response.Status.BAD_REQUEST.statusCode)
     }
   }
@@ -76,7 +77,10 @@ private fun parseBodyParameter(
   try {
     return parseComplexType(parameter, context.body)
   } catch (ex: Throwable) {
-    throw RuntimeException("failed to parse body parameter for ${parameter.name}: ${ex.message}", ex)
+    throw RuntimeException(
+      "failed to parse body parameter for ${parameter.name}: ${ex.message}",
+      ex
+    )
   }
 }
 
@@ -161,8 +165,8 @@ private val parameterParser = ::parsePathParameter
 private fun KParameter.parseParameter(context: RoutingContext): Any? {
   try {
     return parameterParser(this, context).result
-  } catch(ex: Throwable) {
-    LOG.error("failed to parse parameter ${this.name}", ex)
+  } catch (ex: Throwable) {
+    log.error("failed to parse parameter ${this.name}", ex)
     throw RuntimeException("failed to parse parameter ${this.name}: ${ex.message}", ex)
   }
 }
@@ -173,11 +177,23 @@ private fun parseContextParameter(
 ): ParseResult {
   try {
     parameter.findAnnotation<Context>() ?: return ParseResult.NOT_FOUND
-    // we always map and pass HttpHeaders
-    assert(parameter.getType().isSubclassOf(HttpHeaders::class)) { error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}") }
-    return ParseResult(HttpHeadersImpl(context))
-  } catch(ex: Throwable) {
-    throw RuntimeException("failed to parse context parameter for ${parameter.name}: ${ex.message}", ex)
+    // we support either HttpHeaders or the User value
+    return when {
+      parameter.getType().isSubclassOf(HttpHeaders::class) -> {
+        ParseResult(HttpHeadersImpl(context))
+      }
+      parameter.getType().isSubclassOf(User::class) -> {
+        // specify that parameter is found even if context.user() is null --
+        // the `@Context user: User?` parameter is nullable when users are unauthenticated
+        ParseResult(true, context.user())
+      }
+      else -> error("expected parameter to be of type ${HttpHeaders::class.qualifiedName}")
+    }
+  } catch (ex: Throwable) {
+    throw RuntimeException(
+      "failed to parse context parameter for ${parameter.name}: ${ex.message}",
+      ex
+    )
   }
 }
 
@@ -186,7 +202,8 @@ private fun parseHeaderParameter(
   context: RoutingContext
 ): ParseResult {
   try {
-    val annotation = parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
+    val annotation =
+      parameter.findAnnotation<HeaderParam>() ?: return ParseResult.NOT_FOUND
     val headerName = annotation.value
     val values = context.request().headers().getAll(headerName)
     return when (parameter.type.classifier) {
@@ -198,8 +215,11 @@ private fun parseHeaderParameter(
         ParseResult(true, result)
       }
     }
-  } catch(ex: Throwable) {
-    throw RuntimeException("failed to parse header parameter for ${parameter.name}: ${ex.message}", ex)
+  } catch (ex: Throwable) {
+    throw RuntimeException(
+      "failed to parse header parameter for ${parameter.name}: ${ex.message}",
+      ex
+    )
   }
 }
 
@@ -236,15 +256,21 @@ private fun parseQueryParameter(
           // TODO: handle arrays
           ParseResult(parameter.parseSimpleType(URLDecoder.decode(queryParam, "UTF-8")))
         } else {
-          parseComplexType(parameter, Buffer.buffer(URLDecoder.decode(queryParam, "UTF-8")))
+          parseComplexType(
+            parameter,
+            Buffer.buffer(URLDecoder.decode(queryParam, "UTF-8"))
+          )
         }
       }
       else -> {
         ParseResult.NOT_FOUND
       }
     }
-  } catch(ex: Throwable) {
-    throw RuntimeException("failed to parse query parameter ${parameter.name}: ${ex.message}", ex)
+  } catch (ex: Throwable) {
+    throw RuntimeException(
+      "failed to parse query parameter ${parameter.name}: ${ex.message}",
+      ex
+    )
   }
 }
 
@@ -268,7 +294,10 @@ private fun parsePathParameter(
       }
     }
   } catch (ex: Throwable) {
-    throw RuntimeException("failed to parse path parameter for ${parameter.name}: ${ex.message}", ex)
+    throw RuntimeException(
+      "failed to parse path parameter for ${parameter.name}: ${ex.message}",
+      ex
+    )
   }
 }
 
@@ -320,7 +349,10 @@ private fun KParameter.validateHeaderParamAnnotation() {
 
 private fun KParameter.validateContextAnnotation() {
   this.findAnnotation<Context>() ?: return
-  assert(this.getType().isSubclassOf(HttpHeaders::class)) {
-    "braid only supports @${HttpHeaders::class.simpleName} parameters annotated with @${Context::class.simpleName} but parameter ${this.name} is of type ${this.getType()}"
+  assert(
+    this.getType().isSubclassOf(HttpHeaders::class) ||
+      this.getType().isSubclassOf(User::class)
+  ) {
+    "braid only supports @${HttpHeaders::class.simpleName} or @${User::class.simpleName} parameters annotated with @${Context::class.simpleName}, but parameter ${this.name} is of type ${this.getType()}"
   }
 }

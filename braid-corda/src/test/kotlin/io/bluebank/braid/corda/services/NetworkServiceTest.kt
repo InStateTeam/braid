@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.services
 
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
+import io.vertx.ext.auth.User
 import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.NodeInfo
 import net.corda.core.utilities.NetworkHostAndPort
@@ -40,8 +41,15 @@ class NetworkServiceTest {
       on { networkMapSnapshot() } doReturn listOf(nodeInfo)
       on { nodeInfo() } doReturn nodeInfo
     }
-    val network = SimpleNetworkMapServiceImpl(ops)
-    val simpleInfo = network.myNodeInfo()
+
+    fun getAdapter(user: User?): NetworkMapServiceAdapter {
+      return ops
+    }
+
+    val user = mock<User> {}
+
+    val network = RestNetworkMapService(::getAdapter)
+    val simpleInfo = network.myNodeInfo(user)
     assertThat(simpleInfo.addresses, `is`(addresses))
     assertThat(simpleInfo.legalIdentities.size, `is`(1))
   }

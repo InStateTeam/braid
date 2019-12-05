@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import java.lang.reflect.Type
 import javax.ws.rs.QueryParam
+import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
@@ -51,6 +52,9 @@ class KEndPointV3(
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
   }
 
+  private val contextParameters =
+    parameters.filter { it.findAnnotation<Context>() != null }
+
   private val pathParamNames = Paths.PATH_PARAMS_RE.findAll(path)
     .map { it.groups[2]!!.value }
 
@@ -69,8 +73,8 @@ class KEndPointV3(
 
   private val queryParams = parameters.subtract(pathParams).let {
     when (bodyParameter) {
-      null -> it
-      else -> it - bodyParameter
+      null -> it - contextParameters
+      else -> it - contextParameters - bodyParameter
     }
   }
 
