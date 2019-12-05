@@ -23,7 +23,8 @@ import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class ProgressTracker {
+class
+ProgressTracker {
   companion object {
     private val log = loggerFor<ProgressTracker>()
   }

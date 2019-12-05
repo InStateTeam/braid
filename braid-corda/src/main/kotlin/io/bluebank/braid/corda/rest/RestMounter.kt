@@ -111,7 +111,6 @@ class RestMounter(
 
     // and now for the swagger static
     val swaggerStaticResource = when (config.openApiVersion) {
-      2 -> "swagger-1"
       3 -> "swagger-2"
       else -> error("unrecognised open api version")
     }
