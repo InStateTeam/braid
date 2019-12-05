@@ -17,11 +17,14 @@ package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.logging.loggerFor
 import io.vertx.core.json.Json
+import io.vertx.ext.auth.User
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Ignore
 import org.junit.Test
+import javax.ws.rs.core.Context
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 class ProgressTracker {
   companion object {
@@ -51,7 +54,7 @@ class FooFlow(
 
 class UnboundParameterFooFlow<OldState>(
   private val i: Int,
-  private val l: Map<String,OldState>
+  private val l: Map<String, OldState>
 ) : FlowLogic<OldState> {
 
   override fun call(): OldState {
@@ -66,6 +69,16 @@ class UnboundFooFlow<OldState>(
 
   override fun call(): OldState {
     return l;
+  }
+}
+
+class BadlyAnnotatedFlow(
+  private val i: Int,
+  @Context user: User
+) : FlowLogic<Int> {
+
+  override fun call(): Int {
+    return i
   }
 }
 
@@ -96,9 +109,20 @@ class SyntheticConstructorAndTransformerTest {
     assertEquals(1100L, result)
   }
 
-private fun createBoundParameterTypes(): Map<Class<*>, Any> {
-  return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
-}
+  private fun createBoundParameterTypes(): Map<Class<*>, Any> {
+    return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())
+  }
+
+  @Test
+  fun `should fail if the user-defined flow has a Context annotation`() {
+    val constructor = BadlyAnnotatedFlow::class.java.preferredConstructor()
+    val error = assertFails {
+      trampoline(constructor, emptyMap(), "MyUnboundPayloadName") {
+        constructor.newInstance(*it).call()
+      }
+    }
+    assert(error.message!!.contains("Context"))
+  }
 
   @Test
   fun shouldNotIncludeSyntheticConstructors() {

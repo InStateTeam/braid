@@ -15,7 +15,7 @@
  */
 package io.bluebank.braid.corda.rest
 
-import io.bluebank.braid.corda.rest.Router.Companion.LOG
+import io.bluebank.braid.corda.rest.Router.Companion.log
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.http.parseQueryParams
@@ -44,7 +44,7 @@ const val HTTP_UNPROCESSABLE_STATUS_CODE = 422
 
 class Router {
   companion object {
-    val LOG = loggerFor<Router>()
+    val log = loggerFor<Router>()
   }
 }
 
@@ -56,11 +56,11 @@ fun <R> Route.bind(fn: KCallable<R>) {
       try {
         rc.response().end(fn.call(*args))
       } catch (e: Throwable) {
-        LOG.warn("Unable to call: ${rc.request().path()}", e)
+        log.warn("Unable to call: ${rc.request().path()}", e)
         rc.response().end(e, HTTP_UNPROCESSABLE_STATUS_CODE)
       }
     } catch (e: Throwable) {
-      LOG.warn("Unable to parse parameters: ${rc.request().path()}", e)
+      log.warn("Unable to parse parameters: ${rc.request().path()}", e)
       rc.response().end(e, Response.Status.BAD_REQUEST.statusCode)
     }
   }
@@ -166,7 +166,7 @@ private fun KParameter.parseParameter(context: RoutingContext): Any? {
   try {
     return parameterParser(this, context).result
   } catch (ex: Throwable) {
-    LOG.error("failed to parse parameter ${this.name}", ex)
+    log.error("failed to parse parameter ${this.name}", ex)
     throw RuntimeException("failed to parse parameter ${this.name}: ${ex.message}", ex)
   }
 }
