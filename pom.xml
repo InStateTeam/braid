@@ -527,7 +527,6 @@
           <header>LICENSE</header>
           <excludes>
             <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
-            <exclude>**/braid-corda/src/main/resources/swagger-1/**/*</exclude>
             <exclude>**/braid-corda/src/main/resources/swagger-2/**/*</exclude>
             <exclude>.gradle/**</exclude>
             <exclude>.m2/**</exclude>

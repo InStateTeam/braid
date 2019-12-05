@@ -52,7 +52,8 @@ class KEndPointV3(
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
   }
 
-  private val contextParameters = parameters.filter { it.findAnnotation<Context>() != null }
+  private val contextParameters =
+    parameters.filter { it.findAnnotation<Context>() != null }
 
   private val pathParamNames = Paths.PATH_PARAMS_RE.findAll(path)
     .map { it.groups[2]!!.value }
