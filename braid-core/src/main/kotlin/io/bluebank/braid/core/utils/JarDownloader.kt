@@ -23,7 +23,9 @@ import java.nio.channels.Channels
 
 class JarDownloader {
 
-  private val log = loggerFor<JarDownloader>()
+  companion object {
+    private val log = loggerFor<JarDownloader>()
+  }
 
   private val dir by lazy {
     val homeDir = System.getProperty("user.home")
@@ -33,7 +35,7 @@ class JarDownloader {
   }
 
   fun uriToFile(url: URL): URL {
-    val filename = url.path.replace(url.protocol,"")
+    val filename = url.path.replace(url.protocol, "")
     val destination = File(dir, filename)
     if (shouldDownload(url, destination.exists())) {
       log.info("creating ${destination.absolutePath}")
@@ -50,5 +52,5 @@ class JarDownloader {
   }
 
   fun shouldDownload(destination: URL, destinationExists: Boolean) =
-      destination.path.contains("SNAPSHOT") || !destinationExists
+    destination.path.contains("SNAPSHOT") || !destinationExists
 }

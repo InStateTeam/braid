@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import org.apache.commons.lang3.AnnotationUtils
 import java.lang.reflect.*
+import javax.ws.rs.core.Context
 import kotlin.reflect.*
 import kotlin.reflect.full.createType
 
@@ -30,6 +31,17 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   private val transformer: (Array<Any?>) -> R,
   private val additionalParams: List<KParameter> = emptyList()
 ) : KFunction<R> {
+
+  init {
+    val forbidden: (Annotation) -> Boolean = { it: Annotation -> it is Context }
+    if (constructor.annotations.any(forbidden) ||
+      constructor.parameters.any { it.annotations.any(forbidden) }
+    ) {
+      // don't expect nor support any @Context annotations in the user-defined flow
+      // any @Context annotations are reserved for synthetic parameters defined by Braid
+      error("Flow constructor being transformed to $className has user-defined @Context annotations")
+    }
+  }
 
   companion object {
     fun acquirePayloadClass(
