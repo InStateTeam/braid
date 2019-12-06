@@ -79,7 +79,7 @@ data class BraidServerConfig(
           )
         },
         { config: BraidServerConfig, args -> config.copy(user = args[1]) },
-        { config: BraidServerConfig, args -> config.copy(user = args[2]) },
+        { config: BraidServerConfig, args -> config.copy(password = args[2]) },
         { config: BraidServerConfig, args -> config.copy(port = args[3].toInt()) },
         { config: BraidServerConfig, args -> config.copy(openApiVersion = args[4].toInt()) },
         { config: BraidServerConfig, args -> config.copy(cordapps = args.drop(5)) }
