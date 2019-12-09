@@ -36,8 +36,8 @@ class TrackerHandler(private val eventBus: EventBus) {
   }
 
   @Operation(
-    description = "Connect to the Progress Tracker of a flow. " +
-      "This call will return chunked responses of all progress trackers for this flow",
+    description = "Connect to the Progress Tracker. " +
+      "This call will return chunked responses of all progress trackers",
     responses = [ApiResponse(
       content = arrayOf(
                 Content(mediaType = MediaType.APPLICATION_JSON,
