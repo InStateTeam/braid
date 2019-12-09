@@ -667,6 +667,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
     val tracker =  subscribeToTracker()
     
     getNotary()
+      .compose { notary -> tracker.map(notary)  }
       .compose { notary ->
         val json = JsonObject()
           .put("notary", notary)
