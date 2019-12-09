@@ -16,7 +16,7 @@
 package io.bluebank.braid.corda.server
 
 import io.bluebank.braid.corda.BraidCordaJacksonSwaggerInit
-import io.bluebank.braid.corda.server.progress.Progress
+import io.bluebank.braid.corda.server.progress.ProgressNotification
 import io.bluebank.braid.corda.services.SimpleNodeInfo
 import io.bluebank.braid.corda.services.vault.VaultQuery
 import io.bluebank.braid.corda.util.VertxMatcher.vertxAssertThat
@@ -36,7 +36,6 @@ import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
-import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -78,7 +77,6 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.atomic.AtomicReference
 import javax.ws.rs.core.Response
 import kotlin.test.assertEquals
 
@@ -664,7 +662,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
     val async = context.async()
 
-    val tracker =  client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+    val tracker =  client.getFuture("/api/rest/cordapps/progress-tracker",
       headers = mapOf("Accept" to "application/json; charset=utf8")
         .addBearerToken(loginToken)
     ).compose {
@@ -702,7 +700,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       }
       .map{ buffer ->
         log.info("progress tracker 1st reply:" + buffer.toString())
-        val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
+        val progress = Json.decodeValue(buffer.toString(), ProgressNotification::class.java)
         context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
         context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
         progress
