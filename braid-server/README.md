@@ -99,4 +99,8 @@ Run:
 
 ```BraidDocsMain.kt <output_file> [<cordApp1Jar> <cordApp2Jar>...]```
 
+## Enabling Authentication
+
+To enable authentication, provide a blank RPC `username` either as a command line parameter when executing the JAR, or by setting `NODE_RPC_USERNAME` as a blank string.
+
 

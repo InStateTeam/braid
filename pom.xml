@@ -112,7 +112,6 @@
     <module>braid-client-js</module>
     <module>braid-standalone-server</module>
     <module>examples/example-server</module>
-    <module>braid-quickstart</module>
     <module>braid-core</module>
     <module>braid-corda</module>
     <module>braid-client</module>
@@ -372,6 +371,35 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+          <executions>
+            <execution>
+              <id>none</id>
+              <phase>none</phase>
+            </execution>
+            <execution>
+              <id>compile</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>testCompile</id>
+              <phase>test-compile</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>${ant.plugin.version}</version>
         </plugin>
@@ -507,7 +535,6 @@
             <runOnlyOnce>true</runOnlyOnce>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
     <plugins>
@@ -527,7 +554,6 @@
           <header>LICENSE</header>
           <excludes>
             <exclude>**/braid-standalone-server/src/main/resources/editor-web/**/*</exclude>
-            <exclude>**/braid-corda/src/main/resources/swagger-1/**/*</exclude>
             <exclude>**/braid-corda/src/main/resources/swagger-2/**/*</exclude>
             <exclude>.gradle/**</exclude>
             <exclude>.m2/**</exclude>

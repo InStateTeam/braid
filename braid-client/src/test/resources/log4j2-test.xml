@@ -26,13 +26,13 @@
     <Logger name="io.bluebank.braid" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="io.bluebank.braid.core.service" level="trace" additivity="false">
+    <Logger name="io.bluebank.braid.core.service" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="io.bluebank.braid.core.jsonrpc" level="trace" additivity="false">
+    <Logger name="io.bluebank.braid.core.jsonrpc" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="io.bluebank.braid.core.jsonschema" level="trace" additivity="false">
+    <Logger name="io.bluebank.braid.core.jsonschema" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
   </Loggers>

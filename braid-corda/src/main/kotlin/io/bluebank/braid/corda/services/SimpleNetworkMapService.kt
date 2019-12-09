@@ -94,6 +94,7 @@ class SimpleNetworkMapServiceImpl(
   }
 
   override fun state(): Observable<Any> {
+    @Suppress("DEPRECATION")
     return Observable.create { subscriber ->
       val dataFeed = networkMapServiceAdapter.track()
       val snapshot = dataFeed.snapshot.map { SimpleNodeInfo(it) }

@@ -19,6 +19,7 @@ import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.corda.core.utilities.loggerFor
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
@@ -37,8 +38,14 @@ private val log = loggerFor<SuiteTest>()
  *
  * The names of the Suite classes all begin with `SuiteClass`.
  * This matches an exclusion rule for the surefire plugin in pom.xml, so that the suite
- * classes will not be tested twice (i.e. once inside and again outside the suite).
+ * classes will not be tested twice (i.e. once inside and again outside the suite),
+ * however see also https://gitlab.com/bluebank/braid/issues/208
+ *
+ * This file could be deleted but I'm keeping it in case we want to modify the
+ * structure of BraidCordaStandaloneServerTest again in future,
+ * and use this to further experiment (so instead I've simply added @Ignore to this test).
  */
+@Ignore
 @RunWith(Suite::class)
 @Suite.SuiteClasses(SuiteClassFirst::class, SuiteClassSecond::class)
 class SuiteTest {
@@ -70,7 +77,7 @@ class SuiteClassFirst : SuiteClassEither(suiteClassSetup) {
     fun beforeClass(testContext: TestContext) {
       log.info("first beforeClass")
       val finished = testContext.async()
-      suiteClassSetup = startBraidAndLogin(testContext, true)
+      suiteClassSetup = startBraidAndLogin(true)
       finished.complete()
     }
   }
@@ -85,18 +92,17 @@ class SuiteClassSecond : SuiteClassEither(suiteClassSetup) {
     fun beforeClass(testContext: TestContext) {
       log.info("second beforeClass")
       val finished = testContext.async()
-      suiteClassSetup = startBraidAndLogin(testContext, true)
+      suiteClassSetup = startBraidAndLogin(true)
       finished.complete()
     }
   }
 }
 
 @RunWith(VertxUnitRunner::class)
-open class SuiteClassEither(val suiteClassSetup: SuiteClassSetup) {
+open class SuiteClassEither(private val suiteClassSetup: SuiteClassSetup) {
 
   companion object {
     fun startBraidAndLogin(
-      testContext: TestContext,
       userLogin: Boolean
     ): SuiteClassSetup {
       log.info("startBraidAndLogin $userLogin")
@@ -111,7 +117,7 @@ open class SuiteClassEither(val suiteClassSetup: SuiteClassSetup) {
   }
 
   @Test
-  fun secondTest(testContext: TestContext) {
+  fun secondTest() {
     log.info("secondTest ${suiteClassSetup.loginToken != null}")
   }
 }

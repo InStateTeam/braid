@@ -49,7 +49,7 @@ class VaultService(
     @Context user: User?
   ): Vault.Page<ContractState> {
     return try {
-      val forName =
+      @Suppress("UNCHECKED_CAST") val forName =
         if (type != null && type != "")
           Class.forName(
             type,

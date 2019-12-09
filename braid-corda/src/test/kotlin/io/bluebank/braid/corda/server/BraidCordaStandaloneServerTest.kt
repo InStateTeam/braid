@@ -157,14 +157,14 @@ class BraidCordaStandaloneServerTest {
       val future = CompletableFuture<Throwable>();
       val test = Handler<TestContext> { beforeClassWithContext(it) }
       val eh = Handler<Throwable> { future.complete(it) }
-      log.info("beforeClass starting")
+      log.trace("beforeClass starting")
       testContext.run(
         null,
         120_000,
         test,
         eh
       )
-      log.info("beforeClass waiting")
+      log.trace("beforeClass waiting")
       val failure: Throwable? = try {
         future.get()
       } catch (e: InterruptedException) {
@@ -174,7 +174,7 @@ class BraidCordaStandaloneServerTest {
       } finally {
         // currentRunner.set(null)
       }
-      log.info("beforeClass ending")
+      log.trace("beforeClass ending")
       if (failure != null) {
         throw failure
       }
@@ -197,7 +197,7 @@ class BraidCordaStandaloneServerTest {
         .onSuccess {
           nodeA = it.first()
           nodeB = it.last()
-          println("partyAHandle:${nodeA!!.rpcAddress}")
+//          println("partyAHandle:${nodeA!!.rpcAddress}")
         }
         .mapUnit()
     }
@@ -205,7 +205,7 @@ class BraidCordaStandaloneServerTest {
     @AfterClass
     @JvmStatic
     fun closeDown() {
-      log.info("closeDown()")
+      log.trace("closeDown()")
       val testContext: TestContext = TestContextImpl(emptyMap(), null)
       if (driver != null) driver!!.close()
       // todo instead perhaps clientVertx should be local to each suite class
@@ -285,17 +285,17 @@ class SuiteClassStandaloneServerAuth : SuiteClassStandaloneServerEither(setup) {
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-      log.info("BraidCordaStandaloneServerAuth beforeClass starting")
+      log.trace("BraidCordaStandaloneServerAuth beforeClass starting")
       val finished = testContext.async()
       setup = startBraidAndLogin(testContext, true)
-      log.info("BraidCordaStandaloneServerAuth beforeClass finished")
+      log.trace("BraidCordaStandaloneServerAuth beforeClass finished")
       finished.complete()
     }
 
     @AfterClass
     @JvmStatic
-    fun closeDown(context: TestContext) {
-      log.info("BraidCordaStandaloneServerAuth closeDown")
+    fun closeDown() {
+      log.trace("BraidCordaStandaloneServerAuth closeDown")
       setup.client.close()
     }
   }
@@ -312,17 +312,17 @@ class SuiteClassStandaloneServerShared : SuiteClassStandaloneServerEither(setup)
     @BeforeClass
     @JvmStatic
     fun beforeClass(testContext: TestContext) {
-      log.info("BraidCordaStandaloneServerAuth beforeClass starting")
+      log.trace("BraidCordaStandaloneServerAuth beforeClass starting")
       val finished = testContext.async()
       setup = startBraidAndLogin(testContext, false)
-      log.info("BraidCordaStandaloneServerAuth beforeClass finished")
+      log.trace("BraidCordaStandaloneServerAuth beforeClass finished")
       finished.complete()
     }
 
     @AfterClass
     @JvmStatic
-    fun closeDown(context: TestContext) {
-      log.info("BraidCordaStandaloneServerAuth closeDown")
+    fun closeDown() {
+      log.trace("BraidCordaStandaloneServerAuth closeDown")
       setup.client.close()
     }
   }
@@ -367,23 +367,23 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
         isVerifyHost = false
         isTrustAll = true
       })
-      log.info("startBraidAndLogin starting")
+      log.trace("startBraidAndLogin starting")
       val async = testContext.async()
       startBraid(networkHostAndPort, userMustLogin, port)
         .onSuccess {
           if (userMustLogin) {
             loginToken = client.login(testContext)
-            log.info("loginToken is $loginToken")
+            log.trace("loginToken is $loginToken")
             async.complete()
           } else {
-            log.info("loginToken is null")
+            log.trace("loginToken is null")
             async.complete()
           }
         }
         .catch { testContext.fail(it.cause) }
-      log.info("startBraidAndLogin waiting")
+      log.trace("startBraidAndLogin waiting")
       async.awaitSuccess()
-      log.info("startBraidAndLogin finished")
+      log.trace("startBraidAndLogin finished")
       return BraidCordaStandaloneServerSetup(loginToken, client, port)
     }
 
@@ -409,7 +409,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun shouldListNetworkNodes(context: TestContext) {
     val async = context.async()
-    log.info("calling get: http://localhost:$port/api/rest/network/nodes")
+    log.trace("calling get: http://localhost:$port/api/rest/network/nodes")
     client.getFuture(
       "/api/rest/network/nodes",
       headers = mapOf("Accept" to "application/json; charset=utf8")
@@ -441,7 +441,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun shouldListNetworkNodesByHostAndPort(context: TestContext) {
     val async = context.async()
-    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
+    log.trace("calling get: https://localhost:$port/api/rest/network/nodes")
     client.getFuture(
       "/api/rest/network/nodes",
       headers = mapOf("Accept" to "application/json; charset=utf8")
@@ -467,16 +467,16 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   }
 
   @Test
-  fun shouldGetPartyB(context: TestContext) {
+  fun shouldGetPartyB() {
     val cordaX500Name = CordaX500Name("PartyB", "New York", "US")
     val toString = cordaX500Name.toString()
-    val encode = URLEncoder.encode(toString)
+    val encode = URLEncoder.encode(toString, "UTF-8")
     assertThat(encode, `is`("O%3DPartyB%2C+L%3DNew+York%2C+C%3DUS"))
   }
 
   @Test
-  fun shouldDecode(context: TestContext) {
-    val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS")
+  fun shouldDecode() {
+    val encode = URLDecoder.decode("O%3DPartyB%2CL%3DNew+York%2CC%3DUS", "UTF-8")
     val parse = CordaX500Name.parse(encode)
     val cordaX500Name = CordaX500Name("PartyB", "New York", "US")
     assertThat(parse, `is`(cordaX500Name))
@@ -485,7 +485,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun shouldListNetworkNodesByX509Name(context: TestContext) {
     val async = context.async()
-    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
+    log.trace("calling get: https://localhost:$port/api/rest/network/nodes")
     client.getFuture(
       "/api/rest/network/nodes",
       queryParameters = mapOf("x500-name" to driver!!.dsl.defaultNotaryIdentity.name.toString()),
@@ -515,7 +515,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun `should return empty list if node not found`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: https://localhost:$port/api/rest/network/nodes")
+    log.trace("calling get: https://localhost:$port/api/rest/network/nodes")
     client.getFuture(
       "/api/rest/network/nodes?x500-name=O%3DPartyB%2CL%3DNew+York%2CC%3DUS",
       mapOf("Accept" to "application/json; charset=utf8")
@@ -539,7 +539,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun shouldListSelf(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: https://localhost:$port/api/rest/network/nodes/self")
+    log.trace("calling get: https://localhost:$port/api/rest/network/nodes/self")
     client.getFuture(
       "/api/rest/network/nodes/self",
       headers = mapOf("Accept" to "application/json; charset=utf8")
@@ -565,7 +565,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun shouldListNetworkNotaries(context: TestContext) {
     val async = context.async()
-    log.info("calling get: https://localhost:$port/api/rest/network/notaries")
+    log.trace("calling get: https://localhost:$port/api/rest/network/notaries")
     client.getFuture(
       "/api/rest/network/notaries",
       headers = mapOf("Accept" to "application/json; charset=utf8")
@@ -586,7 +586,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun shouldListFlows(context: TestContext) {
     val async = context.async()
-    log.info("calling get: https://localhost:$port/api/rest/cordapps/flows")
+    log.trace("calling get: https://localhost:$port/api/rest/cordapps/flows")
     client.getFuture(
       "/api/rest/cordapps/corda-core/flows",
       emptyMap<String, Any>().addBearerToken(loginToken)
@@ -627,7 +627,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
           .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
         val path =
           "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-        log.info("calling post: https://localhost:$port$path")
+        log.trace("calling post: https://localhost:$port$path")
         val encodePrettily = json.encodePrettily()
         client.postFuture(
           path,
@@ -640,13 +640,13 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       }
       .compose { it.body<JsonObject>() }
       .onSuccess { reply ->
-        log.info("reply:" + reply.encodePrettily())
+        log.trace("reply:" + reply.encodePrettily())
         context.assertThat(reply, notNullValue())
         context.assertThat(reply.getJsonObject("stx"), notNullValue())
         context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
         val signedTransactionJson = reply.getJsonObject("stx").encodePrettily()
-        log.info(signedTransactionJson)
+        log.trace(signedTransactionJson)
 
         //  todo round trip SignedTransaction
         // Failed to decode: Expected exactly 1 of {nodeSerializationEnv, driverSerializationEnv, contextSerializationEnv, inheritableContextSerializationEnv}
@@ -726,7 +726,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
 
       val path =
         "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-      log.info("calling post: https://localhost:$port$path")
+      log.trace("calling post: https://localhost:$port$path")
 
       client.postFuture(
         path,
@@ -782,7 +782,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   @Test
   fun `should query the vault`(context: TestContext) {
     val async = context.async()
-    log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
+    log.trace("calling get: https://localhost:${port}/api/rest/vault/vaultQuery")
     client.getFuture(
       "/api/rest/vault/vaultQuery",
       headers = mapOf("Accept" to "application/json; charset=utf8")
@@ -800,7 +800,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun `should query the vault for a specific type`(context: TestContext) {
     val async = context.async()
 
-    log.info("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
+    log.trace("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
     client.getFuture(
       "/api/rest/vault/vaultQuery", headers = mapOf(
         "Accept" to "application/json; charset=utf8",
@@ -850,7 +850,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   "contractStateType" : "net.corda.core.contracts.ContractState"
 }
 """
-    log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
+    log.trace("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.postFuture(
       "/api/rest/vault/vaultQueryBy",
       body = json,
@@ -860,14 +860,14 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->
         vertxAssertThat(context, nodes, notNullValue())
-        println(nodes.encodePrettily())
+//        println(nodes.encodePrettily())
         async.complete()
       }
       .catch(context::fail)
   }
 
   @Test
-  fun `should serialize various query`(context: TestContext) {
+  fun `should serialize various query`() {
     val generalCriteria = VaultQueryCriteria(Vault.StateStatus.ALL)
     val currencyIndex = CashSchemaV1.PersistentCashState::currency.equal("GBP")
     val quantityIndex = CashSchemaV1.PersistentCashState::pennies.greaterThanOrEqual(0L)
@@ -879,10 +879,10 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       .and(customCriteria1)
       .and(customCriteria2)
 
-    val query = VaultQuery(criteria, contractStateType = Cash.State::class.java)
+    VaultQuery(criteria, contractStateType = Cash.State::class.java)
 
-    val json = Json.encodePrettily(query)
-    println(json)
+//    val json = Json.encodePrettily(query)
+//    println(json)
   }
 
   @Test
@@ -936,7 +936,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   "contractStateType" : "net.corda.finance.contracts.asset.Cash${'$'}State"
 }"""
 
-    log.info("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
+    log.trace("calling post: https://localhost:${port}/api/rest/vault/vaultQueryBy")
     client.postFuture(
       "/api/rest/vault/vaultQueryBy",
       body = json,
@@ -956,7 +956,6 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun `should issue obligation`(context: TestContext) {
     val async = context.async()
     getNotary().map {
-      val notary = it
       val json = """
 {
   "amount": {
@@ -973,7 +972,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
 
       val path =
         "/api/rest/cordapps/kotlin-source/flows/net.corda.examples.obligation.flows.IssueObligation\$Initiator"
-      log.info("calling post: https://localhost:$port$path")
+      log.trace("calling post: https://localhost:$port$path")
 
       client.postFuture(
         path,
@@ -983,7 +982,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       )
         .compose { it.body<JsonObject>() }
         .onSuccess { reply ->
-          log.info("reply:" + reply.encodePrettily())
+          log.trace("reply:" + reply.encodePrettily())
           context.assertThat(reply, notNullValue())
           context.assertThat(reply.getJsonObject("stx"), notNullValue())
           context.assertThat(reply.getJsonObject("recipient"), notNullValue())

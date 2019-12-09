@@ -69,7 +69,7 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       httpResponse.bodyHandler { buffer ->
         try {
           val s = buffer.toString()
-          val jo = JsonObject(s)
+          JsonObject(s)
         } catch (err: Throwable) {
           context.fail(err)
         }
@@ -365,8 +365,8 @@ abstract class AbstractRestMounterTest(openApiVersion: Int = 2) {
       .handler { response ->
         context.assertEquals(200, response.statusCode())
         response.bodyHandler { buffer ->
-          val result = Json.decodeValue(buffer.toString(), Map::class.java)
-          context.assertEquals(expected, result)
+          val decoded = Json.decodeValue(buffer.toString(), Map::class.java)
+          context.assertEquals(expected, decoded)
           async1.complete()
         }
       }

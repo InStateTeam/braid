@@ -185,7 +185,7 @@ class BraidClientTest {
         exception = it
         async.complete()
       }, {
-        println("stream completed")
+//        println("stream completed")
       })
     async.await()
     if (!subscription.isUnsubscribed) {

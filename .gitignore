@@ -17,3 +17,8 @@ node_modules/
 target
 **/dependency-reduced-pom.xml
 **/.node
+.classpath
+.project
+.settings
+*/bin/main
+*/bin/test

@@ -93,8 +93,8 @@ class MixinModelConverterV3Test {
 
   @Test
   fun `should generate dog with correct all of reference`() {
-    val dog = schemas?.get("Dog") as ComposedSchema
-    assertThat(dog?.allOf.get(0).`$ref`, containsString("components"))
+    val dog = schemas?.get("Dog") as ComposedSchema? ?: error("did not find Dog")
+    assertThat(dog.allOf[0]?.`$ref`, containsString("components"))
   }
 
   @Test
