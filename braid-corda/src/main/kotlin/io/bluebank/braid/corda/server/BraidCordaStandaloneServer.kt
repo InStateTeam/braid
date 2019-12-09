@@ -89,6 +89,7 @@ open class BraidCordaStandaloneServer(
     fun withWho(braidConfig: BraidConfig): BraidConfig
 
     val authSchema: AuthSchema
+    val isAuth: Boolean
     val authConstructor: ((Vertx) -> AuthProvider)?
   }
 
@@ -144,6 +145,8 @@ open class BraidCordaStandaloneServer(
 
     override val authSchema: AuthSchema
       get() = AuthSchema.None
+    override val isAuth: Boolean
+      get() = false
     override val authConstructor: ((Vertx) -> AuthProvider)?
       get() = null
   }
@@ -188,6 +191,8 @@ open class BraidCordaStandaloneServer(
 
     override val authSchema: AuthSchema
       get() = AuthSchema.Token
+    override val isAuth: Boolean
+      get() = true
     override val authConstructor: ((Vertx) -> AuthProvider)?
       get() = braidAuth::authConstructor
   }
@@ -264,7 +269,7 @@ open class BraidCordaStandaloneServer(
       val tracker = ProgressTrackerManager()
       val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
       log.info("registering: $path")
-      post(path, FlowInitiator(cordaServicesAdapter,tracker).getInitiator(flowClass))
+      post(path, FlowInitiator(cordaServicesAdapter,tracker,who.isAuth).getInitiator(flowClass))
       get(path + "/progress-tracker", TrackerHandler(tracker)::handle)
     } catch (e: Throwable) {
       log.warn("unable to register flow:${flowClass.java.name}", e);
