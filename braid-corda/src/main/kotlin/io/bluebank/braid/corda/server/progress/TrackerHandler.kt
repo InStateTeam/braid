@@ -15,24 +15,21 @@
  */
 package io.bluebank.braid.corda.server.progress
 
-import io.bluebank.braid.core.http.end
+import io.bluebank.braid.corda.server.flow.FlowInitiator
 import io.bluebank.braid.core.logging.loggerFor
-import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
-import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.models.parameters.HeaderParameter
+import io.vertx.core.eventbus.EventBus
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.json.Json
 import io.vertx.ext.web.RoutingContext
-import javax.ws.rs.HeaderParam
 import javax.ws.rs.core.MediaType
 
-class TrackerHandler(private val tracker: ProgressTrackerManager) {
+class TrackerHandler(private val eventBus: EventBus) {
 
   companion object {
     var log = loggerFor<TrackerHandler>()
@@ -45,7 +42,7 @@ class TrackerHandler(private val tracker: ProgressTrackerManager) {
     responses = [ApiResponse(
       content = arrayOf(
                 Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = Schema(implementation = Progress::class))))]
+                    schema = Schema(implementation = ProgressNotification::class))))]
   )
   fun handle(ctx: RoutingContext) {
     ctx.response()
@@ -55,12 +52,13 @@ class TrackerHandler(private val tracker: ProgressTrackerManager) {
       .putHeader("Pragma", "no-cache")
       .putHeader(HttpHeaders.EXPIRES, "0")
 
-    val flowProgress = tracker.subscribe{
-      ctx.response().write(Json.encode(it))
+    val flowProgress = eventBus.consumer<String>(FlowInitiator.TOPIC){
+      log.trace(it.body())
+      ctx.response().write(it.body())
     }
 
     ctx.response().closeHandler{
-      flowProgress.unsubscribe()
+      flowProgress.unregister()
       ctx.response().end();   // not sure if this is needed
     }
   }

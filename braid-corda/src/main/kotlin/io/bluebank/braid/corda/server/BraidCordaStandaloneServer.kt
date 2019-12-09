@@ -21,7 +21,6 @@ import io.bluebank.braid.corda.rest.AuthSchema
 import io.bluebank.braid.corda.rest.RestConfig
 import io.bluebank.braid.corda.rest.RestMounter
 import io.bluebank.braid.corda.server.flow.FlowInitiator
-import io.bluebank.braid.corda.server.progress.ProgressTrackerManager
 import io.bluebank.braid.corda.server.progress.TrackerHandler
 import io.bluebank.braid.corda.server.rpc.RPCConnections
 import io.bluebank.braid.corda.server.rpc.RPCConnectionsAuth
@@ -89,6 +88,7 @@ open class BraidCordaStandaloneServer(
     fun withWho(braidConfig: BraidConfig): BraidConfig
 
     val authSchema: AuthSchema
+    val isAuth: Boolean
     val authConstructor: ((Vertx) -> AuthProvider)?
   }
 
@@ -144,6 +144,8 @@ open class BraidCordaStandaloneServer(
 
     override val authSchema: AuthSchema
       get() = AuthSchema.None
+    override val isAuth: Boolean
+      get() = false
     override val authConstructor: ((Vertx) -> AuthProvider)?
       get() = null
   }
@@ -188,6 +190,8 @@ open class BraidCordaStandaloneServer(
 
     override val authSchema: AuthSchema
       get() = AuthSchema.Token
+    override val isAuth: Boolean
+      get() = true
     override val authConstructor: ((Vertx) -> AuthProvider)?
       get() = braidAuth::authConstructor
   }
@@ -243,6 +247,7 @@ open class BraidCordaStandaloneServer(
           }
           group("cordapps") {
             get("/cordapps", cordappsScanner::cordapps)
+            get("/cordapps/progress-tracker", TrackerHandler(vertx.eventBus())::handle)
             get("/cordapps/:cordapp/flows", cordappsScanner::flowsForCordapp)
             try {
               cordappsScanner.flowClassesByCordapp.forEach { (cordapp, flowClass) ->
@@ -261,11 +266,9 @@ open class BraidCordaStandaloneServer(
 
   private fun RestMounter.addFlow(cordapp: String, flowClass: KClass<out Any>, cordaServicesAdapter: KFunction1<User?, CordaServicesAdapter>) {
     try {
-      val tracker = ProgressTrackerManager()
       val path = "/cordapps/$cordapp/flows/${flowClass.java.name}"
       log.info("registering: $path")
-      post(path, FlowInitiator(cordaServicesAdapter,tracker).getInitiator(flowClass))
-      get(path + "/progress-tracker", TrackerHandler(tracker)::handle)
+      post(path, FlowInitiator(cordaServicesAdapter, vertx.eventBus(), who.isAuth).getInitiator(flowClass))
     } catch (e: Throwable) {
       log.warn("unable to register flow:${flowClass.java.name}", e);
     }
