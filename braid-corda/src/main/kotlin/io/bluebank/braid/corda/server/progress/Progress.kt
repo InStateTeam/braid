@@ -17,12 +17,23 @@ package io.bluebank.braid.corda.server.progress
 
 data class Progress (
   val invocationId: String = "",
-  val step: String = ""
+  val step: String? = null,
+  val error: Throwable? = null,
+  val complete: Boolean = false
 ) {
   fun withInvocationId(invocationId:String):Progress{
     return copy(invocationId = invocationId)
   }
-  fun withStep(step:String):Progress{
+
+  fun withStep(step:String?):Progress{
     return copy(step = step)
+  }
+
+  fun withError(error:Throwable?):Progress{
+    return copy(error = error)
+  }
+
+  fun withComplete(complete:Boolean):Progress{
+    return copy(complete = complete)
   }
 }

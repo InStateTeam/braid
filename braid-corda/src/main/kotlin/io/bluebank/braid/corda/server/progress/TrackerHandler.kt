@@ -15,6 +15,7 @@
  */
 package io.bluebank.braid.corda.server.progress
 
+import io.bluebank.braid.core.http.end
 import io.bluebank.braid.core.logging.loggerFor
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.v3.oas.annotations.Operation
@@ -46,40 +47,22 @@ class TrackerHandler(private val tracker: ProgressTrackerManager) {
                 Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = Schema(implementation = Progress::class))))]
   )
-  fun invoke(ctx: RoutingContext) {
-    val invocationId = ctx.request().getHeader("invocation-id")
-    val flowProgress = tracker.get(invocationId)
-
-    when (flowProgress) {
-      null -> replyNotFound(ctx)
-      else -> {
-        ctx.response()
-          .setChunked(true)
-          .putHeader("Content-Type","application/json; charset=utf-8")
-          .putHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
-          .putHeader("Pragma", "no-cache")
-          .putHeader(HttpHeaders.EXPIRES, "0")
-
-        flowProgress.progress.subscribe(
-          { ctx.response().write(Json.encode(Progress().withInvocationId(invocationId).withStep(it))) },
-          { replyWithError(it, ctx) },
-          { ctx.response().end() }
-        )
-      }
-    }
-  }
-
-  private fun replyWithError(it: Throwable?, ctx: RoutingContext) {
-    log.error("Error from flow progress:", it);
+  fun handle(ctx: RoutingContext) {
     ctx.response()
-      .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-      .end()
-  }
+      .setChunked(true)
+      .putHeader("Content-Type","application/json; charset=utf-8")
+      .putHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+      .putHeader("Pragma", "no-cache")
+      .putHeader(HttpHeaders.EXPIRES, "0")
 
-  private fun replyNotFound(context: RoutingContext) {
-    context.response()
-      .setStatusCode(HttpResponseStatus.NOT_FOUND.code())
-      .end()
+    val flowProgress = tracker.subscribe{
+      ctx.response().write(Json.encode(it))
+    }
+
+    ctx.response().closeHandler{
+      flowProgress.unsubscribe()
+      ctx.response().end();   // not sure if this is needed
+    }
   }
 
 }
