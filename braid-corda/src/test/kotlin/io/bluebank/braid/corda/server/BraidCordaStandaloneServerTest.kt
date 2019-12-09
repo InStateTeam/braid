@@ -664,10 +664,17 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
   fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
     val async = context.async()
 
-    val tracker =  subscribeToTracker()
+    val tracker =  client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    ).compose {
+      context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
+      val future = Future.future<Buffer>()
+      it.handler{buffer -> future.complete(buffer) }
+      future
+    }
     
     getNotary()
-      .compose { notary -> tracker.map(notary)  }
       .compose { notary ->
         val json = JsonObject()
           .put("notary", notary)
@@ -693,16 +700,10 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
 
         tracker
       }
-      .compose {
-        context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
-        val future = Future.future<Buffer>()
-        it.handler{buffer -> future.complete(buffer) }
-        future
-      }
       .map{ buffer ->
         log.info("progress tracker 1st reply:" + buffer.toString())
         val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
-       // context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
+        context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
         context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
         progress
       }
