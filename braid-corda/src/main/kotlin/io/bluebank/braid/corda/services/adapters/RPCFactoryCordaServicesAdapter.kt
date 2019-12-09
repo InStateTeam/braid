@@ -22,6 +22,7 @@ import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.core.messaging.DataFeed
 import net.corda.core.messaging.FlowHandle
+import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.NetworkMapCache
 import net.corda.core.utilities.NetworkHostAndPort
@@ -35,6 +36,10 @@ class RPCFactoryCordaServicesAdapter(
     vararg args: Any?
   ): FlowHandle<T> {
     return delegate.startFlowDynamic(logicType, *args)
+  }
+
+  override fun <T> startTrackedFlowDynamic(logicType: Class<out FlowLogic<T>>, vararg args: Any?): FlowProgressHandle<T> {
+    return delegate.startTrackedFlowDynamic(logicType, *args)
   }
 
   override fun networkMapSnapshot(): List<NodeInfo> {

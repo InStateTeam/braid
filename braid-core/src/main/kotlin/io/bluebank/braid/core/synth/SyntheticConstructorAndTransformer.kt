@@ -105,7 +105,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   override val isSuspend: Boolean = false
 
   override fun call(vararg args: Any?): R {
-    assert(args.size == additionalParams.size + 1 && args.all { it != null }) { "there should be only one non null parameter but instead got $args" }
+    assert(args.size == additionalParams.size + 1) { "expecting ${additionalParams.size + 1} args but got ${args.size}" }
     @Suppress("UNCHECKED_CAST") val nonNullArgs = args as Array<Any>
     return invoke(*nonNullArgs)
   }

@@ -30,6 +30,8 @@ import net.corda.testing.node.User
  to speed up the
   */
 
+// CordaStandalonekt
+
 fun main(args: Array<String>) {
   // provide a list of cordaApp jars  including obligsation
 

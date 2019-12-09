@@ -19,13 +19,11 @@ import io.bluebank.braid.corda.rest.Paths
 import io.bluebank.braid.corda.rest.docs.javaTypeIncludingSynthetics
 import io.bluebank.braid.corda.rest.parameterName
 import io.swagger.v3.oas.models.media.Content
-import io.swagger.v3.oas.models.parameters.Parameter
-import io.swagger.v3.oas.models.parameters.PathParameter
-import io.swagger.v3.oas.models.parameters.QueryParameter
-import io.swagger.v3.oas.models.parameters.RequestBody
+import io.swagger.v3.oas.models.parameters.*
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpMethod.*
 import java.lang.reflect.Type
+import javax.ws.rs.HeaderParam
 import javax.ws.rs.QueryParam
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
@@ -64,14 +62,18 @@ class KEndPointV3(
         ?: error("could not bind path parameter with name $paramName")
     }
     .toList()
+  
+  private val headerParams = parameters
+    .subtract(pathParams)
+    .filter { it.findAnnotation<HeaderParam>() != null }
 
   private val bodyParameter: KParameter? =
     when (method) {
       GET, HEAD, DELETE, CONNECT, OPTIONS -> null // can't have body parameters for this - everything that's not a path param, gets bound as query parameter
-      else -> parameters.subtract(pathParams).lastOrNull { it.findAnnotation<QueryParam>() == null }
+      else -> parameters.subtract(pathParams).subtract(headerParams).lastOrNull { it.findAnnotation<QueryParam>() == null }
     }
 
-  private val queryParams = parameters.subtract(pathParams).let {
+  private val queryParams = parameters.subtract(pathParams).subtract(headerParams).let {
     when (bodyParameter) {
       null -> it - contextParameters
       else -> it - contextParameters - bodyParameter
@@ -81,7 +83,7 @@ class KEndPointV3(
   override val parameterTypes: List<Type>
     get() = parameters.map { it.type.javaTypeIncludingSynthetics() }
 
-  override fun mapPathParameters(): List<Parameter> {
+  override fun mapPathParameters(): List<PathParameter> {
     return pathParams.map { param ->
       val swaggerProperty = param.type.getSwaggerProperty()
       val p = PathParameter()
@@ -94,11 +96,12 @@ class KEndPointV3(
       //  applyDefaultValueAnnotation(param, p)
       //  applyApiParamDocs(param, p)
       //  applyRequiredAndVarArg(param, p)
-      p
+      p as PathParameter
     }
   }
 
-  override fun mapQueryParameters(): List<Parameter> {
+
+  override fun mapQueryParameters(): List<QueryParameter> {
     return queryParams.map { param ->
       val q = QueryParameter()
         .name(param.parameterName())
@@ -108,10 +111,23 @@ class KEndPointV3(
 //      applyDefaultValueAnnotation(param, q)
 //      applyApiParamDocs(param, q)
 //      applyRequiredAndVarArg(param, q)
-      q
+      q as QueryParameter
     }
   }
 
+  override fun mapHeaderParameters(): List<HeaderParameter> {
+    return headerParams.map { param ->
+      val q = HeaderParameter()
+        .name(param.parameterName())
+        .schema(param.type.getSwaggerProperty().schema)
+
+      // todo convert to V3
+//      applyDefaultValueAnnotation(param, q)
+//      applyApiParamDocs(param, q)
+//      applyRequiredAndVarArg(param, q)
+      q as HeaderParameter
+    }
+  }
 // todo convert to V3
 // private fun <T : Parameter> applyDefaultValueAnnotation(
 //    param: KParameter,

@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.bluebank.braid.corda.services
+package io.bluebank.braid.corda.server.rpc
 
-import net.corda.core.flows.FlowLogic
-import net.corda.core.messaging.FlowHandle
-import net.corda.core.messaging.FlowProgressHandle
+import javax.ws.rs.HeaderParam
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.declaredFunctions
 
-/**
- * interface for starting a flow either within the node or via Corda RPC
- */
-interface FlowStarterAdapter {
-  fun <T> startFlowDynamic(
-    logicType: Class<out FlowLogic<T>>,
-    vararg args: Any?
-  ): FlowHandle<T>
+class RPCInvocationParameter {
+  companion object {
+    fun invocationId(): KParameter {
+      val template = RPCInvocationParameter::class.declaredFunctions.iterator().next()
+      return template.parameters.get(1)
+    }
+  }
 
-  fun <T> startTrackedFlowDynamic(
-    logicType: Class<out FlowLogic<T>>,
-    vararg args: Any?
-  ): FlowProgressHandle<T>
+  fun template(@HeaderParam("invocation-id")
+               invocationId: String?) {
+  }
 }

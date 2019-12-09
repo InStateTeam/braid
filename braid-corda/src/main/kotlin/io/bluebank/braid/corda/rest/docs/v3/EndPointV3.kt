@@ -26,8 +26,7 @@ import io.swagger.v3.core.converter.ResolvedSchema
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.Schema
-import io.swagger.v3.oas.models.parameters.Parameter
-import io.swagger.v3.oas.models.parameters.RequestBody
+import io.swagger.v3.oas.models.parameters.*
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import io.swagger.v3.oas.models.security.SecurityRequirement
@@ -145,14 +144,26 @@ abstract class EndPointV3(
   }
 
   protected abstract fun mapBodyParameter(): RequestBody?
-  protected abstract fun mapQueryParameters(): List<Parameter>
-  protected abstract fun mapPathParameters(): List<Parameter>
+  protected abstract fun mapQueryParameters(): List<QueryParameter>
+  protected abstract fun mapHeaderParameters(): List<HeaderParameter>
+  protected abstract fun mapPathParameters(): List<PathParameter>
 
   protected open fun toSwaggerParams(): List<Parameter> {
-    val pathParams = mapPathParameters()
-    val queryParams = mapQueryParameters()
-    return pathParams + queryParams
+    return mapPathParameters() + mapQueryParameters() + mapHeaderParameters() + annotatedParameters()
   }
+
+  private fun annotatedParameters(): List<Parameter> =
+    apiOperation?.parameters?.map { p ->
+      Parameter()
+        .name(p.name)
+        .description(p.description)
+        .`$ref`(p.ref)
+        // .examples(p.examples)    todo
+        .required(p.required)
+        .deprecated(p.deprecated)
+        .allowEmptyValue(p.allowEmptyValue)
+    } ?: emptyArray<Parameter>().toList()
+
 
   protected fun KType.getSwaggerProperty(): ResolvedSchema {
     return getKType().javaTypeIncludingSynthetics().getSwaggerProperty()
@@ -174,17 +185,17 @@ abstract class EndPointV3(
         .content(
           Content()
             .addMediaType(
-                returnType(type),
+              returnType(type),
               io.swagger.v3.oas.models.media.MediaType().schema(responseSchema.schema)
             )
         )
     }
   }
 
-  private fun returnType(type:Type): String {
-    return when{
+  private fun returnType(type: Type): String {
+    return when {
       type.isBinary() -> MediaType.APPLICATION_OCTET_STREAM
-      String::class.java.equals(type)-> MediaType.TEXT_PLAIN
+      String::class.java.equals(type) -> MediaType.TEXT_PLAIN
       else -> MediaType.APPLICATION_JSON
     }
   }
