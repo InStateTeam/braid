@@ -710,74 +710,7 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       .onSuccess { async.complete() }
       .catch(context::fail)
   }
-
-  private fun subscribeToTracker(): Future<HttpClientResponse> {
-    return client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
-      headers = mapOf("Accept" to "application/json; charset=utf8")
-        .addBearerToken(loginToken))
-  }
-
-//
-//  private fun subscribeToTracker(): Future<HttpClientResponse> {
-//    return client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
-//      headers = mapOf("Accept" to "application/json; charset=utf8")
-//        .addBearerToken(loginToken))
-//  }
-//
-//
-//  @Test
-//  fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
-//    val async = context.async()
-//
-//    val tracker = AtomicReference<HttpClientResponse>()
-//
-//    subscribeToTracker()
-//      .compose { subscribed ->
-//        tracker.set(subscribed)
-//        getNotary()
-//      }
-//      .compose { notary ->
-//        val json = JsonObject()
-//          .put("notary", notary)
-//          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
-//          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
-//        val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
-//        log.info("calling post: https://localhost:$port$path")
-//        val encodePrettily = json.encodePrettily()
-//        client.postFuture(path,
-//          mapOf("Accept" to "application/json; charset=utf8",
-//            "Content-length" to "${encodePrettily.length}",
-//            "invocation-id" to "123")
-//            .addBearerToken(loginToken)
-//          ,
-//          body = encodePrettily)
-//      }
-//      .compose { it.body<JsonObject>() }
-//      .map { reply ->
-//        log.info("reply:" + reply.encodePrettily())
-//        context.assertThat(reply, notNullValue())
-//        context.assertThat(reply.getJsonObject("stx"), notNullValue())
-//        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
-//
-//        tracker.get()
-//      }
-//      .compose {
-//        context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
-//        val future = Future.future<Buffer>()
-//        it.handler { buffer -> future.complete(buffer) }
-//        future
-//      }
-//      .onSuccess { buffer ->
-//        log.info("progress tracker 1st reply:" + buffer.toString())
-//        val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
-//        context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
-//        context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
-//        async.complete()
-//      }
-//      .catch(context::fail)
-//  }
-//
-
+  
   @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
     val async = context.async()
