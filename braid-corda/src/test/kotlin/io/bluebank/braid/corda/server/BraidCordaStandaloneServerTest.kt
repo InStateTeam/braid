@@ -36,6 +36,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpClient
 import io.vertx.core.http.HttpClientOptions
+import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -77,6 +78,7 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicReference
 import javax.ws.rs.core.Response
 import kotlin.test.assertEquals
 
@@ -658,11 +660,20 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
       .catch(context::fail)
   }
 
-
   @Test
   fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
     val async = context.async()
 
+    val tracker =  client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken)
+    ).compose {
+      context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
+      val future = Future.future<Buffer>()
+      it.handler{buffer -> future.complete(buffer) }
+      future
+    }
+    
     getNotary()
       .compose { notary ->
         val json = JsonObject()
@@ -687,27 +698,85 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
         context.assertThat(reply.getJsonObject("stx"), notNullValue())
         context.assertThat(reply.getJsonObject("recipient"), notNullValue())
 
-        client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
-          headers = mapOf("Accept" to "application/json; charset=utf8",
-            "invocation-id" to "123")
-            .addBearerToken(loginToken)
-        )
+        tracker
       }
-      .compose {
-        context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
-        val future = Future.future<Buffer>()
-        it.handler{buffer -> future.complete(buffer) }
-        future
-      }
-      .onSuccess { buffer ->
+      .map{ buffer ->
         log.info("progress tracker 1st reply:" + buffer.toString())
         val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
         context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
         context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
+        progress
       }
       .onSuccess { async.complete() }
       .catch(context::fail)
   }
+
+  private fun subscribeToTracker(): Future<HttpClientResponse> {
+    return client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+      headers = mapOf("Accept" to "application/json; charset=utf8")
+        .addBearerToken(loginToken))
+  }
+
+//
+//  private fun subscribeToTracker(): Future<HttpClientResponse> {
+//    return client.getFuture("/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker",
+//      headers = mapOf("Accept" to "application/json; charset=utf8")
+//        .addBearerToken(loginToken))
+//  }
+//
+//
+//  @Test
+//  fun `should Start a CashIssueFlow with ProgressTracker`(context: TestContext) {
+//    val async = context.async()
+//
+//    val tracker = AtomicReference<HttpClientResponse>()
+//
+//    subscribeToTracker()
+//      .compose { subscribed ->
+//        tracker.set(subscribed)
+//        getNotary()
+//      }
+//      .compose { notary ->
+//        val json = JsonObject()
+//          .put("notary", notary)
+//          .put("amount", JsonObject(Json.encode(AMOUNT(10.00, Currency.getInstance("GBP")))))
+//          .put("issuerBankPartyRef", JsonObject().put("bytes", "AABBCC"))
+//        val path = "/api/rest/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow"
+//        log.info("calling post: https://localhost:$port$path")
+//        val encodePrettily = json.encodePrettily()
+//        client.postFuture(path,
+//          mapOf("Accept" to "application/json; charset=utf8",
+//            "Content-length" to "${encodePrettily.length}",
+//            "invocation-id" to "123")
+//            .addBearerToken(loginToken)
+//          ,
+//          body = encodePrettily)
+//      }
+//      .compose { it.body<JsonObject>() }
+//      .map { reply ->
+//        log.info("reply:" + reply.encodePrettily())
+//        context.assertThat(reply, notNullValue())
+//        context.assertThat(reply.getJsonObject("stx"), notNullValue())
+//        context.assertThat(reply.getJsonObject("recipient"), notNullValue())
+//
+//        tracker.get()
+//      }
+//      .compose {
+//        context.assertThat(it.statusCode(), `is`(200), "expecting to find progress tracker")
+//        val future = Future.future<Buffer>()
+//        it.handler { buffer -> future.complete(buffer) }
+//        future
+//      }
+//      .onSuccess { buffer ->
+//        log.info("progress tracker 1st reply:" + buffer.toString())
+//        val progress = Json.decodeValue(buffer.toString(), Progress::class.java)
+//        context.assertThat(progress.step, equalTo("Starting"), "expecting to find string step status")
+//        context.assertThat(progress.invocationId, equalTo("123"), "expecting to find invocation id")
+//        async.complete()
+//      }
+//      .catch(context::fail)
+//  }
+//
 
   @Test
   fun shouldReplyWithDecentErrorOnBadJson(context: TestContext) {
@@ -803,9 +872,9 @@ open class SuiteClassStandaloneServerEither(private val setup: BraidCordaStandal
     log.trace("calling get: https://localhost:${port}/api/rest/vault/vaultQuery?contract-state-type=" + ContractState::class.java.name)
     client.getFuture(
       "/api/rest/vault/vaultQuery", headers = mapOf(
-        "Accept" to "application/json; charset=utf8",
-        "contract-state-type" to ContractState::class.java.name
-      ).addBearerToken(loginToken)
+      "Accept" to "application/json; charset=utf8",
+      "contract-state-type" to ContractState::class.java.name
+    ).addBearerToken(loginToken)
     )
       .compose { it.body<JsonObject>() }
       .onSuccess { nodes ->

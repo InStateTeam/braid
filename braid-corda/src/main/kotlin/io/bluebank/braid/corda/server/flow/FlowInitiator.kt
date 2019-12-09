@@ -36,8 +36,7 @@ import kotlin.reflect.KClass
 
 class FlowInitiator(
   private val getFlowStarter: (User?) -> FlowStarterAdapter,
-  private val tracker: ProgressTrackerManager,
-  private val isAuth: Boolean = true
+  private val tracker: ProgressTrackerManager
 ) {
 
   private val log = loggerFor<FlowInitiator>()
@@ -69,8 +68,8 @@ class FlowInitiator(
       // and return a Future
 
       // because of additionalParams above, expect this extra `user` parameter at run-time
-      val user: User? = parameters.first() as User?
-      val invocationId: String? = parameters.get(1) as String?
+      val user = parameters.first() as User?
+      val invocationId = parameters.get(1) as String?
 
       // drop the user parameter, and filter out the ProgressTracker if there is one
       val excludeProgressTracker = parameters

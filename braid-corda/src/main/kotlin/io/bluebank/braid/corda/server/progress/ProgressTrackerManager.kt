@@ -16,15 +16,47 @@
 package io.bluebank.braid.corda.server.progress
 
 import net.corda.core.messaging.FlowProgressHandle
+import rx.Observer
+import rx.Subscription
 
 class ProgressTrackerManager {
-  val trackers: MutableMap<String, FlowProgressHandle<*>> = HashMap()
+  private val trackers: MutableMap<String, FlowProgressHandle<*>> = HashMap()
+  private val subscribers: MutableList<(Progress) -> Unit> = ArrayList()
 
-  fun get(invocationId: String): FlowProgressHandle<*>? {
-    return trackers.get(invocationId)
-  }
 
   fun put(invocationId: String, tracker: FlowProgressHandle<*>) {
     trackers.put(invocationId, tracker)
+    tracker.progress.subscribe(MyObserver(subscribers, invocationId))
   }
+
+  fun subscribe(onNext: (Progress) -> Unit): Subscription {
+    subscribers.add(onNext);
+    return MySubscription(subscribers,onNext)
+  }
+
+  private class MyObserver(val subscribers: List<(Progress) -> Unit>, val invocationId: String) : Observer<String>{
+    override fun onError(error: Throwable?) {
+      subscribers.forEach{ it.invoke(Progress().withInvocationId(invocationId).withError(error))}
+    }
+
+    override fun onNext(step: String?) {
+      subscribers.forEach{ it.invoke(Progress().withInvocationId(invocationId).withStep(step)) }
+    }
+
+    override fun onCompleted() {
+      subscribers.forEach{ it.invoke(Progress().withInvocationId(invocationId).withComplete(true)) }
+    }
+  }
+
+  private class MySubscription(val subscribers: MutableList<(Progress) -> Unit>, val onNext: (Progress) -> Unit) : Subscription{
+    override fun isUnsubscribed(): Boolean {
+      return !subscribers.contains { onNext }
+    }
+
+    override fun unsubscribe() {
+      subscribers.remove(onNext)
+    }
+
+  }
+
 }
