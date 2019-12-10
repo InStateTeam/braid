@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.vertx.core.eventbus.EventBus
@@ -39,9 +40,16 @@ class TrackerHandler(private val eventBus: EventBus) {
     description = "Connect to the Progress Tracker. " +
       "This call will return chunked responses of all progress trackers",
     responses = [ApiResponse(
+      
       content = arrayOf(
                 Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = Schema(implementation = ProgressNotification::class))))]
+                    schema = Schema(implementation = ProgressNotification::class),
+                 examples =  [
+                   ExampleObject(name = "boo", value = "exampleError",
+                     summary = "example of an error", externalValue = "{  error:\"anError\" }")
+                 ]
+                )))
+    ]
   )
   fun handle(ctx: RoutingContext) {
     ctx.response()

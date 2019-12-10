@@ -113,12 +113,17 @@ class ImplicitParamsEndPointV3(
 
   private fun io.swagger.v3.oas.annotations.media.Content.toModel(): Content {
     return Content()
-      .addMediaType(this.mediaType, MediaType().schema(this.schema.toModel()))
+      .addMediaType(this.mediaType,
+        MediaType()
+        .schema(this.schema.toModel())
+        
+
+      )
   }
 
   private fun io.swagger.v3.oas.annotations.media.Schema.toModel(): Schema<*> {
     return Schema<Any>()
-
+      .name(this.name)
   }
 
   private fun io.swagger.v3.oas.annotations.Parameter.toModel(): Parameter {

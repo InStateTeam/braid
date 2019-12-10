@@ -26,7 +26,6 @@ import io.bluebank.braid.core.synth.createAnnotationProxy
 import io.bluebank.braid.core.synth.preferredConstructor
 import io.bluebank.braid.core.synth.trampoline
 import io.vertx.core.Future
-import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
 import io.vertx.ext.auth.User
@@ -88,7 +87,7 @@ class FlowInitiator(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
       )
-      val notification = ProgressNotification().withInvocationId(invocationId)
+      val notification = ProgressNotification().withInvocationId(invocationId).withFlowClass(kClass.java)
       flowProgress.progress.subscribe ( 
         { step -> eventBus.publish(TOPIC, Json.encode(notification.withStep(step))) },
         { error -> eventBus.publish(TOPIC, Json.encode(notification.withError(error)))},

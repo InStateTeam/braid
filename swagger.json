@@ -62,7 +62,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/network/nodes/self" : {
@@ -102,7 +105,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/network/notaries" : {
@@ -151,7 +157,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/vault/vaultQuery" : {
@@ -197,7 +206,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/vault/vaultQueryBy" : {
@@ -205,15 +217,20 @@
         "tags" : [ "vault" ],
         "description" : "Queries the vault",
         "operationId" : "vault_vaultQueryBy",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "vault",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/io.bluebank.braid.corda.services.vault.VaultQuery"
+          }
+        } ],
         "requestBody" : {
-          "description" : "vault",
+          "description" : "user",
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/io.bluebank.braid.corda.services.vault.VaultQuery"
-              },
-              "example" : ""
+                "$ref" : "#/components/schemas/io.vertx.ext.auth.User"
+              }
             }
           },
           "required" : true
@@ -249,7 +266,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps" : {
@@ -292,7 +312,53 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
+      }
+    },
+    "/cordapps/progress-tracker" : {
+      "get" : {
+        "tags" : [ "cordapps" ],
+        "description" : "Connect to the Progress Tracker. This call will return chunked responses of all progress trackers",
+        "operationId" : "cordapps_progress_tracker",
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.progress.ProgressNotification"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "the server failed to parse the request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InvocationError"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "the request could not be processed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InvocationError"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps/{cordapp}/flows" : {
@@ -342,7 +408,10 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow" : {
@@ -399,54 +468,10 @@
               }
             }
           }
-        }
-      }
-    },
-    "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashExitFlow/progress-tracker" : {
-      "get" : {
-        "tags" : [ "cordapps" ],
-        "description" : "Connect to the Progress Tracker of a flow. This call will return chunked responses of all progress trackers for this flow",
-        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashExitFlow_progress_tracker",
-        "parameters" : [ {
-          "name" : "invocation-id",
-          "description" : "",
-          "required" : true,
-          "deprecated" : false,
-          "allowEmptyValue" : false,
-          "$ref" : "#/components/parameters/"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.progress.Progress"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "the server failed to parse the request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          },
-          "422" : {
-            "description" : "the request could not be processed",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueAndPaymentFlow" : {
@@ -503,54 +528,10 @@
               }
             }
           }
-        }
-      }
-    },
-    "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueAndPaymentFlow/progress-tracker" : {
-      "get" : {
-        "tags" : [ "cordapps" ],
-        "description" : "Connect to the Progress Tracker of a flow. This call will return chunked responses of all progress trackers for this flow",
-        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashIssueAndPaymentFlow_progress_tracker",
-        "parameters" : [ {
-          "name" : "invocation-id",
-          "description" : "",
-          "required" : true,
-          "deprecated" : false,
-          "allowEmptyValue" : false,
-          "$ref" : "#/components/parameters/"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.progress.Progress"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "the server failed to parse the request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          },
-          "422" : {
-            "description" : "the request could not be processed",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow" : {
@@ -607,54 +588,10 @@
               }
             }
           }
-        }
-      }
-    },
-    "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashIssueFlow/progress-tracker" : {
-      "get" : {
-        "tags" : [ "cordapps" ],
-        "description" : "Connect to the Progress Tracker of a flow. This call will return chunked responses of all progress trackers for this flow",
-        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashIssueFlow_progress_tracker",
-        "parameters" : [ {
-          "name" : "invocation-id",
-          "description" : "",
-          "required" : true,
-          "deprecated" : false,
-          "allowEmptyValue" : false,
-          "$ref" : "#/components/parameters/"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.progress.Progress"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "the server failed to parse the request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          },
-          "422" : {
-            "description" : "the request could not be processed",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InvocationError"
-                }
-              }
-            }
-          }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
     "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashPaymentFlow" : {
@@ -711,29 +648,36 @@
               }
             }
           }
-        }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        } ]
       }
     },
-    "/cordapps/corda-finance-workflows/flows/net.corda.finance.flows.CashPaymentFlow/progress-tracker" : {
-      "get" : {
-        "tags" : [ "cordapps" ],
-        "description" : "Connect to the Progress Tracker of a flow. This call will return chunked responses of all progress trackers for this flow",
-        "operationId" : "cordapps_corda_finance_workflows_flows_net.corda.finance.flows.CashPaymentFlow_progress_tracker",
-        "parameters" : [ {
-          "name" : "invocation-id",
-          "description" : "",
-          "required" : true,
-          "deprecated" : false,
-          "allowEmptyValue" : false,
-          "$ref" : "#/components/parameters/"
-        } ],
+    "/login" : {
+      "post" : {
+        "tags" : [ "" ],
+        "description" : "",
+        "operationId" : "login",
+        "parameters" : [ ],
+        "requestBody" : {
+          "description" : "request",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.rpc.LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
         "responses" : {
           "200" : {
             "description" : "",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/io.bluebank.braid.corda.server.progress.Progress"
+                  "type" : "string"
                 }
               }
             }
@@ -776,7 +720,8 @@
             "type" : "string",
             "description" : "the type of error"
           }
-        }
+        },
+        "description" : "Any errors returned by the Progress tracker observable"
       },
       "net.corda.core.context.Actor" : {
         "required" : [ "owningLegalIdentity" ],
@@ -3251,11 +3196,11 @@
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "untilTime" : {
+          "midpoint" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           },
-          "midpoint" : {
+          "untilTime" : {
             "type" : "string",
             "description" : "JSR310 encoded time representation of Instant"
           }
@@ -3426,11 +3371,11 @@
             "description" : "Base 58 Encoded Secure Hash",
             "example" : "GfHq2tTVk9z4eXgyUuofmR16H6j7srXt8BCyidKdrZL5JEwFqHgDSuiinbTE"
           },
-          "coreTransaction" : {
-            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
-          },
           "tx" : {
             "$ref" : "#/components/schemas/net.corda.core.transactions.WireTransaction"
+          },
+          "coreTransaction" : {
+            "$ref" : "#/components/schemas/net.corda.core.transactions.CoreTransaction"
           },
           "inputs" : {
             "type" : "array",
@@ -3970,6 +3915,17 @@
           }
         }
       },
+      "io.vertx.ext.auth.AuthProvider" : {
+        "type" : "object"
+      },
+      "io.vertx.ext.auth.User" : {
+        "type" : "object",
+        "properties" : {
+          "authProvider" : {
+            "$ref" : "#/components/schemas/io.vertx.ext.auth.AuthProvider"
+          }
+        }
+      },
       "net.corda.core.node.services.Vault_Page_net_corda_core_contracts_ContractState" : {
         "required" : [ "otherResults", "stateTypes", "states", "statesMetadata", "totalStatesAvailable" ],
         "type" : "object",
@@ -4022,6 +3978,36 @@
           }
         }
       },
+      "io.bluebank.braid.corda.server.progress.ProgressNotification" : {
+        "required" : [ "complete" ],
+        "type" : "object",
+        "properties" : {
+          "flowClass" : {
+            "type" : "string",
+            "description" : "Java class name",
+            "example" : "java.lang.Object"
+          },
+          "invocationId" : {
+            "type" : "string",
+            "description" : "The invocation-id header as supplied in the flow initiation post request",
+            "example" : "1234"
+          },
+          "step" : {
+            "type" : "string",
+            "description" : "The step name as defined by the flow",
+            "example" : "Starting,Done,Signing"
+          },
+          "error" : {
+            "$ref" : "#/components/schemas/InvocationError"
+          },
+          "complete" : {
+            "type" : "boolean",
+            "description" : "Indicates if the progress tracker for this flow invocation-id is completed",
+            "example" : false
+          }
+        },
+        "description" : "pet status in the store"
+      },
       "generated.net.corda.finance.flows.CashExitFlowPayload" : {
         "required" : [ "amount", "issuerRef" ],
         "type" : "object",
@@ -4031,18 +4017,6 @@
           },
           "issuerRef" : {
             "$ref" : "#/components/schemas/net.corda.core.utilities.OpaqueBytes"
-          }
-        }
-      },
-      "io.bluebank.braid.corda.server.progress.Progress" : {
-        "required" : [ "invocationId", "step" ],
-        "type" : "object",
-        "properties" : {
-          "invocationId" : {
-            "type" : "string"
-          },
-          "step" : {
-            "type" : "string"
           }
         }
       },
@@ -4106,6 +4080,29 @@
             "$ref" : "#/components/schemas/net.corda.core.identity.Party"
           }
         }
+      },
+      "io.bluebank.braid.corda.server.rpc.LoginRequest" : {
+        "required" : [ "password", "user" ],
+        "type" : "object",
+        "properties" : {
+          "user" : {
+            "type" : "string",
+            "description" : "user name",
+            "example" : "sa"
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "password",
+            "example" : "admin"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "Authorization" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
       }
     }
   }
