@@ -15,12 +15,29 @@
  */
 package io.bluebank.braid.corda.server.progress
 
+import io.swagger.v3.oas.annotations.media.Schema
+
+@Schema(description = "pet status in the store")
 data class ProgressNotification (
+  @Schema(description = "The flow class name", example = "net.corda.finance.flows.CashExitFlow")
+  val flowClass: Class<*>? = null,
+
+  @Schema(description = "The invocation-id header as supplied in the flow initiation post request", example = "1234")
   val invocationId: String? = null,
+
+  @Schema(description = "The step name as defined by the flow", example = "Starting,Done,Signing")
   val step: String? = null,
+
+  @Schema(description = "Any errors returned by the Progress tracker observable")
   val error: Throwable? = null,
+
+  @Schema(description = "Indicates if the progress tracker for this flow invocation-id is completed", example = "false")
   val complete: Boolean = false
 ) {
+  fun withFlowClass(flowClass: Class<out Any>):ProgressNotification{
+    return copy(flowClass = flowClass)
+  }
+
   fun withInvocationId(invocationId:String?):ProgressNotification{
     return copy(invocationId = invocationId)
   }

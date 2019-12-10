@@ -36,7 +36,7 @@ object PathsClassLoader {
         val urls = jarPaths.asSequence().map {
           urlOrFiles(it)
         }.flatMap { it.asSequence() }.toList().toTypedArray()
-        log.info("Using jars:$urls")
+        log.info("Using jars:{${urls.toList()}")
         URLClassLoader(urls, Thread.currentThread().contextClassLoader)
       }
     }
