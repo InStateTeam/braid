@@ -23,7 +23,6 @@ repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
     // must go before the corda one 
-    maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public/'}
     maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
 }
 
