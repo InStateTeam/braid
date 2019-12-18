@@ -15,9 +15,19 @@
  */
 package io.bluebank.braid.corda.rest.docs.v3
 
+import com.fasterxml.jackson.databind.BeanDescription
+import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.bluebank.braid.core.synth.TypeNames
 import io.swagger.v3.core.jackson.ModelResolver
 
-class QualifiedTypeNameConverter(mapper: ObjectMapper) : ModelResolver(mapper, QualifiedTypeNameResolver()) {
+class QualifiedTypeNameConverter(mapper: ObjectMapper) :
+  ModelResolver(mapper, QualifiedTypeNameResolver()), TypeNames {
 
+  // Expose a function which helps to implement SyntheticModelConverter which needs to
+  // know the type name of a property.
+  // This exposes (publishes) a method which would otherwise be protected in a base class.
+  override fun getTypeName(type: JavaType?, beanDesc: BeanDescription?): String {
+    return super._typeName(type, beanDesc)
+  }
 }

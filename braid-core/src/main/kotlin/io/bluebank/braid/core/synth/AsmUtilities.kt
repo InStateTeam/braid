@@ -15,12 +15,16 @@
  */
 package io.bluebank.braid.core.synth
 
+import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureVisitor
 import org.objectweb.asm.signature.SignatureWriter
 import java.lang.reflect.*
 import javax.validation.constraints.NotNull
+import kotlin.reflect.full.memberProperties
+import io.swagger.v3.oas.annotations.Parameter as ParameterAnnotation
+import io.swagger.v3.oas.annotations.media.Schema as SchemaAnnotation
 import org.objectweb.asm.Type as AsmType
 
 private val objectClassRef = Object::class.java.canonicalName.replace('.', '/')
@@ -36,7 +40,7 @@ visit visitSource?
 visitOuterClass? ( visitAnnotation | visitAttribute )*
 ( visitInnerClass | visitField | visitMethod )*
 visitEnd
- 
+
  */
 fun ClassWriter.writeDefaultConstructor() {
   val constructorMethod = visitMethod(
@@ -101,19 +105,109 @@ fun ClassWriter.addFields(parameters: Array<Parameter>) =
 /**
  * add a parameter as a field to the class being written
  */
-fun ClassWriter.addField(it: Parameter) {
+fun ClassWriter.addField(parameter: Parameter) {
   val visitField = visitField(
-      Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL,   // access permissions
-      it.name,                                  // field name
-      AsmType.getDescriptor(it.type),           // raw type description
-      it.parameterizedType.genericSignature(),  // generic parameterisation
-      null                                      // default value is null
+    Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL,   // access permissions
+    parameter.name,                                  // field name
+    AsmType.getDescriptor(parameter.type),           // raw type description
+    parameter.parameterizedType.genericSignature(),  // generic parameterisation
+    null                                      // default value is null
   )
   val visitAnnotation = visitField
-      .visitAnnotation(AsmType.getDescriptor(NotNull::class.java), true)
+    .visitAnnotation(AsmType.getDescriptor(NotNull::class.java), true)
   visitAnnotation.visitEnd()
+  // and maybe copy the parameter's annotations to field annotations
+  if (SynthesisOptions.strategyUsesAnnotations) {
+    if (SynthesisOptions.isParameterTypeAnnotatable(parameter.type)) {
+      parameter.annotations.forEach { annotation ->
+        if (!SynthesisOptions.isParameterAnnotation(annotation)) {
+          return
+        }
+        val visible = true // I'm not sure what this means or why it might ever be false?
+        if (annotation.annotationClass == ParameterAnnotation::class) {
+          // add this as a Schema annotation because Swagger doesn't
+          // notice a Parameter annotation if it's applied to a field
+          visitField.visitAnnotation(
+            AsmType.getDescriptor(SchemaAnnotation::class.java),
+            visible
+          )
+            .apply {
+              // read the important @Parameter properties and make them @Schema properties
+              val parameterAnnotation = annotation as ParameterAnnotation
+              if (parameterAnnotation.schema != null) {
+                this.copyAnnotationProperties(parameterAnnotation.schema)
+              }
+              if (parameterAnnotation.description != null) {
+                this.addNamedValue("description", parameterAnnotation.description)
+              }
+              if (parameterAnnotation.example != null) {
+                this.addNamedValue("example", parameterAnnotation.example)
+              }
+            }
+            .visitEnd()
+        } else {
+          // add a clone of the annotation
+          visitField.visitAnnotation(annotation.classDescriptor(), visible)
+            .copyAnnotationProperties(annotation)
+            .visitEnd()
+        }
+      }
+    }
+  }
   visitField.visitEnd()
-  
+}
+
+fun Annotation.classDescriptor(): String {
+  return AsmType.getDescriptor(this.annotationClass.java)
+}
+
+fun AnnotationVisitor.copyAnnotationProperties(
+  annotation: Annotation
+): AnnotationVisitor {
+  // get the name and value of each field in the annotation
+  // by using reflection to determine what fields exist in this type of annotation
+  // then using call to extract the run-time value from the annotation instance
+  annotation.annotationClass.memberProperties.forEach { member ->
+    val name = member.name
+    val value = member.call(annotation)
+    this.addNamedValue(name, value)
+  }
+  return this
+}
+
+fun AnnotationVisitor.addNamedValue(name: String?, value: Any?) {
+  // section 4.2.1 of https://asm.ow2.io/asm4-guide.pdf says that an annotation may
+  // contain named fields, and that fields are restricted to the following types:
+  // primitive, String, Class, enum, or annotation ... or an array of these
+  when {
+    value == null -> this.visit(name, value)
+    value is Annotation -> // nested annotation
+      this.visitAnnotation(name, value.classDescriptor())
+        .copyAnnotationProperties(value) // recursive
+        .visitEnd()
+    value.javaClass.isArray -> {
+      val visitor = this.visitArray(name)
+      (value as Array<*>).forEach {
+        // section 4.2.2 of https://asm.ow2.io/asm4-guide.pdf says,
+        // "since the elements of an array are not named, the name arguments are ignored
+        // by the methods of the visitor returned by visitArray, and can be set to null"
+        visitor.addNamedValue(null, it) // recursive
+      }
+      visitor.visitEnd()
+    }
+    value.javaClass.isEnum ->
+      this.visitEnum(
+        name,
+        AsmType.getDescriptor(value.javaClass),
+        (value as Enum<*>).name
+      )
+    else -> if (value is Class<*>) {
+      val type = org.objectweb.asm.Type.getType(value)
+      this.visit(name, type)
+    } else {
+      this.visit(name, value)
+    }
+  }
 }
 
 /**

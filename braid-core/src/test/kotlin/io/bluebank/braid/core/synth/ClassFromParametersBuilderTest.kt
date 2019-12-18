@@ -16,13 +16,13 @@
 package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.json.BraidJacksonInit
-import io.bluebank.braid.core.synth.ClassFromParametersBuilder.Companion.acquireClass
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.json.Json
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Assert
 import org.junit.Test
+import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import javax.validation.constraints.NotNull
@@ -40,6 +40,15 @@ class ClassFromParametersBuilderTest {
   companion object {
     init {
       BraidJacksonInit.init()
+    }
+
+    fun buildClass(javaClass: Class<*>): Class<*> {
+      val constructor: Constructor<*> = javaClass.constructors.first()
+      return ClassFromParametersBuilder.acquireClass(
+        constructor.parameters,
+        ClassLoader.getSystemClassLoader(),
+        constructor.declaringClass.payloadClassName()
+      )
     }
   }
 
@@ -67,10 +76,7 @@ class ClassFromParametersBuilderTest {
   @Test
   fun `that swagger will accept the synthetic payload types`() {
     val modelMap = sampleValues.fold<Any, Map<String, Schema<*>>>(mapOf()) { acc, input ->
-      val payloadClass = acquireClass(
-        input.javaClass.constructors.first(),
-        ClassLoader.getSystemClassLoader()
-      )
+      val payloadClass = buildClass(input.javaClass)
       acc + ModelConverters.getInstance().readAll(payloadClass)
     }
     typesForSynthesis.forEach {
@@ -95,12 +101,9 @@ class ClassFromParametersBuilderTest {
   }
 
   private fun <T : Any> assertSynthesizedTypeCanDeserialize(input: T) {
-    val payloadClazz = acquireClass(
-      input.javaClass.constructors.first(),
-      ClassLoader.getSystemClassLoader()
-    )
+    val payloadClass = buildClass(input.javaClass)
     val json = Json.encodePrettily(input)
-    val parsed = Json.decodeValue(json, payloadClazz)
+    val parsed = Json.decodeValue(json, payloadClass)
     assertFieldsAreEqual(input, parsed)
   }
 
@@ -110,11 +113,8 @@ class ClassFromParametersBuilderTest {
   }
 
   private fun <T : Any> assertSynthesizedTypeHasNonNullAnnotations(input: T) {
-    val payloadClazz = acquireClass(
-      input.javaClass.constructors.first(),
-      ClassLoader.getSystemClassLoader()
-    )
-    payloadClazz.fields.forEach {
+    val payloadClass = buildClass(input.javaClass)
+    payloadClass.fields.forEach {
       val notNull = it.getAnnotation(NotNull::class.java)
       Assert.assertThat(notNull, notNullValue())
     }

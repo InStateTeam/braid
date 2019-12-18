@@ -17,6 +17,7 @@ package io.bluebank.braid.corda.rest.docs.v3
 
 import io.bluebank.braid.corda.rest.docs.isEmptyResponseType
 import io.bluebank.braid.corda.swagger.v3.*
+import io.bluebank.braid.core.synth.SyntheticModelConverter
 import io.swagger.v3.core.converter.AnnotatedType
 import io.swagger.v3.core.converter.ModelConverters
 import io.swagger.v3.core.converter.ResolvedSchema
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.ComposedSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.vertx.core.Future
+import io.vertx.core.json.Json
 import net.corda.core.utilities.contextLogger
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -36,12 +38,14 @@ class ModelContextV3 {
   private val mutableModels = mutableMapOf<String, Schema<*>>()
   val models: Map<String, Schema<*>> get() = mutableModels
   private val modelConverters = ModelConverters().apply {
-    addConverter(QualifiedTypeNameConverter(io.vertx.core.json.Json.mapper))
+    val typeNameConverter = QualifiedTypeNameConverter(Json.mapper)
+    addConverter(typeNameConverter)
     addConverter(JSR310ModelConverterV3())
-    addConverter(MixinModelConverterV3(io.vertx.core.json.Json.mapper))
+    addConverter(MixinModelConverterV3(Json.mapper))
     addConverter(SuperClassModelConverterV3())
     addConverter(ComposedSchemaFixV3())
     addConverter(CustomModelConverterV3())
+    addConverter(SyntheticModelConverter(typeNameConverter))
   }
 
   init {
@@ -71,7 +75,10 @@ class ModelContextV3 {
     }
   }
 
-  fun retainDiscriminator(current: Schema<*>?, possibleReplacement: Schema<*>?): Schema<*> {
+  fun retainDiscriminator(
+    current: Schema<*>?,
+    possibleReplacement: Schema<*>?
+  ): Schema<*> {
     if (current == null)
       return fixUp(possibleReplacement!!)
     if (current.discriminator != null)
