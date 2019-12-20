@@ -21,10 +21,7 @@ import io.bluebank.braid.corda.server.rpc.RPCInvocationParameter
 import io.bluebank.braid.corda.services.FlowStarterAdapter
 import io.bluebank.braid.core.async.toFuture
 import io.bluebank.braid.core.logging.loggerFor
-import io.bluebank.braid.core.synth.KParameterSynthetic
-import io.bluebank.braid.core.synth.createAnnotationProxy
-import io.bluebank.braid.core.synth.preferredConstructor
-import io.bluebank.braid.core.synth.trampoline
+import io.bluebank.braid.core.synth.*
 import io.vertx.core.Future
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.Json
@@ -39,32 +36,34 @@ import kotlin.reflect.KClass
 class FlowInitiator(
   private val getFlowStarter: (User?) -> FlowStarterAdapter,
   private val eventBus: EventBus,
-  private val isAuth: Boolean = true
+  private val isAuth: Boolean
 ) {
-  companion object{
-     val TOPIC = "braid-progress-tracker-message-topic-id"
+
+  companion object {
+    val TOPIC = "braid-progress-tracker-message-topic-id"
   }
 
   private val log = loggerFor<FlowInitiator>()
 
   fun getInitiator(kClass: KClass<*>): KCallable<Future<Any?>> {
     val constructor = kClass.java.preferredConstructor()
+    val additionalAnnotations = getFlowMethodAnnotations(kClass)
 
     // this is a simulated `@Context` instance -- cheat like this, to create it, because
     // `@Context` is difficult to instantiate, because it's an interface and final
-
 
     // trampoline is to make the kClass constructor look like a callable function
     val fn = trampoline(
       constructor = constructor,
       boundTypes = createBoundParameterTypes(),
+      additionalAnnotations = additionalAnnotations,
       // This says that `@Context user: User` is an additional parameter; I couldn't make
       // it work properly as a `User?` type, so don't specify it at all if `!isAuth`.
       additionalParams = listOf(RPCInvocationParameter.invocationId()) + possibleUserParameter()
     ) {
       // this is passed to the transform parameter of the trampoline function
       // it's the body of the function which is invoked at run-time
-      parameters ->
+        parameters ->
       // do what you want here ...
       // e.g. call the flow directly
       // obviously, we will be invoking the flow via an interface to CordaRPCOps or ServiceHub
@@ -87,11 +86,12 @@ class FlowInitiator(
         kClass.java as Class<FlowLogic<*>>,
         *excludeProgressTracker.toTypedArray()
       )
-      val notification = ProgressNotification().withInvocationId(invocationId).withFlowClass(kClass.java)
-      flowProgress.progress.subscribe ( 
+      val notification =
+        ProgressNotification().withInvocationId(invocationId).withFlowClass(kClass.java)
+      flowProgress.progress.subscribe(
         { step -> eventBus.publish(TOPIC, Json.encode(notification.withStep(step))) },
-        { error -> eventBus.publish(TOPIC, Json.encode(notification.withError(error)))},
-        { eventBus.publish(TOPIC, Json.encode(notification.withComplete(true)))}
+        { error -> eventBus.publish(TOPIC, Json.encode(notification.withError(error))) },
+        { eventBus.publish(TOPIC, Json.encode(notification.withComplete(true))) }
       )
 
       @Suppress("UNCHECKED_CAST")
@@ -103,7 +103,13 @@ class FlowInitiator(
   }
 
   private fun possibleUserParameter() =
-    if (!isAuth) emptyList() else listOf(KParameterSynthetic("user", User::class.java, listOf(Context::class.createAnnotationProxy())))
+    if (!isAuth) emptyList() else listOf(
+      KParameterSynthetic(
+        "user",
+        User::class.java,
+        listOf(Context::class.createAnnotationProxy())
+      )
+    )
 
   private fun createBoundParameterTypes(): Map<Class<*>, Any> {
     return mapOf<Class<*>, Any>(ProgressTracker::class.java to ProgressTracker())

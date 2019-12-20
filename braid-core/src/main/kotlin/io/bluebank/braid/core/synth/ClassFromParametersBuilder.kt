@@ -17,7 +17,6 @@ package io.bluebank.braid.core.synth
 
 import io.bluebank.braid.core.logging.loggerFor
 import org.objectweb.asm.ClassWriter
-import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 
@@ -26,26 +25,12 @@ import java.lang.reflect.Parameter
  * from parameters of an existing constructor or method
  */
 data class ClassFromParametersBuilder(
-  val parameters: List<Parameter> = emptyList(),
-  val className: String = ""
+  val parameters: List<Parameter>,
+  val className: String
 ) {
 
   companion object {
     private val logger = loggerFor<ClassFromParametersBuilder>()
-
-    @JvmStatic
-    fun acquireClass(
-      method: Method,
-      classLoader: ClassLoader,
-      className: String = method.declaringClass.payloadClassName()
-    ) = acquireClass(method.parameters, classLoader, className)
-
-    @JvmStatic
-    fun acquireClass(
-      constructor: Constructor<*>,
-      classLoader: ClassLoader,
-      className: String = constructor.declaringClass.payloadClassName()
-    ) = acquireClass(constructor.parameters, classLoader, className)
 
     @JvmStatic
     fun acquireClass(
@@ -54,9 +39,7 @@ data class ClassFromParametersBuilder(
       className: String
     ): Class<*> {
       return classLoader.lazyAcquire(className) {
-        ClassFromParametersBuilder()
-          .withParameters(parameters)
-          .withClassName(className)
+        ClassFromParametersBuilder(parameters.toList(), className)
           .buildAndInject(classLoader)
       }
     }
@@ -90,21 +73,6 @@ data class ClassFromParametersBuilder(
     }
   }
 
-  fun withConstructor(constructor: Constructor<*>): ClassFromParametersBuilder {
-    val name = classNameOrDefault { constructor.declaringClass.payloadClassName() }
-    return copy(parameters = constructor.parameters.toList(), className = name)
-  }
-
-  fun withMethod(method: Method): ClassFromParametersBuilder {
-    val name = classNameOrDefault { method.declaringClass.payloadClassName() }
-    return copy(parameters = method.parameters.toList(), className = name)
-  }
-
-  fun withParameters(parameters: Array<Parameter>) =
-    copy(parameters = parameters.toList())
-
-  fun withClassName(name: String) = this.copy(className = name)
-
   /**
    * builds the bytecode of the class and injects it into [classLoader]
    */
@@ -116,6 +84,10 @@ data class ClassFromParametersBuilder(
    */
   fun build(): ByteArray {
     assert(className.isNotBlank()) { "class name was not set" }
+    if (!SynthesisOptions.strategyUsesAnnotations) {
+      // use SyntheticModelConverter instead of annotations
+      SyntheticModelConverter.registerClass(className, parameters)
+    }
     return ClassWriter(0).apply {
       declareSimplePublicClass(className)
       addFields(parameters.toTypedArray())
@@ -126,6 +98,9 @@ data class ClassFromParametersBuilder(
 
   private fun ClassLoader.inject(bytes: ByteArray): Class<*> {
     assert(className.isNotBlank()) { "class name not set" }
+    val result = ClassLogger.readBytes(bytes)
+    logger.info("$className\r\n$result")
+
     return try {
       loadClass(className).also {
         logger.warn("Payload type $className already declared")
@@ -135,12 +110,6 @@ data class ClassFromParametersBuilder(
       return loadClass(className)
     }
   }
-
-  private fun classNameOrDefault(fn: () -> String) =
-    when {
-      className.isBlank() -> fn()
-      else -> className
-    }
 }
 
 const val PAYLOAD_CLASS_SUFFIX = "Payload"

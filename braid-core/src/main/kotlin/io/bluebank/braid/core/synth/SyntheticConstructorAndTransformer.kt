@@ -16,6 +16,7 @@
 package io.bluebank.braid.core.synth
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.bluebank.braid.core.logging.loggerFor
 import io.bluebank.braid.core.utils.tryWithClassLoader
 import org.apache.commons.lang3.AnnotationUtils
 import java.lang.reflect.*
@@ -29,7 +30,8 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   private val boundTypes: Map<Class<*>, Any>,
   private val classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
   private val transformer: (Array<Any?>) -> R,
-  private val additionalParams: List<KParameter> = emptyList()
+  private val additionalParams: List<KParameter> = emptyList(),
+  private val additionalAnnotations: List<Annotation>
 ) : KFunction<R> {
 
   init {
@@ -44,6 +46,8 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
   }
 
   companion object {
+    private val logger = loggerFor<ClassLogger>()
+
     fun acquirePayloadClass(
       constructor: Constructor<*>,
       boundTypes: Map<Class<*>, Any>,
@@ -51,16 +55,23 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
       className: String
     ): Class<*> {
       val parameters = constructor.parameters.filter { !boundTypes.contains(it.type) }
-      return ClassFromParametersBuilder.acquireClass(
+      val clazz = ClassFromParametersBuilder.acquireClass(
         parameters.toTypedArray(),
         classLoader,
         className
       )
+      if (false) {
+        // this doesn't work, I don't know why; is it a class loader issue
+        val name = clazz.simpleName
+        val result = ClassLogger.readClass(clazz)
+        logger.info("$name\r\n$result")
+      }
+      return clazz
     }
   }
 
-  private val payloadClass =
-    acquirePayloadClass(constructor, boundTypes, classLoader, className)
+//  private val payloadClass =
+//    acquirePayloadClass(constructor, boundTypes, classLoader, className)
 
   fun annotations(): Array<Annotation> = constructor.annotations
   fun invoke(vararg args: Any): R {
@@ -79,7 +90,14 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
     }
   }
 
-  override val annotations: List<Annotation> = constructor.annotations.toList()
+  override val annotations: List<Annotation> =
+    (constructor.annotations.toList() + additionalAnnotations).filter {
+      SynthesisOptions.isMethodAnnotation(it)
+    }
+
+  private val payloadClass =
+    acquirePayloadClass(constructor, boundTypes, classLoader, className)
+
   override val isAbstract: Boolean = false
   override val isFinal: Boolean = true
   override val isOpen: Boolean = false
@@ -91,11 +109,7 @@ class SyntheticConstructorAndTransformer<K : Any, R>(
     )
   )
 
-  // DocsHandler cant get java type from this  payloadClass.kotlin.createType()
-  // Unit::class.createType()
-  //  transformer.reflect()!!.returnType     // DocsHandler cant get java type from this
-  override val returnType: KType =
-    payloadClass.kotlin.createType() //KTypeSynthetic(payloadClass)       payloadClass.kotlin.createType()
+  override val returnType: KType = payloadClass.kotlin.createType()
   override val typeParameters: List<KTypeParameter> = emptyList()
   override val visibility: KVisibility? = KVisibility.PUBLIC
   override val isExternal: Boolean = false
@@ -146,6 +160,7 @@ fun <K : Any, R> trampoline(
   className: String = constructor.declaringClass.payloadClassName(),
   classLoader: ClassLoader = ClassLoader.getSystemClassLoader(),
   additionalParams: List<KParameter> = emptyList(),
+  additionalAnnotations: List<Annotation> = emptyList(),
   transform: (Array<Any?>) -> R
 ): KFunction<R> {
   @Suppress("UNCHECKED_CAST")
@@ -155,20 +170,21 @@ fun <K : Any, R> trampoline(
     boundTypes,
     classLoader,
     transform,
-    additionalParams
+    additionalParams,
+    additionalAnnotations
   )
 }
 
 // https://stackoverflow.com/questions/16299717/how-to-create-an-instance-of-an-annotation#answer-57373532
 inline fun <reified T : Any> KClass<T>.createAnnotationProxy(properties: Map<String, Any> = emptyMap()): T {
   val handler = object : InvocationHandler {
-    override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any? {
+    override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
       val annotation = proxy as Annotation
       val methodName = method.name
       when (methodName) {
         "toString" -> return AnnotationUtils.toString(annotation)
         "hashCode" -> return AnnotationUtils.hashCode(annotation)
-        "equals" -> return AnnotationUtils.equals(annotation, args[0] as Annotation)
+        "equals" -> return AnnotationUtils.equals(annotation, args!![0] as Annotation)
         "annotationType" -> return T::class.java
         else -> {
           if (!properties.containsKey(methodName)) {
@@ -189,4 +205,13 @@ inline fun <reified T : Any> KClass<T>.createAnnotationProxy(properties: Map<Str
     arrayOf(T::class.java),
     handler
   ) as T
+}
+
+fun getFlowMethodAnnotations(flowClass: KClass<*>): List<Annotation> {
+  val method = flowClass.java.methods.find {
+    // Modifier.PUBLIC because there seems to be another method named `call`
+    // which returns Object and whose modifiers are 0x04161
+    it.name == "call" && it.parameters.isEmpty() && it.modifiers == Modifier.PUBLIC
+  }
+  return method!!.annotations.toList()
 }
