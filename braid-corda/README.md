@@ -38,7 +38,7 @@ Finally we need to specify the braid version.  We do this in the ```cordapp/buil
 
 ```gradle
 buildscript {
-    ext.braid_version = '1.0.0-SNAPSHOT'
+    ext.braid_version = '4.1.2-RC13'
 }
 ``` 
 
