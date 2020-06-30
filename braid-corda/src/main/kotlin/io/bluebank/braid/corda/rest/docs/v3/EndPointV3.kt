@@ -95,9 +95,9 @@ abstract class EndPointV3(
     annotations.filterIsInstance<MethodDescription>().firstOrNull()
   }
 
-  val operationId: String
+  open val operationId: String
     get() {
-      return path.dropWhile { it == '/' }.replace('/', '_').replace('-', '_')
+      return "test" + path.dropWhile { it == '/' }.replace('/', '_').replace('-', '_')
     }
 
   val description: String

@@ -612,6 +612,15 @@
     </plugins>
   </build>
   <profiles>
+    <profile>
+      <id>github-packages</id>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>github</id>
+          <url>https://maven.pkg.github.com/instateteam/braid</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
    <profile>
         <id>gitlab-release</id>
         <distributionManagement>

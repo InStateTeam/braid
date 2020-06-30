@@ -45,10 +45,10 @@ class QualifiedTypeNameResolver : TypeNameResolver() {
 }
 
 fun Class<*>.swaggerTypeName(options: Set<TypeNameResolver.Options> = emptySet()): String {
-  val className = when {
+  val className = this.simpleName/*when {
     this.name.startsWith("java.") -> this.simpleName
     else -> this.name
-  }
+  }*/
 
   return when {
     options.contains(TypeNameResolver.Options.SKIP_API_MODEL) -> className

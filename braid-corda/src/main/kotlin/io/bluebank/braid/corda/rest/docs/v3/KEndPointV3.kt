@@ -50,6 +50,9 @@ class KEndPointV3(
     // TODO: check sanity of method parameters and types vs REST/HTTP limitations
   }
 
+  override val operationId: String
+    get() = name
+
   private val contextParameters =
     parameters.filter { it.findAnnotation<Context>() != null }
 
